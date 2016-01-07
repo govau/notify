@@ -1,2 +1,4 @@
 monotonic==0.3
 requests==2.7.0
+python-json-logger==0.1.4
+Flask>=0.10
