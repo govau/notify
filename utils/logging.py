@@ -1,0 +1,2 @@
+def logging():
+    print "logged"
