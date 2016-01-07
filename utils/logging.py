@@ -13,6 +13,7 @@ TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
 logger = logging.getLogger(__name__)
 
+
 def init_app(app):
     app.config.setdefault('NOTIFY_LOG_LEVEL', 'INFO')
     app.config.setdefault('NOTIFY_APP_NAME', 'none')
