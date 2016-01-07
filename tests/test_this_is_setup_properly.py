@@ -1,2 +1,2 @@
-def test_for_testing_sake():
+def test_this_works():
     assert 1 == 1
