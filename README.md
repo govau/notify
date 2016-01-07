@@ -1,3 +1,4 @@
+[![Build Status](https://api.travis-ci.org/alphagov/notifications-utils.svg?branch=master)](https://api.travis-ci.org/alphagov/notifications-utils.svg?branch=master)
 
 
 # GOV.UK Notify - notifications-utils [BETA]
