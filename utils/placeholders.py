@@ -6,19 +6,26 @@ from flask import Markup
 
 class Placeholders():
 
-    def __init__(self, template, values={}):
+    pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
+    opening_tag = "<span class='placeholder'>"
+    closing_tag = "</span>"
+
+    def __init__(self, template, values=None):
         if not isinstance(template, str):
             raise TypeError('Template must be a string')
-        self.template = str(template)
-        self.pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
-        self.opening_tag = "<span class='placeholder'>"
-        self.closing_tag = "</span>"
+        if values is not None and not isinstance(values, dict):
+            raise TypeError('Values must be a dict')
+        self.template = template
+        self.values = values or {}
 
     def __str__(self):
-        return self.template
+        if self.values:
+            return self.replaced
+        else:
+            return self.template
 
     def __repr__(self):
-        return "Placeholders(\"{}\")".format(self.template)
+        return "{}(\"{}\", {})".format(self.__class__.__name__, self.template, self.values)
 
     @property
     def formatted(self):
@@ -35,7 +42,7 @@ class Placeholders():
     @property
     def list(self):
         return OrderedSet(re.findall(
-            self.pattern, self.template
+            Placeholders.pattern, self.template
         ))
 
     @property
@@ -45,31 +52,28 @@ class Placeholders():
             for placeholder in self.list
         ]
 
-    def replace(self, values):
-        if self.get_missing_data(values):
-            raise PlaceholderError("Needed by template", self.get_missing_data(values))
-        if self.get_additional_data(values):
-            raise PlaceholderError("Not in template", self.get_additional_data(values))
+    @property
+    def replaced(self):
+        if self.missing_data:
+            raise PlaceholderError("Needed by template", self.missing_data)
+        if self.additional_data:
+            raise PlaceholderError("Not in template", self.additional_data)
         return re.sub(
-            self.pattern,
-            lambda match: values.get(match.group(1)),
+            Placeholders.pattern,
+            lambda match: self.values.get(match.group(1)),
             self.template
         )
 
-    def get_missing_data(self, values):
-        return self.list - values.keys()
+    @property
+    def missing_data(self):
+        return self.list - self.values.keys()
 
-    def get_additional_data(self, values):
-        return values.keys() - self.list
+    @property
+    def additional_data(self):
+        return self.values.keys() - self.list
 
 
 class PlaceholderError(Exception):
 
     def __init__(self, error, keys):
-
-        super(PlaceholderError, self).__init__(
-            "{}: {}".format(
-                error,
-                ", ".join(keys)
-            )
-        )
+        super(PlaceholderError, self).__init__("{}: {}".format(error, ", ".join(keys)))

@@ -6,7 +6,8 @@ from utils.placeholders import Placeholders, PlaceholderError
 
 def test_class():
     assert str(Placeholders("hello ((name))")) == "hello ((name))"
-    assert repr(Placeholders("hello ((name))")) == 'Placeholders("hello ((name))")'
+    assert str(Placeholders("hello ((name))", {'name': 'Chris'})) == 'hello Chris'
+    assert repr(Placeholders("hello ((name))")) == 'Placeholders("hello ((name))", {})'
 
 
 @pytest.mark.parametrize(
@@ -15,6 +16,14 @@ def test_class():
 def test_errors_for_invalid_template_types(template):
     with pytest.raises(TypeError):
         Placeholders(template)
+
+
+@pytest.mark.parametrize(
+    "values", [[], False]
+)
+def test_errors_for_invalid_values(values):
+    with pytest.raises(TypeError):
+        Placeholders("template", values)
 
 
 @pytest.mark.parametrize(
@@ -33,7 +42,7 @@ def test_errors_for_invalid_template_types(template):
 )
 def test_returns_a_string_without_placeholders(template):
     assert Placeholders(template).formatted == template
-    assert Placeholders(template).replace({}) == template
+    assert Placeholders(template).replaced == template
 
 
 @pytest.mark.parametrize(
@@ -101,15 +110,13 @@ def test_formatting_of_placeholders_as_markup():
     ]
 )
 def test_replacement_of_placeholders(template, data, expected):
-
-    assert Placeholders(template).replace(data) == expected
+    assert Placeholders(template, data).replaced == expected
 
 
 def test_replacement_of_placeholders_with_incomplete_data():
     with pytest.raises(PlaceholderError) as error:
         Placeholders(
             "the quick ((colour)) ((animal)) ((verb)) over the ((colour)) dog",
-        ).replace(
             {'animal': 'fox', 'adjective': 'lazy'}
         ).replaced
         assert "Needed by template" in error.value.message
@@ -121,7 +128,6 @@ def test_replacement_of_placeholders_with_too_much_data():
     with pytest.raises(PlaceholderError) as error:
         Placeholders(
             "the quick ((colour)) fox jumps over the ((colour)) dog",
-        ).replace(
             {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
         ).replaced
         assert "Not in template" in error.value.message
