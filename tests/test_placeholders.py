@@ -3,23 +3,23 @@ import pytest
 from utils.placeholders import Placeholders
 
 
-def test_errors_forempty_templates():
+def test_class():
     assert str(Placeholders("hello ((name))")) == "hello ((name))"
     assert repr(Placeholders("hello ((name))")) == 'Placeholders("hello ((name))")'
 
-    with pytest.raises(TypeError):
-        Placeholders().format_placeholders()
+
+@pytest.mark.parametrize(
+    "template", [2, None, False]
+)
+def test_errors_for_invalid_template_types(template):
 
     with pytest.raises(TypeError):
-        assert Placeholders().format_placeholders(2)
-
-    assert Placeholders().format_placeholders("") == ""
-    assert Placeholders().format_placeholders(None) == None
-    assert Placeholders().format_placeholders(False) == False
+        Placeholders(template)
 
 
 @pytest.mark.parametrize(
     "template", [
+        "",
         "the quick brown fox",
         """
             the
@@ -33,8 +33,8 @@ def test_errors_forempty_templates():
 )
 def test_returns_a_string_without_placeholders(template):
 
-    assert Placeholders().format_placeholders(template) == template
-    assert Placeholders().replace_placeholders(template, {}) == template
+    assert Placeholders(template).formatted == template
+    assert Placeholders(template).replace({}) == template
 
 
 @pytest.mark.parametrize(
@@ -71,7 +71,7 @@ def test_returns_a_string_without_placeholders(template):
 )
 def test_formatting_of_placeholders(template, expected):
 
-    assert Placeholders().format_placeholders(template) == expected
+    assert Placeholders(template).formatted == expected
 
 
 @pytest.mark.parametrize(
@@ -100,4 +100,4 @@ def test_formatting_of_placeholders(template, expected):
 )
 def test_replacement_of_placeholders(template, data, expected):
 
-    assert Placeholders().replace_placeholders(template, data) == expected
+    assert Placeholders(template).replace(data) == expected
