@@ -1,7 +1,7 @@
 import pytest
 
 from flask import Markup
-from utils.placeholders import Placeholders
+from utils.placeholders import Placeholders, PlaceholderError
 
 
 def test_class():
@@ -10,10 +10,9 @@ def test_class():
 
 
 @pytest.mark.parametrize(
-    "template", [2, None, False]
+    "template", [0, 1, 2, True, False, None]
 )
 def test_errors_for_invalid_template_types(template):
-
     with pytest.raises(TypeError):
         Placeholders(template)
 
@@ -104,6 +103,30 @@ def test_formatting_of_placeholders_as_markup():
 def test_replacement_of_placeholders(template, data, expected):
 
     assert Placeholders(template).replace(data) == expected
+
+
+def test_replacement_of_placeholders_with_incomplete_data():
+    with pytest.raises(PlaceholderError) as error:
+        Placeholders(
+            "the quick ((colour)) ((animal)) ((verb)) over the ((colour)) dog",
+        ).replace(
+            {'animal': 'fox', 'adjective': 'lazy'}
+        ).replaced
+        assert "Needed by template" in error.value.message
+        assert "colour" in error.value.message
+        assert "verb" in error.value.message
+
+
+def test_replacement_of_placeholders_with_too_much_data():
+    with pytest.raises(PlaceholderError) as error:
+        Placeholders(
+            "the quick ((colour)) fox jumps over the ((colour)) dog",
+        ).replace(
+            {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
+        ).replaced
+        assert "Not in template" in error.value.message
+        assert "adjective" in error.value.message
+        assert "animal" in error.value.message
 
 
 @pytest.mark.parametrize(
