@@ -1,13 +1,26 @@
 import pytest
 
 from flask import Markup
-from utils.placeholders import Placeholders, PlaceholderError
+from utils.placeholders import Template, NeededByTemplateError, NoPlaceholderForDataError
 
 
 def test_class():
-    assert str(Placeholders("hello ((name))")) == "hello ((name))"
-    assert str(Placeholders("hello ((name))", {'name': 'Chris'})) == 'hello Chris'
-    assert repr(Placeholders("hello ((name))")) == 'Placeholders("hello ((name))", {})'
+    template = {"content": "hello ((name))"}
+    assert str(Template(template)) == "hello ((name))"
+    assert str(Template(template, {'name': 'Chris'})) == 'hello Chris'
+    assert repr(Template(template)) == 'Template("hello ((name))", {})'
+
+
+def test_passes_through_template_attributes():
+    assert Template({"content": ''}).name is None
+    assert Template({"content": '', 'name': 'Two week reminder'}).name == 'Two week reminder'
+    assert Template({"content": ''}).id is None
+    assert Template({"content": '', 'id': '1234'}).id == '1234'
+
+
+def test_errors_for_missing_template_content():
+    with pytest.raises(KeyError):
+        Template({})
 
 
 @pytest.mark.parametrize(
@@ -15,7 +28,7 @@ def test_class():
 )
 def test_errors_for_invalid_template_types(template):
     with pytest.raises(TypeError):
-        Placeholders(template)
+        Template(template)
 
 
 @pytest.mark.parametrize(
@@ -23,11 +36,11 @@ def test_errors_for_invalid_template_types(template):
 )
 def test_errors_for_invalid_values(values):
     with pytest.raises(TypeError):
-        Placeholders("template", values)
+        Template({"content": ''}, values)
 
 
 @pytest.mark.parametrize(
-    "template", [
+    "template_content", [
         "",
         "the quick brown fox",
         """
@@ -40,13 +53,13 @@ def test_errors_for_invalid_values(values):
         "the (()) brown fox"
     ]
 )
-def test_returns_a_string_without_placeholders(template):
-    assert Placeholders(template).formatted == template
-    assert Placeholders(template).replaced == template
+def test_returns_a_string_without_template(template_content):
+    assert Template({"content": template_content}).formatted == template_content
+    assert Template({"content": template_content}).replaced == template_content
 
 
 @pytest.mark.parametrize(
-    "template,expected", [
+    "template_content,expected", [
         (
             "((colour))",
             "<span class='placeholder'>colour</span>"
@@ -77,16 +90,18 @@ def test_returns_a_string_without_placeholders(template):
         ),
     ]
 )
-def test_formatting_of_placeholders(template, expected):
-    assert Placeholders(template).formatted == expected
+def test_formatting_of_placeholders(template_content, expected):
+    assert Template({"content": template_content}).formatted == expected
 
 
-def test_formatting_of_placeholders_as_markup():
-    assert Placeholders("Hello ((name))").formatted_as_markup == Markup("Hello <span class='placeholder'>name</span>")
+def test_formatting_of_template_contents_as_markup():
+    assert Template(
+        {"content": "Hello ((name))"}
+    ).formatted_as_markup == Markup("Hello <span class='placeholder'>name</span>")
 
 
 @pytest.mark.parametrize(
-    "template,data,expected", [
+    "template_content,data,expected", [
         (
             "((colour))",
             {"colour": "red"},
@@ -109,34 +124,31 @@ def test_formatting_of_placeholders_as_markup():
         ),
     ]
 )
-def test_replacement_of_placeholders(template, data, expected):
-    assert Placeholders(template, data).replaced == expected
+def test_replacement_of_placeholders(template_content, data, expected):
+    assert Template({"content": template_content}, data).replaced == expected
 
 
-def test_replacement_of_placeholders_with_incomplete_data():
-    with pytest.raises(PlaceholderError) as error:
-        Placeholders(
-            "the quick ((colour)) ((animal)) ((verb)) over the ((colour)) dog",
+def test_replacement_of_template_with_incomplete_data():
+    with pytest.raises(NeededByTemplateError) as error:
+        Template(
+            {"content": "the quick ((colour)) ((animal)) ((verb)) over the ((colour)) dog"},
             {'animal': 'fox', 'adjective': 'lazy'}
         ).replaced
-        assert "Needed by template" in error.value.message
-        assert "colour" in error.value.message
-        assert "verb" in error.value.message
+    assert "colour, verb" == str(error.value)
 
 
-def test_replacement_of_placeholders_with_too_much_data():
-    with pytest.raises(PlaceholderError) as error:
-        Placeholders(
-            "the quick ((colour)) fox jumps over the ((colour)) dog",
+def test_replacement_of_template_with_too_much_data():
+    with pytest.raises(NoPlaceholderForDataError) as error:
+        Template(
+            {"content": "the quick ((colour)) fox jumps over the ((colour)) dog"},
             {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
         ).replaced
-        assert "Not in template" in error.value.message
-        assert "adjective" in error.value.message
-        assert "animal" in error.value.message
+    assert "adjective" in str(error.value)
+    assert "animal" in str(error.value)
 
 
 @pytest.mark.parametrize(
-    "template,expected", [
+    "template_content,expected", [
         (
             "the quick brown fox",
             []
@@ -155,12 +167,12 @@ def test_replacement_of_placeholders_with_too_much_data():
         ),
     ]
 )
-def test_extracting_placeholders(template, expected):
-    assert Placeholders(template).list == expected
+def test_extracting_placeholders(template_content, expected):
+    assert Template({"content": template_content}).placeholders == expected
 
 
 def test_extracting_placeholders_marked_up():
-    assert Placeholders("the quick ((colour)) ((animal))").marked_up_list == [
+    assert Template({"content": "the quick ((colour)) ((animal))"}).placeholders_as_markup == [
         Markup(u"<span class='placeholder'>colour</span>"),
         Markup(u"<span class='placeholder'>animal</span>")
     ]
