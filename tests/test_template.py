@@ -1,7 +1,7 @@
 import pytest
 
 from flask import Markup
-from utils.placeholders import Template, NeededByTemplateError, NoPlaceholderForDataError
+from utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
 
 
 def test_class():
