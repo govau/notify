@@ -10,15 +10,17 @@ class Template():
     placeholder_opening_tag = "<span class='placeholder'>"
     placeholder_closing_tag = "</span>"
 
-    def __init__(self, template, values=None):
-        if not isinstance(template, str):
-            raise TypeError('Template must be a string')
+    def __init__(self, template, values=None, drop_values=()):
+        if not isinstance(template, dict):
+            raise TypeError('Template must be a dict')
         if values is not None and not isinstance(values, dict):
             raise TypeError('Values must be a dict')
         self.id = template.get("id", None)
         self.name = template.get("name", None)
-        self.template = template
-        self.values = values or {}
+        self.content = template["content"]
+        self.values = (values or {}).copy()
+        for value in drop_values:
+            self.values.pop(value, None)
 
     def __str__(self):
         if self.values:

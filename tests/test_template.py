@@ -147,6 +147,19 @@ def test_replacement_of_template_with_too_much_data():
     assert "animal" in str(error.value)
 
 
+def test_can_drop_additional_values():
+    values = {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
+    template = {"content": "the quick ((colour)) fox jumps over the ((colour)) dog"}
+    assert Template(
+        template,
+        values,
+        drop_values=('animal', 'adjective')
+    ).replaced == 'the quick brown fox jumps over the brown dog'
+    # make sure that our template and values aren’t modified
+    with pytest.raises(NoPlaceholderForDataError) as error:
+        Template(template, values).replaced
+
+
 @pytest.mark.parametrize(
     "template_content,expected", [
         (

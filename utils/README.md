@@ -69,10 +69,16 @@ You can do all of the above, plus
 ```
 
 ### Find out what additional data is being passed that the template isn’t expecting
+
+…or ignore some additional data
+
 ```python
   template = Template({"content": "Hello ((name))"}, {"foo": "bar"})
   template.additional_data
   >>> {'foo'}
+  template = Template({"content": "Hello ((name))"}, {"foo": "bar"}, drop_values=('foo'))
+  template.additional_data
+  >>> {}
 ```
 
 ### If you try to replace placeholders with bad data
