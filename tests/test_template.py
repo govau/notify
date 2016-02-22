@@ -16,6 +16,10 @@ def test_passes_through_template_attributes():
     assert Template({"content": '', 'name': 'Two week reminder'}).name == 'Two week reminder'
     assert Template({"content": ''}).id is None
     assert Template({"content": '', 'id': '1234'}).id == '1234'
+    assert Template({"content": ''}).template_type is None
+    assert Template({"content": '', 'template_type': 'sms'}).template_type is 'sms'
+    assert Template({"content": ''}).subject is None
+    assert Template({"content": '', 'subject': 'Your tax is due'}).subject == 'Your tax is due'
 
 
 def test_errors_for_missing_template_content():
