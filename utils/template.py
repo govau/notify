@@ -19,6 +19,8 @@ class Template():
         self.name = template.get("name", None)
         self.content = template["content"]
         self.values = (values or {}).copy()
+        self.template_type = template.get('template_type', None)
+        self.subject = template.get('subject', None)
         for value in drop_values:
             self.values.pop(value, None)
 
