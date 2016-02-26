@@ -49,6 +49,14 @@ the user’s data, eg:
   >>> [Markup(u"<span class='placeholder'>name</span>")]
 ```
 
+### Prefix the message with the service name
+```python
+  template = Template({"content": "Hello world"}, prefix="My service")
+  template.formatted
+  >>> Markup(u"My service: Hello world")
+  template.content
+  >>> "Hello world"
+```
 
 ## If you have the template and the user’s data
 

@@ -63,6 +63,19 @@ def test_returns_a_string_without_template(template_content):
 
 
 @pytest.mark.parametrize(
+    "template_content,prefix,expected", [
+        ("the quick brown fox", None, "the quick brown fox"),
+        ("the quick brown fox", "Vehicle tax", "Vehicle tax: the quick brown fox"),
+        ("the quick brown fox", "((service name))", "((service name)): the quick brown fox")
+    ]
+)
+def test_prefixing_template_with_service_name(template_content, prefix, expected):
+    assert Template({"content": template_content}, prefix=prefix).formatted == expected
+    assert Template({"content": template_content}, prefix=prefix).replaced == expected
+    assert Template({"content": template_content}, prefix=prefix).content == template_content
+
+
+@pytest.mark.parametrize(
     "template_content,expected", [
         (
             "((colour))",
