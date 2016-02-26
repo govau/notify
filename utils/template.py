@@ -10,11 +10,13 @@ class Template():
     placeholder_opening_tag = "<span class='placeholder'>"
     placeholder_closing_tag = "</span>"
 
-    def __init__(self, template, values=None, drop_values=()):
+    def __init__(self, template, values=None, drop_values=(), prefix=None):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
         if values is not None and not isinstance(values, dict):
             raise TypeError('Values must be a dict')
+        if prefix is not None and not isinstance(prefix, str):
+            raise TypeError('Prefix must be a string')
         self.id = template.get("id", None)
         self.name = template.get("name", None)
         self.content = template["content"]
@@ -23,6 +25,7 @@ class Template():
         self.subject = template.get('subject', None)
         for value in drop_values:
             self.values.pop(value, None)
+        self.prefix = prefix
 
     def __str__(self):
         if self.values:
@@ -34,11 +37,11 @@ class Template():
 
     @property
     def formatted(self):
-        return re.sub(
+        return self.__add_prefix(re.sub(
             Template.placeholder_pattern,
             lambda match: Template.placeholder_opening_tag + match.group(1) + Template.placeholder_closing_tag,
             self.content
-        )
+        ))
 
     @property
     def formatted_as_markup(self):
@@ -63,11 +66,11 @@ class Template():
             raise NeededByTemplateError(self.missing_data)
         if self.additional_data:
             raise NoPlaceholderForDataError(self.additional_data)
-        return re.sub(
+        return self.__add_prefix(re.sub(
             Template.placeholder_pattern,
             lambda match: self.values.get(match.group(1)),
             self.content
-        )
+        ))
 
     @property
     def missing_data(self):
@@ -76,6 +79,11 @@ class Template():
     @property
     def additional_data(self):
         return self.values.keys() - self.placeholders
+
+    def __add_prefix(self, output):
+        if self.prefix:
+            return "{}: {}".format(self.prefix.strip(), output)
+        return output
 
 
 class NeededByTemplateError(Exception):
