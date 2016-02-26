@@ -14,4 +14,4 @@ from utils.process_csv import get_recipients_from_csv
     ]
 )
 def test_class(file_contents, expected):
-    assert get_recipients_from_csv(file_contents) == expected
+    assert list(get_recipients_from_csv(file_contents)) == expected
