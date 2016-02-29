@@ -1,7 +1,7 @@
 import pytest
 from io import BytesIO
 
-from utils.process_csv import get_rows_from_csv, get_recipient_from_row
+from utils.process_csv import get_rows_from_csv, get_recipient_from_row, get_personalisation_from_row
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_get_rows(file_contents, expected):
 
 
 @pytest.mark.parametrize(
-    "file_contents,template_type,expected",
+    "file_contents,template_type,expected_recipient,expected_personalisation",
     [
         (
             """
@@ -44,18 +44,21 @@ def test_get_rows(file_contents, expected):
                 +44 123,test1
             """,
             'sms',
-            '+44123'
+            '+44123',
+            {'name': 'test1'}
         ),
         (
             """
-                email address,name
-                test@example.com,test1
+                email address,name,colour
+                test@example.com,test1,red
             """,
             'email',
-            'test@example.com'
+            'test@example.com',
+            {'name': 'test1', 'colour': 'red'}
         )
     ]
 )
-def test_get_recipient(file_contents, template_type, expected):
-    csv = get_rows_from_csv(file_contents)
-    assert get_recipient_from_row(list(csv)[0], template_type) == expected
+def test_get_recipient(file_contents, template_type, expected_recipient, expected_personalisation):
+    csv = list(get_rows_from_csv(file_contents))
+    assert get_recipient_from_row(csv[0], template_type) == expected_recipient
+    assert get_personalisation_from_row(csv[0], template_type) == expected_personalisation
