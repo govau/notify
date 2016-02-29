@@ -1,7 +1,7 @@
 import pytest
 from io import BytesIO
 
-from utils.process_csv import get_rows_from_csv, get_recipients_from_csv
+from utils.process_csv import get_rows_from_csv, get_recipient_from_row
 
 
 @pytest.mark.parametrize(
@@ -42,21 +42,20 @@ def test_get_rows(file_contents, expected):
             """
                 phone number,name
                 +44 123,test1
-                +44 456,test2
             """,
             'sms',
-            ['+44123', '+44456']
+            '+44123'
         ),
         (
             """
                 email address,name
                 test@example.com,test1
-                test2@example.com,test2
             """,
             'email',
-            ['test@example.com', 'test2@example.com']
+            'test@example.com'
         )
     ]
 )
-def test_get_recipients(file_contents, template_type, expected):
-    assert list(get_recipients_from_csv(file_contents, template_type)) == expected
+def test_get_recipient(file_contents, template_type, expected):
+    csv = get_rows_from_csv(file_contents)
+    assert get_recipient_from_row(list(csv)[0], template_type) == expected

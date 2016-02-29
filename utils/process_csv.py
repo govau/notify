@@ -17,8 +17,7 @@ def get_rows_from_csv(file_data):
         yield row
 
 
-def get_recipients_from_csv(file_data, template_type):
-    for row in get_rows_from_csv(file_data):
-        yield row[
-            first_column_heading[template_type]
-        ].replace(' ', '')
+def get_recipient_from_row(row, template_type):
+    return row[
+        first_column_heading[template_type]
+    ].replace(' ', '')
