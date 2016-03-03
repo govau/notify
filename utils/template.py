@@ -37,11 +37,11 @@ class Template():
 
     @property
     def formatted(self):
-        return self.__add_prefix(re.sub(
+        return self.__add_prefix(self.__nl2br(re.sub(
             Template.placeholder_pattern,
             lambda match: Template.placeholder_opening_tag + match.group(1) + Template.placeholder_closing_tag,
             self.content
-        ))
+        )))
 
     @property
     def formatted_as_markup(self):
@@ -84,6 +84,9 @@ class Template():
         if self.prefix:
             return "{}: {}".format(self.prefix.strip(), output)
         return output
+
+    def __nl2br(self, value):
+        return re.sub(r'\n|\r', '<br>', value.strip())
 
 
 class NeededByTemplateError(Exception):
