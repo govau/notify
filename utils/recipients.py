@@ -1,3 +1,4 @@
+import re
 import csv
 
 
@@ -5,6 +6,8 @@ first_column_heading = {
     'email': 'email address',
     'sms': 'phone number'
 }
+
+email_regex = re.compile(r"(^[^\@^\s]+@[^\@^\s]+(\.[^\@^\.^\s]+)$)")
 
 
 class RecipientCSV():
@@ -54,3 +57,58 @@ class RecipientCSV():
         copy_of_row = row.copy()
         copy_of_row.pop(first_column_heading[self.template_type], None)
         return copy_of_row
+
+
+class InvalidEmailError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class InvalidPhoneError(InvalidEmailError):
+    pass
+
+
+def validate_phone_number(number):
+
+    for character in ['(', ')', ' ', '-']:
+        number = number.replace(character, '')
+
+    number = number.lstrip('+')
+
+    try:
+        list(map(int, number))
+    except ValueError:
+        raise InvalidPhoneError('Must not contain letters or symbols')
+
+    if not any(
+        number.startswith(prefix)
+        for prefix in ['07', '447', '4407', '00447']
+    ):
+        raise InvalidPhoneError('Not a UK mobile number')
+
+    # Split number on first 7
+    number = number.split('7', 1)[1]
+
+    if len(number) > 9:
+        raise InvalidPhoneError('Too many digits')
+
+    if len(number) < 9:
+        raise InvalidPhoneError('Not enough digits')
+
+    return number
+
+
+def format_phone_number(number):
+    return '+447{}'.format(number)
+
+
+def validate_email_address(email_address):
+    if not re.match(email_regex, email_address):
+        raise InvalidEmailError('Not a valid email address')
+
+
+def validate_recipient(recipient, template_type):
+    return {
+        'email': validate_email_address,
+        'sms': validate_phone_number
+    }[template_type](recipient)

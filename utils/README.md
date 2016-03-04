@@ -2,7 +2,18 @@
 
 `pass`
 
-# Recipient CSV
+# Recipients
+
+## Validate a recipient
+
+`validate_phone_number(recipient)` and `validate_email_address(recipient)` will
+raise `InvalidPhoneError` and `InvalidEmailError` respectively.
+
+`validate_recipient(recipient, template_type)` accepts a phone number or email
+address, and will do the right validation based on the given template type
+(`email` or `sms`)
+
+## Handling a CSV file of recipients
 
 Given the content of a CSV file, the `RecipientCSV` class can:
 - iterate through the rows
@@ -14,7 +25,7 @@ Given the content of a CSV file, the `RecipientCSV` class can:
 It makes extensive use of generators in order to only read as much data into
 memory as is needed.
 
-## Get the rows from a CSV file
+### Get the rows from a CSV file
 
 ```python
 list(RecipientCSV("phone number\n+44123").rows)
