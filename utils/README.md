@@ -2,6 +2,34 @@
 
 `pass`
 
+# Recipient CSV
+
+Given the content of a CSV file, the `RecipientCSV` class can:
+- iterate through the rows
+- return the column headers, and show how they relate to a template’s
+  placeholders
+- find any errors
+- reformat the CSV data in a way that’s suitable for front end rendering
+
+It makes extensive use of generators in order to only read as much data into
+memory as is needed.
+
+## Get the rows from a CSV file
+
+```python
+list(RecipientCSV("phone number\n+44123").rows)
+>>> {'phone number': '+44123'}
+```
+
+### Get just the recipients, just the personalisation, or both
+
+```python
+list(RecipientCSV("phone number,name\n+44123,Jo").recipients)
+>>> ['+44123']
+list(RecipientCSV("phone number,name\n+44123,Jo").personalisation)
+>>> [{'name': 'Jo'}]
+list(RecipientCSV("phone number,name\n+44123,Jo").recipients_and_personalisation)
+>>> [(['+44123'], {'name': 'Jo'})]
 
 # Template
 
