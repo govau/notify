@@ -39,12 +39,38 @@ class RecipientCSV():
         return first_column_heading[self.template_type]
 
     @property
+    def has_errors(self):
+        return any((
+            self.missing_column_headers,
+            any(self.rows_with_errors)
+        ))
+
+    @property
     def rows(self):
         for row in csv.DictReader(
             self.file_data.strip().splitlines(),
             **RecipientCSV.reader_options
         ):
             yield row
+
+    @property
+    def rows_with_errors(self):
+        return self.rows_with_missing_data | self.rows_with_bad_recipients
+
+    @property
+    def rows_with_missing_data(self):
+        return set(
+            row['index'] for row in self.rows_annotated if any(
+                key not in [self.recipient_column_header, 'index'] and value.get('error')
+                for key, value in row.items()
+            )
+        )
+
+    @property
+    def rows_with_bad_recipients(self):
+        return set(
+            row['index'] for row in self.rows_annotated if row.get(self.recipient_column_header, {}).get('error')
+        )
 
     @property
     def rows_annotated(self):
@@ -99,6 +125,10 @@ class RecipientCSV():
         return []
 
     @property
+    def missing_column_headers(self):
+        return set([self.recipient_column_header] + list(self.placeholders)) - set(self.column_headers)
+
+    @property
     def column_headers_with_placeholders_highlighted(self):
         return [
             Markup(Template.placeholder_tag.format(header)) if header in self.placeholders else header
@@ -106,13 +136,15 @@ class RecipientCSV():
         ]
 
     def _get_error_for_field(self, key, value):
-        if value in [None, '']:
-            return 'Missing'
         if key == self.recipient_column_header:
             try:
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
                 return str(error)
+        if key not in self.placeholders:
+            return None
+        if value in [None, '']:
+            return 'Missing'
 
     def _get_recipient_from_row(self, row):
         return row[

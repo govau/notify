@@ -80,6 +80,22 @@ RecipientCSV("phone number\n+44123").column_headers
 
 Also available is `.column_headers_with_placeholders_highlighted`.
 
+### Find errors in the CSV
+
+```python
+recipients = RecipientCSV("phone number,registration\n+44123", placeholders=['name'])
+recipients.missing_column_headers
+>>> ['name']
+list(recipients.rows_with_bad_recipients)
+>>> [0]
+list(recipients.rows_with_missing_data)
+>>> [0]
+list(recipients.rows_with_errors)
+>>> [0]
+recipients.has_errors
+>>> True
+```
+
 # Template
 
 Given a template object, the `Template` class can:

@@ -214,21 +214,22 @@ def test_get_recipient(file_contents, template_type, expected_recipients, expect
 
 
 @pytest.mark.parametrize(
-    "file_contents,template_type,expected,expected_highlighted",
+    "file_contents,template_type,expected,expected_highlighted,expected_missing",
     [
         (
-            "", 'sms', [], []
+            "", 'sms', [], [], set(['phone number', 'name'])
         ),
         (
             """
                 phone number,name
-                +44 123,test1
-                +44 123,test1
-                +44 123,test1
+                07700900460,test1
+                07700900460,test1
+                07700900460,test1
             """,
             'sms',
             ['phone number', 'name'],
-            ['phone number', Markup('<span class=\'placeholder\'>name</span>')]
+            ['phone number', Markup('<span class=\'placeholder\'>name</span>')],
+            set()
         ),
         (
             """
@@ -236,12 +237,52 @@ def test_get_recipient(file_contents, template_type, expected_recipients, expect
             """,
             'email',
             ['email address', 'name', 'colour'],
-            ['email address', Markup('<span class=\'placeholder\'>name</span>'), 'colour']
+            ['email address', Markup('<span class=\'placeholder\'>name</span>'), 'colour'],
+            set()
+        ),
+        (
+            """
+                email address,colour
+            """,
+            'email',
+            ['email address', 'colour'],
+            ['email address', 'colour'],
+            set(['name'])
         )
     ]
 )
-def test_column_headers(file_contents, template_type, expected, expected_highlighted):
-    assert RecipientCSV(file_contents, template_type=template_type).column_headers == expected
-    assert RecipientCSV(
-        file_contents, template_type=template_type, placeholders=['name']
-    ).column_headers_with_placeholders_highlighted == expected_highlighted
+def test_column_headers(file_contents, template_type, expected, expected_highlighted, expected_missing):
+    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['name'])
+    assert recipients.column_headers == expected
+    assert recipients.column_headers_with_placeholders_highlighted == expected_highlighted
+    assert recipients.missing_column_headers == expected_missing
+    assert recipients.has_errors == bool(expected_missing)
+
+
+@pytest.mark.parametrize(
+    "file_contents,rows_with_bad_recipients,rows_with_missing_data",
+    [
+        (
+            """
+                phone number,name,date
+                07700900460,test1,test1
+                07700900460,test1
+                +44 123,test1,test1
+                07700900460,test1,test1
+                07700900460,test1
+                +44 123,test1,test1
+            """,
+            {2, 5}, {1, 4}
+        ),
+        (
+            """
+            """,
+            set(), set()
+        )
+    ]
+)
+def test_bad_or_missing_data(file_contents, rows_with_bad_recipients, rows_with_missing_data):
+    recipients = RecipientCSV(file_contents, template_type='sms', placeholders=['date'])
+    assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
+    assert recipients.rows_with_missing_data == rows_with_missing_data
+    assert recipients.has_errors is True
