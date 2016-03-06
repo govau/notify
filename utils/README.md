@@ -32,6 +32,34 @@ list(RecipientCSV("phone number\n+44123").rows)
 >>> {'phone number': '+44123'}
 ```
 
+### Annotate each field with some useful metadata
+
+- `data` contains the original data for the column
+- `error` contains any errors with the data
+- `ignored` will be true if the column isn’t in the template’s placeholders
+- `index` (added to the row) is a 0-indexed count of the lines in the CSV
+
+```python
+list(RecipientCSV("phone number,name\n+44123,Jo", template_type='sms').rows)
+>>> {
+>>>   'index': 0,
+>>>   'phone number': {
+>>>     'data': '+44123',
+>>>     'error': 'Must be a valid UK mobile number',
+>>>     'ignored': False
+>>>   },
+>>>   'name': {
+>>>     'data': 'Jo',
+>>>     'error': None,
+>>>     'ignored': True
+>>>   }
+>>> }
+```
+
+By default, only the first 10 rows will be displayed, plus up to 20 subsequent
+rows with errors. This can be changed by specifying `max_initial` and
+`max_errors_shown`.
+
 ### Get just the recipients, just the personalisation, or both
 
 ```python
@@ -41,6 +69,7 @@ list(RecipientCSV("phone number,name\n+44123,Jo").personalisation)
 >>> [{'name': 'Jo'}]
 list(RecipientCSV("phone number,name\n+44123,Jo").recipients_and_personalisation)
 >>> [(['+44123'], {'name': 'Jo'})]
+```
 
 ### Get the column headers
 

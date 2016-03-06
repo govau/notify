@@ -24,11 +24,19 @@ class RecipientCSV():
         self,
         file_data,
         template_type=None,
-        placeholders=None
+        placeholders=None,
+        max_errors_shown=20,
+        max_initial_rows_shown=10
     ):
         self.file_data = file_data
         self.template_type = template_type
         self.placeholders = placeholders or []
+        self.max_errors_shown = max_errors_shown
+        self.max_initial_rows_shown = max_initial_rows_shown
+
+    @property
+    def recipient_column_header(self):
+        return first_column_heading[self.template_type]
 
     @property
     def rows(self):
@@ -37,6 +45,31 @@ class RecipientCSV():
             **RecipientCSV.reader_options
         ):
             yield row
+
+    @property
+    def rows_annotated(self):
+        for row_index, row in enumerate(self.rows):
+            yield dict(
+                {key: {
+                    'data': value,
+                    'error': self._get_error_for_field(key, value),
+                    'ignore': (key != self.recipient_column_header and key not in self.placeholders)
+                } for key, value in row.items()},
+                index=row_index
+            )
+
+    @property
+    def rows_annotated_and_truncated(self):
+        rows_with_errors = set()
+        for row in self.rows_annotated:
+            if RecipientCSV.row_has_error(row):
+                rows_with_errors.add(row['index'])
+            if len(rows_with_errors) > self.max_errors_shown:
+                return
+            if row['index'] >= self.max_initial_rows_shown and row['index'] not in rows_with_errors:
+                continue
+            else:
+                yield row
 
     @property
     def recipients(self):
@@ -72,15 +105,30 @@ class RecipientCSV():
             for header in self.column_headers
         ]
 
+    def _get_error_for_field(self, key, value):
+        if value in [None, '']:
+            return 'Missing'
+        if key == self.recipient_column_header:
+            try:
+                validate_recipient(value, self.template_type)
+            except (InvalidEmailError, InvalidPhoneError) as error:
+                return str(error)
+
     def _get_recipient_from_row(self, row):
         return row[
-            first_column_heading[self.template_type]
+            self.recipient_column_header
         ]
 
     def _get_personalisation_from_row(self, row):
         copy_of_row = row.copy()
-        copy_of_row.pop(first_column_heading[self.template_type], None)
+        copy_of_row.pop(self.recipient_column_header, None)
         return copy_of_row
+
+    @staticmethod
+    def row_has_error(row):
+        return any(
+            key != 'index' and value.get('error') for key, value in row.items()
+        )
 
 
 class InvalidEmailError(Exception):
