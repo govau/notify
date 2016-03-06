@@ -42,6 +42,15 @@ list(RecipientCSV("phone number,name\n+44123,Jo").personalisation)
 list(RecipientCSV("phone number,name\n+44123,Jo").recipients_and_personalisation)
 >>> [(['+44123'], {'name': 'Jo'})]
 
+### Get the column headers
+
+```python
+RecipientCSV("phone number\n+44123").column_headers
+>>> ['phone number']
+```
+
+Also available is `.column_headers_with_placeholders_highlighted`.
+
 # Template
 
 Given a template object, the `Template` class can:

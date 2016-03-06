@@ -1,4 +1,5 @@
 import pytest
+from flask import Markup
 
 from utils.recipients import RecipientCSV
 
@@ -70,3 +71,35 @@ def test_get_recipient(file_contents, template_type, expected_recipients, expect
         (recipient, personalisation)
         for recipient, personalisation in zip(expected_recipients, expected_personalisation)
     ]
+
+
+@pytest.mark.parametrize(
+    "file_contents,expected,expected_highlighted",
+    [
+        (
+            "", [], []
+        ),
+        (
+            """
+                phone number,name
+                +44 123,test1
+                +44 123,test1
+                +44 123,test1
+            """,
+            ['phone number', 'name'],
+            ['phone number', Markup('<span class=\'placeholder\'>name</span>')]
+        ),
+        (
+            """
+                email address,name,colour
+            """,
+            ['email address', 'name', 'colour'],
+            ['email address', Markup('<span class=\'placeholder\'>name</span>'), 'colour']
+        )
+    ]
+)
+def test_column_headers(file_contents, expected, expected_highlighted):
+    assert RecipientCSV(file_contents).column_headers == expected
+    assert RecipientCSV(
+        file_contents, placeholders=['name']
+    ).column_headers_with_placeholders_highlighted == expected_highlighted

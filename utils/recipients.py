@@ -1,5 +1,8 @@
 import re
 import csv
+from flask import Markup
+
+from utils.template import Template
 
 
 first_column_heading = {
@@ -12,21 +15,26 @@ email_regex = re.compile(r"(^[^\@^\s]+@[^\@^\s]+(\.[^\@^\.^\s]+)$)")
 
 class RecipientCSV():
 
+    reader_options = {
+        'quoting': csv.QUOTE_NONE,
+        'skipinitialspace': True
+    }
+
     def __init__(
         self,
         file_data,
-        template_type=None
+        template_type=None,
+        placeholders=None
     ):
         self.file_data = file_data
         self.template_type = template_type
+        self.placeholders = placeholders or []
 
     @property
     def rows(self):
         for row in csv.DictReader(
             self.file_data.strip().splitlines(),
-            lineterminator='\n',
-            quoting=csv.QUOTE_NONE,
-            skipinitialspace=True
+            **RecipientCSV.reader_options
         ):
             yield row
 
@@ -47,6 +55,22 @@ class RecipientCSV():
                 self._get_recipient_from_row(row),
                 self._get_personalisation_from_row(row)
             )
+
+    @property
+    def column_headers(self):
+        for row in csv.reader(
+            self.file_data.strip().splitlines(),
+            **RecipientCSV.reader_options
+        ):
+            return row
+        return []
+
+    @property
+    def column_headers_with_placeholders_highlighted(self):
+        return [
+            Markup(Template.placeholder_tag.format(header)) if header in self.placeholders else header
+            for header in self.column_headers
+        ]
 
     def _get_recipient_from_row(self, row):
         return row[

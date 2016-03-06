@@ -7,8 +7,7 @@ from flask import Markup
 class Template():
 
     placeholder_pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
-    placeholder_opening_tag = "<span class='placeholder'>"
-    placeholder_closing_tag = "</span>"
+    placeholder_tag = "<span class='placeholder'>{}</span>"
 
     def __init__(self, template, values=None, drop_values=(), prefix=None):
         if not isinstance(template, dict):
@@ -39,7 +38,7 @@ class Template():
     def formatted(self):
         return self.__add_prefix(self.__nl2br(re.sub(
             Template.placeholder_pattern,
-            lambda match: Template.placeholder_opening_tag + match.group(1) + Template.placeholder_closing_tag,
+            lambda match: Template.placeholder_tag.format(match.group(1)),
             self.content
         )))
 
@@ -56,7 +55,7 @@ class Template():
     @property
     def placeholders_as_markup(self):
         return [
-            Markup(Template.placeholder_opening_tag + placeholder + Template.placeholder_closing_tag)
+            Markup(Template.placeholder_tag.format(placeholder))
             for placeholder in self.placeholders
         ]
 
