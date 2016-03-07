@@ -63,8 +63,6 @@ class Template():
     def replaced(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
-        if self.additional_data:
-            raise NoPlaceholderForDataError(self.additional_data)
         return self.__add_prefix(re.sub(
             Template.placeholder_pattern,
             lambda match: self.values.get(match.group(1)),
