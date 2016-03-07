@@ -44,22 +44,31 @@ def test_errors_for_invalid_values(values):
 
 
 @pytest.mark.parametrize(
-    "template_content", [
-        "",
-        "the quick brown fox",
-        """
-            the
-            quick brown
+    "template_content,expected_formatted,expected_replaced", [
+        ("", "", ""),
+        ("the quick brown fox", "the quick brown fox", "the quick brown fox"),
+        (
+            """
+                the
+                quick brown
 
-            fox
-        """,
-        "the ((quick brown fox",
-        "the (()) brown fox"
+                fox
+            """,
+            "the<br>                quick brown<br><br>                fox",
+            """
+                the
+                quick brown
+
+                fox
+            """
+        ),
+        ("the ((quick brown fox", "the ((quick brown fox", "the ((quick brown fox"),
+        ("the (()) brown fox", "the (()) brown fox", "the (()) brown fox")
     ]
 )
-def test_returns_a_string_without_template(template_content):
-    assert Template({"content": template_content}).formatted == template_content
-    assert Template({"content": template_content}).replaced == template_content
+def test_returns_a_string_without_placeholders(template_content, expected_formatted, expected_replaced):
+    assert Template({"content": template_content}).formatted == expected_formatted
+    assert Template({"content": template_content}).replaced == expected_replaced
 
 
 @pytest.mark.parametrize(
@@ -95,11 +104,7 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
                 ((colour))
                 ((animal))
             """,
-            """
-                <span class='placeholder'>article</span> quick
-                <span class='placeholder'>colour</span>
-                <span class='placeholder'>animal</span>
-            """
+            "<span class='placeholder'>article</span> quick<br>                <span class='placeholder'>colour</span><br>                <span class='placeholder'>animal</span>"  # noqa
         ),
         (
             "the quick (((colour))) fox",
