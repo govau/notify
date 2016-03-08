@@ -62,14 +62,29 @@ rows with errors. This can be changed by specifying `max_initial` and
 
 ### Get just the recipients, just the personalisation, or both
 
+
 ```python
-list(RecipientCSV("phone number,name\n+44123,Jo").recipients)
+recipients =
+list(RecipientCSV(
+  "phone number,name\n+44123,Jo",
+  template_type='sms'
+).recipients)
 >>> ['+44123']
-list(RecipientCSV("phone number,name\n+44123,Jo").personalisation)
+list(RecipientCSV(
+  "phone number,name\n+44123,Jo",
+  template_type='sms',
+  placeholders=['name']
+).personalisation
 >>> [{'name': 'Jo'}]
-list(RecipientCSV("phone number,name\n+44123,Jo").recipients_and_personalisation)
+list(RecipientCSV(
+  "phone number,name\n+44123,Jo",
+  template_type='sms',
+  placeholders=['name']
+).recipients_and_personalisation)
 >>> [(['+44123'], {'name': 'Jo'})]
 ```
+N.B. these methods will only return personalisation for columns that match the
+template’s placeholders.
 
 ### Get the column headers
 
@@ -83,7 +98,11 @@ Also available is `.column_headers_with_placeholders_highlighted`.
 ### Find errors in the CSV
 
 ```python
-recipients = RecipientCSV("phone number,registration\n+44123", placeholders=['name'])
+recipients = RecipientCSV(
+  "phone number,registration\n+44123",
+  template_type='sms',
+  placeholders=['name']
+)
 recipients.missing_column_headers
 >>> ['name']
 list(recipients.rows_with_bad_recipients)

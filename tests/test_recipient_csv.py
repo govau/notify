@@ -176,7 +176,7 @@ def test_big_list():
 
 
 @pytest.mark.parametrize(
-    "file_contents,template_type,expected_recipients,expected_personalisation",
+    "file_contents,template_type,placeholders,expected_recipients,expected_personalisation",
     [
         (
             """
@@ -185,8 +185,9 @@ def test_big_list():
                 +44456,    ,tomorrow
             """,
             'sms',
+            ['name'],
             ['+44 123', '+44456'],
-            [{'name': 'test1', 'date': 'today'}, {'name': '', 'date': 'tomorrow'}]
+            [{'name': 'test1'}, {'name': ''}]
         ),
         (
             """
@@ -195,16 +196,17 @@ def test_big_list():
                 testatexampledotcom,test2,blue
             """,
             'email',
+            ['colour'],
             ['test@example.com', 'testatexampledotcom'],
             [
-                {'name': 'test1', 'colour': 'red'},
-                {'name': 'test2', 'colour': 'blue'}
+                {'colour': 'red'},
+                {'colour': 'blue'}
             ]
         )
     ]
 )
-def test_get_recipient(file_contents, template_type, expected_recipients, expected_personalisation):
-    recipients = RecipientCSV(file_contents, template_type=template_type)
+def test_get_recipient(file_contents, template_type, placeholders, expected_recipients, expected_personalisation):
+    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders)
     assert list(recipients.recipients) == expected_recipients
     assert list(recipients.personalisation) == expected_personalisation
     assert list(recipients.recipients_and_personalisation) == [
