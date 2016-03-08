@@ -2,6 +2,99 @@
 
 `pass`
 
+# Recipients
+
+## Validate a recipient
+
+`validate_phone_number(recipient)` and `validate_email_address(recipient)` will
+raise `InvalidPhoneError` and `InvalidEmailError` respectively.
+
+`validate_recipient(recipient, template_type)` accepts a phone number or email
+address, and will do the right validation based on the given template type
+(`email` or `sms`)
+
+## Handling a CSV file of recipients
+
+Given the content of a CSV file, the `RecipientCSV` class can:
+- iterate through the rows
+- return the column headers, and show how they relate to a template’s
+  placeholders
+- find any errors
+- reformat the CSV data in a way that’s suitable for front end rendering
+
+It makes extensive use of generators in order to only read as much data into
+memory as is needed.
+
+### Get the rows from a CSV file
+
+```python
+list(RecipientCSV("phone number\n+44123").rows)
+>>> {'phone number': '+44123'}
+```
+
+### Annotate each field with some useful metadata
+
+- `data` contains the original data for the column
+- `error` contains any errors with the data
+- `ignored` will be true if the column isn’t in the template’s placeholders
+- `index` (added to the row) is a 0-indexed count of the lines in the CSV
+
+```python
+list(RecipientCSV("phone number,name\n+44123,Jo", template_type='sms').rows)
+>>> {
+>>>   'index': 0,
+>>>   'phone number': {
+>>>     'data': '+44123',
+>>>     'error': 'Must be a valid UK mobile number',
+>>>     'ignored': False
+>>>   },
+>>>   'name': {
+>>>     'data': 'Jo',
+>>>     'error': None,
+>>>     'ignored': True
+>>>   }
+>>> }
+```
+
+By default, only the first 10 rows will be displayed, plus up to 20 subsequent
+rows with errors. This can be changed by specifying `max_initial` and
+`max_errors_shown`.
+
+### Get just the recipients, just the personalisation, or both
+
+```python
+list(RecipientCSV("phone number,name\n+44123,Jo").recipients)
+>>> ['+44123']
+list(RecipientCSV("phone number,name\n+44123,Jo").personalisation)
+>>> [{'name': 'Jo'}]
+list(RecipientCSV("phone number,name\n+44123,Jo").recipients_and_personalisation)
+>>> [(['+44123'], {'name': 'Jo'})]
+```
+
+### Get the column headers
+
+```python
+RecipientCSV("phone number\n+44123").column_headers
+>>> ['phone number']
+```
+
+Also available is `.column_headers_with_placeholders_highlighted`.
+
+### Find errors in the CSV
+
+```python
+recipients = RecipientCSV("phone number,registration\n+44123", placeholders=['name'])
+recipients.missing_column_headers
+>>> ['name']
+list(recipients.rows_with_bad_recipients)
+>>> [0]
+list(recipients.rows_with_missing_data)
+>>> [0]
+list(recipients.rows_with_errors)
+>>> [0]
+recipients.has_errors
+>>> True
+```
 
 # Template
 

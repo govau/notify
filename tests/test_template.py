@@ -159,16 +159,6 @@ def test_replacement_of_template_with_incomplete_data():
     assert "colour, verb" == str(error.value)
 
 
-def test_replacement_of_template_with_too_much_data():
-    with pytest.raises(NoPlaceholderForDataError) as error:
-        Template(
-            {"content": "the quick ((colour)) fox jumps over the ((colour)) dog"},
-            {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
-        ).replaced
-    assert "adjective" in str(error.value)
-    assert "animal" in str(error.value)
-
-
 def test_can_drop_additional_values():
     values = {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
     template = {"content": "the quick ((colour)) fox jumps over the ((colour)) dog"}
@@ -178,8 +168,7 @@ def test_can_drop_additional_values():
         drop_values=('animal', 'adjective')
     ).replaced == 'the quick brown fox jumps over the brown dog'
     # make sure that our template and values aren’t modified
-    with pytest.raises(NoPlaceholderForDataError) as error:
-        Template(template, values).replaced
+    assert Template(template, values).missing_data == []
 
 
 @pytest.mark.parametrize(
