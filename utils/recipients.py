@@ -152,9 +152,9 @@ class RecipientCSV():
         ]
 
     def _get_personalisation_from_row(self, row):
-        copy_of_row = row.copy()
-        copy_of_row.pop(self.recipient_column_header, None)
-        return copy_of_row
+        return {
+            key: value for key, value in row.items() if key in self.placeholders
+        }
 
     @staticmethod
     def row_has_error(row):
