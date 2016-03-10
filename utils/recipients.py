@@ -60,7 +60,7 @@ class RecipientCSV():
     @property
     def rows_with_missing_data(self):
         return set(
-            row['index'] for row in self.rows_annotated if any(
+            row['index'] for row in self.annotated_rows if any(
                 key not in [self.recipient_column_header, 'index'] and value.get('error')
                 for key, value in row.items()
             )
@@ -69,11 +69,11 @@ class RecipientCSV():
     @property
     def rows_with_bad_recipients(self):
         return set(
-            row['index'] for row in self.rows_annotated if row.get(self.recipient_column_header, {}).get('error')
+            row['index'] for row in self.annotated_rows if row.get(self.recipient_column_header, {}).get('error')
         )
 
     @property
-    def rows_annotated(self):
+    def annotated_rows(self):
         for row_index, row in enumerate(self.rows):
             yield dict(
                 {key: {
@@ -85,16 +85,21 @@ class RecipientCSV():
             )
 
     @property
-    def rows_annotated_and_truncated(self):
-        rows_with_errors = set()
-        for row in self.rows_annotated:
+    def initial_annotated_rows(self):
+        for row in self.annotated_rows:
+            if row['index'] < self.max_initial_rows_shown:
+                yield row
+
+    @property
+    def annotated_rows_with_errors(self):
+        for row in self.annotated_rows:
             if RecipientCSV.row_has_error(row):
-                rows_with_errors.add(row['index'])
-            if len(rows_with_errors) > self.max_errors_shown:
-                return
-            if row['index'] >= self.max_initial_rows_shown and row['index'] not in rows_with_errors:
-                continue
-            else:
+                yield row
+
+    @property
+    def initial_annotated_rows_with_errors(self):
+        for row_index, row in enumerate(self.annotated_rows_with_errors):
+            if row_index < self.max_errors_shown:
                 yield row
 
     @property

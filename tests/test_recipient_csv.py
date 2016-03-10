@@ -84,83 +84,35 @@ def test_get_rows(file_contents, template_type, expected):
         )
     ]
 )
-def test_get_rows_annotated_and_truncated(file_contents, template_type, expected):
-    assert list(RecipientCSV(
+def test_get_annotated_rows(file_contents, template_type, expected):
+    recipients = RecipientCSV(
         file_contents,
         template_type=template_type,
-        placeholders=['name']
-    ).rows_annotated_and_truncated) == expected
-
-
-def test_limited_number_errors():
-    assert len(list(RecipientCSV(
-        """
-            email address, name
-            a@b.com,
-            a@b.com,
-            a@b.com,
-            a@b.com,
-            a@b.com,
-            a@b.com,
-        """,
-        template_type='email',
         placeholders=['name'],
-        max_errors_shown=3,
         max_initial_rows_shown=1
-    ).rows_annotated_and_truncated)) == 3
+    )
+    assert list(recipients.annotated_rows) == expected
+    assert len(list(recipients.annotated_rows)) == 2
+    assert len(list(recipients.initial_annotated_rows)) == 1
 
 
-def test_limited_number_errors_and_limited_number_displayed():
-    assert list(RecipientCSV(
+def test_get_annotated_rows_with_errors():
+    recipients = RecipientCSV(
         """
             email address, name
             a@b.com,
             a@b.com,
-            a@b.com, show this name
             a@b.com,
-            a@b.com,
-            a@b.com,
-            a@b.com, don’t show this name
             a@b.com,
             a@b.com,
             a@b.com,
         """,
         template_type='email',
         placeholders=['name'],
-        max_errors_shown=5,
-        max_initial_rows_shown=3
-    ).rows_annotated_and_truncated) == [
-        {
-            'email address': {'data': 'a@b.com', 'error': None, 'ignore': False},
-            'name': {'data': '', 'error': 'Missing', 'ignore': False},
-            'index': 0
-        },
-        {
-            'email address': {'data': 'a@b.com', 'error': None, 'ignore': False},
-            'name': {'data': '', 'error': 'Missing', 'ignore': False},
-            'index': 1
-        },
-        {
-            'email address': {'data': 'a@b.com', 'error': None, 'ignore': False},
-            'name': {'data': 'show this name', 'error': None, 'ignore': False},
-            'index': 2
-        },
-        {
-            'email address': {'data': 'a@b.com', 'error': None, 'ignore': False},
-            'name': {'data': '', 'error': 'Missing', 'ignore': False},
-            'index': 3
-        },
-        {
-            'email address': {'data': 'a@b.com', 'error': None, 'ignore': False},
-            'name': {'data': '', 'error': 'Missing', 'ignore': False},
-            'index': 4
-        },
-        {
-            'email address': {'data': 'a@b.com', 'error': None, 'ignore': False},
-            'name': {'data': '', 'error': 'Missing', 'ignore': False},
-            'index': 5
-        },
-    ]
+        max_errors_shown=3
+    )
+    assert len(list(recipients.annotated_rows_with_errors)) == 6
+    assert len(list(recipients.initial_annotated_rows_with_errors)) == 3
 
 
 def test_big_list():
@@ -171,7 +123,8 @@ def test_big_list():
         max_errors_shown=100,
         max_initial_rows_shown=3
     )
-    assert len(list(big_csv.rows_annotated_and_truncated)) == 100
+    assert len(list(big_csv.initial_annotated_rows)) == 3
+    assert len(list(big_csv.initial_annotated_rows_with_errors)) == 100
     assert len(list(big_csv.rows)) == 100000
 
 
