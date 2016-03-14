@@ -40,7 +40,7 @@ list(RecipientCSV("phone number\n+44123").rows)
 - `index` (added to the row) is a 0-indexed count of the lines in the CSV
 
 ```python
-list(RecipientCSV("phone number,name\n+44123,Jo", template_type='sms').rows)
+list(RecipientCSV("phone number,name\n+44123,Jo", template_type='sms').annotated_rows)
 >>> {
 >>>   'index': 0,
 >>>   'phone number': {
@@ -56,12 +56,16 @@ list(RecipientCSV("phone number,name\n+44123,Jo", template_type='sms').rows)
 >>> }
 ```
 
-By default, only the first 10 rows will be displayed, plus up to 20 subsequent
-rows with errors. This can be changed by specifying `max_initial` and
-`max_errors_shown`.
+`.initial_annotated_rows` will do the same thing, but limited to the number of
+rows specified when passing `max_initial_rows_shown` to the constructor.
+
+`.annotated_rows_with_errors` will do the same thing, but only return rows that
+have errors.
+
+`.initial_annotated_rows_with_errors` will show only errors, up to a limit of
+`max_errors_shown` (as passed to the constructor).
 
 ### Get just the recipients, just the personalisation, or both
-
 
 ```python
 recipients =
