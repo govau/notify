@@ -36,7 +36,7 @@ class Template():
 
     @property
     def formatted(self):
-        return self.__add_prefix(self.__nl2br(re.sub(
+        return self.__add_prefix(nl2br(re.sub(
             Template.placeholder_pattern,
             lambda match: Template.placeholder_tag.format(match.group(1)),
             self.content
@@ -70,6 +70,14 @@ class Template():
         ))
 
     @property
+    def as_HTML_email(self):
+        return re.sub(
+            r'EMAIL_BODY',
+            nl2br(self.replaced),
+            govuk_email_wrapper
+        )
+
+    @property
     def missing_data(self):
         return self.placeholders - self.values.keys()
 
@@ -82,8 +90,9 @@ class Template():
             return "{}: {}".format(self.prefix.strip(), output)
         return output
 
-    def __nl2br(self, value):
-        return re.sub(r'\n|\r', '<br>', value.strip())
+
+def nl2br(value):
+    return re.sub(r'\n|\r', '<br>', value.strip())
 
 
 class NeededByTemplateError(Exception):
@@ -94,3 +103,89 @@ class NeededByTemplateError(Exception):
 class NoPlaceholderForDataError(Exception):
     def __init__(self, keys):
         super(NoPlaceholderForDataError, self).__init__(", ".join(keys))
+
+
+govuk_email_wrapper = '''
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta content="telephone=no" name="format-detection"> <!-- need to add formatting for real phone numbers -->
+  <title>Page title</title>
+
+  <style>
+    @media only screen and (min-device-width: 581px) {
+      .content {
+        width: 580px !important;
+      }
+    }
+  </style>
+</head>
+
+<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;">
+
+<!--[if (gte mso 9)|(IE)]>
+  <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td>
+<![endif]-->
+     <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td width="100%" height="53" bgcolor="#0b0c0c">
+            <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr>
+                    <td width="70" bgcolor="#0b0c0c" valign="middle">
+                        <!-- This asset should be hosted by the service -->
+                        <a href="https://www.gov.uk" style="text-decoration: none;"><img
+                            src="https://raw.githubusercontent.com/alphagov/email-template/master/crown-32px.gif"
+                            alt="" height="32" border="0"></a>
+                    </td>
+                    <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
+<span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    line-height: 1.315789474;
+    font-weight: 700;
+    color: #efefef;
+    text-decoration: none;
+"
+>GOV.UK</a></span></a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+
+        <table
+            class="content"
+            align="center"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="width: 100%; max-width: 580px;"
+        >
+          <tr>
+            <td height="30">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
+              EMAIL_BODY
+            </td>
+          </tr>
+            <tr>
+              <td height="30">&nbsp;</td>
+            </tr>
+        </table>
+
+<!--[if (gte mso 9)|(IE)]>
+      </td>
+    </tr>
+</table>
+<![endif]-->
+
+</body>
+</html>
+'''

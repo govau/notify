@@ -171,6 +171,20 @@ def test_can_drop_additional_values():
     assert Template(template, values).missing_data == []
 
 
+def test_html_email_template():
+    template = Template(
+        {"content": '''
+            the quick ((colour)) ((animal))
+
+            jumped over the lazy dog
+        '''},
+        {'animal': 'fox', 'colour': 'brown'}
+    )
+    assert '<html>' in template.as_HTML_email
+    print(template.as_HTML_email)
+    assert "the quick brown fox<br><br>            jumped over the lazy dog" in template.as_HTML_email
+
+
 @pytest.mark.parametrize(
     "template_content,expected", [
         (
