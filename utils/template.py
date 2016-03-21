@@ -24,7 +24,7 @@ class Template():
         self.subject = template.get('subject', None)
         for value in drop_values:
             self.values.pop(value, None)
-        self.prefix = prefix
+        self.prefix = prefix if self.template_type == 'sms' else None
 
     def __str__(self):
         if self.values:
