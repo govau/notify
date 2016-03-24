@@ -1,9 +1,17 @@
 import re
 import pytest
-from utils.recipients import validate_phone_number, InvalidPhoneError, validate_email_address, InvalidEmailError
+from utils.recipients import (
+    validate_phone_number,
+    format_phone_number,
+    validate_and_format_phone_number,
+    InvalidPhoneError,
+    validate_email_address,
+    InvalidEmailError
+)
 
 
 valid_phone_numbers = [
+    '7123456789',
     '07123456789',
     '07123 456789',
     '07123-456-789',
@@ -37,7 +45,6 @@ invalid_phone_numbers = sum([
             '+44 117 496 0860',
             '020 7946 0991',
             '+44 20 7946 0991',
-            '71234567890',
         )),
         ('Must not contain letters or symbols', (
             '07890x32109',
@@ -88,6 +95,12 @@ def test_phone_number_accepts_valid_values(phone_number):
         validate_phone_number(phone_number)
     except InvalidPhoneError:
         pytest.fail('Unexpected InvalidPhoneError')
+
+
+@pytest.mark.parametrize("phone_number", valid_phone_numbers)
+def test_valid_phone_number_can_be_formatted_consistently(phone_number):
+    assert format_phone_number(validate_phone_number(phone_number)) == '+447123456789'
+    assert validate_and_format_phone_number(phone_number) == '+447123456789'
 
 
 @pytest.mark.parametrize("phone_number, error_message", invalid_phone_numbers)

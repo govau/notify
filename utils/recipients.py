@@ -182,7 +182,7 @@ def validate_phone_number(number):
     for character in ['(', ')', ' ', '-']:
         number = number.replace(character, '')
 
-    number = number.lstrip('+')
+    number = number.lstrip('+').lstrip('0')
 
     try:
         list(map(int, number))
@@ -191,7 +191,7 @@ def validate_phone_number(number):
 
     if not any(
         number.startswith(prefix)
-        for prefix in ['07', '447', '4407', '00447']
+        for prefix in ['7', '07', '447', '4407', '00447']
     ):
         raise InvalidPhoneError('Not a UK mobile number')
 
@@ -209,6 +209,10 @@ def validate_phone_number(number):
 
 def format_phone_number(number):
     return '+447{}'.format(number)
+
+
+def validate_and_format_phone_number(number):
+    return format_phone_number(validate_phone_number(number))
 
 
 def validate_email_address(email_address):
