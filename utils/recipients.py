@@ -28,7 +28,7 @@ class RecipientCSV():
         max_errors_shown=20,
         max_initial_rows_shown=10
     ):
-        self.file_data = file_data
+        self.file_data = file_data.strip(', \n\r')
         self.template_type = template_type
         self.placeholders = placeholders or []
         self.max_errors_shown = max_errors_shown
