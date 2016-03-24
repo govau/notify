@@ -3,6 +3,7 @@ import pytest
 from utils.recipients import (
     validate_phone_number,
     format_phone_number,
+    validate_and_format_phone_number,
     InvalidPhoneError,
     validate_email_address,
     InvalidEmailError
@@ -99,6 +100,7 @@ def test_phone_number_accepts_valid_values(phone_number):
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
 def test_valid_phone_number_can_be_formatted_consistently(phone_number):
     assert format_phone_number(validate_phone_number(phone_number)) == '+447123456789'
+    assert validate_and_format_phone_number(phone_number) == '+447123456789'
 
 
 @pytest.mark.parametrize("phone_number, error_message", invalid_phone_numbers)

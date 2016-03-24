@@ -211,6 +211,10 @@ def format_phone_number(number):
     return '+447{}'.format(number)
 
 
+def validate_and_format_phone_number(number):
+    return format_phone_number(validate_phone_number(number))
+
+
 def validate_email_address(email_address):
     if not re.match(email_regex, email_address):
         raise InvalidEmailError('Not a valid email address')
