@@ -4,6 +4,7 @@ from utils.recipients import validate_phone_number, InvalidPhoneError, validate_
 
 
 valid_phone_numbers = [
+    '7123456789',
     '07123456789',
     '07123 456789',
     '07123-456-789',
@@ -37,7 +38,6 @@ invalid_phone_numbers = sum([
             '+44 117 496 0860',
             '020 7946 0991',
             '+44 20 7946 0991',
-            '71234567890',
         )),
         ('Must not contain letters or symbols', (
             '07890x32109',
