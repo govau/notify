@@ -45,6 +45,7 @@ def test_get_rows(file_contents, template_type, expected):
                 phone number,name
                 07700900460, test1
                 +447700 900 460,test2
+                ,
             """,
             'sms',
             [
@@ -106,6 +107,8 @@ def test_get_annotated_rows_with_errors():
             a@b.com,
             a@b.com,
             a@b.com,
+
+
         """,
         template_type='email',
         placeholders=['name'],
@@ -136,6 +139,8 @@ def test_big_list():
                 phone number,name, date
                 +44 123,test1,today
                 +44456,    ,tomorrow
+                ,,
+                , ,
             """,
             'sms',
             ['name'],
