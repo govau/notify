@@ -34,7 +34,17 @@ class RecipientCSV():
         self.placeholders = placeholders or []
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
-        self.whitelist = whitelist or []
+        self.whitelist = whitelist
+
+    @property
+    def whitelist(self):
+        return self._whitelist
+
+    @whitelist.setter
+    def whitelist(self, value):
+        self._whitelist = set() if not value else set(
+            format_recipient(recipient, self.template_type) for recipient in value
+        )
 
     @property
     def recipient_column_header(self):
@@ -143,15 +153,21 @@ class RecipientCSV():
         ]
 
     def _get_error_for_field(self, key, value):
+
         if key == self.recipient_column_header:
-            if self.whitelist and value not in self.whitelist:
-                return 'You can’t send to this {}'.format(self.recipient_column_header)
             try:
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
                 return str(error)
+            if (
+                self.whitelist and
+                format_recipient(value, self.template_type) not in self.whitelist
+            ):
+                return 'You can’t send to this {}'.format(self.recipient_column_header)
+
         if key not in self.placeholders:
             return None
+
         if value in [None, '']:
             return 'Missing'
 
@@ -224,8 +240,22 @@ def validate_email_address(email_address):
         raise InvalidEmailError('Not a valid email address')
 
 
+def format_email_address(email_address):
+    return email_address.strip().lower()
+
+
 def validate_recipient(recipient, template_type):
     return {
         'email': validate_email_address,
         'sms': validate_phone_number
     }[template_type](recipient)
+
+
+def format_recipient(recipient, template_type):
+    try:
+        return {
+            'email': format_email_address,
+            'sms': validate_and_format_phone_number
+        }[template_type](recipient)
+    except (InvalidEmailError, InvalidPhoneError):
+        return recipient
