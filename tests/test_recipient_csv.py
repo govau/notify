@@ -1,4 +1,5 @@
 import pytest
+import itertools
 from flask import Markup
 
 from utils.recipients import RecipientCSV
@@ -246,3 +247,57 @@ def test_bad_or_missing_data(file_contents, rows_with_bad_recipients, rows_with_
     assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
     assert recipients.rows_with_missing_data == rows_with_missing_data
     assert recipients.has_errors is True
+
+
+@pytest.mark.parametrize(
+    "file_contents,template_type,whitelist,count_of_rows_with_errors",
+    [
+        (
+            """
+                phone number
+                07700900460
+                07700900461
+                07700900462
+                07700900463
+            """,
+            'sms',
+            ['+447700900460'],  # Same as first phone number but in different format
+            3
+        ),
+        (
+            """
+                phone number
+                7700900460
+                447700900461
+                07700900462
+            """,
+            'sms',
+            ['07700900460', '07700900461', '07700900462', '07700900463', 'test@example.com'],
+            0
+        ),
+        (
+            """
+                email address
+                IN_WHITELIST@EXAMPLE.COM
+                not_in_whitelist@example.com
+            """,
+            'email',
+            ['in_whitelist@example.com', '07700900460'],  # Email case differs to the one in the CSV
+            1
+        )
+    ]
+)
+def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_rows_with_errors):
+
+    recipients = RecipientCSV(
+        file_contents,
+        template_type=template_type,
+        whitelist=whitelist
+    )
+    assert len(recipients.rows_with_errors) == count_of_rows_with_errors
+
+    recipients.whitelist = []
+    assert len(recipients.rows_with_errors) == 0
+
+    recipients.whitelist = itertools.chain()
+    assert len(recipients.rows_with_errors) == 0
