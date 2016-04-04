@@ -110,13 +110,27 @@ recipients = RecipientCSV(
 recipients.missing_column_headers
 >>> ['name']
 list(recipients.rows_with_bad_recipients)
->>> [0]
+>>> {1}
 list(recipients.rows_with_missing_data)
->>> [0]
+>>> {0}
 list(recipients.rows_with_errors)
->>> [0]
+>>> {1}
 recipients.has_errors
 >>> True
+```
+
+### Add a whitelist of recipients
+
+Will give back errors for any recipients not in the whitelist
+
+```python
+recipients = RecipientCSV(
+  "phone number\n+44123",
+  template_type='sms',
+  whitelist=['07700900999']
+)
+list(recipients.rows_with_errors)
+>>> {1}
 ```
 
 # Template

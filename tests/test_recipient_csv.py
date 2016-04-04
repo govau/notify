@@ -246,3 +246,54 @@ def test_bad_or_missing_data(file_contents, rows_with_bad_recipients, rows_with_
     assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
     assert recipients.rows_with_missing_data == rows_with_missing_data
     assert recipients.has_errors is True
+
+
+@pytest.mark.parametrize(
+    "file_contents,template_type,whitelist,count_of_rows_with_errors",
+    [
+        (
+            """
+                phone number
+                07700900460
+                07700900461
+                07700900462
+                07700900463
+            """,
+            'sms',
+            ['07700900460'],
+            3
+        ),
+        (
+            """
+                phone number
+                07700900460
+                07700900461
+                07700900462
+            """,
+            'sms',
+            ['07700900460', '07700900461', '07700900462', '07700900463'],
+            0
+        ),
+        (
+            """
+                email address
+                in_whitelist@example.com
+                not_in_whitelist@example.com
+            """,
+            'email',
+            ['in_whitelist@example.com', 'in_whitelist@example.com'],
+            1
+        )
+    ]
+)
+def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_rows_with_errors):
+
+    recipients = RecipientCSV(
+        file_contents,
+        template_type=template_type,
+        whitelist=whitelist
+    )
+    assert len(recipients.rows_with_errors) == count_of_rows_with_errors
+
+    recipients.whitelist = []
+    assert len(recipients.rows_with_errors) == 0

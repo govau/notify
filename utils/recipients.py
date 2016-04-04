@@ -26,13 +26,15 @@ class RecipientCSV():
         template_type=None,
         placeholders=None,
         max_errors_shown=20,
-        max_initial_rows_shown=10
+        max_initial_rows_shown=10,
+        whitelist=None
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
         self.placeholders = placeholders or []
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
+        self.whitelist = whitelist or []
 
     @property
     def recipient_column_header(self):
@@ -142,6 +144,8 @@ class RecipientCSV():
 
     def _get_error_for_field(self, key, value):
         if key == self.recipient_column_header:
+            if self.whitelist and value not in self.whitelist:
+                return 'You can’t send to this {}'.format(self.recipient_column_header)
             try:
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
