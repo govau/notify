@@ -1,4 +1,5 @@
 import pytest
+import itertools
 from flask import Markup
 
 from utils.recipients import RecipientCSV
@@ -296,4 +297,7 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
     assert len(recipients.rows_with_errors) == count_of_rows_with_errors
 
     recipients.whitelist = []
+    assert len(recipients.rows_with_errors) == 0
+
+    recipients.whitelist = itertools.chain()
     assert len(recipients.rows_with_errors) == 0

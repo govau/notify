@@ -1,5 +1,6 @@
 import re
 import csv
+from contextlib import suppress
 from flask import Markup
 
 from utils.template import Template
@@ -34,17 +35,7 @@ class RecipientCSV():
         self.placeholders = placeholders or []
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
-        self.whitelist = whitelist
-
-    @property
-    def whitelist(self):
-        return self._whitelist
-
-    @whitelist.setter
-    def whitelist(self, value):
-        self._whitelist = set() if not value else set(
-            format_recipient(recipient, self.template_type) for recipient in value
-        )
+        self.whitelist = whitelist or []
 
     @property
     def recipient_column_header(self):
@@ -159,10 +150,7 @@ class RecipientCSV():
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
                 return str(error)
-            if (
-                self.whitelist and
-                format_recipient(value, self.template_type) not in self.whitelist
-            ):
+            if list(self.whitelist) and not allowed_to_send_to(value, self.whitelist):
                 return 'You can’t send to this {}'.format(self.recipient_column_header)
 
         if key not in self.placeholders:
@@ -238,10 +226,15 @@ def validate_and_format_phone_number(number):
 def validate_email_address(email_address):
     if not re.match(email_regex, email_address):
         raise InvalidEmailError('Not a valid email address')
+    return email_address
 
 
 def format_email_address(email_address):
     return email_address.strip().lower()
+
+
+def validate_and_format_email_address(email_address):
+    return format_email_address(validate_email_address(email_address))
 
 
 def validate_recipient(recipient, template_type):
@@ -251,11 +244,15 @@ def validate_recipient(recipient, template_type):
     }[template_type](recipient)
 
 
-def format_recipient(recipient, template_type):
-    try:
-        return {
-            'email': format_email_address,
-            'sms': validate_and_format_phone_number
-        }[template_type](recipient)
-    except (InvalidEmailError, InvalidPhoneError):
-        return recipient
+def format_recipient(recipient):
+    with suppress(InvalidPhoneError):
+        return validate_and_format_phone_number(recipient)
+    with suppress(InvalidEmailError):
+        return validate_and_format_email_address(recipient)
+    return recipient
+
+
+def allowed_to_send_to(recipient, whitelist):
+    return format_recipient(recipient) in [
+        format_recipient(recipient) for recipient in whitelist
+    ]
