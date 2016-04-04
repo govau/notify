@@ -28,8 +28,8 @@ memory as is needed.
 ### Get the rows from a CSV file
 
 ```python
-list(RecipientCSV("phone number\n+44123").rows)
->>> {'phone number': '+44123'}
+list(RecipientCSV("phone number\n07700900460").rows)
+>>> {'phone number': '07700900460'}
 ```
 
 ### Annotate each field with some useful metadata
@@ -40,11 +40,11 @@ list(RecipientCSV("phone number\n+44123").rows)
 - `index` (added to the row) is a 0-indexed count of the lines in the CSV
 
 ```python
-list(RecipientCSV("phone number,name\n+44123,Jo", template_type='sms').annotated_rows)
+list(RecipientCSV("phone number,name\n07700900460,Jo", template_type='sms').annotated_rows)
 >>> {
 >>>   'index': 0,
 >>>   'phone number': {
->>>     'data': '+44123',
+>>>     'data': '07700900460',
 >>>     'error': 'Must be a valid UK mobile number',
 >>>     'ignored': False
 >>>   },
@@ -70,22 +70,22 @@ have errors.
 ```python
 recipients =
 list(RecipientCSV(
-  "phone number,name\n+44123,Jo",
+  "phone number,name\n07700900460,Jo",
   template_type='sms'
 ).recipients)
->>> ['+44123']
+>>> ['07700900460']
 list(RecipientCSV(
-  "phone number,name\n+44123,Jo",
+  "phone number,name\n07700900460,Jo",
   template_type='sms',
   placeholders=['name']
 ).personalisation
 >>> [{'name': 'Jo'}]
 list(RecipientCSV(
-  "phone number,name\n+44123,Jo",
+  "phone number,name\n07700900460,Jo",
   template_type='sms',
   placeholders=['name']
 ).recipients_and_personalisation)
->>> [(['+44123'], {'name': 'Jo'})]
+>>> [(['07700900460'], {'name': 'Jo'})]
 ```
 N.B. these methods will only return personalisation for columns that match the
 template’s placeholders.
@@ -93,7 +93,7 @@ template’s placeholders.
 ### Get the column headers
 
 ```python
-RecipientCSV("phone number\n+44123").column_headers
+RecipientCSV("phone number\n07700900460").column_headers
 >>> ['phone number']
 ```
 
@@ -103,7 +103,7 @@ Also available is `.column_headers_with_placeholders_highlighted`.
 
 ```python
 recipients = RecipientCSV(
-  "phone number,registration\n+44123",
+  "phone number,registration\n07700900460",
   template_type='sms',
   placeholders=['name']
 )
@@ -125,7 +125,7 @@ Will give back errors for any recipients not in the whitelist
 
 ```python
 recipients = RecipientCSV(
-  "phone number\n+44123",
+  "phone number\n07700900460",
   template_type='sms',
   whitelist=['07700900999']
 )
