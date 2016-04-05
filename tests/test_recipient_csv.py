@@ -296,8 +296,14 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
     )
     assert len(recipients.rows_with_errors) == count_of_rows_with_errors
 
+    # Make sure the whitelist isn’t emptied by reading it. If it’s an iterator then
+    # there’s a risk that it gets emptied after being read once
+    recipients.whitelist = (str(fake_number) for fake_number in range(7700900888, 7700900898))
+    list(recipients.whitelist)
+    assert len(recipients.rows_with_errors)
+
+    # An empty whitelist is treated as no whitelist at all
     recipients.whitelist = []
     assert len(recipients.rows_with_errors) == 0
-
     recipients.whitelist = itertools.chain()
     assert len(recipients.rows_with_errors) == 0

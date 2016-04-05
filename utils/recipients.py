@@ -35,7 +35,18 @@ class RecipientCSV():
         self.placeholders = placeholders or []
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
-        self.whitelist = whitelist or []
+        self.whitelist = whitelist
+
+    @property
+    def whitelist(self):
+        return self._whitelist
+
+    @whitelist.setter
+    def whitelist(self, value):
+        try:
+            self._whitelist = list(value)
+        except TypeError:
+            self._whitelist = []
 
     @property
     def recipient_column_header(self):
