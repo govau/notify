@@ -230,7 +230,13 @@ def format_phone_number(number):
     return '+447{}'.format(number)
 
 
-def validate_and_format_phone_number(number):
+def format_phone_number_human_readable(number):
+    return '07{} {} {}'.format(*re.findall('...', number))
+
+
+def validate_and_format_phone_number(number, human_readable=False):
+    if human_readable:
+        return format_phone_number_human_readable(validate_phone_number(number))
     return format_phone_number(validate_phone_number(number))
 
 

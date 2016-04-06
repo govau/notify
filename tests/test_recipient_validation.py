@@ -102,6 +102,7 @@ def test_phone_number_accepts_valid_values(phone_number):
 def test_valid_phone_number_can_be_formatted_consistently(phone_number):
     assert format_phone_number(validate_phone_number(phone_number)) == '+447123456789'
     assert validate_and_format_phone_number(phone_number) == '+447123456789'
+    assert validate_and_format_phone_number(phone_number, human_readable=True) == '07123 456 789'
 
 
 @pytest.mark.parametrize("phone_number, error_message", invalid_phone_numbers)
