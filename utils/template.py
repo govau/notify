@@ -136,9 +136,8 @@ govuk_email_wrapper = '''
             <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
                     <td width="70" bgcolor="#0b0c0c" valign="middle">
-                        <!-- This asset should be hosted by the service -->
                         <a href="https://www.gov.uk" style="text-decoration: none;"><img
-                            src="https://raw.githubusercontent.com/alphagov/email-template/master/crown-32px.gif"
+                            src="https://www.notifications.service.gov.uk/static/images/email-template/crown-32px.gif"
                             alt="" height="32" border="0"></a>
                     </td>
                     <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
