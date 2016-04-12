@@ -49,8 +49,8 @@ class Template():
     @property
     def placeholders(self):
         return OrderedSet(re.findall(
-            Template.placeholder_pattern, self.content
-        ))
+            Template.placeholder_pattern,
+            (self.subject or '') + self.content))
 
     @property
     def placeholders_as_markup(self):
@@ -68,6 +68,15 @@ class Template():
             lambda match: self.values.get(match.group(1)),
             self.content
         ))
+
+    @property
+    def replaced_subject(self):
+        if self.missing_data:
+            raise NeededByTemplateError(self.missing_data)
+        return re.sub(
+            Template.placeholder_pattern,
+            lambda match: self.values.get(match.group(1)),
+            self.subject if self.subject else "")
 
     @property
     def as_HTML_email(self):

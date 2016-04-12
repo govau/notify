@@ -1,6 +1,6 @@
 import re
 import pytest
-from utils.recipients import (
+from notifications_utils.recipients import (
     validate_phone_number,
     format_phone_number,
     validate_and_format_phone_number,

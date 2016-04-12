@@ -2,7 +2,7 @@ import pytest
 import itertools
 from flask import Markup
 
-from utils.recipients import RecipientCSV
+from notifications_utils.recipients import RecipientCSV
 
 
 @pytest.mark.parametrize(

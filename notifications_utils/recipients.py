@@ -3,7 +3,7 @@ import csv
 from contextlib import suppress
 from flask import Markup
 
-from utils.template import Template
+from notifications_utils.template import Template
 
 
 first_column_heading = {
