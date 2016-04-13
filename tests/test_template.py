@@ -1,7 +1,7 @@
 import pytest
 
 from flask import Markup
-from utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
+from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
 
 
 def test_class():
@@ -152,6 +152,44 @@ def test_replacement_of_placeholders(template_content, data, expected):
     assert Template({"content": template_content}, data).replaced == expected
 
 
+@pytest.mark.parametrize(
+    "template_content,template_subject,data,expected_content,expected_subject", [
+        (
+            "No placeholder content",
+            "((name))",
+            {'name': 'Vladimir'},
+            "No placeholder content",
+            "Vladimir"
+        ), (
+            "My name is ((name))",
+            "((name))",
+            {"name": "Vladimir"},
+            "My name is Vladimir",
+            "Vladimir"
+        ), (
+            "The quick brown fox jumped over the lazy dog",
+            "The quick ((colour)) fox jumped over the lazy ((dog))",
+            {"colour": "brown", "dog": "cat"},
+            "The quick brown fox jumped over the lazy dog",
+            "The quick brown fox jumped over the lazy cat"
+        ), (
+            "(((random)))",
+            "(( :) ))",
+            {"random": ":(", ":)": "smiley"},
+            "(:()",
+            "(( :) ))"
+        )
+    ])
+def test_replacement_of_placeholders_subject(template_content,
+                                             template_subject,
+                                             data,
+                                             expected_content,
+                                             expected_subject):
+    template = Template({"content": template_content, 'subject': template_subject}, data)
+    assert template.replaced == expected_content
+    assert template.replaced_subject == expected_subject
+
+
 def test_replacement_of_template_with_incomplete_data():
     with pytest.raises(NeededByTemplateError) as error:
         Template(
@@ -183,32 +221,50 @@ def test_html_email_template():
         {'animal': 'fox', 'colour': 'brown'}
     )
     assert '<html>' in template.as_HTML_email
-    print(template.as_HTML_email)
     assert "the quick brown fox<br><br>            jumped over the lazy dog" in template.as_HTML_email
 
 
 @pytest.mark.parametrize(
-    "template_content,expected", [
+    "template_content, template_subject, expected", [
         (
             "the quick brown fox",
+            "jumps",
             []
         ),
         (
             "the quick ((colour)) fox",
+            "jumps",
             ["colour"]
         ),
         (
             "the quick ((colour)) ((animal))",
+            "jumps",
             ["colour", "animal"]
         ),
         (
             "((colour)) ((animal)) ((colour)) ((animal))",
+            "jumps",
             ["colour", "animal"]
         ),
+        (
+            "the quick brown fox",
+            "((colour))",
+            ["colour"]
+        ),
+        (
+            "the quick ((colour)) ",
+            "((animal))",
+            ["animal", "colour"]
+        ),
+        (
+            "((colour)) ((animal)) ",
+            "((colour)) ((animal))",
+            ["colour", "animal"]
+        )
     ]
 )
-def test_extracting_placeholders(template_content, expected):
-    assert Template({"content": template_content}).placeholders == expected
+def test_extracting_placeholders(template_content, template_subject, expected):
+    assert Template({"content": template_content, 'subject': template_subject}).placeholders == expected
 
 
 def test_extracting_placeholders_marked_up():

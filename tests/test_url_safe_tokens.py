@@ -1,7 +1,7 @@
 from itsdangerous import BadSignature, SignatureExpired
 from pytest import fail
 
-from utils.url_safe_token import generate_token, check_token
+from notifications_utils.url_safe_token import generate_token, check_token
 
 
 def test_should_return_payload_from_signed_token():
