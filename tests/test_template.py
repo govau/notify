@@ -118,6 +118,27 @@ def test_formatting_of_placeholders(template_content, expected):
     assert Template({"content": template_content}).formatted == expected
 
 
+@pytest.mark.parametrize(
+    "template_subject, expected", [
+        (
+            "(( name ))",
+            "<span class='placeholder'> name </span>"
+        ), (
+            "the quick (( animal ))",
+            "the quick <span class='placeholder'> animal </span>"
+        ), (
+            "(( person )) eats (( food ))",
+            "<span class='placeholder'> person </span> eats <span class='placeholder'> food </span>"
+        ), (
+            "the quick (((colour))) fox",
+            "the quick (<span class='placeholder'>colour</span>) fox"
+        )
+    ]
+)
+def test_subject_formatting_of_placeholders(template_subject, expected):
+    assert Template({'subject': template_subject, 'content': ''}).formatted_subject == expected
+
+
 def test_formatting_of_template_contents_as_markup():
     assert Template(
         {"content": "Hello ((name))"}
