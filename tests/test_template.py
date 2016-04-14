@@ -145,6 +145,12 @@ def test_formatting_of_template_contents_as_markup():
     ).formatted_as_markup == Markup("Hello <span class='placeholder'>name</span>")
 
 
+def test_formatting_of_template_contents_as_markup():
+    assert Template(
+        {"content": "", "subject": "Hello ((name))"}
+    ).formatted_subject_as_markup == Markup("Hello <span class='placeholder'>name</span>")
+
+
 @pytest.mark.parametrize(
     "template_content,data,expected", [
         (
