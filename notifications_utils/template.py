@@ -43,6 +43,13 @@ class Template():
         )))
 
     @property
+    def formatted_subject(self):
+        return self.__add_prefix(nl2br(re.sub(
+            Template.placeholder_pattern,
+            lambda match: Template.placeholder_tag.format(match.group(1)),
+            self.subject)))
+
+    @property
     def formatted_as_markup(self):
         return Markup(self.formatted)
 
