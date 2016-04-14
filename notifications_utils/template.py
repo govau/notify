@@ -81,6 +81,10 @@ class Template():
         ))
 
     @property
+    def replaced_govuk_escaped(self):
+        return unlink_govuk_escaped(self.replaced)
+
+    @property
     def replaced_subject(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
@@ -93,7 +97,7 @@ class Template():
     def as_HTML_email(self):
         return re.sub(
             r'EMAIL_BODY',
-            nl2br(self.replaced),
+            nl2br(self.replaced_govuk_escaped),
             govuk_email_wrapper
         )
 
@@ -208,3 +212,17 @@ govuk_email_wrapper = '''
 </body>
 </html>
 '''
+
+
+govuk_not_a_link = re.compile(
+    r'(?<!\.|\/)(GOV)\.(UK)(?!\/|\?)',
+    re.IGNORECASE
+)
+
+
+def unlink_govuk_escaped(message):
+    return re.sub(
+        govuk_not_a_link,
+        r'\1' + '.\u200B' + r'\2',  # Unicode zero-width space
+        message
+    )

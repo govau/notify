@@ -299,3 +299,21 @@ def test_extracting_placeholders_marked_up():
         Markup(u"<span class='placeholder'>colour</span>"),
         Markup(u"<span class='placeholder'>animal</span>")
     ]
+
+
+@pytest.mark.parametrize(
+    "template_content,expected", [
+        ("gov.uk", u"gov.\u200Buk"),
+        ("GOV.UK", u"GOV.\u200BUK"),
+        ("Gov.uk", u"Gov.\u200Buk"),
+        ("https://gov.uk", "https://gov.uk"),
+        ("https://www.gov.uk", "https://www.gov.uk"),
+        ("www.gov.uk", "www.gov.uk"),
+        ("gov.uk/register-to-vote", "gov.uk/register-to-vote"),
+        ("gov.uk?q=", "gov.uk?q=")
+    ]
+)
+def test_escaping_govuk_in_email_templates(template_content, expected):
+    template = Template({"content": template_content, 'template_type': 'email'})
+    assert template.replaced_govuk_escaped == expected
+    assert expected in template.as_HTML_email
