@@ -50,6 +50,10 @@ class Template():
             self.subject)))
 
     @property
+    def formatted_subject_as_markup(self):
+        return Markup(self.formatted_subject)
+
+    @property
     def formatted_as_markup(self):
         return Markup(self.formatted)
 
