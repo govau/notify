@@ -1,4 +1,5 @@
 import re
+import math
 
 from orderedset import OrderedSet
 from flask import Markup
@@ -9,7 +10,7 @@ class Template():
     placeholder_pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
     placeholder_tag = "<span class='placeholder'>{}</span>"
 
-    def __init__(self, template, values=None, drop_values=(), prefix=None):
+    def __init__(self, template, values=None, drop_values=(), prefix=None, encoding="utf-8"):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
         if values is not None and not isinstance(values, dict):
@@ -25,6 +26,7 @@ class Template():
         for value in drop_values:
             self.values.pop(value, None)
         self.prefix = prefix if self.template_type == 'sms' else None
+        self.encoding = encoding
 
     def __str__(self):
         if self.values:
@@ -79,6 +81,21 @@ class Template():
             lambda match: self.values.get(match.group(1)),
             self.content
         ))
+
+    @property
+    def replaced_content_count(self):
+        return len(self.replaced.encode(self.encoding))
+
+    @property
+    def content_count(self):
+        return len(self.content.encode(self.encoding))
+
+    @property
+    def sms_fragment_count(self):
+        if self.template_type != 'sms':
+            raise TypeError("The template needs to have a template type of 'sms'")
+        char_count = self.replaced_content_count
+        return 1 if char_count <= 160 else math.ceil(float(char_count) / 153)
 
     @property
     def replaced_govuk_escaped(self):
