@@ -51,13 +51,17 @@ def test_get_rows(file_contents, template_type, expected):
             'sms',
             [
                 {
-                    'phone number': {'data': '07700900460', 'error': None, 'ignore': False},
-                    'name': {'data': 'test1', 'error': None, 'ignore': False},
+                    'columns': {
+                        'phone number': {'data': '07700900460', 'error': None, 'ignore': False},
+                        'name': {'data': 'test1', 'error': None, 'ignore': False},
+                    },
                     'index': 0
                 },
                 {
-                    'phone number': {'data': '+447700 900 460', 'error': None, 'ignore': False},
-                    'name': {'data': 'test2', 'error': None, 'ignore': False},
+                    'columns': {
+                        'phone number': {'data': '+447700 900 460', 'error': None, 'ignore': False},
+                        'name': {'data': 'test2', 'error': None, 'ignore': False},
+                    },
                     'index': 1
                 },
             ]
@@ -71,15 +75,19 @@ def test_get_rows(file_contents, template_type, expected):
             'email',
             [
                 {
-                    'email address': {'data': 'test@example.com', 'error': None, 'ignore': False},
-                    'name': {'data': 'test1', 'error': None, 'ignore': False},
-                    'colour': {'data': 'blue', 'error': None, 'ignore': True},
+                    'columns': {
+                        'email address': {'data': 'test@example.com', 'error': None, 'ignore': False},
+                        'name': {'data': 'test1', 'error': None, 'ignore': False},
+                        'colour': {'data': 'blue', 'error': None, 'ignore': True},
+                    },
                     'index': 0
                 },
                 {
-                    'email address': {'data': 'example.com', 'error': 'Not a valid email address', 'ignore': False},
-                    'name': {'data': 'test2', 'error': None, 'ignore': False},
-                    'colour': {'data': 'red', 'error': None, 'ignore': True},
+                    'columns': {
+                        'email address': {'data': 'example.com', 'error': 'Not a valid email address', 'ignore': False},
+                        'name': {'data': 'test2', 'error': None, 'ignore': False},
+                        'colour': {'data': 'red', 'error': None, 'ignore': True},
+                    },
                     'index': 1
                 },
             ]

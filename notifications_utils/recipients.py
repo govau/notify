@@ -76,21 +76,23 @@ class RecipientCSV():
         return set(
             row['index'] for row in self.annotated_rows if any(
                 key not in [self.recipient_column_header, 'index'] and value.get('error')
-                for key, value in row.items()
+                for key, value in row['columns'].items()
             )
         )
 
     @property
     def rows_with_bad_recipients(self):
         return set(
-            row['index'] for row in self.annotated_rows if row.get(self.recipient_column_header, {}).get('error')
+            row['index']
+            for row in self.annotated_rows
+            if row['columns'].get(self.recipient_column_header, {}).get('error')
         )
 
     @property
     def annotated_rows(self):
         for row_index, row in enumerate(self.rows):
             yield dict(
-                {key: {
+                columns={key: {
                     'data': value,
                     'error': self._get_error_for_field(key, value),
                     'ignore': (key != self.recipient_column_header and key not in self.placeholders)
@@ -183,7 +185,7 @@ class RecipientCSV():
     @staticmethod
     def row_has_error(row):
         return any(
-            key != 'index' and value.get('error') for key, value in row.items()
+            key != 'index' and value.get('error') for key, value in row['columns'].items()
         )
 
 
