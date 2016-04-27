@@ -94,8 +94,7 @@ class Template():
     def sms_fragment_count(self):
         if self.template_type != 'sms':
             raise TypeError("The template needs to have a template type of 'sms'")
-        char_count = self.replaced_content_count
-        return 1 if char_count <= 160 else math.ceil(float(char_count) / 153)
+        return get_sms_fragment_count(self.replaced_content_count)
 
     @property
     def replaced_govuk_escaped(self):
@@ -243,3 +242,7 @@ def unlink_govuk_escaped(message):
         r'\1' + '.\u200B' + r'\2',  # Unicode zero-width space
         message
     )
+
+
+def get_sms_fragment_count(character_count):
+    return 1 if character_count <= 160 else math.ceil(float(character_count) / 153)
