@@ -356,3 +356,23 @@ def test_sms_fragment_count(char_count, expected_sms_fragment_count):
         mocked.return_value = char_count
         template = Template({'content': 'faked', 'template_type': 'sms'})
         assert template.sms_fragment_count == expected_sms_fragment_count
+
+
+@pytest.mark.parametrize(
+    "content_count, limit, too_long",
+    [
+        (3, 2, True),
+        (2, 3, False),
+        (1, None, False)
+    ])
+def test_content_limit(content_count, limit, too_long):
+    with patch(
+        'notifications_utils.template.Template.replaced_content_count',
+        new_callable=PropertyMock
+    ) as mocked:
+        mocked.return_value = content_count
+        template = Template(
+            {'content': 'faked', 'template_type': 'sms'},
+            content_character_limit=limit
+        )
+        assert template.content_too_long == too_long

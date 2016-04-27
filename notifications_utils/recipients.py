@@ -28,7 +28,8 @@ class RecipientCSV():
         placeholders=None,
         max_errors_shown=20,
         max_initial_rows_shown=10,
-        whitelist=None
+        whitelist=None,
+        template=None
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
