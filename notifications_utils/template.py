@@ -10,7 +10,15 @@ class Template():
     placeholder_pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
     placeholder_tag = "<span class='placeholder'>{}</span>"
 
-    def __init__(self, template, values=None, drop_values=(), prefix=None, encoding="utf-8"):
+    def __init__(
+        self,
+        template,
+        values=None,
+        drop_values=(),
+        prefix=None,
+        encoding="utf-8",
+        content_character_limit=None
+    ):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
         if values is not None and not isinstance(values, dict):
@@ -27,6 +35,7 @@ class Template():
             self.values.pop(value, None)
         self.prefix = prefix if self.template_type == 'sms' else None
         self.encoding = encoding
+        self.content_character_limit = content_character_limit
 
     def __str__(self):
         if self.values:
@@ -94,8 +103,14 @@ class Template():
     def sms_fragment_count(self):
         if self.template_type != 'sms':
             raise TypeError("The template needs to have a template type of 'sms'")
-        char_count = self.replaced_content_count
-        return 1 if char_count <= 160 else math.ceil(float(char_count) / 153)
+        return get_sms_fragment_count(self.replaced_content_count)
+
+    @property
+    def content_too_long(self):
+        return (
+            self.content_character_limit is not None and
+            self.replaced_content_count > self.content_character_limit
+        )
 
     @property
     def replaced_govuk_escaped(self):
@@ -243,3 +258,7 @@ def unlink_govuk_escaped(message):
         r'\1' + '.\u200B' + r'\2',  # Unicode zero-width space
         message
     )
+
+
+def get_sms_fragment_count(character_count):
+    return 1 if character_count <= 160 else math.ceil(float(character_count) / 153)

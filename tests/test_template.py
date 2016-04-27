@@ -321,18 +321,21 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
 
 
 @pytest.mark.parametrize(
-    "content,encoding,expected_length",
+    "content,prefix,encoding,expected_length",
     [
-        ("The quick brown fox jumped over the lazy dog", "utf-8", 44),
-        ("深", "utf-8", 3),
-        ("'First line.\n", 'utf-8', 13),
-        ("\t\n\r", 'utf-8', 3)
+        ("The quick brown fox jumped over the lazy dog", None, "utf-8", 44),
+        ("深", None, "utf-8", 3),
+        ("'First line.\n", None, 'utf-8', 13),
+        ("\t\n\r", None, 'utf-8', 3),
+        ("((placeholder))", 'Service name', "utf-8", 17),
     ])
-def test_get_character_count_of_content(content, encoding, expected_length):
-    template = Template({
-        'content': content,
-        'template_type': 'sms',
-        'encoding': encoding})
+def test_get_character_count_of_content(content, prefix, encoding, expected_length):
+    template = Template(
+        {'content': content, 'template_type': 'sms'},
+        encoding=encoding,
+        prefix=prefix,
+        values={'placeholder': '123'}
+    )
     assert template.replaced_content_count == expected_length
 
 
@@ -356,3 +359,23 @@ def test_sms_fragment_count(char_count, expected_sms_fragment_count):
         mocked.return_value = char_count
         template = Template({'content': 'faked', 'template_type': 'sms'})
         assert template.sms_fragment_count == expected_sms_fragment_count
+
+
+@pytest.mark.parametrize(
+    "content_count, limit, too_long",
+    [
+        (3, 2, True),
+        (2, 3, False),
+        (1, None, False)
+    ])
+def test_content_limit(content_count, limit, too_long):
+    with patch(
+        'notifications_utils.template.Template.replaced_content_count',
+        new_callable=PropertyMock
+    ) as mocked:
+        mocked.return_value = content_count
+        template = Template(
+            {'content': 'faked', 'template_type': 'sms'},
+            content_character_limit=limit
+        )
+        assert template.content_too_long == too_long

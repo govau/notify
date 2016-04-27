@@ -28,7 +28,8 @@ class RecipientCSV():
         placeholders=None,
         max_errors_shown=20,
         max_initial_rows_shown=10,
-        whitelist=None
+        whitelist=None,
+        template=None
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
@@ -36,6 +37,7 @@ class RecipientCSV():
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
         self.whitelist = whitelist
+        self.template = template if isinstance(template, Template) else None
 
     @property
     def whitelist(self):
@@ -69,33 +71,44 @@ class RecipientCSV():
 
     @property
     def rows_with_errors(self):
-        return self.rows_with_missing_data | self.rows_with_bad_recipients
+        return self.rows_with_missing_data | self.rows_with_bad_recipients | self.rows_with_message_too_long
 
     @property
     def rows_with_missing_data(self):
         return set(
             row['index'] for row in self.annotated_rows if any(
                 key not in [self.recipient_column_header, 'index'] and value.get('error')
-                for key, value in row.items()
+                for key, value in row['columns'].items()
             )
         )
 
     @property
     def rows_with_bad_recipients(self):
         return set(
-            row['index'] for row in self.annotated_rows if row.get(self.recipient_column_header, {}).get('error')
+            row['index']
+            for row in self.annotated_rows
+            if row['columns'].get(self.recipient_column_header, {}).get('error')
+        )
+
+    @property
+    def rows_with_message_too_long(self):
+        return set(
+            row['index'] for row in self.annotated_rows if row['message_too_long']
         )
 
     @property
     def annotated_rows(self):
         for row_index, row in enumerate(self.rows):
+            if self.template:
+                self.template.values = dict(row.items())
             yield dict(
-                {key: {
+                columns={key: {
                     'data': value,
                     'error': self._get_error_for_field(key, value),
                     'ignore': (key != self.recipient_column_header and key not in self.placeholders)
                 } for key, value in row.items()},
-                index=row_index
+                index=row_index,
+                message_too_long=bool(self.template and self.template.content_too_long)
             )
 
     @property
@@ -183,7 +196,7 @@ class RecipientCSV():
     @staticmethod
     def row_has_error(row):
         return any(
-            key != 'index' and value.get('error') for key, value in row.items()
+            key != 'index' and value.get('error') for key, value in row['columns'].items()
         )
 
 

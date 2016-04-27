@@ -3,6 +3,7 @@ import itertools
 from flask import Markup
 
 from notifications_utils.recipients import RecipientCSV
+from notifications_utils.template import Template
 
 
 @pytest.mark.parametrize(
@@ -51,14 +52,20 @@ def test_get_rows(file_contents, template_type, expected):
             'sms',
             [
                 {
-                    'phone number': {'data': '07700900460', 'error': None, 'ignore': False},
-                    'name': {'data': 'test1', 'error': None, 'ignore': False},
-                    'index': 0
+                    'columns': {
+                        'phone number': {'data': '07700900460', 'error': None, 'ignore': False},
+                        'name': {'data': 'test1', 'error': None, 'ignore': False},
+                    },
+                    'index': 0,
+                    'message_too_long': False
                 },
                 {
-                    'phone number': {'data': '+447700 900 460', 'error': None, 'ignore': False},
-                    'name': {'data': 'test2', 'error': None, 'ignore': False},
-                    'index': 1
+                    'columns': {
+                        'phone number': {'data': '+447700 900 460', 'error': None, 'ignore': False},
+                        'name': {'data': 'test2', 'error': None, 'ignore': False},
+                    },
+                    'index': 1,
+                    'message_too_long': False
                 },
             ]
         ),
@@ -71,16 +78,22 @@ def test_get_rows(file_contents, template_type, expected):
             'email',
             [
                 {
-                    'email address': {'data': 'test@example.com', 'error': None, 'ignore': False},
-                    'name': {'data': 'test1', 'error': None, 'ignore': False},
-                    'colour': {'data': 'blue', 'error': None, 'ignore': True},
-                    'index': 0
+                    'columns': {
+                        'email address': {'data': 'test@example.com', 'error': None, 'ignore': False},
+                        'name': {'data': 'test1', 'error': None, 'ignore': False},
+                        'colour': {'data': 'blue', 'error': None, 'ignore': True},
+                    },
+                    'index': 0,
+                    'message_too_long': False
                 },
                 {
-                    'email address': {'data': 'example.com', 'error': 'Not a valid email address', 'ignore': False},
-                    'name': {'data': 'test2', 'error': None, 'ignore': False},
-                    'colour': {'data': 'red', 'error': None, 'ignore': True},
-                    'index': 1
+                    'columns': {
+                        'email address': {'data': 'example.com', 'error': 'Not a valid email address', 'ignore': False},
+                        'name': {'data': 'test2', 'error': None, 'ignore': False},
+                        'colour': {'data': 'red', 'error': None, 'ignore': True},
+                    },
+                    'index': 1,
+                    'message_too_long': False
                 },
             ]
         )
@@ -307,3 +320,19 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
     assert len(recipients.rows_with_errors) == 0
     recipients.whitelist = itertools.chain()
     assert len(recipients.rows_with_errors) == 0
+
+
+def test_detects_rows_which_result_in_overly_long_messages():
+    recipients = RecipientCSV(
+        """
+            phone number,placeholder
+            07700900460,1
+            07700900461,1234567890
+            07700900462,12345678901
+            07700900463,123456789012345678901234567890
+        """,
+        template_type='sms',
+        template=Template({'content': '((placeholder))', 'type': 'sms'}, content_character_limit=10)
+    )
+    assert recipients.rows_with_errors == {2, 3}
+    assert recipients.rows_with_message_too_long == {2, 3}
