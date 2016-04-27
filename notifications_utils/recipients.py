@@ -37,6 +37,7 @@ class RecipientCSV():
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
         self.whitelist = whitelist
+        self.template = template if isinstance(template, Template) else None
 
     @property
     def whitelist(self):
@@ -70,7 +71,7 @@ class RecipientCSV():
 
     @property
     def rows_with_errors(self):
-        return self.rows_with_missing_data | self.rows_with_bad_recipients
+        return self.rows_with_missing_data | self.rows_with_bad_recipients | self.rows_with_message_too_long
 
     @property
     def rows_with_missing_data(self):
@@ -90,15 +91,24 @@ class RecipientCSV():
         )
 
     @property
+    def rows_with_message_too_long(self):
+        return set(
+            row['index'] for row in self.annotated_rows if row['message_too_long']
+        )
+
+    @property
     def annotated_rows(self):
         for row_index, row in enumerate(self.rows):
+            if self.template:
+                self.template.values = dict(row.items())
             yield dict(
                 columns={key: {
                     'data': value,
                     'error': self._get_error_for_field(key, value),
                     'ignore': (key != self.recipient_column_header and key not in self.placeholders)
                 } for key, value in row.items()},
-                index=row_index
+                index=row_index,
+                message_too_long=bool(self.template and self.template.content_too_long)
             )
 
     @property
