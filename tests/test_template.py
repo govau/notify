@@ -1,5 +1,6 @@
 import pytest
-
+from unittest.mock import PropertyMock
+from unittest.mock import patch
 from flask import Markup
 from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
 
@@ -317,3 +318,41 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
     template = Template({"content": template_content, 'template_type': 'email'})
     assert template.replaced_govuk_escaped == expected
     assert expected in template.as_HTML_email
+
+
+@pytest.mark.parametrize(
+    "content,encoding,expected_length",
+    [
+        ("The quick brown fox jumped over the lazy dog", "utf-8", 44),
+        ("深", "utf-8", 3),
+        ("'First line.\n", 'utf-8', 13),
+        ("\t\n\r", 'utf-8', 3)
+    ])
+def test_get_character_count_of_content(content, encoding, expected_length):
+    template = Template({
+        'content': content,
+        'template_type': 'sms',
+        'encoding': encoding})
+    assert template.replaced_content_count == expected_length
+
+
+@pytest.mark.parametrize(
+    "char_count, expected_sms_fragment_count",
+    [
+        (159, 1),
+        (160, 1),
+        (161, 2),
+        (306, 2),
+        (307, 3),
+        (459, 3),
+        (460, 4),
+        (461, 4)
+    ])
+def test_sms_fragment_count(char_count, expected_sms_fragment_count):
+    with patch(
+        'notifications_utils.template.Template.replaced_content_count',
+        new_callable=PropertyMock
+    ) as mocked:
+        mocked.return_value = char_count
+        template = Template({'content': 'faked', 'template_type': 'sms'})
+        assert template.sms_fragment_count == expected_sms_fragment_count
