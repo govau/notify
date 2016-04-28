@@ -33,7 +33,7 @@ class RecipientCSV():
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
-        self.placeholders = placeholders or []
+        self.placeholders = placeholders
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
         self.whitelist = whitelist
@@ -49,6 +49,21 @@ class RecipientCSV():
             self._whitelist = list(value)
         except TypeError:
             self._whitelist = []
+
+    @property
+    def placeholders(self):
+        return self._placeholders
+
+    @placeholders.setter
+    def placeholders(self, value):
+        try:
+            self._placeholders = list(value)
+        except TypeError:
+            self._placeholders = []
+
+    @property
+    def placeholders_as_column_keys(self):
+        return [Columns.make_key(placeholder) for placeholder in self.placeholders]
 
     @property
     def recipient_column_header(self):
@@ -67,7 +82,7 @@ class RecipientCSV():
             self.file_data.strip().splitlines(),
             **RecipientCSV.reader_options
         ):
-            yield row
+            yield Columns(row)
 
     @property
     def rows_with_errors(self):
@@ -77,7 +92,7 @@ class RecipientCSV():
     def rows_with_missing_data(self):
         return set(
             row['index'] for row in self.annotated_rows if any(
-                key not in [self.recipient_column_header, 'index'] and value.get('error')
+                key not in Columns.make_key(self.recipient_column_header) and value.get('error')
                 for key, value in row['columns'].items()
             )
         )
@@ -102,11 +117,14 @@ class RecipientCSV():
             if self.template:
                 self.template.values = dict(row.items())
             yield dict(
-                columns={key: {
+                columns=Columns({key: {
                     'data': value,
                     'error': self._get_error_for_field(key, value),
-                    'ignore': (key != self.recipient_column_header and key not in self.placeholders)
-                } for key, value in row.items()},
+                    'ignore': (
+                        key != Columns.make_key(self.recipient_column_header) and
+                        key not in self.placeholders_as_column_keys
+                    )
+                } for key, value in row.items()}),
                 index=row_index,
                 message_too_long=bool(self.template and self.template.content_too_long)
             )
@@ -158,7 +176,17 @@ class RecipientCSV():
 
     @property
     def missing_column_headers(self):
-        return set([self.recipient_column_header] + list(self.placeholders)) - set(self.column_headers)
+        required = {
+            Columns.make_key(key): key
+            for key in set([self.recipient_column_header] + self.placeholders)
+        }
+        return set(
+            required[key] for key in set(
+                [Columns.make_key(self.recipient_column_header)] + self.placeholders_as_column_keys
+            ) - set(
+                Columns.make_key(column_header) for column_header in self.column_headers
+            )
+        )
 
     @property
     def column_headers_with_placeholders_highlighted(self):
@@ -169,7 +197,7 @@ class RecipientCSV():
 
     def _get_error_for_field(self, key, value):
 
-        if key == self.recipient_column_header:
+        if key == Columns.make_key(self.recipient_column_header):
             try:
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
@@ -177,8 +205,8 @@ class RecipientCSV():
             if list(self.whitelist) and not allowed_to_send_to(value, self.whitelist):
                 return 'You can’t send to this {}'.format(self.recipient_column_header)
 
-        if key not in self.placeholders:
-            return None
+        if key not in self.placeholders_as_column_keys:
+            return
 
         if value in [None, '']:
             return 'Missing'
@@ -189,14 +217,43 @@ class RecipientCSV():
         ]
 
     def _get_personalisation_from_row(self, row):
-        return {
-            key: value for key, value in row.items() if key in self.placeholders
-        }
+        return Columns({
+            key: value for key, value in row.items() if key in self.placeholders_as_column_keys
+        })
 
     @staticmethod
     def row_has_error(row):
         return any(
             key != 'index' and value.get('error') for key, value in row['columns'].items()
+        )
+
+
+class Columns():
+
+    def __init__(self, row_dict):
+        self._dict = {
+            Columns.make_key(key): value for key, value in row_dict.items()
+        }
+
+    def __getitem__(self, key):
+        return self.get(key)
+
+    def get(self, key, default=None):
+        return self._dict.get(Columns.make_key(key), default)
+
+    def items(self):
+        return self._dict.items()
+
+    def pop(self, key):
+        return self._dict.pop(key)
+
+    def copy(self):
+        return Columns(self._dict.copy())
+
+    @staticmethod
+    def make_key(original_key):
+        return "".join(
+            character.lower() for character in original_key if character not in ' _-'
         )
 
 

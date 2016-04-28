@@ -135,7 +135,10 @@ class Template():
 
     @property
     def missing_data(self):
-        return self.placeholders - self.values.keys()
+        return list(
+            placeholder for placeholder in self.placeholders
+            if self.values.get(placeholder) is None
+        )
 
     @property
     def additional_data(self):
