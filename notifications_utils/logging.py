@@ -115,7 +115,7 @@ class CustomLogFormatter(logging.Formatter):
     def format(self, record):
         record = self.add_fields(record)
         try:
-            record.msg = record.msg.format(**record.__dict__)
+            record.msg = str(record.msg).format(**record.__dict__)
         except KeyError as e:
             logger.exception("failed to format log message: {} not found".format(e))
         return super(CustomLogFormatter, self).format(record)
