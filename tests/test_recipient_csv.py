@@ -1,8 +1,9 @@
 import pytest
+import mock
 import itertools
 from flask import Markup
 
-from notifications_utils.recipients import RecipientCSV
+from notifications_utils.recipients import RecipientCSV, Columns
 from notifications_utils.template import Template
 
 
@@ -17,8 +18,8 @@ from notifications_utils.template import Template
             """,
             "sms",
             [
-                {'phone number': '+44 123', 'name': 'test1'},
-                {'phone number': '+44 456', 'name': 'test2'}
+                mock.ANY,
+                mock.ANY
             ]
         ),
         (
@@ -29,8 +30,8 @@ from notifications_utils.template import Template
             """,
             "email",
             [
-                {'email address': 'test@example.com', 'name': 'test1'},
-                {'email address': 'test2@example.com', 'name': 'test2'}
+                mock.ANY,
+                mock.ANY
             ]
         )
     ]
@@ -52,18 +53,12 @@ def test_get_rows(file_contents, template_type, expected):
             'sms',
             [
                 {
-                    'columns': {
-                        'phone number': {'data': '07700900460', 'error': None, 'ignore': False},
-                        'name': {'data': 'test1', 'error': None, 'ignore': False},
-                    },
+                    'columns': mock.ANY,
                     'index': 0,
                     'message_too_long': False
                 },
                 {
-                    'columns': {
-                        'phone number': {'data': '+447700 900 460', 'error': None, 'ignore': False},
-                        'name': {'data': 'test2', 'error': None, 'ignore': False},
-                    },
+                    'columns': mock.ANY,
                     'index': 1,
                     'message_too_long': False
                 },
@@ -78,20 +73,12 @@ def test_get_rows(file_contents, template_type, expected):
             'email',
             [
                 {
-                    'columns': {
-                        'email address': {'data': 'test@example.com', 'error': None, 'ignore': False},
-                        'name': {'data': 'test1', 'error': None, 'ignore': False},
-                        'colour': {'data': 'blue', 'error': None, 'ignore': True},
-                    },
+                    'columns': mock.ANY,
                     'index': 0,
                     'message_too_long': False
                 },
                 {
-                    'columns': {
-                        'email address': {'data': 'example.com', 'error': 'Not a valid email address', 'ignore': False},
-                        'name': {'data': 'test2', 'error': None, 'ignore': False},
-                        'colour': {'data': 'red', 'error': None, 'ignore': True},
-                    },
+                    'columns': mock.ANY,
                     'index': 1,
                     'message_too_long': False
                 },
@@ -179,12 +166,16 @@ def test_big_list():
 )
 def test_get_recipient(file_contents, template_type, placeholders, expected_recipients, expected_personalisation):
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders)
-    assert list(recipients.recipients) == expected_recipients
-    assert list(recipients.personalisation) == expected_personalisation
-    assert list(recipients.recipients_and_personalisation) == [
-        (recipient, personalisation)
-        for recipient, personalisation in zip(expected_recipients, expected_personalisation)
-    ]
+
+    recipients_recipients = list(recipients.recipients)
+    recipients_and_personalisation = list(recipients.recipients_and_personalisation)
+    personalisation = list(recipients.personalisation)
+
+    for index, row in enumerate(expected_personalisation):
+        for key, value in row.items():
+            assert recipients_recipients[index] == expected_recipients[index]
+            assert personalisation[index].get(key) == value
+            assert recipients_and_personalisation[index][1].get(key) == value
 
 
 @pytest.mark.parametrize(
@@ -336,3 +327,53 @@ def test_detects_rows_which_result_in_overly_long_messages():
     )
     assert recipients.rows_with_errors == {2, 3}
     assert recipients.rows_with_message_too_long == {2, 3}
+
+
+@pytest.mark.parametrize(
+    "key, expected",
+    sum([
+        [(key, expected) for key in group] for expected, group in [
+            ('07700900460', (
+                'phone number',
+                '   PHONENUMBER',
+                'phone_number',
+                'phone-number',
+                'phoneNumber'
+            )),
+            ('Jo', (
+                'FIRSTNAME',
+                'first name',
+                'first_name ',
+                'first-name',
+                'firstName'
+            )),
+            ('Bloggs', (
+                'Last    Name',
+                'LASTNAME',
+                '    last_name',
+                'last-name',
+                'lastName   '
+            ))
+        ]
+    ], [])
+)
+def test_ignores_spaces_and_case_in_placeholders(key, expected):
+    recipients = RecipientCSV(
+        """
+            phone number,FIRSTNAME, Last Name
+            07700900460, Jo, Bloggs
+        """,
+        placeholders=['phone_number', 'First Name', 'lastname'],
+        template_type='sms'
+    )
+    first_row = list(recipients.annotated_rows)[0]
+    assert first_row['columns'].get(key)['data'] == expected
+    assert first_row['columns'][key]['data'] == expected
+    assert list(recipients.personalisation)[0][key] == expected
+    assert list(recipients.recipients) == ['07700900460']
+
+    assert len(first_row['columns'].items()) == 3
+
+    assert recipients.missing_column_headers == set()
+    recipients.placeholders = {'one', 'TWO', 'Thirty_Three'}
+    assert recipients.missing_column_headers == {'one', 'TWO', 'Thirty_Three'}
