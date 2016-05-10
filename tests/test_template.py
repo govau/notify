@@ -379,3 +379,10 @@ def test_content_limit(content_count, limit, too_long):
             content_character_limit=limit
         )
         assert template.content_too_long == too_long
+
+
+def test_random_variable_retrieve():
+    template = Template({'content': 'content', 'template_type': 'sms', 'created_by': "now"})
+    assert template.get_raw('created_by') == "now"
+    assert template.get_raw('missing', default='random') == 'random'
+    assert template.get_raw('missing') is None
