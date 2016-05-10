@@ -36,6 +36,7 @@ class Template():
         self.prefix = prefix if self.template_type == 'sms' else None
         self.encoding = encoding
         self.content_character_limit = content_character_limit
+        self._template = template
 
     def __str__(self):
         if self.values:
@@ -148,6 +149,9 @@ class Template():
         if self.prefix:
             return "{}: {}".format(self.prefix.strip(), output)
         return output
+
+    def get_raw(self, key, default=None):
+        return self._template.get(key, default)
 
 
 def nl2br(value):
