@@ -200,8 +200,8 @@ govuk_email_wrapper = '''
                 <tr>
                   <td width="70" bgcolor="#0b0c0c" valign="middle">
                     <a href="https://www.gov.uk" style="text-decoration: none;"><img
-                            src="https://www.notifications.service.gov.uk/static/images/email-template/crown-32px.gif"
-                            alt="" height="32" border="0"></a>
+                            src="https://www.notifications.service.gov.uk/static/images/gov.uk_logotype_crown.png"
+                            alt="" height="32" border="0" style="margin-top: 4px;"></a>
                   </td>
                   <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
 <span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
@@ -262,18 +262,12 @@ govuk_email_wrapper = '''
                     <!--[if lte IE 9]>
                     <img
                         src="https://www.notifications.service.gov.uk/static/images/govuk-crest-ie.png"
-                        alt=""
-                        width="125"
-                        height="103"
-                        border="0">
+                        alt="" width="125" height="103" border="0">
                     <![endif]-->
                     <!--[if !IE]> -->
                     <img
                         src="https://www.notifications.service.gov.uk/static/images/govuk-crest-2x.png"
-                        alt=""
-                        width="125"
-                        height="103"
-                        border="0">
+                        alt="" width="125" height="103" border="0">
                     <!-- <![endif]-->
                   </td>
                 </tr>
