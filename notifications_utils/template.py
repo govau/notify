@@ -193,17 +193,17 @@ govuk_email_wrapper = '''
     <tr>
       <td>
 <![endif]-->
-     <table width="100%" cellpadding="0" cellspacing="0" border="0">
-    <tr>
-        <td width="100%" height="53" bgcolor="#0b0c0c">
-            <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="100%" height="53" bgcolor="#0b0c0c">
+              <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
-                    <td width="70" bgcolor="#0b0c0c" valign="middle">
-                        <a href="https://www.gov.uk" style="text-decoration: none;"><img
+                  <td width="70" bgcolor="#0b0c0c" valign="middle">
+                    <a href="https://www.gov.uk" style="text-decoration: none;"><img
                             src="https://www.notifications.service.gov.uk/static/images/email-template/crown-32px.gif"
                             alt="" height="32" border="0"></a>
-                    </td>
-                    <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
+                  </td>
+                  <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
 <span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
     font-family: Helvetica, Arial, sans-serif;
     font-size: 28px;
@@ -213,12 +213,12 @@ govuk_email_wrapper = '''
     text-decoration: none;
 "
 >GOV.UK</a></span></a>
-                    </td>
+                  </td>
                 </tr>
-            </table>
-        </td>
-    </tr>
-</table>
+              </table>
+            </td>
+          </tr>
+        </table>
 
 
         <table
@@ -237,19 +237,20 @@ govuk_email_wrapper = '''
               EMAIL_BODY
             </td>
           </tr>
-            <tr>
-              <td height="30">&nbsp;</td>
-            </tr>
+          <tr>
+            <td height="30">&nbsp;</td>
+          </tr>
         </table>
 
 <!--[if (gte mso 9)|(IE)]>
       </td>
     </tr>
-</table>
+  </table>
 <![endif]-->
 
 </body>
 </html>
+
 '''
 
 
