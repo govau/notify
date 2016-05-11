@@ -212,7 +212,7 @@ govuk_email_wrapper = '''
     color: #ffffff;
     text-decoration: none;
 "
->GOV.UK</a></span></a>
+>GOV.UK</a></span>
                   </td>
                 </tr>
               </table>
