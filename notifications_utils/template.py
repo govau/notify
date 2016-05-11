@@ -209,7 +209,7 @@ govuk_email_wrapper = '''
     font-size: 28px;
     line-height: 1.315789474;
     font-weight: 700;
-    color: #efefef;
+    color: #ffffff;
     text-decoration: none;
 "
 >GOV.UK</a></span></a>
