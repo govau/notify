@@ -21,13 +21,20 @@ def init_app(app):
 
     @app.after_request
     def after_request(response):
-        current_app.logger.info('{method} {url} {status} {time_taken}',
-                                extra={
-                                    'method': request.method,
-                                    'url': request.url,
-                                    'status': response.status_code,
-                                    'time_taken': monotonic() - g.start
-                                })
+
+        extra_fields = {
+            'method': request.method,
+            'url': request.url,
+            'status': response.status_code
+        }
+
+        if 'start' in g:
+            extra_fields.update({
+                'time_taken': "%.5f" % (monotonic() - g.start)
+            })
+            current_app.logger.info('{method} {url} {status} {time_taken}', extra=extra_fields)
+        else:
+            current_app.logger.info('{method} {url} {status}', extra=extra_fields)
         return response
 
     logging.getLogger().addHandler(logging.NullHandler())
