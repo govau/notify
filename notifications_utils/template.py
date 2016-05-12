@@ -186,65 +186,102 @@ govuk_email_wrapper = '''
   </style>
 </head>
 
-<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;">
+<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;background:#dee0e2;">
 
 <!--[if (gte mso 9)|(IE)]>
   <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
     <tr>
       <td>
 <![endif]-->
-     <table width="100%" cellpadding="0" cellspacing="0" border="0">
-    <tr>
-        <td width="100%" height="53" bgcolor="#0b0c0c">
-            <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="100%" height="53" bgcolor="#0b0c0c">
+              <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
-                    <td width="70" bgcolor="#0b0c0c" valign="middle">
-                        <a href="https://www.gov.uk" style="text-decoration: none;"><img
-                            src="https://www.notifications.service.gov.uk/static/images/email-template/crown-32px.gif"
-                            alt="" height="32" border="0"></a>
-                    </td>
-                    <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
+                  <td width="70" bgcolor="#0b0c0c" valign="middle">
+                    <a href="https://www.gov.uk" style="text-decoration: none;"><img
+                            src="https://www.notifications.service.gov.uk/static/images/gov.uk_logotype_crown.png"
+                            alt="" height="32" border="0" style="margin-top: 4px;"></a>
+                  </td>
+                  <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
 <span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
     font-family: Helvetica, Arial, sans-serif;
     font-size: 28px;
     line-height: 1.315789474;
     font-weight: 700;
-    color: #efefef;
+    color: #ffffff;
     text-decoration: none;
 "
->GOV.UK</a></span></a>
-                    </td>
+>GOV.UK</a></span>
+                  </td>
                 </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-
-
-        <table
-            class="content"
-            align="center"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            style="width: 100%; max-width: 580px;"
-        >
-          <tr>
-            <td height="30">&nbsp;</td>
-          </tr>
-          <tr>
-            <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
-              EMAIL_BODY
+              </table>
             </td>
           </tr>
-            <tr>
-              <td height="30">&nbsp;</td>
-            </tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="100%" bgcolor="#ffffff" height="1">
+              <table
+                  class="content"
+                  align="center"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  style="width: 100%; max-width: 580px;"
+              >
+                <tr>
+                  <td height="30">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
+                    EMAIL_BODY
+                  </td>
+                </tr>
+                <tr>
+                  <td height="30">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="100%" bgcolor="#a1acb2" height="1"></td>
+          </tr>
+          <tr>
+            <td width="100%" bgcolor="#dee0e2">
+              <table width="580" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr>
+                  <td width="100%" valign="middle" align="right" height="40"></td>
+                </tr>
+                <tr>
+                  <td width="100%" valign="middle" align="right">
+                    <!--[if lte IE 9]>
+                    <img
+                        src="https://www.notifications.service.gov.uk/static/images/govuk-crest-ie.png"
+                        alt="" width="125" height="103" border="0">
+                    <![endif]-->
+                    <!--[if !IE]> -->
+                    <img
+                        src="https://www.notifications.service.gov.uk/static/images/govuk-crest-2x.png"
+                        alt="" width="125" height="103" border="0">
+                    <!-- <![endif]-->
+                  </td>
+                </tr>
+                <tr>
+                  <td width="100%" valign="middle" align="right" height="40"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
         </table>
 
 <!--[if (gte mso 9)|(IE)]>
-      </td>
-    </tr>
+    </td>
+  </tr>
 </table>
 <![endif]-->
 
