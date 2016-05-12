@@ -1,10 +1,10 @@
-from flask import request, current_app
+from flask import request, current_app, g
 from flask.ctx import has_request_context
 from itertools import product
 import re
 from pythonjsonlogger.jsonlogger import JsonFormatter as BaseJSONFormatter
 import sys
-
+from monotonic import monotonic
 import logging
 
 LOG_FORMAT = '%(asctime)s %(app_name)s %(name)s %(levelname)s ' \
@@ -21,11 +21,12 @@ def init_app(app):
 
     @app.after_request
     def after_request(response):
-        current_app.logger.info('{method} {url} {status}',
+        current_app.logger.info('{method} {url} {status} {time_taken}',
                                 extra={
                                     'method': request.method,
                                     'url': request.url,
-                                    'status': response.status_code
+                                    'status': response.status_code,
+                                    'time_taken': monotonic() - g.start
                                 })
         return response
 
