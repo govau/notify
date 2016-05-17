@@ -361,6 +361,10 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
         whitelist=whitelist
     )
     assert len(recipients.rows_with_errors) == count_of_rows_with_errors
+    if count_of_rows_with_errors:
+        assert not recipients.allowed_to_send_to
+    else:
+        assert recipients.allowed_to_send_to
 
     # Make sure the whitelist isn’t emptied by reading it. If it’s an iterator then
     # there’s a risk that it gets emptied after being read once
