@@ -18,8 +18,8 @@ from notifications_utils.template import Template
             """,
             "sms",
             [
-                mock.ANY,
-                mock.ANY
+                [('phone number', '+44 123'), ('name', 'test1')],
+                [('phone number', '+44 456'), ('name', 'test2')]
             ]
         ),
         (
@@ -30,14 +30,30 @@ from notifications_utils.template import Template
             """,
             "email",
             [
-                mock.ANY,
-                mock.ANY
+                [('email address', 'test@example.com'), ('name', 'test1')],
+                [('email address', 'test2@example.com'), ('name', 'test2')]
+            ]
+        ),
+        (
+            """
+                email address
+                test@example.com,test1,red
+                test2@example.com, test2,blue
+            """,
+            "email",
+            [
+                [('email address', 'test@example.com'), (None, ['test1', 'red'])],
+                [('email address', 'test2@example.com'), (None, ['test2', 'blue'])]
             ]
         )
     ]
 )
 def test_get_rows(file_contents, template_type, expected):
-    assert list(RecipientCSV(file_contents, template_type=template_type).rows) == expected
+    rows = list(RecipientCSV(file_contents, template_type=template_type).rows)
+    for index, row in enumerate(expected):
+        assert len(rows[index].items()) == len(row)
+        for key, value in row:
+            assert rows[index].get(key) == value
 
 
 @pytest.mark.parametrize(
@@ -161,6 +177,17 @@ def test_big_list():
                 {'colour': 'red'},
                 {'colour': 'blue'}
             ]
+        ),
+        (
+            """
+                email address
+                test@example.com,test1,red
+                testatexampledotcom,test2,blue
+            """,
+            'email',
+            [],
+            ['test@example.com', 'testatexampledotcom'],
+            []
         )
     ]
 )
@@ -238,6 +265,13 @@ def test_column_headers(file_contents, template_type, expected, expected_highlig
                 +44 123,test1,test1
             """,
             {2, 5}, {1, 4}
+        ),
+        (
+            """
+                phone number,name
+                07700900460,test1,test2
+            """,
+            set(), set()
         ),
         (
             """

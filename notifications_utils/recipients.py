@@ -92,7 +92,7 @@ class RecipientCSV():
     def rows_with_missing_data(self):
         return set(
             row['index'] for row in self.annotated_rows if any(
-                key not in Columns.make_key(self.recipient_column_header) and value.get('error')
+                str(key) not in Columns.make_key(self.recipient_column_header) and value.get('error')
                 for key, value in row['columns'].items()
             )
         )
@@ -252,6 +252,8 @@ class Columns():
 
     @staticmethod
     def make_key(original_key):
+        if original_key is None:
+            return None
         return "".join(
             character.lower() for character in original_key if character not in ' _-'
         )
