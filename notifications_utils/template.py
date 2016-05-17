@@ -245,7 +245,7 @@ govuk_email_wrapper = '''
               <!--[if (gte mso 9)|(IE)]>
                 <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    <td>
+                    <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
               <![endif]-->
                   EMAIL_BODY
               <!--[if (gte mso 9)|(IE)]>
