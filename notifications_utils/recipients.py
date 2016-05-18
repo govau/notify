@@ -158,6 +158,15 @@ class RecipientCSV():
             yield self._get_personalisation_from_row(row)
 
     @property
+    def enumerated_recipients_and_personalisation(self):
+        for row_index, row in self.annotated_rows:
+            yield (
+                row_index,
+                self._get_recipient_from_row(row),
+                self._get_personalisation_from_row(row)
+            )
+
+    @property
     def recipients_and_personalisation(self):
         for row in self.rows:
             yield (
