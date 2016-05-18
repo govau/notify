@@ -206,6 +206,34 @@ def test_get_recipient(file_contents, template_type, placeholders, expected_reci
 
 
 @pytest.mark.parametrize(
+    "file_contents,template_type,placeholders,expected_recipients,expected_personalisation",
+    [
+        (
+            """
+                email address
+                test@example.com,test1,red
+                testatexampledotcom,test2,blue
+            """,
+            'email',
+            [],
+            [(1, 'test@example.com'), (2, 'testatexampledotcom')],
+            []
+        )
+    ]
+)
+def test_get_recipient_respects_order(file_contents,
+                                      template_type,
+                                      placeholders,
+                                      expected_recipients,
+                                      expected_personalisation):
+    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders)
+
+    recipients_gen = recipients.enumerated_recipients_and_personalisation
+    for row, email in expected_personalisation:
+        assert next(recipients_gen) == (row, email, [])
+
+
+@pytest.mark.parametrize(
     "file_contents,template_type,expected,expected_highlighted,expected_missing",
     [
         (
