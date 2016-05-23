@@ -77,6 +77,15 @@ class RecipientCSV():
         ))
 
     @property
+    def allowed_to_send_to(self):
+        if not self.whitelist:
+            return True
+        return all(
+            allowed_to_send_to(recipient, self.whitelist)
+            for recipient in self.recipients
+        )
+
+    @property
     def rows(self):
         for row in csv.DictReader(
             self.file_data.strip().splitlines(),
