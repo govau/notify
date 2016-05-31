@@ -153,6 +153,9 @@ class Template():
     def get_raw(self, key, default=None):
         return self._template.get(key, default)
 
+    def compare_to(self, new):
+        return TemplateChange(self, new)
+
 
 def nl2br(value):
     return re.sub(r'\n|\r', '<br>', value.strip())
@@ -166,6 +169,25 @@ class NeededByTemplateError(Exception):
 class NoPlaceholderForDataError(Exception):
     def __init__(self, keys):
         super(NoPlaceholderForDataError, self).__init__(", ".join(keys))
+
+
+class TemplateChange():
+
+    def __init__(self, old_template, new_template):
+        self.old_placeholders = old_template.placeholders
+        self.new_placeholders = new_template.placeholders
+
+    @property
+    def has_different_placeholders(self):
+        return bool(self.new_placeholders ^ self.old_placeholders)
+
+    @property
+    def placeholders_added(self):
+        return self.new_placeholders - self.old_placeholders
+
+    @property
+    def placeholders_removed(self):
+        return self.old_placeholders - self.new_placeholders
 
 
 govuk_email_wrapper = '''
