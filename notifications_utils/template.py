@@ -153,6 +153,9 @@ class Template():
     def get_raw(self, key, default=None):
         return self._template.get(key, default)
 
+    def compare_to(self, new):
+        return TemplateChange(self, new)
+
 
 def nl2br(value):
     return re.sub(r'\n|\r', '<br>', value.strip())

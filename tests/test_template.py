@@ -386,3 +386,14 @@ def test_random_variable_retrieve():
     assert template.get_raw('created_by') == "now"
     assert template.get_raw('missing', default='random') == 'random'
     assert template.get_raw('missing') is None
+
+
+def test_compare_template():
+    with patch(
+        'notifications_utils.template.TemplateChange.__init__',
+        return_value=None
+    ) as mocked:
+        old_template = Template({'content': 'faked', 'template_type': 'sms'})
+        new_template = Template({'content': 'faked', 'template_type': 'sms'})
+        template_changes = old_template.compare_to(new_template)
+        mocked.assert_called_once_with(old_template, new_template)
