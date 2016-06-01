@@ -84,7 +84,7 @@ def test_get_rows(file_contents, template_type, expected):
             """
                 email address,name,colour
                 test@example.com,test1,blue
-                example.com, test2,red
+                test2@example.com, test2,red
             """,
             'email',
             [
@@ -112,6 +112,7 @@ def test_get_annotated_rows(file_contents, template_type, expected):
     assert list(recipients.annotated_rows) == expected
     assert len(list(recipients.annotated_rows)) == 2
     assert len(list(recipients.initial_annotated_rows)) == 1
+    assert not recipients.has_errors
 
 
 def test_get_annotated_rows_with_errors():
@@ -133,6 +134,7 @@ def test_get_annotated_rows_with_errors():
     )
     assert len(list(recipients.annotated_rows_with_errors)) == 6
     assert len(list(recipients.initial_annotated_rows_with_errors)) == 3
+    assert recipients.has_errors
 
 
 def test_big_list():
@@ -146,6 +148,7 @@ def test_big_list():
     assert len(list(big_csv.initial_annotated_rows)) == 3
     assert len(list(big_csv.initial_annotated_rows_with_errors)) == 100
     assert len(list(big_csv.rows)) == 100000
+    assert big_csv.has_errors
 
 
 @pytest.mark.parametrize(
@@ -394,6 +397,7 @@ def test_detects_rows_which_result_in_overly_long_messages():
     )
     assert recipients.rows_with_errors == {2, 3}
     assert recipients.rows_with_message_too_long == {2, 3}
+    assert recipients.has_errors
 
 
 @pytest.mark.parametrize(
@@ -438,9 +442,10 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     assert first_row['columns'][key]['data'] == expected
     assert list(recipients.personalisation)[0][key] == expected
     assert list(recipients.recipients) == ['07700900460']
-
     assert len(first_row['columns'].items()) == 3
+    assert not recipients.has_errors
 
     assert recipients.missing_column_headers == set()
     recipients.placeholders = {'one', 'TWO', 'Thirty_Three'}
     assert recipients.missing_column_headers == {'one', 'TWO', 'Thirty_Three'}
+    assert recipients.has_errors
