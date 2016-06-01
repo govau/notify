@@ -360,7 +360,7 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
         template_type=template_type,
         whitelist=whitelist
     )
-    assert len(recipients.rows_with_errors) == count_of_rows_with_errors
+
     if count_of_rows_with_errors:
         assert not recipients.allowed_to_send_to
     else:
@@ -370,13 +370,14 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
     # there’s a risk that it gets emptied after being read once
     recipients.whitelist = (str(fake_number) for fake_number in range(7700900888, 7700900898))
     list(recipients.whitelist)
-    assert len(recipients.rows_with_errors)
+    assert not recipients.allowed_to_send_to
+    assert recipients.has_errors
 
     # An empty whitelist is treated as no whitelist at all
     recipients.whitelist = []
-    assert len(recipients.rows_with_errors) == 0
+    assert recipients.allowed_to_send_to
     recipients.whitelist = itertools.chain()
-    assert len(recipients.rows_with_errors) == 0
+    assert recipients.allowed_to_send_to
 
 
 def test_detects_rows_which_result_in_overly_long_messages():

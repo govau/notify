@@ -74,7 +74,8 @@ class RecipientCSV():
     def has_errors(self):
         return any((
             self.missing_column_headers,
-            any(self.rows_with_errors)
+            self.rows_with_errors,
+            (not self.allowed_to_send_to)
         ))
 
     @property
@@ -221,8 +222,6 @@ class RecipientCSV():
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
                 return str(error)
-            if list(self.whitelist) and not allowed_to_send_to(value, self.whitelist):
-                return 'You can’t send to this {}'.format(self.recipient_column_header)
 
         if key not in self.placeholders_as_column_keys:
             return
