@@ -211,6 +211,12 @@ class RecipientCSV():
         )
 
     @property
+    def has_recipient_column(self):
+        return Columns.make_key(self.recipient_column_header) in set(
+            Columns.make_key(column_header) for column_header in self.column_headers
+        )
+
+    @property
     def column_headers_with_placeholders_highlighted(self):
         return [
             Markup(Template.placeholder_tag.format(header)) if header in self.placeholders else header

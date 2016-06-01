@@ -283,6 +283,31 @@ def test_column_headers(file_contents, template_type, expected, expected_highlig
 
 
 @pytest.mark.parametrize(
+    'placeholders',
+    [
+        None,
+        ['name']
+    ]
+)
+@pytest.mark.parametrize(
+    'file_contents,template_type',
+    [
+        pytest.mark.xfail(('', 'sms')),
+        pytest.mark.xfail(('name', 'sms')),
+        pytest.mark.xfail(('email address', 'sms')),
+        ('phone number', 'sms'),
+        ('phone number,name', 'sms'),
+        ('email address', 'email'),
+        ('email address,name', 'email'),
+        ('PHONENUMBER', 'sms'),
+        ('email_address', 'email')
+    ]
+)
+def test_recipient_column(placeholders, file_contents, template_type):
+    assert RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders).has_recipient_column
+
+
+@pytest.mark.parametrize(
     "file_contents,rows_with_bad_recipients,rows_with_missing_data",
     [
         (
