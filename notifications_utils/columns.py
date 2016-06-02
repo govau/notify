@@ -5,6 +5,10 @@ class Columns():
             Columns.make_key(key): value for key, value in row_dict.items()
         }
 
+    @classmethod
+    def from_keys(cls, keys):
+        return cls({key: key for key in keys})
+
     def __getitem__(self, key):
         return self.get(key)
 
@@ -19,6 +23,9 @@ class Columns():
 
     def copy(self):
         return Columns(self._dict.copy())
+
+    def keys(self):
+        return self._dict.keys()
 
     @staticmethod
     def make_key(original_key):

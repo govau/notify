@@ -29,6 +29,11 @@ from notifications_utils.template import Template, TemplateChange
             Template({'content': '((1))'}),
             True
         ),
+        (
+            Template({'content': '((a)) ((b))'}),
+            Template({'content': '((A)) (( B_ ))'}),
+            False
+        ),
     ]
 )
 def test_checking_for_difference_between_templates(old_template, new_template, should_differ):
@@ -57,6 +62,11 @@ def test_checking_for_difference_between_templates(old_template, new_template, s
             Template({'content': '((1)) ((2)) ((3))'}),
             set(['2', '3'])
         ),
+        (
+            Template({'content': '((a))'}),
+            Template({'content': '((A)) ((B)) ((C))'}),
+            set(['B', 'C'])
+        ),
     ]
 )
 def test_placeholders_added(old_template, new_template, placeholders_added):
@@ -84,6 +94,11 @@ def test_placeholders_added(old_template, new_template, placeholders_added):
             Template({'content': '((1)) ((2)) ((3))'}),
             Template({'content': '((1))'}),
             set(['2', '3'])
+        ),
+        (
+            Template({'content': '((a)) ((b)) ((c))'}),
+            Template({'content': '((A))'}),
+            set(['b', 'c'])
         ),
     ]
 )
