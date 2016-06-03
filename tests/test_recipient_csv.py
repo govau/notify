@@ -84,7 +84,7 @@ def test_get_rows(file_contents, template_type, expected):
             """
                 email address,name,colour
                 test@example.com,test1,blue
-                example.com, test2,red
+                test2@example.com, test2,red
             """,
             'email',
             [
@@ -112,6 +112,7 @@ def test_get_annotated_rows(file_contents, template_type, expected):
     assert list(recipients.annotated_rows) == expected
     assert len(list(recipients.annotated_rows)) == 2
     assert len(list(recipients.initial_annotated_rows)) == 1
+    assert not recipients.has_errors
 
 
 def test_get_annotated_rows_with_errors():
@@ -133,6 +134,7 @@ def test_get_annotated_rows_with_errors():
     )
     assert len(list(recipients.annotated_rows_with_errors)) == 6
     assert len(list(recipients.initial_annotated_rows_with_errors)) == 3
+    assert recipients.has_errors
 
 
 def test_big_list():
@@ -146,6 +148,7 @@ def test_big_list():
     assert len(list(big_csv.initial_annotated_rows)) == 3
     assert len(list(big_csv.initial_annotated_rows_with_errors)) == 100
     assert len(list(big_csv.rows)) == 100000
+    assert big_csv.has_errors
 
 
 @pytest.mark.parametrize(
@@ -280,6 +283,31 @@ def test_column_headers(file_contents, template_type, expected, expected_highlig
 
 
 @pytest.mark.parametrize(
+    'placeholders',
+    [
+        None,
+        ['name']
+    ]
+)
+@pytest.mark.parametrize(
+    'file_contents,template_type',
+    [
+        pytest.mark.xfail(('', 'sms')),
+        pytest.mark.xfail(('name', 'sms')),
+        pytest.mark.xfail(('email address', 'sms')),
+        ('phone number', 'sms'),
+        ('phone number,name', 'sms'),
+        ('email address', 'email'),
+        ('email address,name', 'email'),
+        ('PHONENUMBER', 'sms'),
+        ('email_address', 'email')
+    ]
+)
+def test_recipient_column(placeholders, file_contents, template_type):
+    assert RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders).has_recipient_column
+
+
+@pytest.mark.parametrize(
     "file_contents,rows_with_bad_recipients,rows_with_missing_data",
     [
         (
@@ -360,7 +388,7 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
         template_type=template_type,
         whitelist=whitelist
     )
-    assert len(recipients.rows_with_errors) == count_of_rows_with_errors
+
     if count_of_rows_with_errors:
         assert not recipients.allowed_to_send_to
     else:
@@ -370,13 +398,14 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
     # there’s a risk that it gets emptied after being read once
     recipients.whitelist = (str(fake_number) for fake_number in range(7700900888, 7700900898))
     list(recipients.whitelist)
-    assert len(recipients.rows_with_errors)
+    assert not recipients.allowed_to_send_to
+    assert recipients.has_errors
 
     # An empty whitelist is treated as no whitelist at all
     recipients.whitelist = []
-    assert len(recipients.rows_with_errors) == 0
+    assert recipients.allowed_to_send_to
     recipients.whitelist = itertools.chain()
-    assert len(recipients.rows_with_errors) == 0
+    assert recipients.allowed_to_send_to
 
 
 def test_detects_rows_which_result_in_overly_long_messages():
@@ -393,6 +422,7 @@ def test_detects_rows_which_result_in_overly_long_messages():
     )
     assert recipients.rows_with_errors == {2, 3}
     assert recipients.rows_with_message_too_long == {2, 3}
+    assert recipients.has_errors
 
 
 @pytest.mark.parametrize(
@@ -437,9 +467,10 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     assert first_row['columns'][key]['data'] == expected
     assert list(recipients.personalisation)[0][key] == expected
     assert list(recipients.recipients) == ['07700900460']
-
     assert len(first_row['columns'].items()) == 3
+    assert not recipients.has_errors
 
     assert recipients.missing_column_headers == set()
     recipients.placeholders = {'one', 'TWO', 'Thirty_Three'}
     assert recipients.missing_column_headers == {'one', 'TWO', 'Thirty_Three'}
+    assert recipients.has_errors

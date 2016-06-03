@@ -72,10 +72,13 @@ class RecipientCSV():
 
     @property
     def has_errors(self):
-        return any((
-            self.missing_column_headers,
-            any(self.rows_with_errors)
-        ))
+        return bool(
+            self.missing_column_headers or
+            (not self.allowed_to_send_to) or
+            self.rows_with_missing_data or
+            self.rows_with_bad_recipients or
+            self.rows_with_message_too_long
+        )  # This is 3x faster than using `any()`
 
     @property
     def allowed_to_send_to(self):
@@ -208,6 +211,12 @@ class RecipientCSV():
         )
 
     @property
+    def has_recipient_column(self):
+        return Columns.make_key(self.recipient_column_header) in set(
+            Columns.make_key(column_header) for column_header in self.column_headers
+        )
+
+    @property
     def column_headers_with_placeholders_highlighted(self):
         return [
             Markup(Template.placeholder_tag.format(header)) if header in self.placeholders else header
@@ -221,8 +230,6 @@ class RecipientCSV():
                 validate_recipient(value, self.template_type)
             except (InvalidEmailError, InvalidPhoneError) as error:
                 return str(error)
-            if list(self.whitelist) and not allowed_to_send_to(value, self.whitelist):
-                return 'You can’t send to this {}'.format(self.recipient_column_header)
 
         if key not in self.placeholders_as_column_keys:
             return
