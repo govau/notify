@@ -10,7 +10,7 @@ from notifications_utils.columns import Columns
 class Template():
 
     placeholder_pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
-    placeholder_tag = "<span class='placeholder'>{}</span>"
+    placeholder_tag = "<span class='placeholder'>(({}))</span>"
 
     def __init__(
         self,

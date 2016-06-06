@@ -251,7 +251,7 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'sms',
             ['phone number', 'name'],
-            ['phone number', Markup('<span class=\'placeholder\'>name</span>')],
+            ['phone number', Markup('<span class=\'placeholder\'>((name))</span>')],
             set()
         ),
         (
@@ -260,7 +260,7 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'email',
             ['email address', 'name', 'colour'],
-            ['email address', Markup('<span class=\'placeholder\'>name</span>'), 'colour'],
+            ['email address', Markup('<span class=\'placeholder\'>((name))</span>'), 'colour'],
             set()
         ),
         (

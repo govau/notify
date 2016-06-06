@@ -91,15 +91,15 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
     "template_content,expected", [
         (
             "((colour))",
-            "<span class='placeholder'>colour</span>"
+            "<span class='placeholder'>((colour))</span>"
         ),
         (
             "the quick ((colour)) fox",
-            "the quick <span class='placeholder'>colour</span> fox"
+            "the quick <span class='placeholder'>((colour))</span> fox"
         ),
         (
             "((article)) quick ((colour)) ((animal))",
-            "<span class='placeholder'>article</span> quick <span class='placeholder'>colour</span> <span class='placeholder'>animal</span>"  # noqa
+            "<span class='placeholder'>((article))</span> quick <span class='placeholder'>((colour))</span> <span class='placeholder'>((animal))</span>"  # noqa
         ),
         (
             """
@@ -107,11 +107,11 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
                 ((colour))
                 ((animal))
             """,
-            "<span class='placeholder'>article</span> quick<br>                <span class='placeholder'>colour</span><br>                <span class='placeholder'>animal</span>"  # noqa
+            "<span class='placeholder'>((article))</span> quick<br>                <span class='placeholder'>((colour))</span><br>                <span class='placeholder'>((animal))</span>"  # noqa
         ),
         (
             "the quick (((colour))) fox",
-            "the quick (<span class='placeholder'>colour</span>) fox"
+            "the quick (<span class='placeholder'>((colour))</span>) fox"
         ),
     ]
 )
@@ -123,16 +123,16 @@ def test_formatting_of_placeholders(template_content, expected):
     "template_subject, expected", [
         (
             "(( name ))",
-            "<span class='placeholder'> name </span>"
+            "<span class='placeholder'>(( name ))</span>"
         ), (
             "the quick (( animal ))",
-            "the quick <span class='placeholder'> animal </span>"
+            "the quick <span class='placeholder'>(( animal ))</span>"
         ), (
             "(( person )) eats (( food ))",
-            "<span class='placeholder'> person </span> eats <span class='placeholder'> food </span>"
+            "<span class='placeholder'>(( person ))</span> eats <span class='placeholder'>(( food ))</span>"
         ), (
             "the quick (((colour))) fox",
-            "the quick (<span class='placeholder'>colour</span>) fox"
+            "the quick (<span class='placeholder'>((colour))</span>) fox"
         )
     ]
 )
@@ -149,7 +149,7 @@ def test_formatting_of_template_contents_as_markup():
 def test_formatting_of_template_contents_as_markup():
     assert Template(
         {"content": "", "subject": "Hello ((name))"}
-    ).formatted_subject_as_markup == Markup("Hello <span class='placeholder'>name</span>")
+    ).formatted_subject_as_markup == Markup("Hello <span class='placeholder'>((name))</span>")
 
 
 @pytest.mark.parametrize(
@@ -297,8 +297,8 @@ def test_extracting_placeholders(template_content, template_subject, expected):
 
 def test_extracting_placeholders_marked_up():
     assert Template({"content": "the quick ((colour)) ((animal))"}).placeholders_as_markup == [
-        Markup(u"<span class='placeholder'>colour</span>"),
-        Markup(u"<span class='placeholder'>animal</span>")
+        Markup(u"<span class='placeholder'>((colour))</span>"),
+        Markup(u"<span class='placeholder'>((animal))</span>")
     ]
 
 
