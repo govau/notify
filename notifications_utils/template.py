@@ -132,7 +132,7 @@ class Template():
     def as_HTML_email(self):
         return re.sub(
             r'EMAIL_BODY',
-            nl2br(self.replaced_govuk_escaped),
+            nl2br(linkify(self.replaced_govuk_escaped)),
             govuk_email_wrapper
         )
 
@@ -161,6 +161,14 @@ class Template():
 
 def nl2br(value):
     return re.sub(r'\n|\r', '<br>', value.strip())
+
+
+def linkify(text):
+    return re.sub(
+        r'(https?://\S+)',
+        lambda match: '<a href="{}">{}</a>'.format(match.group(1), match.group(1)),
+        text
+    )
 
 
 class NeededByTemplateError(Exception):
