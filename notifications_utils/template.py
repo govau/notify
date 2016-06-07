@@ -1,6 +1,7 @@
 import re
 import math
 
+import urllib
 from orderedset import OrderedSet
 from flask import Markup
 
@@ -166,7 +167,13 @@ def nl2br(value):
 def linkify(text):
     return re.sub(
         r'(https?://\S+)',
-        lambda match: '<a href="{}">{}</a>'.format(match.group(1), match.group(1)),
+        lambda match: '<a href="{}">{}</a>'.format(
+            urllib.parse.quote(
+                urllib.parse.unquote(match.group(1)),
+                safe=':/?#=&'
+            ),
+            match.group(1)
+        ),
         text
     )
 

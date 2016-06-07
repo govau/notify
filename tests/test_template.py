@@ -258,7 +258,7 @@ def test_html_email_template():
         "http://www.gov.uk/",
         "https://www.gov.uk/",
         "http://service.gov.uk",
-        "http://service.gov.uk/blah.ext?q=a%20b%20c#fragment",
+        "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
         pytest.mark.xfail("example.com"),
         pytest.mark.xfail("www.example.com"),
         pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
@@ -270,6 +270,22 @@ def test_makes_links_out_of_URLs(url):
     assert (linkify(url) == '<a href="{}">{}</a>'.format(
         url, url
     ))
+
+
+@pytest.mark.parametrize(
+    "url, expected_html", [
+        (
+            """https://example.com"onclick="alert('hi')""",
+            """<a href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
+        ),
+        (
+            """https://example.com"style='text-decoration:blink'""",
+            """<a href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
+        ),
+    ]
+)
+def test_URLs_get_escaped(url, expected_html):
+    assert linkify(url) == expected_html
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
