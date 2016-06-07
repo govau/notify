@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
-from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
+from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError, linkify
 
 
 def test_class():
@@ -250,6 +250,43 @@ def test_html_email_template():
     )
     assert '<html>' in template.as_HTML_email
     assert "the quick brown fox<br><br>            jumped over the lazy dog" in template.as_HTML_email
+
+
+@pytest.mark.parametrize(
+    "url", [
+        "http://example.com",
+        "http://www.gov.uk/",
+        "https://www.gov.uk/",
+        "http://service.gov.uk",
+        "http://service.gov.uk/blah.ext?q=a%20b%20c#fragment",
+        pytest.mark.xfail("example.com"),
+        pytest.mark.xfail("www.example.com"),
+        pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
+        pytest.mark.xfail("ftp://example.com"),
+        pytest.mark.xfail("mailto:test@example.com")
+    ]
+)
+def test_makes_links_out_of_URLs(url):
+    assert (linkify(url) == '<a href="{}">{}</a>'.format(
+        url, url
+    ))
+
+
+def test_HTML_template_has_URLs_replaced_with_links():
+    template = Template(
+        {"content": '''
+            You’ve been invited to a service. Click this link:
+            https://service.example.com/accept_invite/((token))
+
+            Thanks
+        '''},
+        {'token': 'a1b2c3d4'}
+    )
+    assert (
+        '<a href="https://service.example.com/accept_invite/a1b2c3d4">'
+        'https://service.example.com/accept_invite/a1b2c3d4'
+        '</a>'
+    ) in template.as_HTML_email
 
 
 @pytest.mark.parametrize(
