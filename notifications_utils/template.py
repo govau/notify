@@ -248,7 +248,7 @@ govuk_email_wrapper = '''
                   <td width="70" bgcolor="#0b0c0c" valign="middle">
                     <a href="https://www.gov.uk" style="text-decoration: none;"><img
                             src="https://www.notifications.service.gov.uk/static/images/gov.uk_logotype_crown.png"
-                            alt="" height="32" border="0" style="margin-top: 4px;></a>
+                            alt="" height="32" border="0" style="margin-top: 4px; margin-left: 10px;"></a>
                   </td>
                   <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
 <span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
@@ -286,9 +286,10 @@ govuk_email_wrapper = '''
             <td height="30">&nbsp;</td>
           </tr>
           <tr>
+            <td width="10" valign="middle">&nbsp;</td>
             <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
               <!--[if (gte mso 9)|(IE)]>
-                <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
+                <table width="560" align="center" cellpadding="0" cellspacing="0" border="0">
                   <tr>
                     <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
               <![endif]-->
@@ -299,6 +300,7 @@ govuk_email_wrapper = '''
                 </table>
               <![endif]-->
             </td>
+            <td width="10" valign="middle">&nbsp;</td>
           </tr>
           <tr>
             <td height="30">&nbsp;</td>
