@@ -19,6 +19,7 @@
 </head>
 
 <body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;">
+{% if govuk_banner %}
   <table width="100%" style="min-width: 100%;width: 100% !important;" cellpadding="0" cellspacing="0" border="0">
     <tr>
       <td width="100%" height="53" bgcolor="#0b0c0c">
@@ -55,7 +56,7 @@
       </td>
     </tr>
   </table>
-
+{% endif %}
   <table
       class="content"
       align="center"
