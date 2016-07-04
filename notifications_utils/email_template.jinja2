@@ -1,3 +1,4 @@
+{% if complete_html %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
@@ -19,6 +20,7 @@
 </head>
 
 <body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;">
+{% endif %}
 {% if govuk_banner %}
   <table width="100%" style="min-width: 100%;width: 100% !important;" cellpadding="0" cellspacing="0" border="0">
     <tr>
@@ -90,6 +92,7 @@
       <td height="30">&nbsp;</td>
     </tr>
   </table>
-
+{% if complete_html %}
 </body>
 </html>
+{% endif %}
