@@ -6,6 +6,7 @@ from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
+from notifications_utils.html_email import HTMLEmail
 
 
 class Template():
@@ -20,7 +21,8 @@ class Template():
         drop_values=(),
         prefix=None,
         encoding="utf-8",
-        content_character_limit=None
+        content_character_limit=None,
+        email_template=HTMLEmail()
     ):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
@@ -39,6 +41,7 @@ class Template():
         self.prefix = prefix if self.template_type == 'sms' else None
         self.encoding = encoding
         self.content_character_limit = content_character_limit
+        self.email_template = email_template
         self._template = template
 
     def __str__(self):
@@ -131,10 +134,8 @@ class Template():
 
     @property
     def as_HTML_email(self):
-        return re.sub(
-            r'EMAIL_BODY',
-            nl2br(linkify(self.replaced_govuk_escaped)),
-            govuk_email_wrapper
+        return self.email_template(
+            nl2br(linkify(self.replaced_govuk_escaped))
         )
 
     @property
@@ -211,106 +212,6 @@ class TemplateChange():
             self.old_placeholders.get(key)
             for key in self.old_placeholders.keys() - self.new_placeholders.keys()
         )
-
-
-govuk_email_wrapper = '''
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta content="telephone=no" name="format-detection"> <!-- need to add formatting for real phone numbers -->
-  <meta name="viewport" content="width=device-width" />
-  <title>Page title</title>
-
-  <style>
-    @media only screen and (min-device-width: 581px) {
-      .content {
-        width: 580px !important;
-      }
-    }
-    body { margin:0 !important; }
-    div[style*="margin: 16px 0"] { margin:0 !important; }
-  </style>
-</head>
-
-<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;">
-        <table width="100%" style="min-width: 100%;width: 100% !important;" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td width="100%" height="53" bgcolor="#0b0c0c">
-              <!--[if (gte mso 9)|(IE)]>
-                <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td>
-              <![endif]-->
-              <table width="100%" style="max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
-                <tr>
-                  <td width="70" bgcolor="#0b0c0c" valign="middle">
-                    <a href="https://www.gov.uk" style="text-decoration: none;"><img
-                            src="https://www.notifications.service.gov.uk/static/images/gov.uk_logotype_crown.png"
-                            alt="" height="32" border="0" style="margin-top: 4px; margin-left: 10px;"></a>
-                  </td>
-                  <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
-<span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 28px;
-    line-height: 1.315789474;
-    font-weight: 700;
-    color: #ffffff;
-    text-decoration: none;
-"
->GOV.UK</a></span>
-                  </td>
-                </tr>
-              </table>
-              <!--[if (gte mso 9)|(IE)]>
-                    </td>
-                  </tr>
-                </table>
-              <![endif]-->
-            </td>
-          </tr>
-        </table>
-
-
-        <table
-            class="content"
-            align="center"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            style="max-width: 580px; width: 100% !important;"
-            width="100%"
-        >
-          <tr>
-            <td height="30">&nbsp;</td>
-          </tr>
-          <tr>
-            <td width="10" valign="middle">&nbsp;</td>
-            <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
-              <!--[if (gte mso 9)|(IE)]>
-                <table width="560" align="center" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
-              <![endif]-->
-                  EMAIL_BODY
-              <!--[if (gte mso 9)|(IE)]>
-                    </td>
-                  </tr>
-                </table>
-              <![endif]-->
-            </td>
-            <td width="10" valign="middle">&nbsp;</td>
-          </tr>
-          <tr>
-            <td height="30">&nbsp;</td>
-          </tr>
-        </table>
-
-</body>
-</html>
-
-'''
 
 
 govuk_not_a_link = re.compile(
