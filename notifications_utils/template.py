@@ -1,7 +1,6 @@
 import re
 import math
 
-import urllib
 from orderedset import OrderedSet
 from flask import Markup
 
@@ -120,10 +119,6 @@ class Template():
         )
 
     @property
-    def replaced_govuk_escaped(self):
-        return unlink_govuk_escaped(self.replaced)
-
-    @property
     def replaced_subject(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
@@ -135,7 +130,7 @@ class Template():
     @property
     def as_HTML_email(self):
         return self.email_template(
-            nl2br(linkify(self.replaced_govuk_escaped))
+            nl2br(self.replaced)
         )
 
     @property
@@ -163,20 +158,6 @@ class Template():
 
 def nl2br(value):
     return re.sub(r'\n|\r', '<br>', value.strip())
-
-
-def linkify(text):
-    return re.sub(
-        r'(https?://\S+)',
-        lambda match: '<a href="{}">{}</a>'.format(
-            urllib.parse.quote(
-                urllib.parse.unquote(match.group(1)),
-                safe=':/?#=&'
-            ),
-            match.group(1)
-        ),
-        text
-    )
 
 
 class NeededByTemplateError(Exception):
@@ -212,20 +193,6 @@ class TemplateChange():
             self.old_placeholders.get(key)
             for key in self.old_placeholders.keys() - self.new_placeholders.keys()
         )
-
-
-govuk_not_a_link = re.compile(
-    r'(?<!\.|\/)(GOV)\.(UK)(?!\/|\?)',
-    re.IGNORECASE
-)
-
-
-def unlink_govuk_escaped(message):
-    return re.sub(
-        govuk_not_a_link,
-        r'\1' + '.\u200B' + r'\2',  # Unicode zero-width space
-        message
-    )
 
 
 def get_sms_fragment_count(character_count):
