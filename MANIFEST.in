@@ -1,0 +1,1 @@
+include notifications_utils/email_template.jinja2
