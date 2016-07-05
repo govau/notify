@@ -1,0 +1,129 @@
+{% if complete_html %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta content="telephone=no" name="format-detection"> <!-- need to add formatting for real phone numbers -->
+  <meta name="viewport" content="width=device-width" />
+  <title>Page title</title>
+
+  <style>
+    @media only screen and (min-device-width: 581px) {
+      .content {
+        width: 580px !important;
+      }
+    }
+    body { margin:0 !important; }
+    div[style*="margin: 16px 0"] { margin:0 !important; }
+  </style>
+</head>
+
+<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#0b0c0c;">
+{% endif %}
+{% if govuk_banner %}
+  <table width="100%" style="min-width: 100%;width: 100% !important;" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td width="100%" height="53" bgcolor="#0b0c0c">
+        <!--[if (gte mso 9)|(IE)]>
+          <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+        <![endif]-->
+        <table width="100%" style="max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
+          <tr>
+            <td width="70" bgcolor="#0b0c0c" valign="middle">
+              <a href="https://www.gov.uk" style="text-decoration: none;"><img
+                      src="https://www.notifications.service.gov.uk/static/images/gov.uk_logotype_crown.png"
+                      alt="" height="32" border="0" style="margin-top: 4px; margin-left: 10px;"></a>
+            </td>
+            <td width="100%" bgcolor="#0b0c0c" valign="middle" align="left">
+              <span style="padding-left: 5px;"><a href="https://www.gov.uk" style="
+                  font-family: Helvetica, Arial, sans-serif;
+                  font-size: 28px;
+                  line-height: 1.315789474;
+                  font-weight: 700;
+                  color: #ffffff;
+                  text-decoration: none;
+              "
+              >GOV.UK</a></span>
+            </td>
+          </tr>
+        </table>
+        <!--[if (gte mso 9)|(IE)]>
+              </td>
+            </tr>
+          </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+  <table
+      class="content"
+      align="center"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="max-width: 580px; width: 100% !important;"
+      width="100%"
+  >
+    <tr>
+      <td width="10" height="10" valign="middle"></td>
+      <td>
+        <!--[if (gte mso 9)|(IE)]>
+          <table width="580" align="center" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td height="10">
+        <![endif]-->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td bgcolor="#005EA5" width="100%" height="10"></td>
+                  </tr>
+                </table>
+        <!--[if (gte mso 9)|(IE)]>
+              </td>
+            </tr>
+          </table>
+        <![endif]-->
+      </td>
+      <td width="10" valign="middle" height="10"></td>
+    </tr>
+  </table>
+{% endif %}
+  <table
+      class="content"
+      align="center"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="max-width: 580px; width: 100% !important;"
+      width="100%"
+  >
+    <tr>
+      <td height="30">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="10" valign="middle">&nbsp;</td>
+      <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
+        <!--[if (gte mso 9)|(IE)]>
+          <table width="560" align="center" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="font-family: Helvetica, Arial, sans-serif; font-size: 19px; line-height: 1.315789474;">
+        <![endif]-->
+            {{ body|safe }}
+        <!--[if (gte mso 9)|(IE)]>
+              </td>
+            </tr>
+          </table>
+        <![endif]-->
+      </td>
+      <td width="10" valign="middle">&nbsp;</td>
+    </tr>
+    <tr>
+      <td height="30">&nbsp;</td>
+    </tr>
+  </table>
+{% if complete_html %}
+</body>
+</html>
+{% endif %}

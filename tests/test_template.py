@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
-from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError, linkify
+from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
 
 
 def test_class():
@@ -253,59 +253,6 @@ def test_html_email_template():
 
 
 @pytest.mark.parametrize(
-    "url", [
-        "http://example.com",
-        "http://www.gov.uk/",
-        "https://www.gov.uk/",
-        "http://service.gov.uk",
-        "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-        pytest.mark.xfail("example.com"),
-        pytest.mark.xfail("www.example.com"),
-        pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
-        pytest.mark.xfail("ftp://example.com"),
-        pytest.mark.xfail("mailto:test@example.com")
-    ]
-)
-def test_makes_links_out_of_URLs(url):
-    assert (linkify(url) == '<a href="{}">{}</a>'.format(
-        url, url
-    ))
-
-
-@pytest.mark.parametrize(
-    "url, expected_html", [
-        (
-            """https://example.com"onclick="alert('hi')""",
-            """<a href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
-        ),
-        (
-            """https://example.com"style='text-decoration:blink'""",
-            """<a href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
-        ),
-    ]
-)
-def test_URLs_get_escaped(url, expected_html):
-    assert linkify(url) == expected_html
-
-
-def test_HTML_template_has_URLs_replaced_with_links():
-    template = Template(
-        {"content": '''
-            You’ve been invited to a service. Click this link:
-            https://service.example.com/accept_invite/((token))
-
-            Thanks
-        '''},
-        {'token': 'a1b2c3d4'}
-    )
-    assert (
-        '<a href="https://service.example.com/accept_invite/a1b2c3d4">'
-        'https://service.example.com/accept_invite/a1b2c3d4'
-        '</a>'
-    ) in template.as_HTML_email
-
-
-@pytest.mark.parametrize(
     "template_content, template_subject, expected", [
         (
             "the quick brown fox",
@@ -353,24 +300,6 @@ def test_extracting_placeholders_marked_up():
         Markup(u"<span class='placeholder'>((colour))</span>"),
         Markup(u"<span class='placeholder'>((animal))</span>")
     ]
-
-
-@pytest.mark.parametrize(
-    "template_content,expected", [
-        ("gov.uk", u"gov.\u200Buk"),
-        ("GOV.UK", u"GOV.\u200BUK"),
-        ("Gov.uk", u"Gov.\u200Buk"),
-        ("https://gov.uk", "https://gov.uk"),
-        ("https://www.gov.uk", "https://www.gov.uk"),
-        ("www.gov.uk", "www.gov.uk"),
-        ("gov.uk/register-to-vote", "gov.uk/register-to-vote"),
-        ("gov.uk?q=", "gov.uk?q=")
-    ]
-)
-def test_escaping_govuk_in_email_templates(template_content, expected):
-    template = Template({"content": template_content, 'template_type': 'email'})
-    assert template.replaced_govuk_escaped == expected
-    assert expected in template.as_HTML_email
 
 
 @pytest.mark.parametrize(
