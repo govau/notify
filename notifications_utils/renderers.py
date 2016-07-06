@@ -2,6 +2,7 @@ import re
 import urllib
 from os import path
 from jinja2 import Environment, FileSystemLoader
+from notifications_utils.take import Take
 
 
 email_template = Environment(loader=FileSystemLoader(
@@ -21,7 +22,11 @@ class SMSMessage():
         self.prefix = prefix
 
     def __call__(self, body):
-        return add_prefix(body, self.prefix)
+        return Take(
+            body
+        ).then(
+            add_prefix, self.prefix
+        ).as_string
 
 
 class SMSPreview():
@@ -30,7 +35,13 @@ class SMSPreview():
         self.prefix = prefix
 
     def __call__(self, body):
-        return nl2br(add_prefix(body, self.prefix))
+        return Take(
+            body
+        ).then(
+            add_prefix, self.prefix
+        ).then(
+            nl2br
+        ).as_string
 
 
 class EmailPreview():
@@ -39,7 +50,15 @@ class EmailPreview():
         pass
 
     def __call__(self, body):
-        return nl2br(linkify(unlink_govuk_escaped(body)))
+        return Take(
+            body
+        ).then(
+            unlink_govuk_escaped
+        ).then(
+            linkify
+        ).then(
+            nl2br
+        ).as_string
 
 
 class PlainTextEmail():
@@ -59,7 +78,15 @@ class HTMLEmail():
 
     def __call__(self, body):
         return email_template.render({
-            'body': nl2br(linkify(unlink_govuk_escaped(body))),
+            'body': Take(
+                body
+            ).then(
+                unlink_govuk_escaped
+            ).then(
+                linkify
+            ).then(
+                nl2br
+            ).as_string,
             'govuk_banner': self.govuk_banner,
             'complete_html': self.complete_html
         })
