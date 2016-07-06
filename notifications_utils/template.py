@@ -5,7 +5,7 @@ from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.html_email import HTMLEmail
+from notifications_utils.renderers import HTMLEmail
 
 
 class Template():

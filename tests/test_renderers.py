@@ -1,5 +1,5 @@
 import pytest
-from notifications_utils.html_email import HTMLEmail
+from notifications_utils.renderers import HTMLEmail
 
 
 def test_html_email_inserts_body():
