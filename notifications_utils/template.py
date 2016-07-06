@@ -135,12 +135,6 @@ class Template():
             self.subject if self.subject else "")
 
     @property
-    def as_HTML_email(self):
-        return self.renderer(
-            nl2br(self.replaced)
-        )
-
-    @property
     def missing_data(self):
         return list(
             placeholder for placeholder in self.placeholders
@@ -161,10 +155,6 @@ class Template():
 
     def compare_to(self, new):
         return TemplateChange(self, new)
-
-
-def nl2br(value):
-    return re.sub(r'\n|\r', '<br>', value.strip())
 
 
 class NeededByTemplateError(Exception):
