@@ -38,10 +38,7 @@ class SMSMessage():
         ).as_string
 
 
-class SMSPreview():
-
-    def __init__(self, prefix=None):
-        self.prefix = prefix
+class SMSPreview(SMSMessage):
 
     def __call__(self, body):
         return Take(
@@ -53,10 +50,7 @@ class SMSPreview():
         ).as_string
 
 
-class EmailPreview():
-
-    def __init__(self):
-        pass
+class EmailPreview(PassThrough):
 
     def __call__(self, body):
         return Take(
@@ -70,10 +64,7 @@ class EmailPreview():
         ).as_string
 
 
-class PlainTextEmail():
-
-    def __init__(self):
-        pass
+class PlainTextEmail(PassThrough):
 
     def __call__(self, body):
         return unlink_govuk_escaped(body)
