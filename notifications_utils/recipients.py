@@ -39,6 +39,7 @@ class RecipientCSV():
         self.max_initial_rows_shown = max_initial_rows_shown
         self.whitelist = whitelist
         self.template = template if isinstance(template, Template) else None
+        self.annotated_rows = list(self.get_annotated_rows())
 
     @property
     def whitelist(self):
@@ -124,8 +125,7 @@ class RecipientCSV():
             row['index'] for row in self.annotated_rows if row['message_too_long']
         )
 
-    @property
-    def annotated_rows(self):
+    def get_annotated_rows(self):
         for row_index, row in enumerate(self.rows):
             if self.template:
                 self.template.values = dict(row.items())
