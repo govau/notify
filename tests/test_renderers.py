@@ -1,7 +1,16 @@
 import pytest
 from notifications_utils.renderers import (
-    HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, unlink_govuk_escaped, linkify
+    PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, unlink_govuk_escaped, linkify
 )
+
+
+def test_pass_through_renderer():
+    message = '''
+        the
+        quick brown
+        fox
+    '''
+    assert PassThrough()(message) == message
 
 
 def test_html_email_inserts_body():
