@@ -3,6 +3,7 @@ from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
 from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
+from notifications_utils.renderers import HTMLEmail
 
 
 def test_class():
@@ -56,12 +57,7 @@ def test_errors_for_invalid_values(values):
                 fox
             """,
             "the<br>                quick brown<br><br>                fox",
-            """
-                the
-                quick brown
-
-                fox
-            """
+            "the<br>                quick brown<br><br>                fox",
         ),
         ("the ((quick brown fox", "the ((quick brown fox", "the ((quick brown fox"),
         ("the (()) brown fox", "the (()) brown fox", "the (()) brown fox")
@@ -246,10 +242,11 @@ def test_html_email_template():
 
             jumped over the lazy dog
         '''},
-        {'animal': 'fox', 'colour': 'brown'}
+        {'animal': 'fox', 'colour': 'brown'},
+        renderer=HTMLEmail()
     )
-    assert '<html>' in template.as_HTML_email
-    assert "the quick brown fox<br><br>            jumped over the lazy dog" in template.as_HTML_email
+    assert '<html>' in template.replaced
+    assert "the quick brown fox<br><br>            jumped over the lazy dog" in template.replaced
 
 
 @pytest.mark.parametrize(
@@ -307,8 +304,8 @@ def test_extracting_placeholders_marked_up():
     [
         ("The quick brown fox jumped over the lazy dog", None, "utf-8", 44),
         ("深", None, "utf-8", 3),
-        ("'First line.\n", None, 'utf-8', 13),
-        ("\t\n\r", None, 'utf-8', 3),
+        ("'First line.\n", None, 'utf-8', 12),
+        ("\t\n\r", None, 'utf-8', 0),
         ("((placeholder))", 'Service name', "utf-8", 17),
     ])
 def test_get_character_count_of_content(content, prefix, encoding, expected_length):

@@ -5,7 +5,7 @@ from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.html_email import HTMLEmail
+from notifications_utils.renderers import HTMLEmail, SMSPreview, EmailPreview
 
 
 class Template():
@@ -21,7 +21,7 @@ class Template():
         prefix=None,
         encoding="utf-8",
         content_character_limit=None,
-        email_template=HTMLEmail()
+        renderer=None
     ):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
@@ -40,8 +40,13 @@ class Template():
         self.prefix = prefix if self.template_type == 'sms' else None
         self.encoding = encoding
         self.content_character_limit = content_character_limit
-        self.email_template = email_template
         self._template = template
+        if not renderer:
+            self.renderer = (
+                SMSPreview(prefix=self.prefix) if self.template_type == 'sms' else EmailPreview()
+            )
+        else:
+            self.renderer = renderer
 
     def __str__(self):
         if self.values:
@@ -53,18 +58,19 @@ class Template():
 
     @property
     def formatted(self):
-        return self.__add_prefix(nl2br(re.sub(
+        return self.renderer(re.sub(
             Template.placeholder_pattern,
             lambda match: Template.placeholder_tag.format(match.group(1)),
             self.content
-        )))
+        ))
 
     @property
     def formatted_subject(self):
-        return self.__add_prefix(nl2br(re.sub(
+        return re.sub(
             Template.placeholder_pattern,
             lambda match: Template.placeholder_tag.format(match.group(1)),
-            self.subject)))
+            self.subject
+        )
 
     @property
     def formatted_subject_as_markup(self):
@@ -78,7 +84,8 @@ class Template():
     def placeholders(self):
         return OrderedSet(re.findall(
             Template.placeholder_pattern,
-            (self.subject or '') + self.content))
+            (self.subject or '') + self.content)
+        )
 
     @property
     def placeholders_as_markup(self):
@@ -91,7 +98,7 @@ class Template():
     def replaced(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
-        return self.__add_prefix(re.sub(
+        return self.renderer(re.sub(
             Template.placeholder_pattern,
             lambda match: self.values.get(match.group(1)),
             self.content
@@ -128,12 +135,6 @@ class Template():
             self.subject if self.subject else "")
 
     @property
-    def as_HTML_email(self):
-        return self.email_template(
-            nl2br(self.replaced)
-        )
-
-    @property
     def missing_data(self):
         return list(
             placeholder for placeholder in self.placeholders
@@ -154,10 +155,6 @@ class Template():
 
     def compare_to(self, new):
         return TemplateChange(self, new)
-
-
-def nl2br(value):
-    return re.sub(r'\n|\r', '<br>', value.strip())
 
 
 class NeededByTemplateError(Exception):

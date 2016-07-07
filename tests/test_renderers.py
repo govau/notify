@@ -1,5 +1,7 @@
 import pytest
-from notifications_utils.html_email import HTMLEmail
+from notifications_utils.renderers import (
+    HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, unlink_govuk_escaped, linkify
+)
 
 
 def test_html_email_inserts_body():
@@ -53,9 +55,9 @@ def test_complete_html(complete_html, content):
     ]
 )
 def test_makes_links_out_of_URLs(url):
-    assert (HTMLEmail.linkify(url) == '<a href="{}">{}</a>'.format(
-        url, url
-    ))
+    link = '<a href="{}">{}</a>'.format(url, url)
+    assert (linkify(url) == link)
+    assert link in HTMLEmail()(url)
 
 
 @pytest.mark.parametrize(
@@ -71,7 +73,8 @@ def test_makes_links_out_of_URLs(url):
     ]
 )
 def test_URLs_get_escaped(url, expected_html):
-    assert HTMLEmail.linkify(url) == expected_html
+    assert linkify(url) == expected_html
+    assert expected_html in HTMLEmail()(url)
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -100,5 +103,26 @@ def test_HTML_template_has_URLs_replaced_with_links():
     ]
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
-    assert HTMLEmail.unlink_govuk_escaped(template_content) == expected
+    assert unlink_govuk_escaped(template_content) == expected
+    assert PlainTextEmail()(template_content) == expected
     assert expected in HTMLEmail()(template_content)
+
+
+@pytest.mark.parametrize(
+    "prefix, body, expected", [
+        ("a", "b", "a: b"),
+        (None, "b", "b"),
+    ]
+)
+def test_sms_message_adds_prefix(prefix, body, expected):
+    assert SMSMessage(prefix=prefix)(body) == expected
+    assert SMSPreview(prefix=prefix)(body) == expected
+
+
+def test_sms_preview_adds_newlines():
+    assert SMSPreview()("""
+        the
+        quick
+
+        brown fox
+    """) == "the<br>        quick<br><br>        brown fox"
