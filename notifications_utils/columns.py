@@ -1,3 +1,6 @@
+from functools import lru_cache
+
+
 class Columns():
 
     def __init__(self, row_dict):
@@ -28,6 +31,7 @@ class Columns():
         return self._dict.keys()
 
     @staticmethod
+    @lru_cache(maxsize=32, typed=False)
     def make_key(original_key):
         if original_key is None:
             return None
