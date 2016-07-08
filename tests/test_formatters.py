@@ -3,7 +3,7 @@ from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
 )
 from notifications_utils.formatters import (
-    unlink_govuk_escaped, linkify
+    unlink_govuk_escaped, linkify, markup_headings, markup_lists, markup_blockquotes
 )
 
 
@@ -93,3 +93,62 @@ def test_sms_preview_adds_newlines():
 
         brown fox
     """) == "the<br>        quick<br><br>        brown fox"
+
+
+@pytest.mark.parametrize(
+    "message, expected_html", [
+        (
+            '''
+# This is a heading
+
+And this is some text
+            ''',
+            '''
+<h2 style="margin: 10px 0 0 0; padding: 0; font-size: 27px; font-weight: bold">This is a heading</h2>
+And this is some text
+            '''
+        ),
+    ]
+)
+def test_markup_headings(message, expected_html):
+    assert expected_html == markup_headings(message)
+
+
+@pytest.mark.parametrize(
+    "message, expected_html", [
+        (
+            '''
+* item 1
+* item 2
+* item 3
+            ''',
+            (
+                '\n<li style="margin: 5px 0; display: list-item; list-style-type: disc; font-size: 19px;">item 1</li>'
+                '<li style="margin: 5px 0; display: list-item; list-style-type: disc; font-size: 19px;">item 2</li>'
+                '<li style="margin: 5px 0; display: list-item; list-style-type: disc; font-size: 19px;">item 3</li>'
+                '            '
+            )
+        ),
+    ]
+)
+def test_markup_lists(message, expected_html):
+    assert expected_html == markup_lists(message)
+
+
+@pytest.mark.parametrize(
+    "message, expected_html", [
+        (
+            '''
+^ some text
+            ''',
+            (
+                '\n'
+                '<blockquote style="margin: 0; border-left: 10px solid #BFC1C3; padding: 0 0 0 15px; font-size: 19px;">'
+                'some text'
+                '</blockquote>            '
+            )
+        ),
+    ]
+)
+def test_markup_blockquotes(message, expected_html):
+    assert expected_html == markup_blockquotes(message)
