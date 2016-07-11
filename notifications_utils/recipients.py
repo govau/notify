@@ -219,7 +219,7 @@ class RecipientCSV():
     @property
     def column_headers_with_placeholders_highlighted(self):
         return [
-            Markup(Template.placeholder_tag.format(header)) if header in self.placeholders else header
+            Markup(Template.placeholder_tag.format(header, '')) if header in self.placeholders else header
             for header in self.column_headers
         ]
 
