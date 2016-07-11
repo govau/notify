@@ -18,7 +18,8 @@ def unlink_govuk_escaped(message):
 
 def linkify(text):
     return re.sub(
-        r'(https?://\S+)',
+        #             url is anything without whitespace, >, or <
+        r'(https?:\/\/[^\s\<\>]+)($|\s)',
         lambda match: '<a href="{}">{}</a>'.format(
             urllib.parse.quote(
                 urllib.parse.unquote(match.group(1)),

@@ -14,17 +14,26 @@ from notifications_utils.formatters import (
         "https://www.gov.uk/",
         "http://service.gov.uk",
         "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-        pytest.mark.xfail("example.com"),
-        pytest.mark.xfail("www.example.com"),
         pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
-        pytest.mark.xfail("ftp://example.com"),
-        pytest.mark.xfail("mailto:test@example.com")
     ]
 )
 def test_makes_links_out_of_URLs(url):
     link = '<a href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
     assert link in HTMLEmail()(url)
+
+
+@pytest.mark.parametrize(
+    "url", [
+        "example.com",
+        "www.example.com",
+        "ftp://example.com",
+        "mailto:test@example.com",
+        "http://service.gov.uk/register/<span class='placeholder'>((token))</span>"
+    ]
+)
+def test_doesnt_make_links_out_of_invalid_urls(url):
+    assert url == linkify(url)
 
 
 @pytest.mark.parametrize(
