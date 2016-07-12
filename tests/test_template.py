@@ -183,6 +183,11 @@ def test_formatting_of_template_contents_as_markup():
             "the quick (brown) fox"
         ),
         (
+            "the quick ((colour)) fox",
+            {"colour": "<script>alert('foo')</script>"},
+            "the quick alert('foo') fox"
+        ),
+        (
             "((warning?))",
             {"warning?": "This is not a conditional"},
             "This is not a conditional"
