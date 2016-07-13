@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
-from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
+from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError, str2bool
 from notifications_utils.renderers import HTMLEmail
 
 
@@ -109,6 +109,18 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
             "the quick (((colour))) fox",
             "the quick (<span class='placeholder'>((colour))</span>) fox"
         ),
+        (
+            "((warning?))",
+            "<span class='placeholder'>((warning?))</span>"
+        ),
+        (
+            "((warning? This is not a conditional))",
+            "<span class='placeholder'>((warning? This is not a conditional))</span>"
+        ),
+        (
+            "((warning?? This is a warning))",
+            "<span class='placeholder-conditional'>((warning??</span> This is a warning))"
+        ),
     ]
 )
 def test_formatting_of_placeholders(template_content, expected):
@@ -169,6 +181,26 @@ def test_formatting_of_template_contents_as_markup():
             "the quick (((colour))) fox",
             {"colour": "brown"},
             "the quick (brown) fox"
+        ),
+        (
+            "((warning?))",
+            {"warning?": "This is not a conditional"},
+            "This is not a conditional"
+        ),
+        (
+            "((warning?warning))",
+            {"warning?warning": "This is not a conditional"},
+            "This is not a conditional"
+        ),
+        (
+            "((warning??This is a conditional warning))",
+            {"warning": True},
+            "This is a conditional warning"
+        ),
+        (
+            "((warning??This is a conditional warning))",
+            {"warning": False},
+            ""
         ),
     ]
 )
@@ -285,6 +317,16 @@ def test_html_email_template():
             "((colour)) ((animal)) ",
             "((colour)) ((animal))",
             ["colour", "animal"]
+        ),
+        (
+            "Dear ((name)), ((warning?? This is a warning))",
+            "",
+            ["name", "warning"]
+        ),
+        (
+            "((warning? one question mark))",
+            "",
+            ["warning? one question mark"]
         )
     ]
 )
@@ -292,11 +334,23 @@ def test_extracting_placeholders(template_content, template_subject, expected):
     assert Template({"content": template_content, 'subject': template_subject}).placeholders == expected
 
 
-def test_extracting_placeholders_marked_up():
-    assert Template({"content": "the quick ((colour)) ((animal))"}).placeholders_as_markup == [
-        Markup(u"<span class='placeholder'>((colour))</span>"),
-        Markup(u"<span class='placeholder'>((animal))</span>")
+@pytest.mark.parametrize(
+    "template_content, expected_placeholders", [
+        (
+            "the quick ((colour)) ((animal))", [
+                Markup(u"<span class='placeholder'>((colour))</span>"),
+                Markup(u"<span class='placeholder'>((animal))</span>")
+            ]
+        ),
+        (
+            "((warning?? This is a warning))", [
+                Markup(u"<span class='placeholder'>((warning))</span>"),
+            ]
+        )
     ]
+)
+def test_extracting_placeholders_marked_up(template_content, expected_placeholders):
+    assert Template({"content": template_content}).placeholders_as_markup == expected_placeholders
 
 
 @pytest.mark.parametrize(
@@ -376,3 +430,38 @@ def test_compare_template():
         new_template = Template({'content': 'faked', 'template_type': 'sms'})
         template_changes = old_template.compare_to(new_template)
         mocked.assert_called_once_with(old_template, new_template)
+
+
+@pytest.mark.parametrize(
+    "value", [
+        '0',
+        0, 2, 99.99999,
+        'off',
+        'exclude',
+        'no'
+        'any random string',
+        'false',
+        False,
+        [], {}, (),
+        ['true'], {'True': True}, (True, 'true', 1)
+    ]
+)
+def test_what_will_not_trigger_optional_placeholder(value):
+    assert str2bool(value) is False
+
+
+@pytest.mark.parametrize(
+    "value", [
+        1,
+        '1',
+        'yes',
+        'y',
+        'true',
+        'True',
+        True,
+        'include',
+        'show'
+    ]
+)
+def test_what_will_trigger_optional_placeholder(value):
+    assert str2bool(value) is True

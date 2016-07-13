@@ -10,8 +10,15 @@ from notifications_utils.renderers import HTMLEmail, SMSPreview, EmailPreview
 
 class Template():
 
-    placeholder_pattern = r"\(\(([^\)\(]+)\)\)"  # anything that looks like ((registration number))
-    placeholder_tag = "<span class='placeholder'>(({}))</span>"
+    placeholder_pattern = re.compile(
+        '\(\('            # opening ((
+        '([^\(\)\?]+)'    # 1. name of placeholder, eg ‘registration number’
+        '(\?\?)?'         # 2. optional ??
+        '([^\)\(]*)'      # 3. optional text to display if the placeholder’s value is True
+        '\)\)'            # closing ))
+    )
+    placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
+    optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
 
     def __init__(
         self,
@@ -56,20 +63,31 @@ class Template():
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
 
+    def get_match(self, match):
+        if match[1] and match[2]:
+            return match[0]
+        return match[0] + match[2]
+
+    def format_match(self, match):
+        if match.group(2) and match.group(3):
+            return self.optional_placeholder_tag.format(match.group(1), match.group(3))
+        return self.placeholder_tag.format(match.group(1), match.group(3))
+
+    def replace_match(self, match):
+        if match.group(2) and match.group(3):
+            return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
+        return self.values.get(match.group(1) + match.group(3))
+
     @property
     def formatted(self):
         return self.renderer(re.sub(
-            Template.placeholder_pattern,
-            lambda match: Template.placeholder_tag.format(match.group(1)),
-            self.content
+            Template.placeholder_pattern, self.format_match, self.content
         ))
 
     @property
     def formatted_subject(self):
         return re.sub(
-            Template.placeholder_pattern,
-            lambda match: Template.placeholder_tag.format(match.group(1)),
-            self.subject
+            Template.placeholder_pattern, self.format_match, self.subject
         )
 
     @property
@@ -82,15 +100,16 @@ class Template():
 
     @property
     def placeholders(self):
-        return OrderedSet(re.findall(
-            Template.placeholder_pattern,
-            (self.subject or '') + self.content)
+        return OrderedSet(
+            self.get_match(match) for match in re.findall(
+                Template.placeholder_pattern, (self.subject or '') + self.content
+            )
         )
 
     @property
     def placeholders_as_markup(self):
         return [
-            Markup(Template.placeholder_tag.format(placeholder))
+            Markup(Template.placeholder_tag.format(placeholder, ''))
             for placeholder in self.placeholders
         ]
 
@@ -99,9 +118,7 @@ class Template():
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
         return self.renderer(re.sub(
-            Template.placeholder_pattern,
-            lambda match: self.values.get(match.group(1)),
-            self.content
+            Template.placeholder_pattern, self.replace_match, self.content
         ))
 
     @property
@@ -131,8 +148,9 @@ class Template():
             raise NeededByTemplateError(self.missing_data)
         return re.sub(
             Template.placeholder_pattern,
-            lambda match: self.values.get(match.group(1)),
-            self.subject if self.subject else "")
+            self.replace_match,
+            self.subject if self.subject else ""
+        )
 
     @property
     def missing_data(self):
@@ -194,3 +212,9 @@ class TemplateChange():
 
 def get_sms_fragment_count(character_count):
     return 1 if character_count <= 160 else math.ceil(float(character_count) / 153)
+
+
+def str2bool(value):
+    if not value:
+        return False
+    return str(value).lower() in ("yes", "y", "true", "t", "1", "include", "show")
