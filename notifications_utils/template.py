@@ -1,5 +1,6 @@
 import re
 import math
+import bleach
 
 from orderedset import OrderedSet
 from flask import Markup
@@ -75,8 +76,8 @@ class Template():
 
     def replace_match(self, match):
         if match.group(2) and match.group(3):
-            return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
-        return self.values.get(match.group(1) + match.group(3))
+            return strip_html(match.group(3)) if str2bool(self.values.get(match.group(1))) else ''
+        return strip_html(self.values.get(match.group(1) + match.group(3)))
 
     @property
     def formatted(self):
@@ -218,3 +219,7 @@ def str2bool(value):
     if not value:
         return False
     return str(value).lower() in ("yes", "y", "true", "t", "1", "include", "show")
+
+
+def strip_html(value):
+    return bleach.clean(value, tags=[], strip=True)
