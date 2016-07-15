@@ -3,9 +3,8 @@ from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
 )
 from notifications_utils.formatters import (
-    unlink_govuk_escaped, linkify, markup_headings, markup_lists, markup_blockquotes
+    unlink_govuk_escaped, linkify, notify_markdown
 )
-from notifications_utils.formatters import notify_markdown as markdown
 
 
 @pytest.mark.parametrize(
@@ -105,76 +104,13 @@ def test_sms_preview_adds_newlines():
     """) == "the<br>        quick<br><br>        brown fox"
 
 
-@pytest.mark.parametrize(
-    "message, expected_html", [
-        (
-            '''
-# This is a heading
-
-And this is some text
-            ''',
-            '''
-<h2 style="margin: 10px 0 0 0; padding: 0; font-size: 27px; font-weight: bold">This is a heading</h2>
-And this is some text
-            '''
-        ),
-    ]
-)
-def test_markup_headings(message, expected_html):
-    assert expected_html == markup_headings(message)
-
-
-@pytest.mark.parametrize(
-    "message, expected_html", [
-        (
-            '''
-* item 1
-* item 2
-* item 3
-            ''',
-            (
-                '\n<li style="margin: 5px 0; display: list-item; list-style-type: disc; '
-                'font-size: 19px; line-height: 25px;">item 1</li>'
-                '<li style="margin: 5px 0; display: list-item; list-style-type: disc; '
-                'font-size: 19px; line-height: 25px;">item 2</li>'
-                '<li style="margin: 5px 0; display: list-item; list-style-type: disc; '
-                'font-size: 19px; line-height: 25px;">item 3</li>'
-                '            '
-            )
-        ),
-    ]
-)
-def test_markup_lists(message, expected_html):
-    assert expected_html == markup_lists(message)
-
-
-@pytest.mark.parametrize(
-    "message, expected_html", [
-        (
-            '''
-^ some text
-            ''',
-            (
-                '\n'
-                '<blockquote style="margin: 0; border-left: 10px solid #BFC1C3;'
-                'padding: 0 0 0 15px; font-size: 19px; line-height: 25px;">'
-                'some text'
-                '</blockquote>            '
-            )
-        ),
-    ]
-)
-def test_markup_blockquotes(message, expected_html):
-    assert expected_html == markup_blockquotes(message)
-
-
-class TestMarkdown():
+class TestNotifyMarkdown():
 
     def test_block_code(self):
-        assert markdown('```\nprint("hello")\n```') == 'print("hello")'
+        assert notify_markdown('```\nprint("hello")\n```') == 'print("hello")'
 
     def test_block_quote(self):
-        assert markdown('^ inset text') == (
+        assert notify_markdown('^ inset text') == (
             '<blockquote '
             'style="margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
             'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;'
@@ -184,7 +120,7 @@ class TestMarkdown():
         )
 
     def test_level_1_header(self):
-        assert markdown('# heading') == (
+        assert notify_markdown('# heading') == (
             '<h2 style="margin: 0 0 20px 0; padding: 0; font-size: 27px; '
             'line-height: 35px; font-weight: bold">'
             'heading'
@@ -192,24 +128,24 @@ class TestMarkdown():
         )
 
     def test_level_2_header(self):
-        assert markdown(
+        assert notify_markdown(
             '## inset text'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">inset text</p>'
         )
 
     def test_hrule(self):
-        assert markdown('a\n\n***\n\nb') == (
+        assert notify_markdown('a\n\n***\n\nb') == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">a</p>'
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">b</p>'
         )
-        assert markdown('a\n\n---\n\nb') == (
+        assert notify_markdown('a\n\n---\n\nb') == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">a</p>'
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">b</p>'
         )
 
     def test_ordered_list(self):
-        assert markdown(
+        assert notify_markdown(
             '1. one\n'
             '2. two\n'
             '3. three\n'
@@ -222,7 +158,7 @@ class TestMarkdown():
         )
 
     def test_unordered_list(self):
-        assert markdown(
+        assert notify_markdown(
             '* one\n'
             '* two\n'
             '* three\n'
@@ -235,7 +171,7 @@ class TestMarkdown():
         )
 
     def test_paragraphs(self):
-        assert markdown(
+        assert notify_markdown(
             'line one\n'
             'line two\n'
             '\n'
@@ -247,7 +183,7 @@ class TestMarkdown():
         )
 
     def test_table(self):
-        assert markdown(
+        assert notify_markdown(
             'col | col\n'
             '----|----\n'
             'val | val\n'
@@ -256,49 +192,49 @@ class TestMarkdown():
         )
 
     def test_autolink(self):
-        assert markdown(
+        assert notify_markdown(
             'http://example.com'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">http://example.com</p>'
         )
 
     def test_codespan(self):
-        assert markdown(
+        assert notify_markdown(
             'variable called `thing`'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">variable called thing</p>'
         )
 
     def test_double_emphasis(self):
-        assert markdown(
+        assert notify_markdown(
             'something **important**'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">something important</p>'
         )
 
     def test_emphasis(self):
-        assert markdown(
+        assert notify_markdown(
             'something *important*'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">something important</p>'
         )
 
     def test_image(self):
-        assert markdown(
+        assert notify_markdown(
             '![alt text](http://example.com/image.png)'
         ) == (
             ''
         )
 
     def test_link(self):
-        assert markdown(
+        assert notify_markdown(
             '[Example](http://example.com)'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">Example: http://example.com</p>'
         )
 
     def test_strikethrough(self):
-        assert markdown(
+        assert notify_markdown(
             '~~Strike~~'
         ) == (
             '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">Strike</p>'

@@ -6,9 +6,6 @@ from notifications_utils.formatters import (
     linkify,
     nl2br,
     add_prefix,
-    markup_headings,
-    markup_lists,
-    markup_blockquotes,
     notify_markdown
 )
 
