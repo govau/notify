@@ -71,9 +71,19 @@ class PlainTextEmail(PassThrough):
 
 class HTMLEmail():
 
-    def __init__(self, govuk_banner=True, complete_html=True):
+    def __init__(
+        self,
+        govuk_banner=True,
+        complete_html=True,
+        brand_logo=None,
+        brand_name=None,
+        brand_colour=None
+    ):
         self.govuk_banner = govuk_banner
         self.complete_html = complete_html
+        self.brand_logo = brand_logo
+        self.brand_name = brand_name
+        self.brand_colour = brand_colour
 
     def __call__(self, body):
         return email_template.render({
@@ -81,5 +91,8 @@ class HTMLEmail():
                 body
             ),
             'govuk_banner': self.govuk_banner,
-            'complete_html': self.complete_html
+            'complete_html': self.complete_html,
+            'brand_logo': self.brand_logo,
+            'brand_name': self.brand_name,
+            'brand_colour': self.brand_colour
         })
