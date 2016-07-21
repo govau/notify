@@ -6,9 +6,7 @@ from notifications_utils.formatters import (
     linkify,
     nl2br,
     add_prefix,
-    markup_headings,
-    markup_lists,
-    markup_blockquotes
+    notify_markdown
 )
 
 
@@ -57,17 +55,11 @@ class EmailPreview(PassThrough):
         return Take(
             body
         ).then(
-            markup_headings
-        ).then(
-            markup_lists
-        ).then(
-            markup_blockquotes
-        ).then(
             unlink_govuk_escaped
         ).then(
             linkify
         ).then(
-            nl2br
+            notify_markdown
         ).as_string
 
 

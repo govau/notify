@@ -1,16 +1,17 @@
 import pytest
+from functools import partial
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
 from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError, str2bool
-from notifications_utils.renderers import HTMLEmail
+from notifications_utils.renderers import HTMLEmail, PassThrough
 
 
 def test_class():
     template = {"content": "hello ((name))"}
-    assert str(Template(template)) == "hello ((name))"
-    assert str(Template(template, {'name': 'Chris'})) == 'hello Chris'
-    assert repr(Template(template)) == 'Template("hello ((name))", {})'
+    assert str(Template(template, renderer=PassThrough())) == "hello ((name))"
+    assert str(Template(template, {'name': 'Chris'}, renderer=PassThrough())) == 'hello Chris'
+    assert repr(Template(template, renderer=PassThrough())) == 'Template("hello ((name))", {})'
 
 
 def test_passes_through_template_attributes():
@@ -56,16 +57,26 @@ def test_errors_for_invalid_values(values):
 
                 fox
             """,
-            "the<br>                quick brown<br><br>                fox",
-            "the<br>                quick brown<br><br>                fox",
+            """
+                the
+                quick brown
+
+                fox
+            """,
+            """
+                the
+                quick brown
+
+                fox
+            """
         ),
         ("the ((quick brown fox", "the ((quick brown fox", "the ((quick brown fox"),
         ("the (()) brown fox", "the (()) brown fox", "the (()) brown fox")
     ]
 )
 def test_returns_a_string_without_placeholders(template_content, expected_formatted, expected_replaced):
-    assert Template({"content": template_content}).formatted == expected_formatted
-    assert Template({"content": template_content}).replaced == expected_replaced
+    assert Template({"content": template_content}, renderer=PassThrough()).formatted == expected_formatted
+    assert Template({"content": template_content}, renderer=PassThrough()).replaced == expected_replaced
 
 
 @pytest.mark.parametrize(
@@ -79,8 +90,8 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).formatted == expected
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).replaced == expected
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).content == template_content
-    assert Template({"content": template_content}, prefix=prefix).replaced == template_content
-    assert Template({"content": template_content}, prefix=prefix).formatted == template_content
+    assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).replaced == template_content
+    assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).formatted == template_content
 
 
 @pytest.mark.parametrize(
@@ -103,7 +114,11 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
                 ((colour))
                 ((animal))
             """,
-            "<span class='placeholder'>((article))</span> quick<br>                <span class='placeholder'>((colour))</span><br>                <span class='placeholder'>((animal))</span>"  # noqa
+            """
+                <span class='placeholder'>((article))</span> quick
+                <span class='placeholder'>((colour))</span>
+                <span class='placeholder'>((animal))</span>
+            """
         ),
         (
             "the quick (((colour))) fox",
@@ -124,7 +139,7 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
     ]
 )
 def test_formatting_of_placeholders(template_content, expected):
-    assert Template({"content": template_content}).formatted == expected
+    assert Template({"content": template_content}, renderer=PassThrough()).formatted == expected
 
 
 @pytest.mark.parametrize(
@@ -150,13 +165,13 @@ def test_subject_formatting_of_placeholders(template_subject, expected):
 
 def test_formatting_of_template_contents_as_markup():
     assert Template(
-        {"content": "Hello ((name))"}
+        {"content": "Hello ((name))"}, renderer=PassThrough()
     ).formatted_as_markup == Markup("Hello <span class='placeholder'>name</span>")
 
 
 def test_formatting_of_template_contents_as_markup():
     assert Template(
-        {"content": "", "subject": "Hello ((name))"}
+        {"content": "", "subject": "Hello ((name))"}, renderer=PassThrough()
     ).formatted_subject_as_markup == Markup("Hello <span class='placeholder'>((name))</span>")
 
 
@@ -210,7 +225,9 @@ def test_formatting_of_template_contents_as_markup():
     ]
 )
 def test_replacement_of_placeholders(template_content, data, expected):
-    assert Template({"content": template_content}, data).replaced == expected
+    assert Template(
+        {"content": template_content}, data, renderer=PassThrough()
+    ).replaced == expected
 
 
 @pytest.mark.parametrize(
@@ -246,7 +263,7 @@ def test_replacement_of_placeholders_subject(template_content,
                                              data,
                                              expected_content,
                                              expected_subject):
-    template = Template({"content": template_content, 'subject': template_subject}, data)
+    template = Template({"content": template_content, 'subject': template_subject}, data, renderer=PassThrough())
     assert template.replaced == expected_content
     assert template.replaced_subject == expected_subject
 
@@ -266,7 +283,8 @@ def test_can_drop_additional_values():
     assert Template(
         template,
         values,
-        drop_values=('animal', 'adjective')
+        drop_values=('animal', 'adjective'),
+        renderer=PassThrough()
     ).replaced == 'the quick brown fox jumps over the brown dog'
     # make sure that our template and values aren’t modified
     assert Template(template, values).missing_data == []
@@ -274,16 +292,19 @@ def test_can_drop_additional_values():
 
 def test_html_email_template():
     template = Template(
-        {"content": '''
-            the quick ((colour)) ((animal))
-
-            jumped over the lazy dog
-        '''},
+        {"content": (
+            'the quick ((colour)) ((animal))\n'
+            '\n'
+            'jumped over the lazy dog'
+        )},
         {'animal': 'fox', 'colour': 'brown'},
         renderer=HTMLEmail()
     )
     assert '<html>' in template.replaced
-    assert "the quick brown fox<br><br>            jumped over the lazy dog" in template.replaced
+    assert (
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">the quick brown fox</p>'
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">jumped over the lazy dog</p>'
+    ) in template.replaced
 
 
 @pytest.mark.parametrize(
