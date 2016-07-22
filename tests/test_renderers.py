@@ -39,14 +39,38 @@ def test_govuk_banner(show_banner):
     "complete_html", (True, False)
 )
 @pytest.mark.parametrize(
+    "branding_should_be_present, brand_logo, brand_name, brand_colour",
+    [
+        (True, 'http://example.com/image.png', 'Example', '#f00'),
+        (True, 'http://example.com/image.png', 'Example', None),
+        (True, 'http://example.com/image.png', '', None),
+        (False, None, 'Example', '#f00'),
+        (False, 'http://example.com/image.png', None, '#f00')
+    ]
+)
+@pytest.mark.parametrize(
     "content", ('DOCTYPE', 'html', 'body')
 )
-def test_complete_html(complete_html, content):
-    email = HTMLEmail(complete_html=complete_html)('hello world')
+def test_complete_html(complete_html, branding_should_be_present, brand_logo, brand_name, brand_colour, content):
+
+    email = HTMLEmail(
+        complete_html=complete_html,
+        brand_logo=brand_logo,
+        brand_name=brand_name,
+        brand_colour=brand_colour
+    )('hello world')
+
     if complete_html:
         assert content in email
     else:
         assert content not in email
+
+    if branding_should_be_present:
+        assert brand_logo in email
+        assert brand_name in email
+
+        if brand_colour:
+            assert brand_colour in email
 
 
 @pytest.mark.parametrize(
