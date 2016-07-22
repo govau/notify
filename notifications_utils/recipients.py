@@ -1,6 +1,8 @@
 import re
+import sys
 import csv
 from contextlib import suppress
+
 from flask import Markup
 
 from notifications_utils.template import Template
@@ -30,7 +32,8 @@ class RecipientCSV():
         max_errors_shown=20,
         max_initial_rows_shown=10,
         whitelist=None,
-        template=None
+        template=None,
+        remaining_messages=sys.maxsize
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
@@ -40,6 +43,7 @@ class RecipientCSV():
         self.whitelist = whitelist
         self.template = template if isinstance(template, Template) else None
         self.annotated_rows = list(self.get_annotated_rows())
+        self.remaining_messages = remaining_messages
 
     @property
     def whitelist(self):
@@ -78,7 +82,8 @@ class RecipientCSV():
             (not self.allowed_to_send_to) or
             self.rows_with_missing_data or
             self.rows_with_bad_recipients or
-            self.rows_with_message_too_long
+            self.rows_with_message_too_long or
+            self.more_rows_than_can_send
         )  # This is 3x faster than using `any()`
 
     @property
@@ -124,6 +129,10 @@ class RecipientCSV():
         return set(
             row['index'] for row in self.annotated_rows if row['message_too_long']
         )
+
+    @property
+    def more_rows_than_can_send(self):
+        return len(self.annotated_rows) > self.remaining_messages
 
     def get_annotated_rows(self):
         for row_index, row in enumerate(self.rows):
