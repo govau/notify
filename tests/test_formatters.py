@@ -66,6 +66,20 @@ def test_HTML_template_has_URLs_replaced_with_links():
     ''')
 
 
+def test_preserves_whitespace_when_making_links():
+    assert (
+        '<a href="https://example.com">'
+        'https://example.com'
+        '</a>\n'
+        '\n'
+        'Next paragraph'
+    ) == linkify(
+        'https://example.com\n'
+        '\n'
+        'Next paragraph'
+    )
+
+
 @pytest.mark.parametrize(
     "template_content,expected", [
         ("gov.uk", u"gov.\u200Buk"),
