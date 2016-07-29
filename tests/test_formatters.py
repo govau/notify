@@ -3,7 +3,7 @@ from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
 )
 from notifications_utils.formatters import (
-    unlink_govuk_escaped, linkify, notify_markdown
+    unlink_govuk_escaped, linkify, notify_markdown, prepare_newlines_for_markdown
 )
 
 
@@ -77,6 +77,30 @@ def test_preserves_whitespace_when_making_links():
         'https://example.com\n'
         '\n'
         'Next paragraph'
+    )
+
+
+def test_add_spaces_after_single_newlines_so_markdown_converts_them():
+    converted = prepare_newlines_for_markdown(
+        'Line one\n'
+        'Line two\n'
+        '\n'
+        'Next paragraph'
+    )
+    assert converted == (
+        'Line one  \n'
+        'Line two\n'
+        '\n'
+        'Next paragraph'
+    )
+    assert notify_markdown(converted) == (
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">'
+        'Line one<br/>'
+        'Line two'
+        '</p>'
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">'
+        'Next paragraph'
+        '</p>'
     )
 
 

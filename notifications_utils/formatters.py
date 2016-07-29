@@ -36,6 +36,17 @@ def linkify(text):
     )
 
 
+def prepare_newlines_for_markdown(text):
+    return re.sub(
+        r'^(.+)\n([^\s])',
+        lambda match: '{}  \n{}'.format(
+            match.group(1),
+            match.group(2)
+        ),
+        text
+    )
+
+
 def nl2br(value):
     return re.sub(r'\n|\r', '<br>', value.strip())
 
