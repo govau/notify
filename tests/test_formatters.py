@@ -18,7 +18,7 @@ from notifications_utils.formatters import (
     ]
 )
 def test_makes_links_out_of_URLs(url):
-    link = '<a href="{}">{}</a>'.format(url, url)
+    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
     assert link in HTMLEmail()(url)
 
@@ -40,11 +40,11 @@ def test_doesnt_make_links_out_of_invalid_urls(url):
     "url, expected_html", [
         (
             """https://example.com"onclick="alert('hi')""",
-            """<a href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
         ),
         (
             """https://example.com"style='text-decoration:blink'""",
-            """<a href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
         ),
     ]
 )
@@ -55,7 +55,7 @@ def test_URLs_get_escaped(url, expected_html):
 
 def test_HTML_template_has_URLs_replaced_with_links():
     assert (
-        '<a href="https://service.example.com/accept_invite/a1b2c3d4">'
+        '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
     ) in HTMLEmail()('''
@@ -68,7 +68,7 @@ def test_HTML_template_has_URLs_replaced_with_links():
 
 def test_preserves_whitespace_when_making_links():
     assert (
-        '<a href="https://example.com">'
+        '<a style="word-wrap: break-word;" href="https://example.com">'
         'https://example.com'
         '</a>\n'
         '\n'
