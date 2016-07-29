@@ -474,3 +474,24 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     recipients.placeholders = {'one', 'TWO', 'Thirty_Three'}
     assert recipients.missing_column_headers == {'one', 'TWO', 'Thirty_Three'}
     assert recipients.has_errors
+
+
+def test_error_if_too_many_recipients():
+    recipients = RecipientCSV(
+        'phone number,\n07700900460,\n07700900460,\n07700900460,',
+        placeholders=['phone_number'],
+        template_type='sms',
+        remaining_messages=2
+    )
+    assert recipients.has_errors
+    assert recipients.more_rows_than_can_send
+
+
+def test_dont_error_if_too_many_recipients_not_specified():
+    recipients = RecipientCSV(
+        'phone number,\n07700900460,\n07700900460,\n07700900460,',
+        placeholders=['phone_number'],
+        template_type='sms'
+    )
+    assert not recipients.has_errors
+    assert not recipients.more_rows_than_can_send
