@@ -79,11 +79,11 @@ class RecipientCSV():
     def has_errors(self):
         return bool(
             self.missing_column_headers or
+            self.more_rows_than_can_send or
             (not self.allowed_to_send_to) or
             self.rows_with_missing_data or
             self.rows_with_bad_recipients or
-            self.rows_with_message_too_long or
-            self.more_rows_than_can_send
+            self.rows_with_message_too_long
         )  # This is 3x faster than using `any()`
 
     @property
