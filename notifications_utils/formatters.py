@@ -11,6 +11,11 @@ govuk_not_a_link = re.compile(
     re.IGNORECASE
 )
 
+single_newlines = re.compile(
+    r'^(.+)\n([^\s])',
+    re.MULTILINE
+)
+
 
 def unlink_govuk_escaped(message):
     return re.sub(
@@ -38,7 +43,7 @@ def linkify(text):
 
 def prepare_newlines_for_markdown(text):
     return re.sub(
-        r'^(.+)\n([^\s])',
+        single_newlines,
         lambda match: '{}  \n{}'.format(
             match.group(1),
             match.group(2)
