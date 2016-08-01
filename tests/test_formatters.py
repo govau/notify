@@ -82,21 +82,28 @@ def test_preserves_whitespace_when_making_links():
 
 def test_add_spaces_after_single_newlines_so_markdown_converts_them():
     converted = prepare_newlines_for_markdown(
-        'Line one\n'
-        'Line two\n'
+        'Paragraph one\n'
+        '\n'
+        'Paragraph two has a linebreak\n'
+        'This is the second line\n'
         '\n'
         'Next paragraph'
     )
     assert converted == (
-        'Line one  \n'
-        'Line two\n'
+        'Paragraph one\n'
+        '\n'
+        'Paragraph two has a linebreak  \n'
+        'This is the second line\n'
         '\n'
         'Next paragraph'
     )
     assert notify_markdown(converted) == (
         '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Line one<br/>'
-        'Line two'
+        'Paragraph one'
+        '</p>'
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'Paragraph two has a linebreak<br/>'
+        'This is the second line'
         '</p>'
         '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         'Next paragraph'
