@@ -24,12 +24,24 @@ def linkify(text):
     return re.sub(
         #             url is anything without whitespace, >, or <
         r'(https?:\/\/[^\s\<\>]+)($|\s)',
-        lambda match: '<a href="{}">{}</a>'.format(
+        lambda match: '<a style="word-wrap: break-word;" href="{}">{}</a>{}'.format(
             urllib.parse.quote(
                 urllib.parse.unquote(match.group(1)),
                 safe=':/?#=&'
             ),
-            match.group(1)
+            match.group(1),
+            match.group(2)
+        ),
+        text
+    )
+
+
+def prepare_newlines_for_markdown(text):
+    return re.sub(
+        r'^(.+)\n([^\s])',
+        lambda match: '{}  \n{}'.format(
+            match.group(1),
+            match.group(2)
         ),
         text
     )
@@ -65,7 +77,8 @@ class NotifyMarkdownRenderer(mistune.Renderer):
     def header(self, text, level, raw=None):
         if level == 1:
             return (
-                '<h2 style="margin: 0 0 20px 0; padding: 0; font-size: 27px; line-height: 35px; font-weight: bold">'
+                '<h2 style="margin: 0 0 20px 0; padding: 0; '
+                'font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;">'
                 '{}'
                 '</h2>'
             ).format(
@@ -93,7 +106,8 @@ class NotifyMarkdownRenderer(mistune.Renderer):
 
     def list_item(self, text):
         return (
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">'
             '{}'
             '</li>'
         ).format(
@@ -103,7 +117,7 @@ class NotifyMarkdownRenderer(mistune.Renderer):
     def paragraph(self, text):
         if text.strip():
             return (
-                '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">{}</p>'
+                '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">{}</p>'
             ).format(
                 text
             )

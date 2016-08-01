@@ -302,8 +302,10 @@ def test_html_email_template():
     )
     assert '<html>' in template.replaced
     assert (
-        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">the quick brown fox</p>'
-        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">jumped over the lazy dog</p>'
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'the quick brown fox</p>'
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'jumped over the lazy dog</p>'
     ) in template.replaced
 
 

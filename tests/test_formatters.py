@@ -3,7 +3,7 @@ from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
 )
 from notifications_utils.formatters import (
-    unlink_govuk_escaped, linkify, notify_markdown
+    unlink_govuk_escaped, linkify, notify_markdown, prepare_newlines_for_markdown
 )
 
 
@@ -18,7 +18,7 @@ from notifications_utils.formatters import (
     ]
 )
 def test_makes_links_out_of_URLs(url):
-    link = '<a href="{}">{}</a>'.format(url, url)
+    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
     assert link in HTMLEmail()(url)
 
@@ -40,11 +40,11 @@ def test_doesnt_make_links_out_of_invalid_urls(url):
     "url, expected_html", [
         (
             """https://example.com"onclick="alert('hi')""",
-            """<a href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
         ),
         (
             """https://example.com"style='text-decoration:blink'""",
-            """<a href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
         ),
     ]
 )
@@ -55,7 +55,7 @@ def test_URLs_get_escaped(url, expected_html):
 
 def test_HTML_template_has_URLs_replaced_with_links():
     assert (
-        '<a href="https://service.example.com/accept_invite/a1b2c3d4">'
+        '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
     ) in HTMLEmail()('''
@@ -64,6 +64,44 @@ def test_HTML_template_has_URLs_replaced_with_links():
 
         Thanks
     ''')
+
+
+def test_preserves_whitespace_when_making_links():
+    assert (
+        '<a style="word-wrap: break-word;" href="https://example.com">'
+        'https://example.com'
+        '</a>\n'
+        '\n'
+        'Next paragraph'
+    ) == linkify(
+        'https://example.com\n'
+        '\n'
+        'Next paragraph'
+    )
+
+
+def test_add_spaces_after_single_newlines_so_markdown_converts_them():
+    converted = prepare_newlines_for_markdown(
+        'Line one\n'
+        'Line two\n'
+        '\n'
+        'Next paragraph'
+    )
+    assert converted == (
+        'Line one  \n'
+        'Line two\n'
+        '\n'
+        'Next paragraph'
+    )
+    assert notify_markdown(converted) == (
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'Line one<br/>'
+        'Line two'
+        '</p>'
+        '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'Next paragraph'
+        '</p>'
+    )
 
 
 @pytest.mark.parametrize(
@@ -115,14 +153,14 @@ class TestNotifyMarkdown():
             'style="margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
             'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;'
             '">'
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">inset text</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
             '</blockquote>'
         )
 
     def test_level_1_header(self):
         assert notify_markdown('# heading') == (
             '<h2 style="margin: 0 0 20px 0; padding: 0; font-size: 27px; '
-            'line-height: 35px; font-weight: bold">'
+            'line-height: 35px; font-weight: bold; color: #0B0C0C;">'
             'heading'
             '</h2>'
         )
@@ -131,17 +169,17 @@ class TestNotifyMarkdown():
         assert notify_markdown(
             '## inset text'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">inset text</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
         )
 
     def test_hrule(self):
         assert notify_markdown('a\n\n***\n\nb') == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">a</p>'
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">b</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
         )
         assert notify_markdown('a\n\n---\n\nb') == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">a</p>'
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">b</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
         )
 
     def test_ordered_list(self):
@@ -151,9 +189,12 @@ class TestNotifyMarkdown():
             '3. three\n'
         ) == (
             '<ol style="margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: decimal;">'
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">one</li>'
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">two</li>'
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">three</li>'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">one</li>'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">two</li>'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">three</li>'
             '</ol>'
         )
 
@@ -164,9 +205,12 @@ class TestNotifyMarkdown():
             '* three\n'
         ) == (
             '<ul style="margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: disc;">'
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">one</li>'
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">two</li>'
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; line-height: 25px;">three</li>'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">one</li>'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">two</li>'
+            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">three</li>'
             '</ul>'
         )
 
@@ -177,9 +221,9 @@ class TestNotifyMarkdown():
             '\n'
             'new paragraph'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">line one\n'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
             'line two</p>'
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">new paragraph</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
         )
 
     def test_table(self):
@@ -195,28 +239,29 @@ class TestNotifyMarkdown():
         assert notify_markdown(
             'http://example.com'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">http://example.com</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'
         )
 
     def test_codespan(self):
         assert notify_markdown(
             'variable called `thing`'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">variable called thing</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
+            'color: #0B0C0C;">variable called thing</p>'
         )
 
     def test_double_emphasis(self):
         assert notify_markdown(
             'something **important**'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">something important</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
         )
 
     def test_emphasis(self):
         assert notify_markdown(
             'something *important*'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">something important</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
         )
 
     def test_image(self):
@@ -230,14 +275,15 @@ class TestNotifyMarkdown():
         assert notify_markdown(
             '[Example](http://example.com)'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">Example: http://example.com</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
+            'color: #0B0C0C;">Example: http://example.com</p>'
         )
 
     def test_strikethrough(self):
         assert notify_markdown(
             '~~Strike~~'
         ) == (
-            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px;">Strike</p>'
+            '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">Strike</p>'
         )
 
     def test_footnotes(self):
