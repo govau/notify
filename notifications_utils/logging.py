@@ -14,7 +14,7 @@ TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 logger = logging.getLogger(__name__)
 
 
-def init_app(app):
+def init_app(app, statsd_client=None):
     app.config.setdefault('NOTIFY_LOG_LEVEL', 'INFO')
     app.config.setdefault('NOTIFY_APP_NAME', 'none')
     app.config.setdefault('NOTIFY_LOG_PATH', './log/application.log')
@@ -29,9 +29,27 @@ def init_app(app):
         }
 
         if 'start' in g:
+            time_taken = monotonic() - g.start
             extra_fields.update({
-                'time_taken': "%.5f" % (monotonic() - g.start)
+                'time_taken': "%.5f" % time_taken
             })
+
+        if statsd_client and 'endpoint' in g:
+            statsd_client.incr(
+                '{method}.{endpoint}.{status_code}'.format(
+                    method=request.method, endpoint=g.endpoint, status_code=response.status_code
+                )
+            )
+            if 'time_taken' in extra_fields:
+                statsd_client.timing(
+                    '{method}.{endpoint}.{status_code}'.format(
+                        method=request.method,
+                        endpoint=g.endpoint,
+                        status_code=response.status_code),
+                    extra_fields['time_taken']
+                )
+
+        if 'time_taken' in extra_fields:
             current_app.logger.info('{method} {url} {status} {time_taken}', extra=extra_fields)
         else:
             current_app.logger.info('{method} {url} {status}', extra=extra_fields)
