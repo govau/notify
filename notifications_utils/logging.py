@@ -40,13 +40,14 @@ def init_app(app, statsd_client=None):
                     method=request.method, endpoint=g.endpoint, status_code=response.status_code
                 )
             )
+
             if 'time_taken' in extra_fields:
                 statsd_client.timing(
                     '{method}.{endpoint}.{status_code}'.format(
                         method=request.method,
                         endpoint=g.endpoint,
                         status_code=response.status_code),
-                    extra_fields['time_taken']
+                    time_taken
                 )
 
         if 'time_taken' in extra_fields:
