@@ -71,6 +71,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
 
         if brand_colour:
             assert brand_colour in email
+            assert '##' not in email
 
 
 @pytest.mark.parametrize(
