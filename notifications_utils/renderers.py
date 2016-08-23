@@ -27,14 +27,15 @@ class PassThrough():
 
 class SMSMessage():
 
-    def __init__(self, prefix=None):
+    def __init__(self, prefix=None, sender=None):
         self.prefix = prefix
+        self.sender = sender
 
     def __call__(self, body):
         return Take(
             body
         ).then(
-            add_prefix, self.prefix
+            add_prefix, self.prefix if not self.sender else None
         ).as_string
 
 
@@ -42,9 +43,7 @@ class SMSPreview(SMSMessage):
 
     def __call__(self, body):
         return Take(
-            body
-        ).then(
-            add_prefix, self.prefix
+            SMSMessage(self.prefix, self.sender)(body)
         ).then(
             nl2br
         ).as_string
