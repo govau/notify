@@ -27,6 +27,7 @@ class Template():
         values=None,
         drop_values=(),
         prefix=None,
+        sms_sender=None,
         encoding="utf-8",
         content_character_limit=None,
         renderer=None
@@ -51,7 +52,10 @@ class Template():
         self._template = template
         if not renderer:
             self.renderer = (
-                SMSPreview(prefix=self.prefix) if self.template_type == 'sms' else EmailPreview()
+                SMSPreview(
+                    prefix=self.prefix,
+                    sender=sms_sender
+                ) if self.template_type == 'sms' else EmailPreview()
             )
         else:
             self.renderer = renderer
