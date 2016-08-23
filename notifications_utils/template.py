@@ -46,14 +46,13 @@ class Template():
         self.subject = template.get('subject', None)
         for value in drop_values:
             self.values.pop(value, None)
-        self.prefix = prefix if self.template_type == 'sms' else None
         self.encoding = encoding
         self.content_character_limit = content_character_limit
         self._template = template
         if not renderer:
             self.renderer = (
                 SMSPreview(
-                    prefix=self.prefix,
+                    prefix=prefix,
                     sender=sms_sender
                 ) if self.template_type == 'sms' else EmailPreview()
             )
@@ -167,11 +166,6 @@ class Template():
     @property
     def additional_data(self):
         return self.values.keys() - self.placeholders
-
-    def __add_prefix(self, output):
-        if self.prefix:
-            return "{}: {}".format(self.prefix.strip(), output)
-        return output
 
     def get_raw(self, key, default=None):
         return self._template.get(key, default)
