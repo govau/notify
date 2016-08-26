@@ -153,6 +153,18 @@ def test_sms_message_adds_prefix(prefix, body, expected):
     assert SMSPreview(prefix=prefix)(body) == expected
 
 
+@pytest.mark.parametrize(
+    "prefix, body, sender, expected", [
+        ("a", "b", "c", "b"),
+        ("a", "b", None, "a: b"),
+        ("a", "b", False, "a: b"),
+    ]
+)
+def test_sms_message_adds_prefix_only_if_no_sender_set(prefix, body, sender, expected):
+    assert SMSMessage(prefix=prefix, sender=sender)(body) == expected
+    assert SMSPreview(prefix=prefix, sender=sender)(body) == expected
+
+
 def test_sms_preview_adds_newlines():
     assert SMSPreview()("""
         the

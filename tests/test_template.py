@@ -89,6 +89,9 @@ def test_returns_a_string_without_placeholders(template_content, expected_format
 def test_prefixing_template_with_service_name(template_content, prefix, expected):
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).formatted == expected
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).replaced == expected
+    assert Template(
+        {"content": template_content, 'template_type': 'sms'}, prefix=prefix, sms_sender='Something'
+    ).replaced == "the quick brown fox"
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).content == template_content
     assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).replaced == template_content
     assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).formatted == template_content
