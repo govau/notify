@@ -1,5 +1,5 @@
 {% macro spacer(width=10, height=10) -%}
-  <img src="https://www.notifications.service.gov.uk/static/images/email-template/spacer.png" width="{{ width }}" height="{{ height }}" />
+  <img src="https://www.notifications.service.gov.uk/static/images/email-template/spacer.png" width="{{ width }}" height="{{ height }}" alt="" />
 {% endmacro %}
 
 {% if complete_html %}
@@ -129,7 +129,7 @@
                     <td bgcolor="#{{ brand_colour }}" width="2">{{ spacer(2) }}</td>
                     <td width="7">{{ spacer(7) }}</td>
                     {% endif %}
-                    <td><img src="{{ brand_logo }}" style="display: block; border: 0;" height="27" /></td>
+                    <td><img src="{{ brand_logo }}" style="display: block; border: 0;" height="27" alt="" /></td>
                     <td width="5">{{ spacer(5) }}</td>
                     <td width="100%" style="font-family: Helvetica, Arial, sans-serif; font-size: 18px; line-height: 23px;" valign="center">
                       {% if brand_name %}
