@@ -65,12 +65,11 @@ class RecipientCSV():
     def placeholders(self, value):
         try:
             self._placeholders = list(value)
+            self.placeholders_as_column_keys = [
+                Columns.make_key(placeholder) for placeholder in value
+            ]
         except TypeError:
-            self._placeholders = []
-
-    @property
-    def placeholders_as_column_keys(self):
-        return [Columns.make_key(placeholder) for placeholder in self.placeholders]
+            self._placeholders, self.placeholders_as_column_keys = [], []
 
     @property
     def recipient_column_header(self):
