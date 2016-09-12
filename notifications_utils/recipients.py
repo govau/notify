@@ -72,8 +72,13 @@ class RecipientCSV():
             self._placeholders, self.placeholders_as_column_keys = [], []
 
     @property
-    def recipient_column_header(self):
-        return first_column_heading[self.template_type]
+    def template_type(self):
+        return self._template_type
+
+    @template_type.setter
+    def template_type(self, value):
+        self._template_type = value
+        self.recipient_column_header = first_column_heading[self.template_type]
 
     @property
     def has_errors(self):
