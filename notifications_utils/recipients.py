@@ -2,6 +2,7 @@ import re
 import sys
 import csv
 from contextlib import suppress
+from functools import lru_cache
 
 from flask import Markup
 
@@ -337,6 +338,7 @@ def validate_recipient(recipient, template_type):
     }[template_type](recipient)
 
 
+@lru_cache(maxsize=32, typed=False)
 def format_recipient(recipient):
     with suppress(InvalidPhoneError):
         return validate_and_format_phone_number(recipient)
