@@ -143,7 +143,8 @@ def test_big_list():
         template_type='email',
         placeholders=['name'],
         max_errors_shown=100,
-        max_initial_rows_shown=3
+        max_initial_rows_shown=3,
+        whitelist=["a@b.com"]
     )
     assert len(list(big_csv.initial_annotated_rows)) == 3
     assert len(list(big_csv.initial_annotated_rows_with_errors)) == 100

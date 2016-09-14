@@ -2,6 +2,7 @@ import re
 import sys
 import csv
 from contextlib import suppress
+from functools import lru_cache
 
 from flask import Markup
 
@@ -64,16 +65,20 @@ class RecipientCSV():
     def placeholders(self, value):
         try:
             self._placeholders = list(value)
+            self.placeholders_as_column_keys = [
+                Columns.make_key(placeholder) for placeholder in value
+            ]
         except TypeError:
-            self._placeholders = []
+            self._placeholders, self.placeholders_as_column_keys = [], []
 
     @property
-    def placeholders_as_column_keys(self):
-        return [Columns.make_key(placeholder) for placeholder in self.placeholders]
+    def template_type(self):
+        return self._template_type
 
-    @property
-    def recipient_column_header(self):
-        return first_column_heading[self.template_type]
+    @template_type.setter
+    def template_type(self, value):
+        self._template_type = value
+        self.recipient_column_header = first_column_heading[self.template_type]
 
     @property
     def has_errors(self):
@@ -337,6 +342,7 @@ def validate_recipient(recipient, template_type):
     }[template_type](recipient)
 
 
+@lru_cache(maxsize=32, typed=False)
 def format_recipient(recipient):
     with suppress(InvalidPhoneError):
         return validate_and_format_phone_number(recipient)
