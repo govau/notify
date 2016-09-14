@@ -195,12 +195,12 @@ class TestNotifyMarkdown():
             '2. two\n'
             '3. three\n'
         ) == (
-            '<ol style="Margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: decimal;">'
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">one</li>'
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">two</li>'
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">three</li>'
             '</ol>'
         )
@@ -211,12 +211,12 @@ class TestNotifyMarkdown():
             '* two\n'
             '* three\n'
         ) == (
-            '<ul style="Margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: disc;">'
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">one</li>'
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">two</li>'
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">three</li>'
             '</ul>'
         )

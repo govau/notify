@@ -96,13 +96,13 @@ class NotifyMarkdownRenderer(mistune.Renderer):
 
     def list(self, body, ordered=True):
         return (
-            '<ol style="Margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: decimal;">'
+            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
             '{}'
             '</ol>'
         ).format(
             body
         ) if ordered else (
-            '<ul style="Margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: disc;">'
+            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
             '{}'
             '</ul>'
         ).format(
@@ -111,7 +111,7 @@ class NotifyMarkdownRenderer(mistune.Renderer):
 
     def list_item(self, text):
         return (
-            '<li style="Margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">'
             '{}'
             '</li>'
