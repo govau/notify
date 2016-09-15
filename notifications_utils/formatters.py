@@ -70,7 +70,7 @@ class NotifyMarkdownRenderer(mistune.Renderer):
     def block_quote(self, text):
         return (
             '<blockquote '
-            'style="margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
+            'style="Margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
             'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;"'
             '>'
             '{}'
@@ -82,7 +82,7 @@ class NotifyMarkdownRenderer(mistune.Renderer):
     def header(self, text, level, raw=None):
         if level == 1:
             return (
-                '<h2 style="margin: 0 0 20px 0; padding: 0; '
+                '<h2 style="Margin: 0 0 20px 0; padding: 0; '
                 'font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;">'
                 '{}'
                 '</h2>'
@@ -96,13 +96,13 @@ class NotifyMarkdownRenderer(mistune.Renderer):
 
     def list(self, body, ordered=True):
         return (
-            '<ol style="margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: decimal;">'
+            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
             '{}'
             '</ol>'
         ).format(
             body
         ) if ordered else (
-            '<ul style="margin: 0 0 20px 0; padding: 0 0 0 20px; list-style-type: disc;">'
+            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
             '{}'
             '</ul>'
         ).format(
@@ -111,7 +111,7 @@ class NotifyMarkdownRenderer(mistune.Renderer):
 
     def list_item(self, text):
         return (
-            '<li style="margin: 5px 0; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
             'line-height: 25px; color: #0B0C0C;">'
             '{}'
             '</li>'
@@ -122,7 +122,7 @@ class NotifyMarkdownRenderer(mistune.Renderer):
     def paragraph(self, text):
         if text.strip():
             return (
-                '<p style="margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">{}</p>'
+                '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">{}</p>'
             ).format(
                 text
             )
