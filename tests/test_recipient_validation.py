@@ -64,6 +64,7 @@ email_addresses = sum([
     ] for valid, group in [
         (True, (
             'email@domain.com',
+            'email@domain.COM',
             'firstname.lastname@domain.com',
             'email@subdomain.domain.com',
             'firstname+lastname@domain.com',
@@ -75,7 +76,8 @@ email_addresses = sum([
             '_______@domain.com',
             'email@domain.name',
             'email@domain.co.jp',
-            'firstname-lastname@domain.com'
+            'firstname-lastname@domain.com',
+            'email@domain.gov;uk',
         )),
         (False, (
             'plainaddress',
@@ -85,6 +87,7 @@ email_addresses = sum([
             'email.domain.com',
             'email@domain@domain.com',
             'email@domain',
+            'email@domain.com;',
         ))
     ]
 ], [])
