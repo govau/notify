@@ -15,7 +15,9 @@ first_column_heading = {
     'sms': 'phone number'
 }
 
-email_regex = re.compile(r"(^[^\@^\s]+@[^\@^\s]+(\.[^\@^\.^\s]+)$)")
+
+# liberated from https://github.com/clones/wtforms/blob/da7a918c/wtforms/validators.py#L214
+email_regex = re.compile(r"^.+@[^.].*\.[a-z]{2,10}$", flags=re.IGNORECASE)
 
 
 class RecipientCSV():
