@@ -18,7 +18,8 @@ first_column_heading = {
 
 # liberated from https://github.com/clones/wtforms/blob/da7a918c/wtforms/validators.py#L214
 # with minor tweaks for SES compatibility - don't allow any double quotes or semicolons to prevent Technical Failures
-email_regex = re.compile(r'^[^";]+@[^";]*\.[a-z]{2,10}$', flags=re.IGNORECASE)
+# and don't allow multiple @ signs (we also don't allow consecutive ..s)
+email_regex = re.compile(r'^[^";@]+@[^";@]*\.[a-z]{2,10}$', flags=re.IGNORECASE)
 
 
 class RecipientCSV():
@@ -325,7 +326,7 @@ def validate_and_format_phone_number(number, human_readable=False):
 
 
 def validate_email_address(email_address):
-    if not re.match(email_regex, email_address):
+    if not re.match(email_regex, email_address) or '..' in email_address:
         raise InvalidEmailError('Not a valid email address')
     return email_address
 
