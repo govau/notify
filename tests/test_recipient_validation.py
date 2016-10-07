@@ -58,39 +58,37 @@ invalid_phone_numbers = sum([
     ]
 ], [])
 
-email_addresses = sum([
-    [
-        (email_address, valid) for email_address in group
-    ] for valid, group in [
-        (True, (
-            'email@domain.com',
-            'email@domain.COM',
-            'firstname.lastname@domain.com',
-            'email@subdomain.domain.com',
-            'firstname+lastname@domain.com',
-            '"email"@domain.com',
-            '1234567890@domain.com',
-            'email@domain-one.com',
-            '_______@domain.com',
-            'email@domain.name',
-            'email@domain.co.jp',
-            'firstname-lastname@domain.com',
-            '#@%^%#$@#$@#.com',
-            'email@domain@domain.com',
-        )),
-        (False, (
-            'email@123.123.123.123',
-            'email@[123.123.123.123]',
-            'plainaddress',
-            '@domain.com',
-            'Jo Smith <email@domain.com>',
-            'email.domain.com',
-            'email@domain',
-            'email@domain.co;uk',
-            'email@domain.com;',
-        ))
-    ]
-], [])
+valid_email_addresses = (
+    'email@domain.com',
+    'email@domain.COM',
+    'firstname.lastname@domain.com',
+    'email@subdomain.domain.com',
+    'firstname+lastname@domain.com',
+    '1234567890@domain.com',
+    'email@domain-one.com',
+    '_______@domain.com',
+    'email@domain.name',
+    'email@domain.co.jp',
+    'firstname-lastname@domain.com',
+    '#@%^%#$@#$@#.com',
+    'email+lots-of-dots@domain..gov..uk',
+    'email@domain@domain.com',
+)
+invalid_email_addresses = (
+    'email@123.123.123.123',
+    'email@[123.123.123.123]',
+    'plainaddress',
+    '@no-local-part.com',
+    'Outlook Contact <outlook-contact@domain.com>',
+    'no-at.domain.com',
+    'no-tld@domain',
+    'middle-semicolon@domain.co;uk',
+    'trailing-semicolon@domain.com;',
+    '"email+leading-quotes@domain.com',
+    'email+middle"-quotes@domain.com',
+    '"quoted-local-part"@domain.com',
+    '"quoted@domain.com"',
+)
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
@@ -115,13 +113,15 @@ def test_phone_number_rejects_invalid_values(phone_number, error_message):
     assert error_message == str(e.value)
 
 
-@pytest.mark.parametrize("email_address,is_valid", email_addresses)
-def test_validates_email_addresses(email_address, is_valid):
-    if is_valid:
+@pytest.mark.parametrize("email_address", valid_email_addresses)
+def test_validate_email_address_accepts_valid(email_address):
+    assert validate_email_address(email_address) == email_address
+
+
+@pytest.mark.parametrize("email_address", invalid_email_addresses)
+def test_validate_email_address_raises_for_invalid(email_address):
+    with pytest.raises(InvalidEmailError) as e:
         validate_email_address(email_address)
-    else:
-        with pytest.raises(InvalidEmailError) as e:
-            validate_email_address(email_address)
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
@@ -130,7 +130,6 @@ def test_validates_against_whitelist_of_phone_numbers(phone_number):
     assert not allowed_to_send_to(phone_number, ['07700900460', '07700900461', 'test@example.com'])
 
 
-@pytest.mark.parametrize("email_address,is_valid", email_addresses)
-def test_validates_against_whitelist_of_email_addresses(email_address, is_valid):
-    if is_valid:
-        assert not allowed_to_send_to(email_address, ['very_special_and_unique@example.com'])
+@pytest.mark.parametrize("email_address", valid_email_addresses)
+def test_validates_against_whitelist_of_email_addresses(email_address):
+    assert not allowed_to_send_to(email_address, ['very_special_and_unique@example.com'])
