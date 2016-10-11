@@ -22,6 +22,10 @@ function display_result {
   fi
 }
 
+if [ -d venv ]; then
+  source ./venv/bin/activate
+fi
+
 pep8 .
 display_result $? 1 "Code style check"
 
@@ -29,5 +33,5 @@ display_result $? 1 "Code style check"
 #py.test --cov=client tests/
 #display_result $? 2 "Code coverage"
 
-py.test -v
+py.test -v tests/
 display_result $? 3 "Unit tests"
