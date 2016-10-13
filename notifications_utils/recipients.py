@@ -55,7 +55,7 @@ class RecipientCSV():
 
     def __len__(self):
         if not hasattr(self, '_len'):
-            self._len = len(self.annotated_rows)
+            self._len = len(list(self.rows))
         return self._len
 
     @property
@@ -157,6 +157,8 @@ class RecipientCSV():
         return len(self) > self.max_rows
 
     def get_annotated_rows(self):
+        if self.too_many_rows:
+            return []
         for row_index, row in enumerate(self.rows):
             if self.template:
                 self.template.values = dict(row.items())

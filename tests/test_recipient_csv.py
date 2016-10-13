@@ -352,6 +352,7 @@ def test_errors_when_too_many_rows():
     assert RecipientCSV.max_rows == 50000
     assert recipients.too_many_rows is True
     assert recipients.has_errors is True
+    assert recipients.annotated_rows == []
 
 
 @pytest.mark.parametrize(
