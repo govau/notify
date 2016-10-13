@@ -30,6 +30,8 @@ class RecipientCSV():
         'skipinitialspace': True
     }
 
+    max_rows = 50000
+
     def __init__(
         self,
         file_data,
