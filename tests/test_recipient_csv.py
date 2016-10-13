@@ -344,6 +344,16 @@ def test_bad_or_missing_data(file_contents, rows_with_bad_recipients, rows_with_
     assert recipients.has_errors is True
 
 
+def test_errors_when_too_many_rows():
+    recipients = RecipientCSV(
+        "email address\n" + ("a@b.com\n" * (RecipientCSV.max_rows + 1)),
+        template_type='email'
+    )
+    assert RecipientCSV.max_rows == 50000
+    assert recipients.too_many_rows is True
+    assert recipients.has_errors is True
+
+
 @pytest.mark.parametrize(
     "file_contents,template_type,whitelist,count_of_rows_with_errors",
     [

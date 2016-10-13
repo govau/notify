@@ -92,6 +92,7 @@ class RecipientCSV():
         return bool(
             self.missing_column_headers or
             self.more_rows_than_can_send or
+            self.too_many_rows or
             (not self.allowed_to_send_to) or
             self.rows_with_missing_data or
             self.rows_with_bad_recipients or
@@ -145,6 +146,10 @@ class RecipientCSV():
     @property
     def more_rows_than_can_send(self):
         return len(self.annotated_rows) > self.remaining_messages
+
+    @property
+    def too_many_rows(self):
+        return len(self.annotated_rows) > self.max_rows
 
     def get_annotated_rows(self):
         for row_index, row in enumerate(self.rows):
