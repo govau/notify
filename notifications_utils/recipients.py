@@ -17,9 +17,10 @@ first_column_heading = {
 
 
 # liberated from https://github.com/clones/wtforms/blob/da7a918c/wtforms/validators.py#L214
-# with minor tweaks for SES compatibility - don't allow any double quotes or semicolons to prevent Technical Failures
-# and don't allow multiple @ signs (we also don't allow consecutive ..s)
-email_regex = re.compile(r'^[^";@]+@[^";@]*\.[a-z]{2,10}$', flags=re.IGNORECASE)
+# with minor tweaks for SES compatibility - don't allow any spaces, double quotes or semicolons, or
+# multiple @ signs (we also don't allow consecutive ..s) [to prevent technical failures]. Also don't allow underscores
+# in the domain as that's also banned
+email_regex = re.compile(r'^[^\s";@]+@[^\s";@_]*\.[a-z]{2,10}$', flags=re.IGNORECASE)
 
 
 class RecipientCSV():
