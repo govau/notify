@@ -53,6 +53,11 @@ class RecipientCSV():
         self.annotated_rows = list(self.get_annotated_rows())
         self.remaining_messages = remaining_messages
 
+    def __len__(self):
+        if not hasattr(self, '_len'):
+            self._len = len(self.annotated_rows)
+        return self._len
+
     @property
     def whitelist(self):
         return self._whitelist
@@ -145,11 +150,11 @@ class RecipientCSV():
 
     @property
     def more_rows_than_can_send(self):
-        return len(self.annotated_rows) > self.remaining_messages
+        return len(self) > self.remaining_messages
 
     @property
     def too_many_rows(self):
-        return len(self.annotated_rows) > self.max_rows
+        return len(self) > self.max_rows
 
     def get_annotated_rows(self):
         for row_index, row in enumerate(self.rows):
