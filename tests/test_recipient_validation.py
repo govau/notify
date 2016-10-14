@@ -62,6 +62,7 @@ valid_email_addresses = (
     'email@domain.com',
     'email@domain.COM',
     'firstname.lastname@domain.com',
+    'firstname.o\'lastname@domain.com',
     'email@subdomain.domain.com',
     'firstname+lastname@domain.com',
     '1234567890@domain.com',
@@ -88,6 +89,9 @@ invalid_email_addresses = (
     '"quoted@domain.com"',
     'lots-of-dots@domain..gov..uk',
     'multiple@domains@domain.com',
+    'spaces in local@domain.com',
+    'spaces-in-domain@dom ain.com',
+    'underscores-in-domain@dom_ain.com',
     # this is technically valid (and accepted by SES), however we have made a conscious decision to block it
     # to keep validation leaner
     'technically..valid@domain.com',
