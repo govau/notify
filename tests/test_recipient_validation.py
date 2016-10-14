@@ -62,6 +62,7 @@ valid_email_addresses = (
     'email@domain.com',
     'email@domain.COM',
     'firstname.lastname@domain.com',
+    'firstname.o\'lastname@domain.com',
     'email@subdomain.domain.com',
     'firstname+lastname@domain.com',
     '1234567890@domain.com',
