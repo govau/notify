@@ -139,7 +139,7 @@ def test_get_annotated_rows_with_errors():
 
 def test_big_list():
     big_csv = RecipientCSV(
-        "email address,name\n" + ("a@b.com\n"*100000),
+        "email address,name\n" + ("a@b.com\n" * RecipientCSV.max_rows),
         template_type='email',
         placeholders=['name'],
         max_errors_shown=100,
@@ -148,7 +148,7 @@ def test_big_list():
     )
     assert len(list(big_csv.initial_annotated_rows)) == 3
     assert len(list(big_csv.initial_annotated_rows_with_errors)) == 100
-    assert len(list(big_csv.rows)) == 100000
+    assert len(list(big_csv.rows)) == RecipientCSV.max_rows
     assert big_csv.has_errors
 
 
@@ -342,6 +342,17 @@ def test_bad_or_missing_data(file_contents, rows_with_bad_recipients, rows_with_
     assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
     assert recipients.rows_with_missing_data == rows_with_missing_data
     assert recipients.has_errors is True
+
+
+def test_errors_when_too_many_rows():
+    recipients = RecipientCSV(
+        "email address\n" + ("a@b.com\n" * (RecipientCSV.max_rows + 1)),
+        template_type='email'
+    )
+    assert RecipientCSV.max_rows == 50000
+    assert recipients.too_many_rows is True
+    assert recipients.has_errors is True
+    assert recipients.annotated_rows == []
 
 
 @pytest.mark.parametrize(

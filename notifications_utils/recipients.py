@@ -30,6 +30,8 @@ class RecipientCSV():
         'skipinitialspace': True
     }
 
+    max_rows = 50000
+
     def __init__(
         self,
         file_data,
@@ -50,6 +52,11 @@ class RecipientCSV():
         self.template = template if isinstance(template, Template) else None
         self.annotated_rows = list(self.get_annotated_rows())
         self.remaining_messages = remaining_messages
+
+    def __len__(self):
+        if not hasattr(self, '_len'):
+            self._len = len(list(self.rows))
+        return self._len
 
     @property
     def whitelist(self):
@@ -90,6 +97,7 @@ class RecipientCSV():
         return bool(
             self.missing_column_headers or
             self.more_rows_than_can_send or
+            self.too_many_rows or
             (not self.allowed_to_send_to) or
             self.rows_with_missing_data or
             self.rows_with_bad_recipients or
@@ -142,9 +150,15 @@ class RecipientCSV():
 
     @property
     def more_rows_than_can_send(self):
-        return len(self.annotated_rows) > self.remaining_messages
+        return len(self) > self.remaining_messages
+
+    @property
+    def too_many_rows(self):
+        return len(self) > self.max_rows
 
     def get_annotated_rows(self):
+        if self.too_many_rows:
+            return []
         for row_index, row in enumerate(self.rows):
             if self.template:
                 self.template.values = dict(row.items())
