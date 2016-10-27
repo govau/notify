@@ -125,6 +125,10 @@ def test_validate_email_address_accepts_valid(email_address):
     assert validate_email_address(email_address) == email_address
 
 
+def test_validate_email_address_strips_whitespace():
+    assert validate_email_address('email@domain.com ') == 'email@domain.com'
+
+
 @pytest.mark.parametrize("email_address", invalid_email_addresses)
 def test_validate_email_address_raises_for_invalid(email_address):
     with pytest.raises(InvalidEmailError) as e:

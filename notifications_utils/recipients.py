@@ -341,6 +341,7 @@ def validate_and_format_phone_number(number, human_readable=False):
 
 
 def validate_email_address(email_address):
+    email_address = email_address.strip()
     if not re.match(email_regex, email_address) or '..' in email_address:
         raise InvalidEmailError('Not a valid email address')
     return email_address
