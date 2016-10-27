@@ -18,7 +18,7 @@ first_column_heading = {
 # regexes for use in validate_email_address
 email_regex = re.compile(r'^[^\s";@]+@([^.@][^@]+)$', flags=re.IGNORECASE)
 hostname_part = re.compile(r'^(xn-|[a-z0-9]+)(-[a-z0-9]+)*$', re.IGNORECASE)
-tld_part = re.compile(r'^([a-z]{2,20}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECASE)
+tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECASE)
 
 
 class RecipientCSV():

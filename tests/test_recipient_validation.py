@@ -73,6 +73,7 @@ valid_email_addresses = (
     'email@domain.co.jp',
     'firstname-lastname@domain.com',
     'info@german-financial-services.vermögensberatung',
+    'info@german-financial-services.reallylongarbitrarytldthatiswaytoohugejustincase',
     'japanese-info@例え.テスト',
     'technically..valid@domain.com',
 )
@@ -126,7 +127,7 @@ def test_validate_email_address_accepts_valid(email_address):
     try:
         assert validate_email_address(email_address) == email_address
     except InvalidEmailError:
-        pytest.fail('Unexpected InvalidPhoneError')
+        pytest.fail('Unexpected InvalidEmailError')
 
 
 def test_validate_email_address_strips_whitespace():
@@ -135,7 +136,7 @@ def test_validate_email_address_strips_whitespace():
 
 @pytest.mark.parametrize("email_address", invalid_email_addresses)
 def test_validate_email_address_raises_for_invalid(email_address):
-    with pytest.raises(InvalidEmailError) as e:
+    with pytest.raises(InvalidEmailError):
         validate_email_address(email_address)
 
 
