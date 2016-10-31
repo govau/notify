@@ -12,7 +12,7 @@ govuk_not_a_link = re.compile(
 )
 
 single_newlines = re.compile(
-    r'^(.+)\n([^\s])',
+    r'^(.+)\n(?=[^\n])',
     re.MULTILINE
 )
 
@@ -44,9 +44,8 @@ def linkify(text):
 def prepare_newlines_for_markdown(text):
     return re.sub(
         single_newlines,
-        lambda match: '{}  \n{}'.format(
-            match.group(1),
-            match.group(2)
+        lambda match: '{}  \n'.format(
+            match.group(1).strip()
         ),
         text
     )
