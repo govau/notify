@@ -69,9 +69,13 @@ valid_email_addresses = (
     'email@domain-one.com',
     '_______@domain.com',
     'email@domain.name',
+    'email@domain.superlongtld',
     'email@domain.co.jp',
     'firstname-lastname@domain.com',
-    '#%^%#$@#$#.com',
+    'info@german-financial-services.vermögensberatung',
+    'info@german-financial-services.reallylongarbitrarytldthatiswaytoohugejustincase',
+    'japanese-info@例え.テスト',
+    'technically..valid@domain.com',
 )
 invalid_email_addresses = (
     'email@123.123.123.123',
@@ -81,6 +85,7 @@ invalid_email_addresses = (
     'Outlook Contact <outlook-contact@domain.com>',
     'no-at.domain.com',
     'no-tld@domain',
+    ';beginning-semicolon@domain.co.uk',
     'middle-semicolon@domain.co;uk',
     'trailing-semicolon@domain.com;',
     '"email+leading-quotes@domain.com',
@@ -92,9 +97,6 @@ invalid_email_addresses = (
     'spaces in local@domain.com',
     'spaces-in-domain@dom ain.com',
     'underscores-in-domain@dom_ain.com',
-    # this is technically valid (and accepted by SES), however we have made a conscious decision to block it
-    # to keep validation leaner
-    'technically..valid@domain.com',
 )
 
 
@@ -122,12 +124,19 @@ def test_phone_number_rejects_invalid_values(phone_number, error_message):
 
 @pytest.mark.parametrize("email_address", valid_email_addresses)
 def test_validate_email_address_accepts_valid(email_address):
-    assert validate_email_address(email_address) == email_address
+    try:
+        assert validate_email_address(email_address) == email_address
+    except InvalidEmailError:
+        pytest.fail('Unexpected InvalidEmailError')
+
+
+def test_validate_email_address_strips_whitespace():
+    assert validate_email_address('email@domain.com ') == 'email@domain.com'
 
 
 @pytest.mark.parametrize("email_address", invalid_email_addresses)
 def test_validate_email_address_raises_for_invalid(email_address):
-    with pytest.raises(InvalidEmailError) as e:
+    with pytest.raises(InvalidEmailError):
         validate_email_address(email_address)
 
 

@@ -15,12 +15,10 @@ first_column_heading = {
     'sms': 'phone number'
 }
 
-
-# liberated from https://github.com/clones/wtforms/blob/da7a918c/wtforms/validators.py#L214
-# with minor tweaks for SES compatibility - don't allow any spaces, double quotes or semicolons, or
-# multiple @ signs (we also don't allow consecutive ..s) [to prevent technical failures]. Also don't allow underscores
-# in the domain as that's also banned
-email_regex = re.compile(r'^[^\s";@]+@[^\s";@_]*\.[a-z]{2,10}$', flags=re.IGNORECASE)
+# regexes for use in validate_email_address
+email_regex = re.compile(r'^[^\s";@]+@([^.@][^@]+)$')
+hostname_part = re.compile(r'^(xn-|[a-z0-9]+)(-[a-z0-9]+)*$', re.IGNORECASE)
+tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECASE)
 
 
 class RecipientCSV():
@@ -288,8 +286,8 @@ class RecipientCSV():
 
 
 class InvalidEmailError(Exception):
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, message=None):
+        self.message = message or 'Not a valid email address.'
 
 
 class InvalidPhoneError(InvalidEmailError):
@@ -341,13 +339,42 @@ def validate_and_format_phone_number(number, human_readable=False):
 
 
 def validate_email_address(email_address):
-    if not re.match(email_regex, email_address) or '..' in email_address:
-        raise InvalidEmailError('Not a valid email address')
+    # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
+    # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
+    # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
+    email_address = email_address.strip()
+    match = re.match(email_regex, email_address)
+
+    # not an email
+    if not match:
+        raise InvalidEmailError
+
+    hostname = match.group(1)
+    # don't allow consecutive periods in domain names
+    if '..' in hostname:
+        raise InvalidEmailError
+
+    # idna = "Internationalized domain name" - this encode/decode cycle converts unicode into its accurate ascii
+    # representation as the web uses. '例え.テスト'.encode('idna') == b'xn--r8jz45g.xn--zckzah'
+    hostname = hostname.encode('idna').decode('ascii')
+    parts = hostname.split('.')
+
+    if len(hostname) > 253 or len(parts) < 2:
+        raise InvalidEmailError
+
+    for part in parts:
+        if not part or len(part) > 63 or not hostname_part.match(part):
+            raise InvalidEmailError
+
+    # if the part after the last . is not a valid TLD then bail out
+    if not tld_part.match(parts[-1]):
+        raise InvalidEmailError
+
     return email_address
 
 
 def format_email_address(email_address):
-    return email_address.strip().lower()
+    return email_address.lower()
 
 
 def validate_and_format_email_address(email_address):
