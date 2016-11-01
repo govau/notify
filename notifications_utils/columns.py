@@ -30,6 +30,11 @@ class Columns():
     def keys(self):
         return self._dict.keys()
 
+    def as_dict_with_keys(self, keys):
+        return {
+            key: self.get(key) for key in keys
+        }
+
     @staticmethod
     @lru_cache(maxsize=32, typed=False)
     def make_key(original_key):
