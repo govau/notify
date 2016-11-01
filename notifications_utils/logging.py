@@ -1,10 +1,12 @@
-from flask import request, current_app, g
-from flask.ctx import has_request_context
 from itertools import product
 import re
-from pythonjsonlogger.jsonlogger import JsonFormatter as BaseJSONFormatter
 import sys
-from monotonic import monotonic
+
+from flask import request, current_app, g
+from flask.ctx import has_request_context
+from pythonjsonlogger.jsonlogger import JsonFormatter as BaseJSONFormatter
+from time import monotonic
+
 import logging
 
 LOG_FORMAT = '%(asctime)s %(app_name)s %(name)s %(levelname)s ' \
