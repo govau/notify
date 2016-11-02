@@ -46,6 +46,21 @@ def test_errors_for_invalid_values(values):
         Template({"content": ''}, values)
 
 
+def test_matches_keys_to_placeholder_names():
+
+    template = Template({"content": "hello ((name))"})
+
+    template.values = {'NAME': 'Chris'}
+    assert template.values == {'name': 'Chris'}
+
+    template.values = {'NAME': 'Chris', 'Town': 'London'}
+    assert template.values == {'name': 'Chris', 'Town': 'London'}
+    assert template.additional_data == {'Town'}
+
+    template.values = None
+    assert template.missing_data == ['name']
+
+
 @pytest.mark.parametrize(
     "template_content,expected_formatted,expected_replaced", [
         ("", "", ""),
