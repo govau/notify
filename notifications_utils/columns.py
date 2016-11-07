@@ -15,6 +15,9 @@ class Columns():
     def __getitem__(self, key):
         return self.get(key)
 
+    def __dict__(self):
+        return self._dict
+
     def get(self, key, default=None):
         return self._dict.get(Columns.make_key(key), default)
 
