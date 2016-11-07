@@ -4,7 +4,7 @@ from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
 from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError, str2bool
-from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, PassThrough
+from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, LetterPreview, PassThrough
 
 
 def test_class():
@@ -56,12 +56,19 @@ def test_sets_default_renderer():
 @pytest.mark.parametrize("template_type, expected_renderer", [
     ('sms', SMSPreview),
     ('email', EmailPreview),
+    ('letter', LetterPreview)
 ])
 def test_sets_correct_renderer(template_type, expected_renderer):
     assert isinstance(
         Template({'content': '', 'template_type': template_type}).renderer,
         expected_renderer
     )
+
+
+def test_passes_subject_through_to_letter_renderer():
+    assert Template(
+        {'content': '', 'template_type': 'letter', 'subject': 'Your thing is due'}
+    ).renderer.subject == 'Your thing is due'
 
 
 def test_matches_keys_to_placeholder_names():
