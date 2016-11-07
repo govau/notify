@@ -61,6 +61,10 @@ def add_prefix(body, prefix=None):
     return body
 
 
+def prepend_subject(body, subject):
+    return '# {}\n\n{}'.format(subject, body)
+
+
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):

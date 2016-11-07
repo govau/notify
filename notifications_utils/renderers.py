@@ -8,7 +8,8 @@ from notifications_utils.formatters import (
     add_prefix,
     notify_email_markdown,
     notify_letter_preview_markdown,
-    prepare_newlines_for_markdown
+    prepare_newlines_for_markdown,
+    prepend_subject
 )
 
 
@@ -103,9 +104,14 @@ class HTMLEmail():
 
 class LetterPreview(PassThrough):
 
+    def __init__(self, subject):
+        self.subject = subject
+
     def __call__(self, body):
         return Take(
             body
+        ).then(
+            prepend_subject, self.subject
         ).then(
             prepare_newlines_for_markdown
         ).then(
