@@ -3,7 +3,7 @@ from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
 )
 from notifications_utils.formatters import (
-    unlink_govuk_escaped, linkify, notify_email_markdown, prepare_newlines_for_markdown
+    unlink_govuk_escaped, linkify, notify_email_markdown, notify_letter_preview_markdown, prepare_newlines_for_markdown
 )
 
 
@@ -155,12 +155,21 @@ def test_sms_preview_adds_newlines():
     """) == "the<br>        quick<br><br>        brown fox"
 
 
+@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
 class TestNotifyMarkdown():
 
+    def __init__(self, markdown_function):
+        self.markdown_function = markdown_function
+
     def test_block_code(self):
-        assert notify_email_markdown('```\nprint("hello")\n```') == 'print("hello")'
+        assert self.markdown_function('```\nprint("hello")\n```') == 'print("hello")'
 
     def test_block_quote(self):
+        assert notify_letter_preview_markdown('^ inset text') == (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            'inset text'
+            '</p>'
+        )
         assert notify_email_markdown('^ inset text') == (
             '<blockquote '
             'style="Margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
@@ -171,7 +180,7 @@ class TestNotifyMarkdown():
         )
 
     def test_level_1_header(self):
-        assert notify_email_markdown('# heading') == (
+        assert self.markdown_function('# heading') == (
             '<h2 style="Margin: 0 0 20px 0; padding: 0; font-size: 27px; '
             'line-height: 35px; font-weight: bold; color: #0B0C0C;">'
             'heading'
@@ -179,24 +188,24 @@ class TestNotifyMarkdown():
         )
 
     def test_level_2_header(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             '## inset text'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
         )
 
     def test_hrule(self):
-        assert notify_email_markdown('a\n\n***\n\nb') == (
+        assert self.markdown_function('a\n\n***\n\nb') == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
         )
-        assert notify_email_markdown('a\n\n---\n\nb') == (
+        assert self.markdown_function('a\n\n---\n\nb') == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
         )
 
     def test_ordered_list(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             '1. one\n'
             '2. two\n'
             '3. three\n'
@@ -212,7 +221,7 @@ class TestNotifyMarkdown():
         )
 
     def test_unordered_list(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             '* one\n'
             '* two\n'
             '* three\n'
@@ -228,7 +237,7 @@ class TestNotifyMarkdown():
         )
 
     def test_paragraphs(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             'line one\n'
             'line two\n'
             '\n'
@@ -240,7 +249,7 @@ class TestNotifyMarkdown():
         )
 
     def test_table(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             'col | col\n'
             '----|----\n'
             'val | val\n'
@@ -249,14 +258,14 @@ class TestNotifyMarkdown():
         )
 
     def test_autolink(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             'http://example.com'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'
         )
 
     def test_codespan(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             'variable called `thing`'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
@@ -264,28 +273,28 @@ class TestNotifyMarkdown():
         )
 
     def test_double_emphasis(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             'something **important**'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
         )
 
     def test_emphasis(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             'something *important*'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
         )
 
     def test_image(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             '![alt text](http://example.com/image.png)'
         ) == (
             ''
         )
 
     def test_link(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             '[Example](http://example.com)'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
@@ -293,7 +302,7 @@ class TestNotifyMarkdown():
         )
 
     def test_strikethrough(self):
-        assert notify_email_markdown(
+        assert self.markdown_function(
             '~~Strike~~'
         ) == (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">Strike</p>'
