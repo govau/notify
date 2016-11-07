@@ -1,6 +1,7 @@
 import pytest
+import mock
 from notifications_utils.renderers import (
-    PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, unlink_govuk_escaped, linkify
+    PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, LetterPreview, unlink_govuk_escaped, linkify
 )
 
 
@@ -172,3 +173,15 @@ def test_sms_preview_adds_newlines():
 
         brown fox
     """) == "the<br>        quick<br><br>        brown fox"
+
+
+@mock.patch('notifications_utils.renderers.unlink_govuk_escaped')
+@mock.patch('notifications_utils.renderers.linkify')
+@mock.patch('notifications_utils.renderers.notify_letter_preview_markdown', return_value='Bar')
+@mock.patch('notifications_utils.renderers.prepare_newlines_for_markdown', return_value='Baz')
+def test_letter_preview_renderer(prepare_newlines, letter_markdown, linkify, unlink_govuk):
+    assert LetterPreview()('Foo') == 'Bar'
+    prepare_newlines.assert_called_once_with('Foo')
+    letter_markdown.assert_called_once_with('Baz')
+    linkify.assert_not_called()
+    unlink_govuk.assert_not_called()
