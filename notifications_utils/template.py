@@ -49,15 +49,9 @@ class Template():
         self.encoding = encoding
         self.content_character_limit = content_character_limit
         self._template = template
-        if not renderer:
-            self.renderer = (
-                SMSPreview(
-                    prefix=prefix,
-                    sender=sms_sender
-                ) if self.template_type == 'sms' else EmailPreview()
-            )
-        else:
-            self.renderer = renderer
+        self._prefix = prefix
+        self._sms_sender = sms_sender
+        self.renderer = renderer
 
     def __str__(self):
         if self.values:
@@ -66,6 +60,24 @@ class Template():
 
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
+
+    @property
+    def renderer(self):
+        return self._renderer
+
+    @renderer.setter
+    def renderer(self, value):
+        if not value:
+            self._renderer = (
+                SMSPreview(
+                    prefix=self._prefix,
+                    sender=self._sms_sender
+                )
+                if self.template_type == 'sms' else
+                EmailPreview()
+            )
+        else:
+            self._renderer = value
 
     def get_match(self, match):
         if match[1] and match[2]:
