@@ -12,7 +12,8 @@ from notifications_utils.columns import Columns
 
 first_column_heading = {
     'email': 'email address',
-    'sms': 'phone number'
+    'sms': 'phone number',
+    'letter': 'address_line_1'
 }
 
 # regexes for use in validate_email_address
@@ -384,7 +385,8 @@ def validate_and_format_email_address(email_address):
 def validate_recipient(recipient, template_type):
     return {
         'email': validate_email_address,
-        'sms': validate_phone_number
+        'sms': validate_phone_number,
+        'letter': lambda recipient: True
     }[template_type](recipient)
 
 
