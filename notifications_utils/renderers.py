@@ -6,7 +6,7 @@ from notifications_utils.formatters import (
     linkify,
     nl2br,
     add_prefix,
-    notify_markdown,
+    notify_email_markdown,
     prepare_newlines_for_markdown
 )
 
@@ -61,7 +61,7 @@ class EmailPreview(PassThrough):
         ).then(
             prepare_newlines_for_markdown
         ).then(
-            notify_markdown
+            notify_email_markdown
         ).as_string
 
 

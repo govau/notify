@@ -61,7 +61,7 @@ def add_prefix(body, prefix=None):
     return body
 
 
-class NotifyMarkdownRenderer(mistune.Renderer):
+class NotifyEmailMarkdownRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):
         return code
@@ -167,4 +167,4 @@ class NotifyMarkdownRenderer(mistune.Renderer):
         return text
 
 
-notify_markdown = mistune.Markdown(renderer=NotifyMarkdownRenderer())
+notify_email_markdown = mistune.Markdown(renderer=NotifyEmailMarkdownRenderer())
