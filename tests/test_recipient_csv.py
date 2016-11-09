@@ -317,7 +317,7 @@ def test_column_headers(file_contents, template_type, expected, expected_highlig
     ]
 )
 def test_recipient_column(placeholders, file_contents, template_type):
-    assert RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders).has_recipient_column
+    assert RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders).has_recipient_columns
 
 
 @pytest.mark.parametrize(
