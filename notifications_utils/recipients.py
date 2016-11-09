@@ -13,7 +13,23 @@ from notifications_utils.columns import Columns
 first_column_headings = {
     'email': ['email address'],
     'sms': ['phone number'],
-    'letter': ['address_line_1'],
+    'letter': [
+        'address line 1',
+        'address line 2',
+        'address line 3',
+        'address line 4',
+        'address line 5',
+        'address line 6',
+        'postcode',
+    ],
+}
+
+optional_address_columns = {
+    'address line 2',
+    'address line 3',
+    'address line 4',
+    'address line 5'
+    'address line 6'
 }
 
 # regexes for use in validate_email_address

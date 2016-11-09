@@ -284,6 +284,15 @@ def test_get_recipient_respects_order(file_contents,
             ['email address', 'colour'],
             ['email address', 'colour'],
             set(['name'])
+        ),
+        (
+            """
+                address_line_1, address_line_2, name
+            """,
+            'letter',
+            ['address_line_1', 'address_line_2', 'name'],
+            ['address_line_1', 'address_line_2', Markup('<span class=\'placeholder\'>((name))</span>')],
+            set(['postcode', 'address line 3', 'address line 4', 'address line 5', 'address line 6'])
         )
     ]
 )
@@ -308,12 +317,21 @@ def test_column_headers(file_contents, template_type, expected, expected_highlig
         pytest.mark.xfail(('', 'sms')),
         pytest.mark.xfail(('name', 'sms')),
         pytest.mark.xfail(('email address', 'sms')),
+        pytest.mark.xfail((
+            # missing postcode
+            'address_line_1, address_line_2, address_line_3, address_line_4, address_line_5',
+            'letter'
+        )),
         ('phone number', 'sms'),
         ('phone number,name', 'sms'),
         ('email address', 'email'),
         ('email address,name', 'email'),
         ('PHONENUMBER', 'sms'),
-        ('email_address', 'email')
+        ('email_address', 'email'),
+        (
+            'address_line_1, address_line_2, address_line_3, address_line_4, address_line_5, address_line_6, postcode',
+            'letter'
+        ),
     ]
 )
 def test_recipient_column(placeholders, file_contents, template_type):
