@@ -126,6 +126,8 @@ class RecipientCSV():
 
     @property
     def allowed_to_send_to(self):
+        if self.template_type == 'letter':
+            return True
         if not self.whitelist:
             return True
         return all(
