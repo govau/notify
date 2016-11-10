@@ -144,19 +144,25 @@ def test_validate_email_address_raises_for_invalid(email_address):
 
 @pytest.mark.parametrize('column', [
     'address_line_1', 'AddressLine1',
-    'address_line_2',
-    'address_line_3',
-    'address_line_4',
-    'address_line_5',
     'postcode', 'Postcode'
 ])
 @pytest.mark.parametrize('contents', [
     '', ' ', None
 ])
-def test_validate_address_raises_for_missing(column, contents):
+def test_validate_address_raises_for_missing_required_columns(column, contents):
     with pytest.raises(InvalidAddressError) as e:
         validate_recipient(contents, 'letter', column=column)
     assert 'Missing' == str(e.value)
+
+
+@pytest.mark.parametrize('column', [
+    'address_line_2',
+    'address_line_3',
+    'address_line_4',
+    'address_line_5',
+])
+def test_validate_address_doesnt_raise_for_missing_optional_columns(column):
+    assert validate_recipient('', 'letter', column=column) == ''
 
 
 def test_validate_address_raises_for_wrong_column():

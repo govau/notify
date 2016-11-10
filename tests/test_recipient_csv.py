@@ -322,6 +322,11 @@ def test_column_headers(file_contents, template_type, expected, expected_highlig
             'address_line_1, address_line_2, address_line_3, address_line_4, address_line_5',
             'letter'
         )),
+        pytest.mark.xfail((
+            # all address columns required, not just non-optional
+            'address_line_1, postcode',
+            'letter'
+        )),
         ('phone number', 'sms'),
         ('phone number,name', 'sms'),
         ('email address', 'email'),
@@ -377,6 +382,15 @@ def test_recipient_column(placeholders, file_contents, template_type):
             """,
             'letter',
             {1}, set()
+        ),
+        (
+            # only required address fields
+            """
+                address_line_1, postcode, date
+                name,           postcode, today
+            """,
+            'letter',
+            set(), set()
         ),
     ]
 )

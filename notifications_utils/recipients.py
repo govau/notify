@@ -28,8 +28,8 @@ optional_address_columns = {
     'address line 2',
     'address line 3',
     'address line 4',
-    'address line 5'
-    'address line 6'
+    'address line 5',
+    'address line 6',
 }
 
 # regexes for use in validate_email_address
@@ -295,6 +295,12 @@ class RecipientCSV():
         if key not in self.placeholders_as_column_keys:
             return
 
+        if (
+            self.template_type == 'letter' and
+            Columns.make_key(key) in Columns.from_keys(optional_address_columns).keys()
+        ):
+            return
+
         if value in [None, '']:
             return 'Missing'
 
@@ -421,6 +427,8 @@ def validate_and_format_email_address(email_address):
 
 
 def validate_address(address_line, column):
+    if Columns.make_key(column) in Columns.from_keys(optional_address_columns).keys():
+        return address_line
     if Columns.make_key(column) not in Columns.from_keys(first_column_headings['letter']).keys():
         raise TypeError
     if not address_line or not address_line.strip():
