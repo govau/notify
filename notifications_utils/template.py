@@ -41,11 +41,11 @@ class Template():
         self.id = template.get("id", None)
         self.name = template.get("name", None)
         self.content = template["content"]
-        self.values = (values or {}).copy()
-        self.template_type = template.get('template_type', None)
         self.subject = template.get('subject', None)
+        self.values = values
+        self.template_type = template.get('template_type', None)
         for value in drop_values:
-            self.values.pop(value, None)
+            self._values.pop(value, None)
         self.encoding = encoding
         self.content_character_limit = content_character_limit
         self._template = template
@@ -60,6 +60,23 @@ class Template():
 
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
+
+    @property
+    def values(self):
+        return self._values
+
+    @values.setter
+    def values(self, value):
+        if not value:
+            self._values = {}
+        else:
+            placeholders = Columns.from_keys(self.placeholders)
+            self._values = Columns(value).as_dict_with_keys(
+                self.placeholders | set(
+                    key for key in value.keys()
+                    if Columns.make_key(key) not in placeholders.keys()
+                )
+            )
 
     @property
     def renderer(self):
