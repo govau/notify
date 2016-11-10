@@ -286,10 +286,10 @@ class RecipientCSV():
 
     def _get_error_for_field(self, key, value):
 
-        if Columns.make_key(key) in self.recipient_column_headers_as_column_keys:
+        if key in self.recipient_column_headers_as_column_keys:
             try:
-                validate_recipient(value, self.template_type)
-            except (InvalidEmailError, InvalidPhoneError) as error:
+                validate_recipient(value, self.template_type, column=key)
+            except (InvalidEmailError, InvalidPhoneError, InvalidAddressError) as error:
                 return str(error)
 
         if key not in self.placeholders_as_column_keys:
@@ -329,7 +329,11 @@ class InvalidPhoneError(InvalidEmailError):
     pass
 
 
-def validate_phone_number(number):
+class InvalidAddressError(InvalidEmailError):
+    pass
+
+
+def validate_phone_number(number, column=None):
 
     for character in ['(', ')', ' ', '-']:
         number = number.replace(character, '')
@@ -373,7 +377,7 @@ def validate_and_format_phone_number(number, human_readable=False):
     return format_phone_number(validate_phone_number(number))
 
 
-def validate_email_address(email_address):
+def validate_email_address(email_address, column=None):
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
     # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
@@ -416,12 +420,20 @@ def validate_and_format_email_address(email_address):
     return format_email_address(validate_email_address(email_address))
 
 
-def validate_recipient(recipient, template_type):
+def validate_address(address_line, column):
+    if Columns.make_key(column) not in Columns.from_keys(first_column_headings['letter']).keys():
+        raise TypeError
+    if not address_line or not address_line.strip():
+        raise InvalidAddressError('Missing')
+    return address_line
+
+
+def validate_recipient(recipient, template_type, column=None):
     return {
         'email': validate_email_address,
         'sms': validate_phone_number,
-        'letter': lambda recipient: True
-    }[template_type](recipient)
+        'letter': validate_address
+    }[template_type](recipient, column)
 
 
 @lru_cache(maxsize=32, typed=False)

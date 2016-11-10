@@ -339,7 +339,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
 
 
 @pytest.mark.parametrize(
-    "file_contents,rows_with_bad_recipients,rows_with_missing_data",
+    "file_contents,template_type,rows_with_bad_recipients,rows_with_missing_data",
     [
         (
             """
@@ -351,6 +351,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
                 07700900460,test1
                 +44 123,test1,test1
             """,
+            'sms',
             {2, 5}, {1, 4}
         ),
         (
@@ -358,17 +359,29 @@ def test_recipient_column(placeholders, file_contents, template_type):
                 phone number,name
                 07700900460,test1,test2
             """,
+            'sms',
             set(), set()
         ),
         (
             """
             """,
+            'sms',
             set(), set()
-        )
+        ),
+        (
+            # missing postcode
+            """
+                address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,postcode,date
+                name,          building,      street,        town,          county,        postcode,today
+                name,          building,      street,        town,          county,        ,        today
+            """,
+            'letter',
+            {1}, set()
+        ),
     ]
 )
-def test_bad_or_missing_data(file_contents, rows_with_bad_recipients, rows_with_missing_data):
-    recipients = RecipientCSV(file_contents, template_type='sms', placeholders=['date'])
+def test_bad_or_missing_data(file_contents, template_type, rows_with_bad_recipients, rows_with_missing_data):
+    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['date'])
     assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
     assert recipients.rows_with_missing_data == rows_with_missing_data
     assert recipients.has_errors is True
