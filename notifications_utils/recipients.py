@@ -10,10 +10,26 @@ from notifications_utils.template import Template
 from notifications_utils.columns import Columns
 
 
-first_column_heading = {
-    'email': 'email address',
-    'sms': 'phone number',
-    'letter': 'address_line_1'
+first_column_headings = {
+    'email': ['email address'],
+    'sms': ['phone number'],
+    'letter': [
+        'address line 1',
+        'address line 2',
+        'address line 3',
+        'address line 4',
+        'address line 5',
+        'address line 6',
+        'postcode',
+    ],
+}
+
+optional_address_columns = {
+    'address line 2',
+    'address line 3',
+    'address line 4',
+    'address line 5',
+    'address line 6',
 }
 
 # regexes for use in validate_email_address
@@ -75,12 +91,17 @@ class RecipientCSV():
     @placeholders.setter
     def placeholders(self, value):
         try:
-            self._placeholders = list(value)
-            self.placeholders_as_column_keys = [
-                Columns.make_key(placeholder) for placeholder in value
-            ]
+            self._placeholders = list(value) + self.recipient_column_headers
         except TypeError:
-            self._placeholders, self.placeholders_as_column_keys = [], []
+            self._placeholders = self.recipient_column_headers
+        self.placeholders_as_column_keys = [
+            Columns.make_key(placeholder)
+            for placeholder in self._placeholders
+        ]
+        self.recipient_column_headers_as_column_keys = [
+            Columns.make_key(placeholder)
+            for placeholder in self.recipient_column_headers
+        ]
 
     @property
     def template_type(self):
@@ -89,7 +110,7 @@ class RecipientCSV():
     @template_type.setter
     def template_type(self, value):
         self._template_type = value
-        self.recipient_column_header = first_column_heading[self.template_type]
+        self.recipient_column_headers = first_column_headings[self.template_type]
 
     @property
     def has_errors(self):
@@ -105,6 +126,8 @@ class RecipientCSV():
 
     @property
     def allowed_to_send_to(self):
+        if self.template_type == 'letter':
+            return True
         if not self.whitelist:
             return True
         return all(
@@ -128,7 +151,10 @@ class RecipientCSV():
     def rows_with_missing_data(self):
         return set(
             row['index'] for row in self.annotated_rows if any(
-                str(key) not in Columns.make_key(self.recipient_column_header) and value.get('error')
+                (
+                    Columns.make_key(key) not in self.recipient_column_headers_as_column_keys and
+                    value.get('error')
+                )
                 for key, value in row['columns'].items()
             )
         )
@@ -138,7 +164,10 @@ class RecipientCSV():
         return set(
             row['index']
             for row in self.annotated_rows
-            if row['columns'].get(self.recipient_column_header, {}).get('error')
+            if any(
+                row['columns'].get(recipient_column, {}).get('error')
+                for recipient_column in self.recipient_column_headers
+            )
         )
 
     @property
@@ -166,7 +195,6 @@ class RecipientCSV():
                     'data': value,
                     'error': self._get_error_for_field(key, value),
                     'ignore': (
-                        key != Columns.make_key(self.recipient_column_header) and
                         key not in self.placeholders_as_column_keys
                     )
                 } for key, value in row.items()}),
@@ -229,50 +257,64 @@ class RecipientCSV():
         return []
 
     @property
+    def column_headers_as_column_keys(self):
+        return Columns.from_keys(self.column_headers).keys()
+
+    @property
     def missing_column_headers(self):
-        required = {
-            Columns.make_key(key): key
-            for key in set([self.recipient_column_header] + self.placeholders)
-        }
         return set(
-            required[key] for key in set(
-                [Columns.make_key(self.recipient_column_header)] + self.placeholders_as_column_keys
-            ) - set(
-                Columns.make_key(column_header) for column_header in self.column_headers
-            )
+            key for key in self.placeholders
+            if Columns.make_key(key) not in self.column_headers_as_column_keys
+        )
+        return set(
+            key for key in self.placeholders
+            if Columns.make_key(key) not in self.column_headers
         )
 
     @property
-    def has_recipient_column(self):
-        return Columns.make_key(self.recipient_column_header) in set(
-            Columns.make_key(column_header) for column_header in self.column_headers
-        )
+    def has_recipient_columns(self):
+        return set(
+            Columns.make_key(recipient_column)
+            for recipient_column in self.recipient_column_headers
+        ) <= self.column_headers_as_column_keys
 
     @property
     def column_headers_with_placeholders_highlighted(self):
         return [
-            Markup(Template.placeholder_tag.format(header, '')) if header in self.placeholders else header
+            Markup(Template.placeholder_tag.format(header, ''))
+            if (header in self.placeholders and header not in self.recipient_column_headers) else header
             for header in self.column_headers
         ]
 
     def _get_error_for_field(self, key, value):
 
-        if key == Columns.make_key(self.recipient_column_header):
+        if key in self.recipient_column_headers_as_column_keys:
             try:
-                validate_recipient(value, self.template_type)
-            except (InvalidEmailError, InvalidPhoneError) as error:
+                validate_recipient(value, self.template_type, column=key)
+            except (InvalidEmailError, InvalidPhoneError, InvalidAddressError) as error:
                 return str(error)
 
         if key not in self.placeholders_as_column_keys:
+            return
+
+        if (
+            self.template_type == 'letter' and
+            Columns.make_key(key) in Columns.from_keys(optional_address_columns).keys()
+        ):
             return
 
         if value in [None, '']:
             return 'Missing'
 
     def _get_recipient_from_row(self, row):
-        return row[
-            self.recipient_column_header
-        ]
+        if len(self.recipient_column_headers) == 1:
+            return row[
+                self.recipient_column_headers[0]
+            ]
+        else:
+            return [
+                row[column] for column in self.recipient_column_headers
+            ]
 
     def _get_personalisation_from_row(self, row):
         return Columns({
@@ -295,7 +337,11 @@ class InvalidPhoneError(InvalidEmailError):
     pass
 
 
-def validate_phone_number(number):
+class InvalidAddressError(InvalidEmailError):
+    pass
+
+
+def validate_phone_number(number, column=None):
 
     for character in ['(', ')', ' ', '-']:
         number = number.replace(character, '')
@@ -339,7 +385,7 @@ def validate_and_format_phone_number(number, human_readable=False):
     return format_phone_number(validate_phone_number(number))
 
 
-def validate_email_address(email_address):
+def validate_email_address(email_address, column=None):
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
     # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
@@ -382,12 +428,22 @@ def validate_and_format_email_address(email_address):
     return format_email_address(validate_email_address(email_address))
 
 
-def validate_recipient(recipient, template_type):
+def validate_address(address_line, column):
+    if Columns.make_key(column) in Columns.from_keys(optional_address_columns).keys():
+        return address_line
+    if Columns.make_key(column) not in Columns.from_keys(first_column_headings['letter']).keys():
+        raise TypeError
+    if not address_line or not address_line.strip():
+        raise InvalidAddressError('Missing')
+    return address_line
+
+
+def validate_recipient(recipient, template_type, column=None):
     return {
         'email': validate_email_address,
         'sms': validate_phone_number,
-        'letter': lambda recipient: True
-    }[template_type](recipient)
+        'letter': validate_address
+    }[template_type](recipient, column)
 
 
 @lru_cache(maxsize=32, typed=False)

@@ -7,7 +7,9 @@ from notifications_utils.recipients import (
     InvalidPhoneError,
     validate_email_address,
     InvalidEmailError,
-    allowed_to_send_to
+    allowed_to_send_to,
+    InvalidAddressError,
+    validate_recipient
 )
 
 
@@ -138,6 +140,46 @@ def test_validate_email_address_strips_whitespace():
 def test_validate_email_address_raises_for_invalid(email_address):
     with pytest.raises(InvalidEmailError):
         validate_email_address(email_address)
+
+
+@pytest.mark.parametrize('column', [
+    'address_line_1', 'AddressLine1',
+    'postcode', 'Postcode'
+])
+@pytest.mark.parametrize('contents', [
+    '', ' ', None
+])
+def test_validate_address_raises_for_missing_required_columns(column, contents):
+    with pytest.raises(InvalidAddressError) as e:
+        validate_recipient(contents, 'letter', column=column)
+    assert 'Missing' == str(e.value)
+
+
+@pytest.mark.parametrize('column', [
+    'address_line_2',
+    'address_line_3',
+    'address_line_4',
+    'address_line_5',
+])
+def test_validate_address_doesnt_raise_for_missing_optional_columns(column):
+    assert validate_recipient('', 'letter', column=column) == ''
+
+
+def test_validate_address_raises_for_wrong_column():
+    with pytest.raises(TypeError):
+        validate_recipient('any', 'letter', column='email address')
+
+
+@pytest.mark.parametrize('column', [
+    'address_line_1',
+    'address_line_2',
+    'address_line_3',
+    'address_line_4',
+    'address_line_5',
+    'postcode',
+])
+def test_validate_address_allows_any_non_empty_value(column):
+    assert validate_recipient('any', 'letter', column=column) == 'any'
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
