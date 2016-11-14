@@ -61,22 +61,17 @@ def add_prefix(body, prefix=None):
     return body
 
 
-class NotifyMarkdownRenderer(mistune.Renderer):
+def prepend_subject(body, subject):
+    return '# {}\n\n{}'.format(subject, body)
+
+
+class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):
         return code
 
     def block_quote(self, text):
-        return (
-            '<blockquote '
-            'style="Margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
-            'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;"'
-            '>'
-            '{}'
-            '</blockquote>'
-        ).format(
-            text
-        )
+        return text
 
     def header(self, text, level, raw=None):
         if level == 1:
@@ -167,4 +162,20 @@ class NotifyMarkdownRenderer(mistune.Renderer):
         return text
 
 
-notify_markdown = mistune.Markdown(renderer=NotifyMarkdownRenderer())
+class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
+
+    def block_quote(self, text):
+        return (
+            '<blockquote '
+            'style="Margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
+            'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;"'
+            '>'
+            '{}'
+            '</blockquote>'
+        ).format(
+            text
+        )
+
+
+notify_email_markdown = mistune.Markdown(renderer=NotifyEmailMarkdownRenderer())
+notify_letter_preview_markdown = mistune.Markdown(renderer=NotifyLetterMarkdownPreviewRenderer())

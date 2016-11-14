@@ -6,8 +6,10 @@ from notifications_utils.formatters import (
     linkify,
     nl2br,
     add_prefix,
-    notify_markdown,
-    prepare_newlines_for_markdown
+    notify_email_markdown,
+    notify_letter_preview_markdown,
+    prepare_newlines_for_markdown,
+    prepend_subject
 )
 
 
@@ -61,7 +63,7 @@ class EmailPreview(PassThrough):
         ).then(
             prepare_newlines_for_markdown
         ).then(
-            notify_markdown
+            notify_email_markdown
         ).as_string
 
 
@@ -98,3 +100,20 @@ class HTMLEmail():
             'brand_name': self.brand_name,
             'brand_colour': self.brand_colour
         })
+
+
+class LetterPreview(PassThrough):
+
+    def __init__(self, subject):
+        self.subject = subject
+
+    def __call__(self, body):
+        return Take(
+            body
+        ).then(
+            prepend_subject, self.subject
+        ).then(
+            prepare_newlines_for_markdown
+        ).then(
+            notify_letter_preview_markdown
+        ).as_string

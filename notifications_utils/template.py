@@ -6,7 +6,7 @@ from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.renderers import HTMLEmail, SMSPreview, EmailPreview
+from notifications_utils.renderers import HTMLEmail, SMSPreview, EmailPreview, LetterPreview
 
 
 class Template():
@@ -84,17 +84,19 @@ class Template():
 
     @renderer.setter
     def renderer(self, value):
-        if not value:
-            self._renderer = (
-                SMSPreview(
-                    prefix=self._prefix,
-                    sender=self._sms_sender
-                )
-                if self.template_type == 'sms' else
-                EmailPreview()
-            )
-        else:
+        if value:
             self._renderer = value
+        elif self.template_type == 'sms':
+            self._renderer = SMSPreview(
+                prefix=self._prefix,
+                sender=self._sms_sender
+            )
+        elif self.template_type == 'letter':
+            self._renderer = LetterPreview(
+                subject=self.subject
+            )
+        elif self.template_type == 'email' or not self.template_type:
+            self._renderer = EmailPreview()
 
     def get_match(self, match):
         if match[1] and match[2]:

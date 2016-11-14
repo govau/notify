@@ -45,6 +45,18 @@ from notifications_utils.template import Template
                 [('email address', 'test@example.com'), (None, ['test1', 'red'])],
                 [('email address', 'test2@example.com'), (None, ['test2', 'blue'])]
             ]
+        ),
+        (
+            """
+                address_line_1
+                Alice
+                Bob
+            """,
+            "letter",
+            [
+                [('address_line_1', 'Alice')],
+                [('address_line_1', 'Bob')]
+            ]
         )
     ]
 )
