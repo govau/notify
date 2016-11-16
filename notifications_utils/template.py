@@ -140,13 +140,6 @@ class Template():
         )
 
     @property
-    def placeholders_as_markup(self):
-        return [
-            Markup(Template.placeholder_tag.format(placeholder, ''))
-            for placeholder in self.placeholders
-        ]
-
-    @property
     def replaced(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)

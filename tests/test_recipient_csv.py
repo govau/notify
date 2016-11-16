@@ -250,10 +250,10 @@ def test_get_recipient_respects_order(file_contents,
 
 
 @pytest.mark.parametrize(
-    "file_contents,template_type,expected,expected_highlighted,expected_missing",
+    "file_contents,template_type,expected,expected_missing",
     [
         (
-            "", 'sms', [], [], set(['phone number', 'name'])
+            "", 'sms', [], set(['phone number', 'name'])
         ),
         (
             """
@@ -264,7 +264,6 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'sms',
             ['phone number', 'name'],
-            ['phone number', Markup('<span class=\'placeholder\'>((name))</span>')],
             set()
         ),
         (
@@ -273,7 +272,6 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'email',
             ['email address', 'name', 'colour'],
-            ['email address', Markup('<span class=\'placeholder\'>((name))</span>'), 'colour'],
             set()
         ),
         (
@@ -281,7 +279,6 @@ def test_get_recipient_respects_order(file_contents,
                 email address,colour
             """,
             'email',
-            ['email address', 'colour'],
             ['email address', 'colour'],
             set(['name'])
         ),
@@ -291,15 +288,13 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'letter',
             ['address_line_1', 'address_line_2', 'name'],
-            ['address_line_1', 'address_line_2', Markup('<span class=\'placeholder\'>((name))</span>')],
             set(['postcode', 'address line 3', 'address line 4', 'address line 5', 'address line 6'])
         )
     ]
 )
-def test_column_headers(file_contents, template_type, expected, expected_highlighted, expected_missing):
+def test_column_headers(file_contents, template_type, expected, expected_missing):
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['name'])
     assert recipients.column_headers == expected
-    assert recipients.column_headers_with_placeholders_highlighted == expected_highlighted
     assert recipients.missing_column_headers == expected_missing
     assert recipients.has_errors == bool(expected_missing)
 

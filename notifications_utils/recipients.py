@@ -278,14 +278,6 @@ class RecipientCSV():
             for recipient_column in self.recipient_column_headers
         ) <= self.column_headers_as_column_keys
 
-    @property
-    def column_headers_with_placeholders_highlighted(self):
-        return [
-            Markup(Template.placeholder_tag.format(header, ''))
-            if (header in self.placeholders and header not in self.recipient_column_headers) else header
-            for header in self.column_headers
-        ]
-
     def _get_error_for_field(self, key, value):
 
         if key in self.recipient_column_headers_as_column_keys:

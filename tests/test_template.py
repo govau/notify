@@ -406,25 +406,6 @@ def test_extracting_placeholders(template_content, template_subject, expected):
 
 
 @pytest.mark.parametrize(
-    "template_content, expected_placeholders", [
-        (
-            "the quick ((colour)) ((animal))", [
-                Markup(u"<span class='placeholder'>((colour))</span>"),
-                Markup(u"<span class='placeholder'>((animal))</span>")
-            ]
-        ),
-        (
-            "((warning?? This is a warning))", [
-                Markup(u"<span class='placeholder'>((warning))</span>"),
-            ]
-        )
-    ]
-)
-def test_extracting_placeholders_marked_up(template_content, expected_placeholders):
-    assert Template({"content": template_content}).placeholders_as_markup == expected_placeholders
-
-
-@pytest.mark.parametrize(
     "content,prefix,encoding,expected_length",
     [
         ("The quick brown fox jumped over the lazy dog", None, "utf-8", 44),
