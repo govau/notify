@@ -3,7 +3,7 @@ from functools import partial
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
-from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError, str2bool
+from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
 from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, LetterPreview, PassThrough
 
 
@@ -115,7 +115,7 @@ def test_matches_keys_to_placeholder_names():
     ]
 )
 def test_returns_a_string_without_placeholders(template_content, expected_formatted, expected_replaced):
-    assert Template({"content": template_content}, renderer=PassThrough()).formatted == expected_formatted
+    assert Template({"content": template_content}, renderer=PassThrough())._raw_formatted == expected_formatted
     assert Template({"content": template_content}, renderer=PassThrough()).replaced == expected_replaced
 
 
@@ -127,14 +127,16 @@ def test_returns_a_string_without_placeholders(template_content, expected_format
     ]
 )
 def test_prefixing_template_with_service_name(template_content, prefix, expected):
-    assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).formatted == expected
+    assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix)._raw_formatted == expected
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).replaced == expected
     assert Template(
         {"content": template_content, 'template_type': 'sms'}, prefix=prefix, sms_sender='Something'
     ).replaced == "the quick brown fox"
     assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).content == template_content
     assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).replaced == template_content
-    assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).formatted == template_content
+    assert Template(
+        {"content": template_content}, prefix=prefix, renderer=PassThrough()
+    )._raw_formatted == template_content
 
 
 @pytest.mark.parametrize(
@@ -182,7 +184,7 @@ def test_prefixing_template_with_service_name(template_content, prefix, expected
     ]
 )
 def test_formatting_of_placeholders(template_content, expected):
-    assert Template({"content": template_content}, renderer=PassThrough()).formatted == expected
+    assert Template({"content": template_content}, renderer=PassThrough())._raw_formatted == expected
 
 
 @pytest.mark.parametrize(
@@ -203,7 +205,7 @@ def test_formatting_of_placeholders(template_content, expected):
     ]
 )
 def test_subject_formatting_of_placeholders(template_subject, expected):
-    assert Template({'subject': template_subject, 'content': ''}).formatted_subject == expected
+    assert Template({'subject': template_subject, 'content': ''})._raw_formatted_subject == expected
 
 
 def test_formatting_of_template_contents_as_markup():
@@ -215,7 +217,7 @@ def test_formatting_of_template_contents_as_markup():
 def test_formatting_of_template_contents_as_markup():
     assert Template(
         {"content": "", "subject": "Hello ((name))"}, renderer=PassThrough()
-    ).formatted_subject_as_markup == Markup("Hello <span class='placeholder'>((name))</span>")
+    ).formatted_subject == Markup("Hello <span class='placeholder'>((name))</span>")
 
 
 @pytest.mark.parametrize(
@@ -482,38 +484,3 @@ def test_compare_template():
         new_template = Template({'content': 'faked', 'template_type': 'sms'})
         template_changes = old_template.compare_to(new_template)
         mocked.assert_called_once_with(old_template, new_template)
-
-
-@pytest.mark.parametrize(
-    "value", [
-        '0',
-        0, 2, 99.99999,
-        'off',
-        'exclude',
-        'no'
-        'any random string',
-        'false',
-        False,
-        [], {}, (),
-        ['true'], {'True': True}, (True, 'true', 1)
-    ]
-)
-def test_what_will_not_trigger_optional_placeholder(value):
-    assert str2bool(value) is False
-
-
-@pytest.mark.parametrize(
-    "value", [
-        1,
-        '1',
-        'yes',
-        'y',
-        'true',
-        'True',
-        True,
-        'include',
-        'show'
-    ]
-)
-def test_what_will_trigger_optional_placeholder(value):
-    assert str2bool(value) is True
