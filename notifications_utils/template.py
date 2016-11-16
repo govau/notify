@@ -50,6 +50,12 @@ class Template():
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
 
+    def to_dict(self):
+        return {
+            key: getattr(self, key)
+            for key in ['content', 'subject', 'values']
+        }
+
     @property
     def values(self):
         return self._values
@@ -81,15 +87,13 @@ class Template():
                 sender=self._sms_sender
             )
         elif self.template_type == 'letter':
-            self._renderer = LetterPreview(
-                subject=self.subject
-            )
+            self._renderer = LetterPreview()
         elif self.template_type == 'email' or not self.template_type:
             self._renderer = EmailPreview()
 
     @property
-    def _raw_formatted(self):
-        return self.renderer(str(Field(self.content, {})), self.values)
+    def rendered(self):
+        return self.renderer(self.to_dict())
 
     @property
     def _raw_formatted_subject(self):
@@ -98,6 +102,10 @@ class Template():
     @property
     def formatted_subject(self):
         return Markup(self._raw_formatted_subject)
+
+    @property
+    def _raw_formatted(self):
+        return self.rendered
 
     @property
     def formatted(self):
@@ -111,7 +119,7 @@ class Template():
     def replaced(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
-        return self.renderer(str(Field(self.content, self.values)), self.values)
+        return self.renderer(self.to_dict())
 
     @property
     def replaced_content_count(self):

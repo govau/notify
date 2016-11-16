@@ -4,6 +4,7 @@ from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, LetterPreview, unlink_govuk_escaped, linkify
 )
 from notifications_utils.field import Field
+from notifications_utils.template import Template
 
 
 def test_pass_through_renderer():
@@ -12,25 +13,25 @@ def test_pass_through_renderer():
         quick brown
         fox
     '''
-    assert PassThrough()(message) == message
+    assert PassThrough()({'content': message}) == message
 
 
 def test_html_email_inserts_body():
-    assert 'the <em>quick</em> brown fox' in HTMLEmail()('the <em>quick</em> brown fox')
+    assert 'the <em>quick</em> brown fox' in HTMLEmail()({'content': 'the <em>quick</em> brown fox'})
 
 
 @pytest.mark.parametrize(
     "content", ('DOCTYPE', 'html', 'body', 'GOV.UK', 'hello world')
 )
 def test_default_template(content):
-    assert content in HTMLEmail()('hello world')
+    assert content in HTMLEmail()({'content': 'hello world'})
 
 
 @pytest.mark.parametrize(
     "show_banner", (True, False)
 )
 def test_govuk_banner(show_banner):
-    email = HTMLEmail(govuk_banner=show_banner)('hello world')
+    email = HTMLEmail(govuk_banner=show_banner)({'content': 'hello world'})
     if show_banner:
         assert "GOV.UK" in email
     else:
@@ -60,7 +61,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
         brand_logo=brand_logo,
         brand_name=brand_name,
         brand_colour=brand_colour
-    )('hello world')
+    )({'content': 'hello world'})
 
     if complete_html:
         assert content in email
@@ -93,7 +94,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
-    assert link in HTMLEmail()(url)
+    assert link in HTMLEmail()({'content': url})
 
 
 @pytest.mark.parametrize(
@@ -110,7 +111,7 @@ def test_makes_links_out_of_URLs(url):
 )
 def test_URLs_get_escaped(url, expected_html):
     assert linkify(url) == expected_html
-    assert expected_html in HTMLEmail()(url)
+    assert expected_html in HTMLEmail()({'content': url})
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -118,12 +119,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in HTMLEmail()('''
+    ) in HTMLEmail()({'content': '''
         You’ve been invited to a service. Click this link:
         https://service.example.com/accept_invite/a1b2c3d4
 
         Thanks
-    ''')
+    '''})
 
 
 @pytest.mark.parametrize(
@@ -140,8 +141,8 @@ def test_HTML_template_has_URLs_replaced_with_links():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert PlainTextEmail()(template_content) == expected
-    assert expected in HTMLEmail()(template_content)
+    assert PlainTextEmail()({'content': template_content}) == expected
+    assert expected in HTMLEmail()({'content': template_content})
 
 
 @pytest.mark.parametrize(
@@ -151,8 +152,8 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
     ]
 )
 def test_sms_message_adds_prefix(prefix, body, expected):
-    assert SMSMessage(prefix=prefix)(body) == expected
-    assert SMSPreview(prefix=prefix)(body) == expected
+    assert SMSMessage(prefix=prefix)({'content': body}) == expected
+    assert SMSPreview(prefix=prefix)({'content': body}) == expected
 
 
 @pytest.mark.parametrize(
@@ -163,17 +164,17 @@ def test_sms_message_adds_prefix(prefix, body, expected):
     ]
 )
 def test_sms_message_adds_prefix_only_if_no_sender_set(prefix, body, sender, expected):
-    assert SMSMessage(prefix=prefix, sender=sender)(body) == expected
-    assert SMSPreview(prefix=prefix, sender=sender)(body) == expected
+    assert SMSMessage(prefix=prefix, sender=sender)({'content': body}) == expected
+    assert SMSPreview(prefix=prefix, sender=sender)({'content': body}) == expected
 
 
 def test_sms_preview_adds_newlines():
-    assert SMSPreview()("""
+    assert SMSPreview()({'content': """
         the
         quick
 
         brown fox
-    """) == "the<br>        quick<br><br>        brown fox"
+    """}) == "the<br>        quick<br><br>        brown fox"
 
 
 @mock.patch('notifications_utils.renderers.unlink_govuk_escaped')
@@ -182,7 +183,7 @@ def test_sms_preview_adds_newlines():
 @mock.patch('notifications_utils.renderers.prepare_newlines_for_markdown', return_value='Baz')
 @mock.patch('notifications_utils.renderers.prepend_postal_address', return_value='Boo')
 def test_letter_preview_renderer(prepend_postal, prepare_newlines, letter_markdown, linkify, unlink_govuk):
-    assert LetterPreview(subject='Subject')('Foo') == 'Bar'
+    assert LetterPreview()({'content': 'Foo', 'subject': 'Subject', 'values': {}}) == 'Bar'
     assert prepend_postal.call_args[0][0] == '# Subject\n\nFoo'
     assert isinstance(prepend_postal.call_args[0][1], Field)
     prepare_newlines.assert_called_once_with('Boo')

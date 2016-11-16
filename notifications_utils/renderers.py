@@ -25,8 +25,10 @@ class PassThrough():
     def __init__(self):
         pass
 
-    def __call__(self, body, values=None):
-        return body
+    def __call__(self, template, values=None):
+        return str(
+            Field(template['content'], template.get('values', {}))
+        )
 
 
 class SMSMessage():
@@ -35,9 +37,9 @@ class SMSMessage():
         self.prefix = prefix
         self.sender = sender
 
-    def __call__(self, body, values=None):
-        return Take(
-            body
+    def __call__(self, template, values=None):
+        return Take.from_field(
+            Field(template['content'], template.get('values', {}))
         ).then(
             add_prefix, self.prefix if not self.sender else None
         ).as_string
@@ -45,9 +47,9 @@ class SMSMessage():
 
 class SMSPreview(SMSMessage):
 
-    def __call__(self, body, values=None):
+    def __call__(self, template, values=None):
         return Take(
-            SMSMessage(self.prefix, self.sender)(body)
+            SMSMessage(self.prefix, self.sender)(template)
         ).then(
             nl2br
         ).as_string
@@ -55,9 +57,9 @@ class SMSPreview(SMSMessage):
 
 class EmailPreview(PassThrough):
 
-    def __call__(self, body, values=None):
-        return Take(
-            body
+    def __call__(self, template, values=None):
+        return Take.from_field(
+            Field(template['content'], template.get('values', {}))
         ).then(
             unlink_govuk_escaped
         ).then(
@@ -71,8 +73,12 @@ class EmailPreview(PassThrough):
 
 class PlainTextEmail(PassThrough):
 
-    def __call__(self, body, values=None):
-        return unlink_govuk_escaped(body)
+    def __call__(self, template, values=None):
+        return Take.from_field(
+            Field(template['content'], template.get('values', {}))
+        ).then(
+            unlink_govuk_escaped
+        ).as_string
 
 
 class HTMLEmail():
@@ -91,10 +97,10 @@ class HTMLEmail():
         self.brand_name = brand_name
         self.brand_colour = brand_colour and brand_colour.replace('#', '')
 
-    def __call__(self, body, values=None):
+    def __call__(self, template, values=None):
         return email_template.render({
             'body': EmailPreview()(
-                body
+                template
             ),
             'govuk_banner': self.govuk_banner,
             'complete_html': self.complete_html,
@@ -116,16 +122,13 @@ class LetterPreview(PassThrough):
         '((postcode))',
     ])
 
-    def __init__(self, subject):
-        self.subject = subject
-
-    def __call__(self, body, values=None):
-        return Take(
-            body
+    def __call__(self, template):
+        return Take.from_field(
+            Field(template['content'], template.get('values', {}))
         ).then(
-            prepend_subject, self.subject
+            prepend_subject, Field(template['subject'], template['values'])
         ).then(
-            prepend_postal_address, Field(self.address_block, values)
+            prepend_postal_address, Field(self.address_block, template['values'])
         ).then(
             prepare_newlines_for_markdown
         ).then(

@@ -65,12 +65,6 @@ def test_sets_correct_renderer(template_type, expected_renderer):
     )
 
 
-def test_passes_subject_through_to_letter_renderer():
-    assert Template(
-        {'content': '', 'template_type': 'letter', 'subject': 'Your thing is due'}
-    ).renderer.subject == 'Your thing is due'
-
-
 def test_matches_keys_to_placeholder_names():
 
     template = Template({"content": "hello ((name))"})

@@ -26,7 +26,7 @@ from notifications_utils.field import Field
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
-    assert link in HTMLEmail()(url)
+    assert link in HTMLEmail()({'content': url})
 
 
 @pytest.mark.parametrize(
@@ -56,7 +56,7 @@ def test_doesnt_make_links_out_of_invalid_urls(url):
 )
 def test_URLs_get_escaped(url, expected_html):
     assert linkify(url) == expected_html
-    assert expected_html in HTMLEmail()(url)
+    assert expected_html in HTMLEmail()({'content': url})
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -64,12 +64,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in HTMLEmail()('''
+    ) in HTMLEmail()({'content': '''
         You’ve been invited to a service. Click this link:
         https://service.example.com/accept_invite/a1b2c3d4
 
         Thanks
-    ''')
+    '''})
 
 
 def test_preserves_whitespace_when_making_links():
@@ -137,8 +137,8 @@ def test_add_spaces_after_single_newlines_so_markdown_converts_them():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert PlainTextEmail()(template_content) == expected
-    assert expected in HTMLEmail()(template_content)
+    assert PlainTextEmail()({'content': template_content}) == expected
+    assert expected in HTMLEmail()({'content': template_content})
 
 
 @pytest.mark.parametrize(
@@ -148,17 +148,17 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
     ]
 )
 def test_sms_message_adds_prefix(prefix, body, expected):
-    assert SMSMessage(prefix=prefix)(body) == expected
-    assert SMSPreview(prefix=prefix)(body) == expected
+    assert SMSMessage(prefix=prefix)({'content': body}) == expected
+    assert SMSPreview(prefix=prefix)({'content': body}) == expected
 
 
 def test_sms_preview_adds_newlines():
-    assert SMSPreview()("""
+    assert SMSPreview()({'content': """
         the
         quick
 
         brown fox
-    """) == "the<br>        quick<br><br>        brown fox"
+    """}) == "the<br>        quick<br><br>        brown fox"
 
 
 def test_prepend_address():
