@@ -1,5 +1,6 @@
 from os import path
 from jinja2 import Environment, FileSystemLoader
+from notifications_utils.field import Field
 from notifications_utils.take import Take
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
@@ -9,7 +10,8 @@ from notifications_utils.formatters import (
     notify_email_markdown,
     notify_letter_preview_markdown,
     prepare_newlines_for_markdown,
-    prepend_subject
+    prepend_subject,
+    prepend_postal_address
 )
 
 
@@ -23,7 +25,7 @@ class PassThrough():
     def __init__(self):
         pass
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return body
 
 
@@ -33,7 +35,7 @@ class SMSMessage():
         self.prefix = prefix
         self.sender = sender
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return Take(
             body
         ).then(
@@ -43,7 +45,7 @@ class SMSMessage():
 
 class SMSPreview(SMSMessage):
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return Take(
             SMSMessage(self.prefix, self.sender)(body)
         ).then(
@@ -53,7 +55,7 @@ class SMSPreview(SMSMessage):
 
 class EmailPreview(PassThrough):
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return Take(
             body
         ).then(
@@ -69,7 +71,7 @@ class EmailPreview(PassThrough):
 
 class PlainTextEmail(PassThrough):
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return unlink_govuk_escaped(body)
 
 
@@ -89,7 +91,7 @@ class HTMLEmail():
         self.brand_name = brand_name
         self.brand_colour = brand_colour and brand_colour.replace('#', '')
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return email_template.render({
             'body': EmailPreview()(
                 body
@@ -104,14 +106,26 @@ class HTMLEmail():
 
 class LetterPreview(PassThrough):
 
+    address_block = '\n'.join([
+        '((address line 1))',
+        '((address line 2))',
+        '((address line 3))',
+        '((address line 4))',
+        '((address line 5))',
+        '((address line 6))',
+        '((postcode))',
+    ])
+
     def __init__(self, subject):
         self.subject = subject
 
-    def __call__(self, body):
+    def __call__(self, body, values=None):
         return Take(
             body
         ).then(
             prepend_subject, self.subject
+        ).then(
+            prepend_postal_address, Field(self.address_block, values)
         ).then(
             prepare_newlines_for_markdown
         ).then(

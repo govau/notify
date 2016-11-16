@@ -89,7 +89,7 @@ class Template():
 
     @property
     def _raw_formatted(self):
-        return self.renderer(str(Field(self.content, {})))
+        return self.renderer(str(Field(self.content, {})), self.values)
 
     @property
     def _raw_formatted_subject(self):
@@ -111,7 +111,7 @@ class Template():
     def replaced(self):
         if self.missing_data:
             raise NeededByTemplateError(self.missing_data)
-        return self.renderer(str(Field(self.content, self.values)))
+        return self.renderer(str(Field(self.content, self.values)), self.values)
 
     @property
     def replaced_content_count(self):

@@ -3,8 +3,14 @@ from notifications_utils.renderers import (
     HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
 )
 from notifications_utils.formatters import (
-    unlink_govuk_escaped, linkify, notify_email_markdown, notify_letter_preview_markdown, prepare_newlines_for_markdown
+    unlink_govuk_escaped,
+    linkify,
+    notify_email_markdown,
+    notify_letter_preview_markdown,
+    prepare_newlines_for_markdown,
+    prepend_postal_address,
 )
+from notifications_utils.field import Field
 
 
 @pytest.mark.parametrize(
@@ -153,6 +159,31 @@ def test_sms_preview_adds_newlines():
 
         brown fox
     """) == "the<br>        quick<br><br>        brown fox"
+
+
+def test_prepend_address():
+    assert prepend_postal_address('body', Field('((line 1))', {})) == (
+        "<span class='placeholder'>((line 1))</span>\n\nbody"
+    )
+
+
+def test_prepend_address_with_some_values():
+    assert prepend_postal_address(
+        'body',
+        Field(
+            '((line 1))\n((line 2))\n((line 3))',
+            {
+                'line 1': 'one',
+                'line 2': '',  # note empty optional line
+                'line 3': 'three'
+            }
+        )
+    ) == (
+        'one\n'
+        'three\n'
+        '\n'
+        'body'
+    )
 
 
 @pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))

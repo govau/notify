@@ -3,6 +3,7 @@ import mock
 from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, LetterPreview, unlink_govuk_escaped, linkify
 )
+from notifications_utils.field import Field
 
 
 def test_pass_through_renderer():
@@ -179,9 +180,12 @@ def test_sms_preview_adds_newlines():
 @mock.patch('notifications_utils.renderers.linkify')
 @mock.patch('notifications_utils.renderers.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.renderers.prepare_newlines_for_markdown', return_value='Baz')
-def test_letter_preview_renderer(prepare_newlines, letter_markdown, linkify, unlink_govuk):
+@mock.patch('notifications_utils.renderers.prepend_postal_address', return_value='Boo')
+def test_letter_preview_renderer(prepend_postal, prepare_newlines, letter_markdown, linkify, unlink_govuk):
     assert LetterPreview(subject='Subject')('Foo') == 'Bar'
-    prepare_newlines.assert_called_once_with('# Subject\n\nFoo')
+    assert prepend_postal.call_args[0][0] == '# Subject\n\nFoo'
+    assert isinstance(prepend_postal.call_args[0][1], Field)
+    prepare_newlines.assert_called_once_with('Boo')
     letter_markdown.assert_called_once_with('Baz')
     linkify.assert_not_called()
     unlink_govuk.assert_not_called()
