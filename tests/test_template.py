@@ -4,7 +4,7 @@ from unittest.mock import PropertyMock
 from unittest.mock import patch
 from flask import Markup
 from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
-from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, LetterPreview, PassThrough
+from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, SMSMessage, LetterPreview, PassThrough
 
 
 def test_class():
@@ -175,9 +175,9 @@ def test_extracting_placeholders(template_content, template_subject, expected):
     ])
 def test_get_character_count_of_content(content, prefix, expected_length):
     template = Template(
-        {'content': content, 'template_type': 'sms'},
-        prefix=prefix,
-        values={'placeholder': '123'}
+        {'content': content},
+        values={'placeholder': '123'},
+        renderer=SMSMessage(prefix=prefix)
     )
     assert template.content_count == expected_length
 

@@ -1,5 +1,6 @@
 from os import path
 from jinja2 import Environment, FileSystemLoader
+from flask import Markup
 from notifications_utils.field import Field
 from notifications_utils.take import Take
 from notifications_utils.formatters import (
@@ -14,10 +15,9 @@ from notifications_utils.formatters import (
     prepend_postal_address
 )
 
-
-email_template = Environment(loader=FileSystemLoader(
+template_env = Environment(loader=FileSystemLoader(
     path.dirname(path.abspath(__file__))
-)).get_template('email_template.jinja2')
+))
 
 
 class PassThrough():
@@ -37,27 +37,38 @@ class SMSMessage():
         self.prefix = prefix
         self.sender = sender
 
-    def __call__(self, template, values=None):
+    def __call__(self, template):
         return Take.from_field(
             Field(template['content'], template.get('values', {}))
         ).then(
             add_prefix, self.prefix if not self.sender else None
-        ).as_string
+        ).as_string.strip()
 
 
 class SMSPreview(SMSMessage):
 
-    def __call__(self, template, values=None):
-        return Take(
-            SMSMessage(self.prefix, self.sender)(template)
-        ).then(
-            nl2br
-        ).as_string
+    jinja_template = template_env.get_template('sms_preview_template.jinja2')
+
+    def __init__(self, prefix=None, sender=None, show_recipient=True):
+        self.prefix = prefix
+        self.sender = sender
+        self.show_recipient = show_recipient
+
+    def __call__(self, template):
+        return Markup(self.jinja_template.render({
+            'recipient': template.get('values', {}).get('phonenumber'),
+            'show_recipient': self.show_recipient,
+            'body': Take(
+                SMSMessage(self.prefix, self.sender)(template)
+            ).then(
+                nl2br
+            ).as_string
+        }))
 
 
-class EmailPreview(PassThrough):
+class EmailBody(PassThrough):
 
-    def __call__(self, template, values=None):
+    def __call__(self, template):
         return Take.from_field(
             Field(template['content'], template.get('values', {}))
         ).then(
@@ -73,7 +84,7 @@ class EmailPreview(PassThrough):
 
 class PlainTextEmail(PassThrough):
 
-    def __call__(self, template, values=None):
+    def __call__(self, template):
         return Take.from_field(
             Field(template['content'], template.get('values', {}))
         ).then(
@@ -82,6 +93,8 @@ class PlainTextEmail(PassThrough):
 
 
 class HTMLEmail():
+
+    jinja_template = template_env.get_template('email_template.jinja2')
 
     def __init__(
         self,
@@ -97,9 +110,9 @@ class HTMLEmail():
         self.brand_name = brand_name
         self.brand_colour = brand_colour and brand_colour.replace('#', '')
 
-    def __call__(self, template, values=None):
-        return email_template.render({
-            'body': EmailPreview()(
+    def __call__(self, template):
+        return self.jinja_template.render({
+            'body': EmailBody()(
                 template
             ),
             'govuk_banner': self.govuk_banner,
@@ -110,7 +123,39 @@ class HTMLEmail():
         })
 
 
+class EmailPreview(PassThrough):
+
+    jinja_template = template_env.get_template('email_preview_template.jinja2')
+
+    def __init__(
+        self,
+        from_name=None,
+        from_address=None,
+        expanded=False,
+        show_recipient=True
+    ):
+        self.from_name = from_name
+        self.from_address = from_address
+        self.expanded = expanded
+        self.show_recipient = show_recipient
+
+    def __call__(self, template):
+        return Markup(self.jinja_template.render({
+            'body': EmailBody()(
+                template
+            ),
+            'subject': template['subject'],
+            'from_name': self.from_name,
+            'from_address': self.from_address,
+            'recipient': template['values'].get('emailaddress'),
+            'expanded': self.expanded,
+            'show_recipient': self.show_recipient
+        }))
+
+
 class LetterPreview(PassThrough):
+
+    jinja_template = template_env.get_template('letter_preview_template.jinja2')
 
     address_block = '\n'.join([
         '((address line 1))',
@@ -123,14 +168,16 @@ class LetterPreview(PassThrough):
     ])
 
     def __call__(self, template):
-        return Take.from_field(
-            Field(template['content'], template.get('values', {}))
-        ).then(
-            prepend_subject, Field(template['subject'], template['values'])
-        ).then(
-            prepend_postal_address, Field(self.address_block, template['values'])
-        ).then(
-            prepare_newlines_for_markdown
-        ).then(
-            notify_letter_preview_markdown
-        ).as_string
+        return Markup(self.jinja_template.render({
+            'body': Take.from_field(
+                Field(template['content'], template.get('values', {}))
+            ).then(
+                prepend_subject, Field(template['subject'], template['values'])
+            ).then(
+                prepend_postal_address, Field(self.address_block, template['values'])
+            ).then(
+                prepare_newlines_for_markdown
+            ).then(
+                notify_letter_preview_markdown
+            ).as_string
+        }))

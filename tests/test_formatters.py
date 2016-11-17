@@ -149,16 +149,15 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
 )
 def test_sms_message_adds_prefix(prefix, body, expected):
     assert SMSMessage(prefix=prefix)({'content': body}) == expected
-    assert SMSPreview(prefix=prefix)({'content': body}) == expected
 
 
 def test_sms_preview_adds_newlines():
-    assert SMSPreview()({'content': """
+    assert '<br>' in SMSPreview()({'content': """
         the
         quick
 
         brown fox
-    """}) == "the<br>        quick<br><br>        brown fox"
+    """})
 
 
 def test_prepend_address():

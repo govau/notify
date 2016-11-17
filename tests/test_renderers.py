@@ -1,5 +1,6 @@
 import pytest
 import mock
+from flask import Markup
 from notifications_utils.renderers import (
     PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, LetterPreview, unlink_govuk_escaped, linkify
 )
@@ -145,36 +146,42 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
     assert expected in HTMLEmail()({'content': template_content})
 
 
+@mock.patch('notifications_utils.renderers.add_prefix', return_value='')
 @pytest.mark.parametrize(
-    "prefix, body, expected", [
-        ("a", "b", "a: b"),
-        (None, "b", "b"),
+    'renderer', [SMSMessage, SMSPreview]
+)
+@pytest.mark.parametrize(
+    "prefix, body, expected_call", [
+        ("a", "b", (Markup("b"), "a")),
+        (None, "b", (Markup("b"), None)),
     ]
 )
-def test_sms_message_adds_prefix(prefix, body, expected):
-    assert SMSMessage(prefix=prefix)({'content': body}) == expected
-    assert SMSPreview(prefix=prefix)({'content': body}) == expected
+def test_sms_message_adds_prefix(add_prefix, renderer, prefix, body, expected_call):
+    renderer(prefix=prefix)({'content': body})
+    add_prefix.assert_called_once_with(*expected_call)
 
 
+@mock.patch('notifications_utils.renderers.add_prefix', return_value='')
 @pytest.mark.parametrize(
-    "prefix, body, sender, expected", [
-        ("a", "b", "c", "b"),
-        ("a", "b", None, "a: b"),
-        ("a", "b", False, "a: b"),
+    'renderer', [SMSMessage, SMSPreview]
+)
+@pytest.mark.parametrize(
+    "prefix, body, sender, expected_call", [
+        ("a", "b", "c", (Markup("b"), None)),
+        ("a", "b", None, (Markup("b"), "a")),
+        ("a", "b", False, (Markup("b"), "a")),
     ]
 )
-def test_sms_message_adds_prefix_only_if_no_sender_set(prefix, body, sender, expected):
-    assert SMSMessage(prefix=prefix, sender=sender)({'content': body}) == expected
-    assert SMSPreview(prefix=prefix, sender=sender)({'content': body}) == expected
+def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body, sender, expected_call, renderer):
+    renderer(prefix=prefix, sender=sender)({'content': body})
+    add_prefix.assert_called_once_with(*expected_call)
 
 
-def test_sms_preview_adds_newlines():
-    assert SMSPreview()({'content': """
-        the
-        quick
-
-        brown fox
-    """}) == "the<br>        quick<br><br>        brown fox"
+@mock.patch('notifications_utils.renderers.nl2br')
+def test_sms_preview_adds_newlines(nl2br):
+    content = "the\nquick\n\nbrown fox"
+    assert SMSPreview()({'content': content})
+    nl2br.assert_called_once_with(content)
 
 
 @mock.patch('notifications_utils.renderers.unlink_govuk_escaped')
@@ -183,7 +190,11 @@ def test_sms_preview_adds_newlines():
 @mock.patch('notifications_utils.renderers.prepare_newlines_for_markdown', return_value='Baz')
 @mock.patch('notifications_utils.renderers.prepend_postal_address', return_value='Boo')
 def test_letter_preview_renderer(prepend_postal, prepare_newlines, letter_markdown, linkify, unlink_govuk):
-    assert LetterPreview()({'content': 'Foo', 'subject': 'Subject', 'values': {}}) == 'Bar'
+    assert LetterPreview()({'content': 'Foo', 'subject': 'Subject', 'values': {}}) == (
+        '  <div class="letter">\n'
+        '    Bar\n'
+        '  </div>'
+    )
     assert prepend_postal.call_args[0][0] == '# Subject\n\nFoo'
     assert isinstance(prepend_postal.call_args[0][1], Field)
     prepare_newlines.assert_called_once_with('Boo')
