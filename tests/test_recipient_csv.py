@@ -5,6 +5,7 @@ from flask import Markup
 
 from notifications_utils.recipients import RecipientCSV, Columns
 from notifications_utils.template import Template
+from notifications_utils.renderers import PassThrough
 
 
 @pytest.mark.parametrize(
@@ -482,7 +483,11 @@ def test_detects_rows_which_result_in_overly_long_messages():
             07700900463,123456789012345678901234567890
         """,
         template_type='sms',
-        template=Template({'content': '((placeholder))', 'template_type': 'sms'}, content_character_limit=10)
+        template=Template(
+            {'content': '((placeholder))', 'template_type': 'sms'},
+            renderer=PassThrough(),
+            content_character_limit=10
+        )
     )
     assert recipients.rows_with_errors == {2, 3}
     assert recipients.rows_with_message_too_long == {2, 3}

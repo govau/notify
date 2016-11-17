@@ -12,6 +12,8 @@ from notifications_utils.field import Field
 
 class Template():
 
+    encoding = "utf-8"
+
     def __init__(
         self,
         template,
@@ -19,7 +21,6 @@ class Template():
         drop_values=(),
         prefix=None,
         sms_sender=None,
-        encoding="utf-8",
         content_character_limit=None,
         renderer=None
     ):
@@ -37,15 +38,11 @@ class Template():
         self.template_type = template.get('template_type', None)
         for value in drop_values:
             self._values.pop(value, None)
-        self.encoding = encoding
         self.content_character_limit = content_character_limit
         self._template = template
         self._prefix = prefix
         self._sms_sender = sms_sender
         self.renderer = renderer
-
-    def __str__(self):
-        return self.replaced if self.values else self.content
 
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
@@ -96,57 +93,25 @@ class Template():
         return self.renderer(self.to_dict())
 
     @property
-    def _raw_formatted_subject(self):
-        return str(Field(self.subject, {}))
-
-    @property
-    def formatted_subject(self):
-        return Markup(self._raw_formatted_subject)
-
-    @property
-    def _raw_formatted(self):
-        return self.rendered
-
-    @property
-    def formatted(self):
-        return Markup(self._raw_formatted)
-
-    @property
     def placeholders(self):
         return Field(self.subject or '').placeholders | Field(self.content).placeholders
 
     @property
-    def replaced(self):
-        if self.missing_data:
-            raise NeededByTemplateError(self.missing_data)
-        return self.renderer(self.to_dict())
-
-    @property
-    def replaced_content_count(self):
-        return len(self.replaced.encode(self.encoding))
-
-    @property
     def content_count(self):
-        return len(self.content.encode(self.encoding))
+        return len(self.rendered.encode(self.encoding))
 
     @property
     def sms_fragment_count(self):
         if self.template_type != 'sms':
             raise TypeError("The template needs to have a template type of 'sms'")
-        return get_sms_fragment_count(self.replaced_content_count)
+        return get_sms_fragment_count(self.content_count)
 
     @property
     def content_too_long(self):
         return (
             self.content_character_limit is not None and
-            self.replaced_content_count > self.content_character_limit
+            self.content_count > self.content_character_limit
         )
-
-    @property
-    def replaced_subject(self):
-        if self.missing_data:
-            raise NeededByTemplateError(self.missing_data)
-        return str(Field(self.subject, self.values))
 
     @property
     def missing_data(self):

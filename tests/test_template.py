@@ -8,10 +8,9 @@ from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, L
 
 
 def test_class():
-    template = {"content": "hello ((name))"}
-    assert str(Template(template, renderer=PassThrough())) == "hello ((name))"
-    assert str(Template(template, {'name': 'Chris'}, renderer=PassThrough())) == 'hello Chris'
-    assert repr(Template(template, renderer=PassThrough())) == 'Template("hello ((name))", {})'
+    assert repr(
+        Template({"content": "hello ((name))"}, renderer=PassThrough())
+    ) == 'Template("hello ((name))", {})'
 
 
 def test_passes_through_template_attributes():
@@ -80,242 +79,6 @@ def test_matches_keys_to_placeholder_names():
     assert template.missing_data == ['name']
 
 
-@pytest.mark.parametrize(
-    "template_content,expected_formatted,expected_replaced", [
-        ("", "", ""),
-        ("the quick brown fox", "the quick brown fox", "the quick brown fox"),
-        (
-            """
-                the
-                quick brown
-
-                fox
-            """,
-            """
-                the
-                quick brown
-
-                fox
-            """,
-            """
-                the
-                quick brown
-
-                fox
-            """
-        ),
-        ("the ((quick brown fox", "the ((quick brown fox", "the ((quick brown fox"),
-        ("the (()) brown fox", "the (()) brown fox", "the (()) brown fox")
-    ]
-)
-def test_returns_a_string_without_placeholders(template_content, expected_formatted, expected_replaced):
-    assert Template({"content": template_content}, renderer=PassThrough())._raw_formatted == expected_formatted
-    assert Template({"content": template_content}, renderer=PassThrough()).replaced == expected_replaced
-
-
-@pytest.mark.parametrize(
-    "template_content,prefix,expected", [
-        ("the quick brown fox", None, "the quick brown fox"),
-        ("the quick brown fox", "Vehicle tax", "Vehicle tax: the quick brown fox"),
-        ("the quick brown fox", "((service name))", "((service name)): the quick brown fox")
-    ]
-)
-def test_prefixing_template_with_service_name(template_content, prefix, expected):
-    assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix)._raw_formatted == expected
-    assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).replaced == expected
-    assert Template(
-        {"content": template_content, 'template_type': 'sms'}, prefix=prefix, sms_sender='Something'
-    ).replaced == "the quick brown fox"
-    assert Template({"content": template_content, 'template_type': 'sms'}, prefix=prefix).content == template_content
-    assert Template({"content": template_content}, prefix=prefix, renderer=PassThrough()).replaced == template_content
-    assert Template(
-        {"content": template_content}, prefix=prefix, renderer=PassThrough()
-    )._raw_formatted == template_content
-
-
-@pytest.mark.parametrize(
-    "template_content,expected", [
-        (
-            "((colour))",
-            "<span class='placeholder'>((colour))</span>"
-        ),
-        (
-            "the quick ((colour)) fox",
-            "the quick <span class='placeholder'>((colour))</span> fox"
-        ),
-        (
-            "((article)) quick ((colour)) ((animal))",
-            "<span class='placeholder'>((article))</span> quick <span class='placeholder'>((colour))</span> <span class='placeholder'>((animal))</span>"  # noqa
-        ),
-        (
-            """
-                ((article)) quick
-                ((colour))
-                ((animal))
-            """,
-            """
-                <span class='placeholder'>((article))</span> quick
-                <span class='placeholder'>((colour))</span>
-                <span class='placeholder'>((animal))</span>
-            """
-        ),
-        (
-            "the quick (((colour))) fox",
-            "the quick (<span class='placeholder'>((colour))</span>) fox"
-        ),
-        (
-            "((warning?))",
-            "<span class='placeholder'>((warning?))</span>"
-        ),
-        (
-            "((warning? This is not a conditional))",
-            "<span class='placeholder'>((warning? This is not a conditional))</span>"
-        ),
-        (
-            "((warning?? This is a warning))",
-            "<span class='placeholder-conditional'>((warning??</span> This is a warning))"
-        ),
-    ]
-)
-def test_formatting_of_placeholders(template_content, expected):
-    assert Template({"content": template_content}, renderer=PassThrough())._raw_formatted == expected
-
-
-@pytest.mark.parametrize(
-    "template_subject, expected", [
-        (
-            "(( name ))",
-            "<span class='placeholder'>(( name ))</span>"
-        ), (
-            "the quick (( animal ))",
-            "the quick <span class='placeholder'>(( animal ))</span>"
-        ), (
-            "(( person )) eats (( food ))",
-            "<span class='placeholder'>(( person ))</span> eats <span class='placeholder'>(( food ))</span>"
-        ), (
-            "the quick (((colour))) fox",
-            "the quick (<span class='placeholder'>((colour))</span>) fox"
-        )
-    ]
-)
-def test_subject_formatting_of_placeholders(template_subject, expected):
-    assert Template({'subject': template_subject, 'content': ''})._raw_formatted_subject == expected
-
-
-def test_formatting_of_template_contents_as_markup():
-    assert Template(
-        {"content": "Hello ((name))"}, renderer=PassThrough()
-    ).formatted_as_markup == Markup("Hello <span class='placeholder'>name</span>")
-
-
-def test_formatting_of_template_contents_as_markup():
-    assert Template(
-        {"content": "", "subject": "Hello ((name))"}, renderer=PassThrough()
-    ).formatted_subject == Markup("Hello <span class='placeholder'>((name))</span>")
-
-
-@pytest.mark.parametrize(
-    "template_content,data,expected", [
-        (
-            "((colour))",
-            {"colour": "red"},
-            "red"
-        ),
-        (
-            "the quick ((colour)) fox",
-            {"colour": "brown"},
-            "the quick brown fox"
-        ),
-        (
-            "((article)) quick ((colour)) ((animal))",
-            {"article": "the", "colour": "brown", "animal": "fox"},
-            "the quick brown fox"
-        ),
-        (
-            "the quick (((colour))) fox",
-            {"colour": "brown"},
-            "the quick (brown) fox"
-        ),
-        (
-            "the quick ((colour)) fox",
-            {"colour": "<script>alert('foo')</script>"},
-            "the quick alert('foo') fox"
-        ),
-        (
-            "((warning?))",
-            {"warning?": "This is not a conditional"},
-            "This is not a conditional"
-        ),
-        (
-            "((warning?warning))",
-            {"warning?warning": "This is not a conditional"},
-            "This is not a conditional"
-        ),
-        (
-            "((warning??This is a conditional warning))",
-            {"warning": True},
-            "This is a conditional warning"
-        ),
-        (
-            "((warning??This is a conditional warning))",
-            {"warning": False},
-            ""
-        ),
-    ]
-)
-def test_replacement_of_placeholders(template_content, data, expected):
-    assert Template(
-        {"content": template_content}, data, renderer=PassThrough()
-    ).replaced == expected
-
-
-@pytest.mark.parametrize(
-    "template_content,template_subject,data,expected_content,expected_subject", [
-        (
-            "No placeholder content",
-            "((name))",
-            {'name': 'Vladimir'},
-            "No placeholder content",
-            "Vladimir"
-        ), (
-            "My name is ((name))",
-            "((name))",
-            {"name": "Vladimir"},
-            "My name is Vladimir",
-            "Vladimir"
-        ), (
-            "The quick brown fox jumped over the lazy dog",
-            "The quick ((colour)) fox jumped over the lazy ((dog))",
-            {"colour": "brown", "dog": "cat"},
-            "The quick brown fox jumped over the lazy dog",
-            "The quick brown fox jumped over the lazy cat"
-        ), (
-            "(((random)))",
-            "(( :) ))",
-            {"random": ":(", ":)": "smiley"},
-            "(:()",
-            "(( :) ))"
-        )
-    ])
-def test_replacement_of_placeholders_subject(template_content,
-                                             template_subject,
-                                             data,
-                                             expected_content,
-                                             expected_subject):
-    template = Template({"content": template_content, 'subject': template_subject}, data, renderer=PassThrough())
-    assert template.replaced == expected_content
-    assert template.replaced_subject == expected_subject
-
-
-def test_replacement_of_template_with_incomplete_data():
-    with pytest.raises(NeededByTemplateError) as error:
-        Template(
-            {"content": "the quick ((colour)) ((animal)) ((verb)) over the ((colour)) dog"},
-            {'animal': 'fox', 'adjective': 'lazy'}
-        ).replaced
-    assert "colour, verb" == str(error.value)
-
-
 def test_can_drop_additional_values():
     values = {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
     template = {"content": "the quick ((colour)) fox jumps over the ((colour)) dog"}
@@ -324,7 +87,7 @@ def test_can_drop_additional_values():
         values,
         drop_values=('animal', 'adjective'),
         renderer=PassThrough()
-    ).replaced == 'the quick brown fox jumps over the brown dog'
+    ).rendered == 'the quick brown fox jumps over the brown dog'
     # make sure that our template and values aren’t modified
     assert Template(template, values).missing_data == []
 
@@ -339,13 +102,13 @@ def test_html_email_template():
         {'animal': 'fox', 'colour': 'brown'},
         renderer=HTMLEmail()
     )
-    assert '<html>' in template.replaced
+    assert '<html>' in template.rendered
     assert (
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         'the quick brown fox</p>'
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         'jumped over the lazy dog</p>'
-    ) in template.replaced
+    ) in template.rendered
 
 
 @pytest.mark.parametrize(
@@ -402,22 +165,21 @@ def test_extracting_placeholders(template_content, template_subject, expected):
 
 
 @pytest.mark.parametrize(
-    "content,prefix,encoding,expected_length",
+    "content,prefix,expected_length",
     [
-        ("The quick brown fox jumped over the lazy dog", None, "utf-8", 44),
-        ("深", None, "utf-8", 3),
-        ("'First line.\n", None, 'utf-8', 12),
-        ("\t\n\r", None, 'utf-8', 0),
-        ("((placeholder))", 'Service name', "utf-8", 17),
+        ("The quick brown fox jumped over the lazy dog", None, 44),
+        ("深", None, 3),
+        ("'First line.\n", None, 12),
+        ("\t\n\r", None, 0),
+        ("((placeholder))", 'Service name', 17),
     ])
-def test_get_character_count_of_content(content, prefix, encoding, expected_length):
+def test_get_character_count_of_content(content, prefix, expected_length):
     template = Template(
         {'content': content, 'template_type': 'sms'},
-        encoding=encoding,
         prefix=prefix,
         values={'placeholder': '123'}
     )
-    assert template.replaced_content_count == expected_length
+    assert template.content_count == expected_length
 
 
 @pytest.mark.parametrize(
@@ -434,7 +196,7 @@ def test_get_character_count_of_content(content, prefix, encoding, expected_leng
     ])
 def test_sms_fragment_count(char_count, expected_sms_fragment_count):
     with patch(
-        'notifications_utils.template.Template.replaced_content_count',
+        'notifications_utils.template.Template.content_count',
         new_callable=PropertyMock
     ) as mocked:
         mocked.return_value = char_count
@@ -451,7 +213,7 @@ def test_sms_fragment_count(char_count, expected_sms_fragment_count):
     ])
 def test_content_limit(content_count, limit, too_long):
     with patch(
-        'notifications_utils.template.Template.replaced_content_count',
+        'notifications_utils.template.Template.content_count',
         new_callable=PropertyMock
     ) as mocked:
         mocked.return_value = content_count
