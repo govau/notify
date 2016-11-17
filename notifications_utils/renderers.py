@@ -56,7 +56,7 @@ class SMSPreview(SMSMessage):
 
     def __call__(self, template):
         return Markup(self.jinja_template.render({
-            'recipient': template.get('values', {}).get('phonenumber'),
+            'recipient': Field('((phone number))', template.get('values', {}), with_brackets=False),
             'show_recipient': self.show_recipient,
             'body': Take(
                 SMSMessage(self.prefix, self.sender)(template)
@@ -147,7 +147,7 @@ class EmailPreview(PassThrough):
             'subject': template['subject'],
             'from_name': self.from_name,
             'from_address': self.from_address,
-            'recipient': template['values'].get('emailaddress'),
+            'recipient': Field("((email address))", template.get('values', {}), with_brackets=False),
             'expanded': self.expanded,
             'show_recipient': self.show_recipient
         }))
@@ -174,7 +174,7 @@ class LetterPreview(PassThrough):
             ).then(
                 prepend_subject, Field(template['subject'], template['values'])
             ).then(
-                prepend_postal_address, Field(self.address_block, template['values'])
+                prepend_postal_address, Field(self.address_block, template.get('values', {}), with_brackets=False)
             ).then(
                 prepare_newlines_for_markdown
             ).then(

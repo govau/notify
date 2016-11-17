@@ -1,10 +1,6 @@
 {% if show_recipient %}
   <p class="sms-message-recipient">
-    To: {% if not recipient %}
-      <span class="placeholder-no-brackets">phone number</span>
-    {% else %}
-      {{ recipient }}
-    {% endif %}
+    To: {{ recipient }}
   </p>
 {% endif %}
 <div class="sms-message-wrapper">

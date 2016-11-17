@@ -18,10 +18,13 @@ class Field():
     )
     placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
+    placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
 
-    def __init__(self, content, values=None):
+    def __init__(self, content, values=None, with_brackets=True):
         self.content = content
         self.values = values
+        if not with_brackets:
+            self.placeholder_tag = self.placeholder_tag_no_brackets
 
     def __str__(self):
         if self.values:
