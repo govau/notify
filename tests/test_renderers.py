@@ -184,20 +184,23 @@ def test_sms_preview_adds_newlines(nl2br):
     nl2br.assert_called_once_with(content)
 
 
+@mock.patch('notifications_utils.renderers.LetterPreview.jinja_template.render')
+@mock.patch('notifications_utils.renderers.remove_empty_lines', return_value='123 Street')
 @mock.patch('notifications_utils.renderers.unlink_govuk_escaped')
 @mock.patch('notifications_utils.renderers.linkify')
 @mock.patch('notifications_utils.renderers.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.renderers.prepare_newlines_for_markdown', return_value='Baz')
-@mock.patch('notifications_utils.renderers.prepend_postal_address', return_value='Boo')
-def test_letter_preview_renderer(prepend_postal, prepare_newlines, letter_markdown, linkify, unlink_govuk):
-    assert LetterPreview()({'content': 'Foo', 'subject': 'Subject', 'values': {}}) == (
-        '  <div class="letter">\n'
-        '    Bar\n'
-        '  </div>'
-    )
-    assert prepend_postal.call_args[0][0] == '# Subject\n\nFoo'
-    assert isinstance(prepend_postal.call_args[0][1], Field)
-    prepare_newlines.assert_called_once_with('Boo')
+def test_letter_preview_renderer(
+    prepare_newlines,
+    letter_markdown,
+    linkify,
+    unlink_govuk,
+    remove_empty_lines,
+    jinja_template
+):
+    LetterPreview()({'content': 'Foo', 'subject': 'Subject', 'values': {}})
+    jinja_template.assert_called_once_with({'address': '123 Street', 'message': 'Bar'})
+    prepare_newlines.assert_called_once_with('# Subject\n\nFoo')
     letter_markdown.assert_called_once_with('Baz')
     linkify.assert_not_called()
     unlink_govuk.assert_not_called()

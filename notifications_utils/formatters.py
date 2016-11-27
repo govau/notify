@@ -72,6 +72,10 @@ def prepend_postal_address(body, address_field):
     )
 
 
+def remove_empty_lines(lines):
+    return '\n'.join(filter(None, str(lines).split('\n')))
+
+
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):
