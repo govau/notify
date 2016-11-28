@@ -2,8 +2,15 @@ import pytest
 import mock
 from flask import Markup
 from notifications_utils.renderers import (
-    PassThrough, HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview, LetterPreview, unlink_govuk_escaped, linkify
+    PassThrough,
+    HTMLEmail,
+    PlainTextEmail,
+    SMSMessage,
+    SMSPreview,
+    LetterPreview,
+    LetterPDFLink,
 )
+from notifications_utils.formatters import unlink_govuk_escaped, linkify
 from notifications_utils.field import Field
 from notifications_utils.template import Template
 
@@ -204,3 +211,12 @@ def test_letter_preview_renderer(
     letter_markdown.assert_called_once_with('Baz')
     linkify.assert_not_called()
     unlink_govuk.assert_not_called()
+
+
+@mock.patch('notifications_utils.renderers.LetterPDFLink.jinja_template.render')
+def test_letter_link_renderer(jinja_template):
+    LetterPDFLink(service_id='123')({'id': '456'})
+    jinja_template.assert_called_once_with({
+        'service_id': '123',
+        'template_id': '456',
+    })

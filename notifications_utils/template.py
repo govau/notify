@@ -50,7 +50,7 @@ class Template():
     def to_dict(self):
         return {
             key: getattr(self, key)
-            for key in ['content', 'subject', 'values']
+            for key in ['content', 'subject', 'values', 'id']
         }
 
     @property

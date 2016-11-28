@@ -187,3 +187,17 @@ class LetterPreview(PassThrough):
                 nl2br
             ).as_string
         }))
+
+
+class LetterPDFLink(PassThrough):
+
+    jinja_template = template_env.get_template('letter_preview_template.jinja2')
+
+    def __init__(self, service_id):
+        self.service_id = service_id
+
+    def __call__(self, template):
+        return Markup(self.jinja_template.render({
+            'service_id': self.service_id,
+            'template_id': template['id']
+        }))
