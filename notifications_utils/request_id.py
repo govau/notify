@@ -1,6 +1,6 @@
 import uuid
 
-from flask import request, current_app
+from flask import request
 from flask.wrappers import Request
 
 
@@ -11,8 +11,8 @@ class CustomRequest(Request):
     def request_id(self):
         if self._request_id is None:
             self._request_id = self._get_request_id(
-                current_app.config['NOTIFY_REQUEST_ID_HEADER'],
-                current_app.config['NOTIFY_DOWNSTREAM_REQUEST_ID_HEADER'])
+                'NotifyRequestID',
+                'NotifyDownstreamNotifyRequestID')
         return self._request_id
 
     def _get_request_id(self, request_id_header, downstream_header):
@@ -43,8 +43,5 @@ class ResponseHeaderMiddleware(object):
 
 
 def init_app(app):
-    app.config.setdefault('NOTIFY_REQUEST_ID_HEADER', 'NOTIFY-Request-ID')
-    app.config.setdefault('NOTIFY_DOWNSTREAM_REQUEST_ID_HEADER', '')
-
     app.request_class = CustomRequest
-    app.wsgi_app = ResponseHeaderMiddleware(app.wsgi_app, app.config['NOTIFY_REQUEST_ID_HEADER'])
+    app.wsgi_app = ResponseHeaderMiddleware(app.wsgi_app, 'NotifyRequestID')
