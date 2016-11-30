@@ -12,7 +12,7 @@ def test_should_build_complete_log_line():
         'service_id': service_id
     }
     assert "{service_id} method url 200 time_taken".format(
-        service_id = str(service_id)) == logging.build_log_line(extra_fields)
+        service_id=str(service_id)) == logging.build_log_line(extra_fields)
 
 
 def test_should_build_log_line_without_service_id():
