@@ -12,7 +12,7 @@ class CustomRequest(Request):
         if self._request_id is None:
             self._request_id = self._get_request_id(
                 'NotifyRequestID',
-                'NotifyDownstreamNotifyRequestID')
+                'NotifyDownstreamRequestID')
         return self._request_id
 
     def _get_request_id(self, request_id_header, downstream_header):

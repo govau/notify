@@ -12,18 +12,18 @@ def test_get_request_id_from_request_id_header():
     request = CustomRequest(builder.get_environ())
 
     request_id = request._get_request_id('NotifyRequestID',
-                                         'NotifyDownstreamNotifyRequestID')
+                                         'NotifyDownstreamRequestID')
 
     assert request_id == 'from-header'
 
 
 def test_get_request_id_from_downstream_header():
     builder = EnvironBuilder()
-    builder.headers['NotifyDownstreamNotifyRequestID'] = 'from-downstream'
+    builder.headers['NotifyDownstreamRequestID'] = 'from-downstream'
     request = CustomRequest(builder.get_environ())
 
-    request_id = request._get_request_id('NNotifyRequestID',
-                                         'NotifyDownstreamNotifyRequestID')
+    request_id = request._get_request_id('NotifyRequestID',
+                                         'NotifyDownstreamRequestID')
 
     assert request_id == 'from-downstream'
 
@@ -48,7 +48,7 @@ def test_get_request_id_generates_id(uuid4_mock):
     uuid4_mock.return_value = 'generated'
 
     request_id = request._get_request_id('NotifyRequestID',
-                                         'NotifyDownstreamNotifyRequestID')
+                                         'NotifyDownstreamRequestID')
 
     uuid4_mock.assert_called_once()
     assert request_id == 'generated'
