@@ -1,5 +1,6 @@
 import pytest
-from notifications_utils.template import Template, TemplateChange
+from notifications_utils.template import Template
+from notifications_utils.template_change import TemplateChange
 
 
 @pytest.mark.parametrize(

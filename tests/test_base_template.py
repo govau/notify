@@ -236,7 +236,7 @@ def test_random_variable_retrieve():
 
 def test_compare_template():
     with patch(
-        'notifications_utils.template.TemplateChange.__init__',
+        'notifications_utils.template_change.TemplateChange.__init__',
         return_value=None
     ) as mocked:
         old_template = Template({'content': 'faked', 'template_type': 'sms'})
