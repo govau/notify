@@ -2,6 +2,21 @@ import pytest
 from flask import Flask
 
 
-@pytest.fixture
+class FakeService():
+    id = "1234"
+
+
+@pytest.fixture(scope='session')
 def app():
-    return Flask(__name__)
+    flask_app = Flask(__name__)
+    ctx = flask_app.app_context()
+    ctx.push()
+
+    yield flask_app
+
+    ctx.pop()
+
+
+@pytest.fixture(scope='session')
+def sample_service():
+    return FakeService()
