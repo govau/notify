@@ -16,6 +16,26 @@ TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 logger = logging.getLogger(__name__)
 
 
+def build_log_line(extra_fields):
+    fields = []
+    if 'service_id' in extra_fields:
+        fields.append(str(extra_fields.get('service_id')))
+    standard_fields = [extra_fields.get('method'), extra_fields.get('url'), extra_fields.get('status')]
+    fields += [str(field) for field in standard_fields if field is not None]
+    if 'time_taken' in extra_fields:
+        fields.append(extra_fields.get('time_taken'))
+    return ' '.join(fields)
+
+
+def build_statsd_line(extra_fields):
+    fields = []
+    if 'service_id' in extra_fields:
+        fields.append(str(extra_fields.get('service_id')))
+    standard_fields = [extra_fields.get('method'), extra_fields.get('endpoint'), extra_fields.get('status')]
+    fields += [str(field) for field in standard_fields if field is not None]
+    return '.'.join(fields)
+
+
 def init_app(app, statsd_client=None):
     app.config.setdefault('NOTIFY_LOG_LEVEL', 'INFO')
     app.config.setdefault('NOTIFY_APP_NAME', 'none')
@@ -23,12 +43,16 @@ def init_app(app, statsd_client=None):
 
     @app.after_request
     def after_request(response):
-
         extra_fields = {
             'method': request.method,
             'url': request.url,
             'status': response.status_code
         }
+
+        if 'service_id' in g:
+            extra_fields.update({
+                'service_id': g.service_id
+            })
 
         if 'start' in g:
             time_taken = monotonic() - g.start
@@ -36,26 +60,19 @@ def init_app(app, statsd_client=None):
                 'time_taken': "%.5f" % time_taken
             })
 
-        if statsd_client and 'endpoint' in g:
-            statsd_client.incr(
-                '{method}.{endpoint}.{status_code}'.format(
-                    method=request.method, endpoint=g.endpoint, status_code=response.status_code
-                )
-            )
+        if 'endpoint' in g:
+            extra_fields.update({
+                'endpoint': g.endpoint
+            })
+
+        if statsd_client:
+            stat = build_statsd_line(extra_fields)
+            statsd_client.incr(stat)
 
             if 'time_taken' in extra_fields:
-                statsd_client.timing(
-                    '{method}.{endpoint}.{status_code}'.format(
-                        method=request.method,
-                        endpoint=g.endpoint,
-                        status_code=response.status_code),
-                    time_taken
-                )
+                statsd_client.timing(stat, time_taken)
 
-        if 'time_taken' in extra_fields:
-            current_app.logger.info('{method} {url} {status} {time_taken}', extra=extra_fields)
-        else:
-            current_app.logger.info('{method} {url} {status}', extra=extra_fields)
+        current_app.logger.info(build_log_line(extra_fields))
         return response
 
     logging.getLogger().addHandler(logging.NullHandler())

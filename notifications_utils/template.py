@@ -54,9 +54,7 @@ class Template():
         self.renderer = renderer
 
     def __str__(self):
-        if self.values:
-            return self.replaced
-        return self.content
+        return self.replaced if self.values else self.content
 
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
