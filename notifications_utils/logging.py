@@ -30,7 +30,7 @@ def build_log_line(extra_fields):
 def build_statsd_line(extra_fields):
     fields = []
     if 'service_id' in extra_fields:
-        fields.append(str(extra_fields.get('service_id')))
+        fields = ["service-id", str(extra_fields.get('service_id'))]
     standard_fields = [extra_fields.get('method'), extra_fields.get('endpoint'), extra_fields.get('status')]
     fields += [str(field) for field in standard_fields if field is not None]
     return '.'.join(fields)
