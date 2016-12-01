@@ -5,6 +5,7 @@ from flask import Markup
 
 from notifications_utils.recipients import RecipientCSV, Columns
 from notifications_utils.template import Template
+from notifications_utils.renderers import PassThrough
 
 
 @pytest.mark.parametrize(
@@ -250,10 +251,10 @@ def test_get_recipient_respects_order(file_contents,
 
 
 @pytest.mark.parametrize(
-    "file_contents,template_type,expected,expected_highlighted,expected_missing",
+    "file_contents,template_type,expected,expected_missing",
     [
         (
-            "", 'sms', [], [], set(['phone number', 'name'])
+            "", 'sms', [], set(['phone number', 'name'])
         ),
         (
             """
@@ -264,7 +265,6 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'sms',
             ['phone number', 'name'],
-            ['phone number', Markup('<span class=\'placeholder\'>((name))</span>')],
             set()
         ),
         (
@@ -273,7 +273,6 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'email',
             ['email address', 'name', 'colour'],
-            ['email address', Markup('<span class=\'placeholder\'>((name))</span>'), 'colour'],
             set()
         ),
         (
@@ -281,7 +280,6 @@ def test_get_recipient_respects_order(file_contents,
                 email address,colour
             """,
             'email',
-            ['email address', 'colour'],
             ['email address', 'colour'],
             set(['name'])
         ),
@@ -291,15 +289,13 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'letter',
             ['address_line_1', 'address_line_2', 'name'],
-            ['address_line_1', 'address_line_2', Markup('<span class=\'placeholder\'>((name))</span>')],
             set(['postcode', 'address line 3', 'address line 4', 'address line 5', 'address line 6'])
         )
     ]
 )
-def test_column_headers(file_contents, template_type, expected, expected_highlighted, expected_missing):
+def test_column_headers(file_contents, template_type, expected, expected_missing):
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['name'])
     assert recipients.column_headers == expected
-    assert recipients.column_headers_with_placeholders_highlighted == expected_highlighted
     assert recipients.missing_column_headers == expected_missing
     assert recipients.has_errors == bool(expected_missing)
 
@@ -487,7 +483,11 @@ def test_detects_rows_which_result_in_overly_long_messages():
             07700900463,123456789012345678901234567890
         """,
         template_type='sms',
-        template=Template({'content': '((placeholder))', 'template_type': 'sms'}, content_character_limit=10)
+        template=Template(
+            {'content': '((placeholder))', 'template_type': 'sms'},
+            renderer=PassThrough(),
+            content_character_limit=10
+        )
     )
     assert recipients.rows_with_errors == {2, 3}
     assert recipients.rows_with_message_too_long == {2, 3}

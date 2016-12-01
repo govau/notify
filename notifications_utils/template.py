@@ -7,19 +7,12 @@ from flask import Markup
 
 from notifications_utils.columns import Columns
 from notifications_utils.renderers import HTMLEmail, SMSPreview, EmailPreview, LetterPreview
+from notifications_utils.field import Field
 
 
 class Template():
 
-    placeholder_pattern = re.compile(
-        '\(\('            # opening ((
-        '([^\(\)\?]+)'    # 1. name of placeholder, eg ‘registration number’
-        '(\?\?)?'         # 2. optional ??
-        '([^\)\(]*)'      # 3. optional text to display if the placeholder’s value is True
-        '\)\)'            # closing ))
-    )
-    placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
-    optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
+    encoding = "utf-8"
 
     def __init__(
         self,
@@ -28,7 +21,6 @@ class Template():
         drop_values=(),
         prefix=None,
         sms_sender=None,
-        encoding="utf-8",
         content_character_limit=None,
         renderer=None
     ):
@@ -46,18 +38,20 @@ class Template():
         self.template_type = template.get('template_type', None)
         for value in drop_values:
             self._values.pop(value, None)
-        self.encoding = encoding
         self.content_character_limit = content_character_limit
         self._template = template
         self._prefix = prefix
         self._sms_sender = sms_sender
         self.renderer = renderer
 
-    def __str__(self):
-        return self.replaced if self.values else self.content
-
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
+
+    def to_dict(self):
+        return {
+            key: getattr(self, key)
+            for key in ['content', 'subject', 'values']
+        }
 
     @property
     def values(self):
@@ -90,99 +84,33 @@ class Template():
                 sender=self._sms_sender
             )
         elif self.template_type == 'letter':
-            self._renderer = LetterPreview(
-                subject=self.subject
-            )
+            self._renderer = LetterPreview()
         elif self.template_type == 'email' or not self.template_type:
             self._renderer = EmailPreview()
 
-    def get_match(self, match):
-        if match[1] and match[2]:
-            return match[0]
-        return match[0] + match[2]
-
-    def format_match(self, match):
-        if match.group(2) and match.group(3):
-            return self.optional_placeholder_tag.format(match.group(1), match.group(3))
-        return self.placeholder_tag.format(match.group(1), match.group(3))
-
-    def replace_match(self, match):
-        if match.group(2) and match.group(3):
-            return strip_html(match.group(3)) if str2bool(self.values.get(match.group(1))) else ''
-        return strip_html(self.values.get(match.group(1) + match.group(3)))
-
     @property
-    def formatted(self):
-        return self.renderer(re.sub(
-            Template.placeholder_pattern, self.format_match, self.content
-        ))
-
-    @property
-    def formatted_subject(self):
-        return re.sub(
-            Template.placeholder_pattern, self.format_match, self.subject
-        )
-
-    @property
-    def formatted_subject_as_markup(self):
-        return Markup(self.formatted_subject)
-
-    @property
-    def formatted_as_markup(self):
-        return Markup(self.formatted)
+    def rendered(self):
+        return self.renderer(self.to_dict())
 
     @property
     def placeholders(self):
-        return OrderedSet(
-            self.get_match(match) for match in re.findall(
-                Template.placeholder_pattern, (self.subject or '') + self.content
-            )
-        )
-
-    @property
-    def placeholders_as_markup(self):
-        return [
-            Markup(Template.placeholder_tag.format(placeholder, ''))
-            for placeholder in self.placeholders
-        ]
-
-    @property
-    def replaced(self):
-        if self.missing_data:
-            raise NeededByTemplateError(self.missing_data)
-        return self.renderer(re.sub(
-            Template.placeholder_pattern, self.replace_match, self.content
-        ))
-
-    @property
-    def replaced_content_count(self):
-        return len(self.replaced.encode(self.encoding))
+        return Field(self.subject or '').placeholders | Field(self.content).placeholders
 
     @property
     def content_count(self):
-        return len(self.content.encode(self.encoding))
+        return len(self.rendered.encode(self.encoding))
 
     @property
     def sms_fragment_count(self):
         if self.template_type != 'sms':
             raise TypeError("The template needs to have a template type of 'sms'")
-        return get_sms_fragment_count(self.replaced_content_count)
+        return get_sms_fragment_count(self.content_count)
 
     @property
     def content_too_long(self):
         return (
             self.content_character_limit is not None and
-            self.replaced_content_count > self.content_character_limit
-        )
-
-    @property
-    def replaced_subject(self):
-        if self.missing_data:
-            raise NeededByTemplateError(self.missing_data)
-        return re.sub(
-            Template.placeholder_pattern,
-            self.replace_match,
-            self.subject if self.subject else ""
+            self.content_count > self.content_character_limit
         )
 
     @property
@@ -240,13 +168,3 @@ class TemplateChange():
 
 def get_sms_fragment_count(character_count):
     return 1 if character_count <= 160 else math.ceil(float(character_count) / 153)
-
-
-def str2bool(value):
-    if not value:
-        return False
-    return str(value).lower() in ("yes", "y", "true", "t", "1", "include", "show")
-
-
-def strip_html(value):
-    return bleach.clean(value, tags=[], strip=True)

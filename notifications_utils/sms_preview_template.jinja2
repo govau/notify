@@ -1,0 +1,8 @@
+{% if show_recipient %}
+  <p class="sms-message-recipient">
+    To: {{ recipient }}
+  </p>
+{% endif %}
+<div class="sms-message-wrapper">
+  {{ body }}
+</div>
