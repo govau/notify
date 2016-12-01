@@ -1,13 +1,20 @@
 import pytest
 from unittest.mock import PropertyMock
 from unittest.mock import patch
-from notifications_utils.template import Template
-from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, SMSMessage, LetterPreview, PassThrough
+from flask import Markup
+from notifications_utils.template import (
+    Template,
+    HTMLEmailTemplate,
+    SMSMessageTemplate,
+    LetterPreviewTemplate,
+    NeededByTemplateError,
+    NoPlaceholderForDataError
+)
 
 
 def test_class():
     assert repr(
-        Template({"content": "hello ((name))"}, renderer=PassThrough())
+        Template({"content": "hello ((name))"})
     ) == 'Template("hello ((name))", {})'
 
 
@@ -43,25 +50,6 @@ def test_errors_for_invalid_values(values):
         Template({"content": ''}, values)
 
 
-def test_sets_default_renderer():
-    assert isinstance(
-        Template({'content': ''}).renderer,
-        EmailPreview
-    )
-
-
-@pytest.mark.parametrize("template_type, expected_renderer", [
-    ('sms', SMSPreview),
-    ('email', EmailPreview),
-    ('letter', LetterPreview)
-])
-def test_sets_correct_renderer(template_type, expected_renderer):
-    assert isinstance(
-        Template({'content': '', 'template_type': template_type}).renderer,
-        expected_renderer
-    )
-
-
 def test_matches_keys_to_placeholder_names():
 
     template = Template({"content": "hello ((name))"})
@@ -75,43 +63,6 @@ def test_matches_keys_to_placeholder_names():
 
     template.values = None
     assert template.missing_data == ['name']
-
-
-def test_can_drop_additional_values():
-    values = {'colour': 'brown', 'animal': 'fox', 'adjective': 'lazy'}
-    template = {"content": "the quick ((colour)) fox jumps over the ((colour)) dog"}
-    assert Template(
-        template,
-        values,
-        drop_values=('animal', 'adjective'),
-        renderer=PassThrough()
-    ).rendered == 'the quick brown fox jumps over the brown dog'
-    # make sure that our template and values aren’t modified
-    assert Template(template, values).missing_data == []
-
-
-@pytest.mark.parametrize(
-    'renderer', [HTMLEmail, LetterPreview]
-)
-def test_markdown_in_templates(renderer):
-    template = Template(
-        {
-            "content": (
-                'the quick ((colour)) ((animal))\n'
-                '\n'
-                'jumped over the lazy dog'
-            ),
-            'subject': 'animal story'
-        },
-        {'animal': 'fox', 'colour': 'brown'},
-        renderer=renderer()
-    )
-    assert (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'the quick brown fox</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'jumped over the lazy dog</p>'
-    ) in template.rendered
 
 
 @pytest.mark.parametrize(
@@ -177,11 +128,12 @@ def test_extracting_placeholders(template_content, template_subject, expected):
         ("((placeholder))", 'Service name', 17),
     ])
 def test_get_character_count_of_content(content, prefix, expected_length):
-    template = Template(
+    template = SMSMessageTemplate(
         {'content': content},
-        values={'placeholder': '123'},
-        renderer=SMSMessage(prefix=prefix)
+        values={'placeholder': '123'}
     )
+    template.prefix = prefix
+    template.sender = None
     assert template.content_count == expected_length
 
 
@@ -199,11 +151,11 @@ def test_get_character_count_of_content(content, prefix, expected_length):
     ])
 def test_sms_fragment_count(char_count, expected_sms_fragment_count):
     with patch(
-        'notifications_utils.template.Template.content_count',
+        'notifications_utils.template.SMSMessageTemplate.content_count',
         new_callable=PropertyMock
     ) as mocked:
         mocked.return_value = char_count
-        template = Template({'content': 'faked', 'template_type': 'sms'})
+        template = SMSMessageTemplate({'content': 'faked', 'template_type': 'sms'})
         assert template.sms_fragment_count == expected_sms_fragment_count
 
 
@@ -216,14 +168,14 @@ def test_sms_fragment_count(char_count, expected_sms_fragment_count):
     ])
 def test_content_limit(content_count, limit, too_long):
     with patch(
-        'notifications_utils.template.Template.content_count',
+        'notifications_utils.template.SMSMessageTemplate.content_count',
         new_callable=PropertyMock
     ) as mocked:
         mocked.return_value = content_count
-        template = Template(
+        template = SMSMessageTemplate(
             {'content': 'faked', 'template_type': 'sms'},
-            content_character_limit=limit
         )
+        template.content_character_limit = limit
         assert template.content_too_long == too_long
 
 
