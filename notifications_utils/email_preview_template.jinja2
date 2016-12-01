@@ -1,0 +1,42 @@
+<div class="email-message">
+  <table class="email-message-meta">
+    <tbody>
+      {% if show_recipient %}
+        {% if from_name and from_address %}
+          <tr>
+            <th>From</th>
+            <td>
+              {{ from_name }} &lt;{{ from_address }}&gt;
+            </td>
+          </tr>
+        {% endif %}
+        <tr>
+          <th>To</th>
+          <td>
+            {% if recipient is not none %}
+              {{ recipient }}
+            {% else %}
+              <span class="placeholder-no-brackets">email address</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endif %}
+      <tr class="email-message-meta">
+        <th>Subject</th>
+        <td>
+          {{ subject }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="email-message-body" {% if not expanded %}data-module="expand-collapse" data-max-height="200"{% endif %}>
+    {% if not expanded %}
+    <div class="email-message-body-wrapper">
+    {% endif %}
+      {{ body }}
+    {% if not expanded %}
+    </div>
+    <div class='toggle' tabindex='0'>...<span class='visually-hidden'>show full email</span></div>
+    {% endif %}
+  </div>
+</div>
