@@ -12,6 +12,8 @@ from notifications_utils.template import (
     PlainTextEmailTemplate,
     SMSMessageTemplate,
     SMSPreviewTemplate,
+    WithSubjectTemplate,
+    EmailPreviewTemplate,
 )
 
 
@@ -25,21 +27,23 @@ def test_pass_through_renderer():
 
 
 def test_html_email_inserts_body():
-    assert 'the <em>quick</em> brown fox' in str(HTMLEmailTemplate({'content': 'the <em>quick</em> brown fox'}))
+    assert 'the <em>quick</em> brown fox' in str(HTMLEmailTemplate(
+        {'content': 'the <em>quick</em> brown fox', 'subject': ''}
+    ))
 
 
 @pytest.mark.parametrize(
     "content", ('DOCTYPE', 'html', 'body', 'GOV.UK', 'hello world')
 )
 def test_default_template(content):
-    assert content in str(HTMLEmailTemplate({'content': 'hello world'}))
+    assert content in str(HTMLEmailTemplate({'content': 'hello world', 'subject': ''}))
 
 
 @pytest.mark.parametrize(
     "show_banner", (True, False)
 )
 def test_govuk_banner(show_banner):
-    email = HTMLEmailTemplate({'content': 'hello world'})
+    email = HTMLEmailTemplate({'content': 'hello world', 'subject': ''})
     email.govuk_banner = show_banner
     if show_banner:
         assert "GOV.UK" in str(email)
@@ -66,7 +70,7 @@ def test_govuk_banner(show_banner):
 def test_complete_html(complete_html, branding_should_be_present, brand_logo, brand_name, brand_colour, content):
 
     email = str(HTMLEmailTemplate(
-        {'content': 'hello world'},
+        {'content': 'hello world', 'subject': ''},
         complete_html=complete_html,
         brand_logo=brand_logo,
         brand_name=brand_name,
@@ -127,7 +131,7 @@ def test_markdown_in_templates(template_class):
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
-    assert link in str(HTMLEmailTemplate({'content': url}))
+    assert link in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -144,7 +148,7 @@ def test_makes_links_out_of_URLs(url):
 )
 def test_URLs_get_escaped(url, expected_html):
     assert linkify(url) == expected_html
-    assert expected_html in str(HTMLEmailTemplate({'content': url}))
+    assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -157,7 +161,7 @@ def test_HTML_template_has_URLs_replaced_with_links():
         https://service.example.com/accept_invite/a1b2c3d4
 
         Thanks
-    '''}))
+    ''', 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -174,8 +178,8 @@ def test_HTML_template_has_URLs_replaced_with_links():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert str(PlainTextEmailTemplate({'content': template_content})) == expected
-    assert expected in str(HTMLEmailTemplate({'content': template_content}))
+    assert str(PlainTextEmailTemplate({'content': template_content, 'subject': ''})) == expected
+    assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
 
 @mock.patch('notifications_utils.template.add_prefix', return_value='')
@@ -249,3 +253,29 @@ def test_letter_link_renderer(jinja_template):
         'service_id': '123',
         'template_id': '456',
     })
+
+
+def test_sets_subject():
+    assert WithSubjectTemplate({"content": '', 'subject': 'Your tax is due'}).subject == 'Your tax is due'
+
+
+def test_subject_line_gets_applied_to_correct_template_types():
+    for cls in [
+        EmailPreviewTemplate,
+        HTMLEmailTemplate,
+        PlainTextEmailTemplate,
+        LetterPreviewTemplate,
+    ]:
+        assert issubclass(cls, WithSubjectTemplate)
+    for cls in [
+        SMSMessageTemplate,
+        SMSPreviewTemplate,
+    ]:
+        assert not issubclass(cls, WithSubjectTemplate)
+
+
+def test_subject_line_gets_replaced():
+    template = WithSubjectTemplate({"content": '', 'subject': '((name))'})
+    assert template.subject == Markup("<span class='placeholder'>((name))</span>")
+    template.values = {'name': 'Jo'}
+    assert template.subject == 'Jo'

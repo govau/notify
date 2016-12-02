@@ -8,7 +8,8 @@ from notifications_utils.template import (
     SMSMessageTemplate,
     LetterPreviewTemplate,
     NeededByTemplateError,
-    NoPlaceholderForDataError
+    NoPlaceholderForDataError,
+    WithSubjectTemplate
 )
 
 
@@ -25,8 +26,7 @@ def test_passes_through_template_attributes():
     assert Template({"content": '', 'id': '1234'}).id == '1234'
     assert Template({"content": ''}).template_type is None
     assert Template({"content": '', 'template_type': 'sms'}).template_type is 'sms'
-    assert Template({"content": ''}).subject is None
-    assert Template({"content": '', 'subject': 'Your tax is due'}).subject == 'Your tax is due'
+    assert not hasattr(Template({"content": ''}), 'subject')
 
 
 def test_errors_for_missing_template_content():
@@ -115,7 +115,7 @@ def test_matches_keys_to_placeholder_names():
     ]
 )
 def test_extracting_placeholders(template_content, template_subject, expected):
-    assert Template({"content": template_content, 'subject': template_subject}).placeholders == expected
+    assert WithSubjectTemplate({"content": template_content, 'subject': template_subject}).placeholders == expected
 
 
 @pytest.mark.parametrize(

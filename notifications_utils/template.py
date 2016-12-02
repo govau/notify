@@ -41,7 +41,6 @@ class Template():
         self.id = template.get("id", None)
         self.name = template.get("name", None)
         self.content = template["content"]
-        self.subject = template.get('subject', None)
         self.values = values
         self.template_type = template.get('template_type', None)
         self._template = template
@@ -56,7 +55,9 @@ class Template():
 
     @property
     def values(self):
-        return self._values
+        if hasattr(self, '_values'):
+            return self._values
+        return {}
 
     @values.setter
     def values(self, value):
@@ -73,7 +74,7 @@ class Template():
 
     @property
     def placeholders(self):
-        return Field(self.subject or '').placeholders | Field(self.content).placeholders
+        return Field(self.content).placeholders
 
     @property
     def missing_data(self):
@@ -161,7 +162,30 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         }))
 
 
-class PlainTextEmailTemplate(Template):
+class WithSubjectTemplate(Template):
+
+    def __init__(
+        self,
+        template,
+        values=None
+    ):
+        self._subject = template['subject']
+        super().__init__(template, values)
+
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values))
+
+    @subject.setter
+    def subject(self, value):
+        self._subject = value
+
+    @property
+    def placeholders(self):
+        return Field(self._subject).placeholders | Field(self.content).placeholders
+
+
+class PlainTextEmailTemplate(WithSubjectTemplate):
 
     def __str__(self):
         return Take.as_field(
@@ -171,7 +195,7 @@ class PlainTextEmailTemplate(Template):
         ).as_string
 
 
-class HTMLEmailTemplate(Template):
+class HTMLEmailTemplate(WithSubjectTemplate):
 
     jinja_template = template_env.get_template('email_template.jinja2')
 
@@ -185,12 +209,12 @@ class HTMLEmailTemplate(Template):
         brand_name=None,
         brand_colour=None
     ):
+        super().__init__(template, values)
         self.govuk_banner = govuk_banner
         self.complete_html = complete_html
         self.brand_logo = brand_logo
         self.brand_name = brand_name
         self.brand_colour = brand_colour and brand_colour.replace('#', '')
-        super().__init__(template, values)
 
     def __str__(self):
 
@@ -206,7 +230,7 @@ class HTMLEmailTemplate(Template):
         })
 
 
-class EmailPreviewTemplate(Template):
+class EmailPreviewTemplate(WithSubjectTemplate):
 
     jinja_template = template_env.get_template('email_preview_template.jinja2')
 
@@ -219,18 +243,18 @@ class EmailPreviewTemplate(Template):
         expanded=False,
         show_recipient=True
     ):
+        super().__init__(template, values)
         self.from_name = from_name
         self.from_address = from_address
         self.expanded = expanded
         self.show_recipient = show_recipient
-        super().__init__(template, values)
 
     def __str__(self):
         return Markup(self.jinja_template.render({
             'body': get_html_email_body(
                 self.content, self.values
             ),
-            'subject': template['subject'],
+            'subject': self.subject,
             'from_name': self.from_name,
             'from_address': self.from_address,
             'recipient': Field("((email address))", self.values, with_brackets=False),
@@ -239,7 +263,7 @@ class EmailPreviewTemplate(Template):
         }))
 
 
-class LetterPreviewTemplate(Template):
+class LetterPreviewTemplate(WithSubjectTemplate):
 
     jinja_template = template_env.get_template('letter_pdf_template.jinja2')
 
@@ -258,7 +282,7 @@ class LetterPreviewTemplate(Template):
             'message': Take.as_field(
                 self.content, self.values
             ).then(
-                prepend_subject, Field(self.subject, self.values)
+                prepend_subject, self.subject
             ).then(
                 prepare_newlines_for_markdown
             ).then(
@@ -284,10 +308,10 @@ class LetterPDFLinkTemplate(Template):
         values=None,
         service_id=None
     ):
+        super().__init__(template, values)
         if not service_id:
             raise TypeError('service_id is required')
         self.service_id = service_id
-        super().__init__(template, values)
 
     def __str__(self):
         return Markup(self.jinja_template.render({
