@@ -41,7 +41,7 @@ tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECA
 class RecipientCSV():
 
     reader_options = {
-        'quoting': csv.QUOTE_NONE,
+        'quoting': csv.QUOTE_MINIMAL,
         'skipinitialspace': True
     }
 

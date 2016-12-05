@@ -49,6 +49,30 @@ from notifications_utils.renderers import PassThrough
         ),
         (
             """
+                email address,name
+                test@example.com,"test1"
+                test2@example.com," test2"
+            """,
+            "email",
+            [
+                [('email address', 'test@example.com'), ('name', 'test1')],
+                [('email address', 'test2@example.com'), ('name', ' test2')]
+            ]
+        ),
+        (
+            """
+                email address,date,name
+                test@example.com,"Nov 28, 2016",test1
+                test2@example.com,"Nov 29, 2016",test2
+            """,
+            "email",
+            [
+                [('email address', 'test@example.com'), ('date', 'Nov 28, 2016'), ('name', 'test1')],
+                [('email address', 'test2@example.com'), ('date', 'Nov 29, 2016'), ('name', 'test2')]
+            ]
+        ),
+        (
+            """
                 address_line_1
                 Alice
                 Bob
