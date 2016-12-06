@@ -12,7 +12,7 @@ from notifications_utils.formatters import (
     notify_letter_preview_markdown,
     prepare_newlines_for_markdown,
     prepend_subject,
-    prepend_postal_address
+    remove_empty_lines
 )
 
 template_env = Environment(loader=FileSystemLoader(
@@ -155,7 +155,7 @@ class EmailPreview(PassThrough):
 
 class LetterPreview(PassThrough):
 
-    jinja_template = template_env.get_template('letter_preview_template.jinja2')
+    jinja_template = template_env.get_template('letter_pdf_template.jinja2')
 
     address_block = '\n'.join([
         '((address line 1))',
@@ -169,15 +169,34 @@ class LetterPreview(PassThrough):
 
     def __call__(self, template):
         return Markup(self.jinja_template.render({
-            'body': Take.from_field(
+            'message': Take.from_field(
                 Field(template['content'], template.get('values', {}))
             ).then(
                 prepend_subject, Field(template['subject'], template['values'])
             ).then(
-                prepend_postal_address, Field(self.address_block, template.get('values', {}), with_brackets=False)
-            ).then(
                 prepare_newlines_for_markdown
             ).then(
                 notify_letter_preview_markdown
+            ).as_string,
+            'address': Take.from_field(
+                Field(self.address_block, template.get('values', {}), with_brackets=False)
+            ).then(
+                remove_empty_lines
+            ).then(
+                nl2br
             ).as_string
+        }))
+
+
+class LetterPDFLink(PassThrough):
+
+    jinja_template = template_env.get_template('letter_preview_template.jinja2')
+
+    def __init__(self, service_id):
+        self.service_id = service_id
+
+    def __call__(self, template):
+        return Markup(self.jinja_template.render({
+            'service_id': self.service_id,
+            'template_id': template['id']
         }))

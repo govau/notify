@@ -1,12 +1,7 @@
-import re
 import math
-import bleach
-
-from orderedset import OrderedSet
-from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.renderers import HTMLEmail, SMSPreview, EmailPreview, LetterPreview
+from notifications_utils.renderers import SMSPreview, EmailPreview, LetterPreview
 from notifications_utils.field import Field
 
 
@@ -50,7 +45,7 @@ class Template():
     def to_dict(self):
         return {
             key: getattr(self, key)
-            for key in ['content', 'subject', 'values']
+            for key in ['content', 'subject', 'values', 'id']
         }
 
     @property
