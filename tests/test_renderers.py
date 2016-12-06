@@ -11,8 +11,6 @@ from notifications_utils.renderers import (
     LetterPDFLink,
 )
 from notifications_utils.formatters import unlink_govuk_escaped, linkify
-from notifications_utils.field import Field
-from notifications_utils.template import Template
 
 
 def test_pass_through_renderer():

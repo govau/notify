@@ -1,9 +1,7 @@
 import pytest
-from functools import partial
 from unittest.mock import PropertyMock
 from unittest.mock import patch
-from flask import Markup
-from notifications_utils.template import Template, NeededByTemplateError, NoPlaceholderForDataError
+from notifications_utils.template import Template
 from notifications_utils.renderers import HTMLEmail, EmailPreview, SMSPreview, SMSMessage, LetterPreview, PassThrough
 
 

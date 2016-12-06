@@ -12,7 +12,6 @@ from notifications_utils.formatters import (
     notify_letter_preview_markdown,
     prepare_newlines_for_markdown,
     prepend_subject,
-    prepend_postal_address,
     remove_empty_lines
 )
 
