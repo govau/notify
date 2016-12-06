@@ -65,11 +65,8 @@ def prepend_subject(body, subject):
     return '# {}\n\n{}'.format(subject, body)
 
 
-def prepend_postal_address(body, address_field):
-    return '{}\n\n{}'.format(
-        '\n'.join(filter(None, str(address_field).split('\n'))),
-        body
-    )
+def remove_empty_lines(lines):
+    return '\n'.join(filter(None, str(lines).split('\n')))
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):

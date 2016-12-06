@@ -1,0 +1,74 @@
+  <div class="letter">
+    {{ body }}
+  </div>
+
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <title>
+        Preview – GOV.UK Notify
+      </title>
+      <style media="print">
+        @page {
+          size: A4 portrait;
+          margin: 5mm 10mm 40mm 10mm;
+        }
+        body {
+          font-family: 'Helvetica Neue';
+          font-size: 14pt;
+          line-height: 17.5pt;
+          margin: 5mm 10mm 40mm 10mm;
+          padding: 90mm 50mm 0 0;
+        }
+        #logo {
+          height: 20mm;
+          width: 70mm;
+          position: absolute;
+          top: 5mm;
+          left: 10mm;
+          background: #999;
+        }
+        #to,
+        #from {
+          position: absolute;
+          top: 30mm;
+          height: 65mm;
+          font-size: 10pt;
+          line-height: 12pt
+        }
+        #to {
+          left: 10mm;
+          width: 100mm;
+        }
+        #from {
+          left: 140mm;
+          width: 100mm;
+        }
+        #barcode {
+          position: absolute;
+          top: 70mm;
+          width: 50mm;
+          height: 10mm;
+          background: #000;
+        }
+        h1 {
+          font-size: 21pt;
+          font-weight: bold;
+          margin: 0 0 27pt 0;
+        }
+        p {
+          margin: 0 0 14pt 0;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="logo"></div>
+      <div id="to">
+        {{ address }}
+      </div>
+      <div id="barcode">
+      </div>
+      {{ message }}
+    </body>
+  </html>
