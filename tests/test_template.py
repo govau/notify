@@ -90,17 +90,22 @@ def test_can_drop_additional_values():
     assert Template(template, values).missing_data == []
 
 
-def test_html_email_template():
+@pytest.mark.parametrize(
+    'renderer', [HTMLEmail, LetterPreview]
+)
+def test_markdown_in_templates(renderer):
     template = Template(
-        {"content": (
-            'the quick ((colour)) ((animal))\n'
-            '\n'
-            'jumped over the lazy dog'
-        )},
+        {
+            "content": (
+                'the quick ((colour)) ((animal))\n'
+                '\n'
+                'jumped over the lazy dog'
+            ),
+            'subject': 'animal story'
+        },
         {'animal': 'fox', 'colour': 'brown'},
-        renderer=HTMLEmail()
+        renderer=renderer()
     )
-    assert '<html>' in template.rendered
     assert (
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         'the quick brown fox</p>'
