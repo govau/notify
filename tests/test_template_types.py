@@ -91,27 +91,46 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
             assert '##' not in email
 
 
-@pytest.mark.parametrize(
-    'template_class', [HTMLEmailTemplate, LetterPreviewTemplate]
-)
-def test_markdown_in_templates(template_class):
-    template = template_class(
-        {
-            "content": (
-                'the quick ((colour)) ((animal))\n'
-                '\n'
-                'jumped over the lazy dog'
-            ),
-            'subject': 'animal story'
-        },
-        {'animal': 'fox', 'colour': 'brown'}
-    )
-    assert (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'the quick brown fox</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'jumped over the lazy dog</p>'
-    ) in str(template)
+@pytest.mark.parametrize('template_class, result, markdown_renderer', [
+    [
+        HTMLEmailTemplate,
+        (
+            'the quick brown fox\n'
+            '\n'
+            'jumped over the lazy dog'
+        ),
+        'notifications_utils.template.notify_email_markdown',
+    ],
+    [
+        LetterPreviewTemplate,
+        (
+            '# animal story\n'
+            '\n'
+            'the quick brown fox\n'
+            '\n'
+            'jumped over the lazy dog'
+        ),
+        'notifications_utils.template.notify_letter_preview_markdown'
+    ]
+])
+def test_markdown_in_templates(
+    template_class,
+    result,
+    markdown_renderer,
+):
+    with mock.patch(markdown_renderer) as mock_markdown_renderer:
+        str(template_class(
+            {
+                "content": (
+                    'the quick ((colour)) ((animal))\n'
+                    '\n'
+                    'jumped over the lazy dog'
+                ),
+                'subject': 'animal story'
+            },
+            {'animal': 'fox', 'colour': 'brown'}
+        ))
+    mock_markdown_renderer.assert_called_once_with(result)
 
 
 @pytest.mark.parametrize(

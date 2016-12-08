@@ -189,7 +189,7 @@ def test_block_code(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            '<p>'
             'inset text'
             '</p>'
         )
@@ -215,12 +215,7 @@ def test_block_quote(markdown_function, expected):
     (
         [
             notify_letter_preview_markdown,
-            (
-                '<h2 style="Margin: 0 0 20px 0; padding: 0; font-size: 27px; '
-                'line-height: 35px; font-weight: bold; color: #0B0C0C;">'
-                'heading'
-                '</h2>'
-            )
+            '<h2>heading</h2>'
         ],
         [
             notify_email_markdown,
@@ -240,7 +235,7 @@ def test_level_1_header(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
+        '<p>inset text</p>'
     ],
     [
         notify_email_markdown,
@@ -255,8 +250,8 @@ def test_level_2_header(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
+            '<p>a</p>'
+            '<p>b</p>'
         )
     ],
     [
@@ -276,13 +271,10 @@ def test_hrule(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">one</li>'
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">two</li>'
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">three</li>'
+            '<ol>'
+            '<li>one</li>'
+            '<li>two</li>'
+            '<li>three</li>'
             '</ol>'
         )
     ],
@@ -312,13 +304,10 @@ def test_ordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">one</li>'
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">two</li>'
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">three</li>'
+            '<ul>'
+            '<li>one</li>'
+            '<li>two</li>'
+            '<li>three</li>'
             '</ul>'
         )
     ],
@@ -348,9 +337,9 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
+            '<p>line one\n'
             'line two</p>'
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
+            '<p>new paragraph</p>'
         )
     ],
     [
@@ -385,7 +374,7 @@ def test_table(markdown_function):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'
+        '<p>http://example.com</p>'
     ],
     [
         notify_email_markdown,
@@ -401,7 +390,7 @@ def test_autolink(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">variable called thing</p>'
+        '<p>variable called thing</p>'
     ],
     [
         notify_email_markdown,
@@ -417,7 +406,7 @@ def test_codespan(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
+        '<p>something important</p>'
     ],
     [
         notify_email_markdown,
@@ -433,7 +422,7 @@ def test_double_emphasis(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
+        '<p>something important</p>'
     ],
     [
         notify_email_markdown,
@@ -459,8 +448,7 @@ def test_image(markdown_function):
     [
         notify_letter_preview_markdown,
         (
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
-            'color: #0B0C0C;">Example: http://example.com</p>'
+            '<p>Example: http://example.com</p>'
         )
     ],
     [
@@ -480,7 +468,7 @@ def test_link(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">Strike</p>'
+        '<p>Strike</p>'
     ],
     [
         notify_email_markdown,
