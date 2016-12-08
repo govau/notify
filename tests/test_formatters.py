@@ -168,106 +168,207 @@ def test_sms_preview_adds_newlines():
     assert '<br>' in str(template)
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_block_code(markdown_function):
-    assert markdown_function('```\nprint("hello")\n```') == 'print("hello")'
-
-
-def test_block_quote():
-    assert notify_letter_preview_markdown('^ inset text') == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'inset text'
-        '</p>'
+@pytest.mark.parametrize(
+    'markdown_function, expected',
+    (
+        [
+            notify_letter_preview_markdown,
+            'print("hello")'
+        ],
+        [
+            notify_email_markdown,
+            'print("hello")'
+        ]
     )
-    assert notify_email_markdown('^ inset text') == (
-        '<blockquote '
-        'style="Margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
-        'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;'
-        '">'
+)
+def test_block_code(markdown_function, expected):
+    assert markdown_function('```\nprint("hello")\n```') == expected
+
+
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            'inset text'
+            '</p>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<blockquote '
+            'style="Margin: 0 0 20px 0; border-left: 10px solid #BFC1C3;'
+            'padding: 15px 0 0.1px 15px; font-size: 19px; line-height: 25px;'
+            '">'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
+            '</blockquote>'
+        )
+    ]
+))
+def test_block_quote(markdown_function, expected):
+    assert markdown_function('^ inset text') == expected
+
+
+@pytest.mark.parametrize(
+    'markdown_function, expected',
+    (
+        [
+            notify_letter_preview_markdown,
+            (
+                '<h2 style="Margin: 0 0 20px 0; padding: 0; font-size: 27px; '
+                'line-height: 35px; font-weight: bold; color: #0B0C0C;">'
+                'heading'
+                '</h2>'
+            )
+        ],
+        [
+            notify_email_markdown,
+            (
+                '<h2 style="Margin: 0 0 20px 0; padding: 0; font-size: 27px; '
+                'line-height: 35px; font-weight: bold; color: #0B0C0C;">'
+                'heading'
+                '</h2>'
+            )
+        ]
+    )
+)
+def test_level_1_header(markdown_function, expected):
+    assert markdown_function('# heading') == expected
+
+
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
-        '</blockquote>'
-    )
-
-
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_level_1_header(markdown_function):
-    assert markdown_function('# heading') == (
-        '<h2 style="Margin: 0 0 20px 0; padding: 0; font-size: 27px; '
-        'line-height: 35px; font-weight: bold; color: #0B0C0C;">'
-        'heading'
-        '</h2>'
-    )
-
-
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_level_2_header(markdown_function):
-    assert markdown_function(
-        '## inset text'
-    ) == (
+    ],
+    [
+        notify_email_markdown,
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
-    )
+    ]
+))
+def test_level_2_header(markdown_function, expected):
+    assert markdown_function('## inset text') == (expected)
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_hrule(markdown_function):
-    assert markdown_function('a\n\n***\n\nb') == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
-    )
-    assert markdown_function('a\n\n---\n\nb') == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
-    )
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">a</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">b</p>'
+        )
+    ]
+))
+def test_hrule(markdown_function, expected):
+    assert markdown_function('a\n\n***\n\nb') == expected
+    assert markdown_function('a\n\n---\n\nb') == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_ordered_list(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">one</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">two</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">three</li>'
+            '</ol>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">one</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">two</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">three</li>'
+            '</ol>'
+        )
+    ]
+))
+def test_ordered_list(markdown_function, expected):
     assert markdown_function(
         '1. one\n'
         '2. two\n'
         '3. three\n'
-    ) == (
-        '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
-        '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-        'line-height: 25px; color: #0B0C0C;">one</li>'
-        '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-        'line-height: 25px; color: #0B0C0C;">two</li>'
-        '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-        'line-height: 25px; color: #0B0C0C;">three</li>'
-        '</ol>'
-    )
+    ) == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_unordered_list(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">one</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">two</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">three</li>'
+            '</ul>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">one</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">two</li>'
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">three</li>'
+            '</ul>'
+        )
+    ]
+))
+def test_unordered_list(markdown_function, expected):
     assert markdown_function(
         '* one\n'
         '* two\n'
         '* three\n'
-    ) == (
-        '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
-        '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-        'line-height: 25px; color: #0B0C0C;">one</li>'
-        '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-        'line-height: 25px; color: #0B0C0C;">two</li>'
-        '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-        'line-height: 25px; color: #0B0C0C;">three</li>'
-        '</ul>'
-    )
+    ) == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_paragraphs(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
+            'line two</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
+            'line two</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
+        )
+    ]
+))
+def test_paragraphs(markdown_function, expected):
     assert markdown_function(
         'line one\n'
         'line two\n'
         '\n'
         'new paragraph'
-    ) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
-        'line two</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
-    )
+    ) == expected
 
 
 @pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
@@ -281,41 +382,68 @@ def test_table(markdown_function):
     )
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_autolink(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'
+    ],
+    [
+        notify_email_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'
+    ]
+))
+def test_autolink(markdown_function, expected):
     assert markdown_function(
         'http://example.com'
-    ) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'  # noqa
-    )
+    ) == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_codespan(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">variable called thing</p>'
+    ],
+    [
+        notify_email_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">variable called thing</p>'
+    ]
+))
+def test_codespan(markdown_function, expected):
     assert markdown_function(
         'variable called `thing`'
-    ) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
-        'color: #0B0C0C;">variable called thing</p>'
-    )
+    ) == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_double_emphasis(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
+    ],
+    [
+        notify_email_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
+    ]
+))
+def test_double_emphasis(markdown_function, expected):
     assert markdown_function(
         'something **important**'
-    ) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'  # noqa
-    )
+    ) == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_emphasis(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
+    ],
+    [
+        notify_email_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
+    ]
+))
+def test_emphasis(markdown_function, expected):
     assert markdown_function(
         'something *important*'
-    ) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'  # noqa
-    )
+    ) == expected
 
 
 @pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
@@ -327,23 +455,40 @@ def test_image(markdown_function):
     )
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_link(markdown_function):
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
+            'color: #0B0C0C;">Example: http://example.com</p>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
+            'color: #0B0C0C;">Example: http://example.com</p>'
+        )
+    ]
+))
+def test_link(markdown_function, expected):
     assert markdown_function(
         '[Example](http://example.com)'
-    ) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
-        'color: #0B0C0C;">Example: http://example.com</p>'
-    )
+    ) == expected
 
 
-@pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))
-def test_strikethrough(markdown_function):
-    assert markdown_function(
-        '~~Strike~~'
-    ) == (
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">Strike</p>'
-    )
+    ],
+    [
+        notify_email_markdown,
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">Strike</p>'
+    ]
+))
+def test_strikethrough(markdown_function, expected):
+    assert markdown_function('~~Strike~~') == expected
 
 
 def test_footnotes():
