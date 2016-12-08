@@ -215,7 +215,7 @@ def test_block_quote(markdown_function, expected):
     (
         [
             notify_letter_preview_markdown,
-            '<h2>heading</h2>'
+            '<h2>heading</h2>\n'
         ],
         [
             notify_email_markdown,
@@ -271,11 +271,11 @@ def test_hrule(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<ol>'
-            '<li>one</li>'
-            '<li>two</li>'
-            '<li>three</li>'
-            '</ol>'
+            '<ol>\n'
+            '<li>one</li>\n'
+            '<li>two</li>\n'
+            '<li>three</li>\n'
+            '</ol>\n'
         )
     ],
     [
@@ -304,11 +304,11 @@ def test_ordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<ul>'
-            '<li>one</li>'
-            '<li>two</li>'
-            '<li>three</li>'
-            '</ul>'
+            '<ul>\n'
+            '<li>one</li>\n'
+            '<li>two</li>\n'
+            '<li>three</li>\n'
+            '</ul>\n'
         )
     ],
     [

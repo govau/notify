@@ -79,17 +79,11 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def header(self, text, level, raw=None):
         if level == 1:
-            return '<h2>{}</h2>'.format(text)
+            return super().header(text, 2)
         return self.paragraph(text)
 
     def hrule(self):
         return ""
-
-    def list(self, body, ordered=True):
-        return '<ol>{}</ol>'.format(body) if ordered else '<ul>{}</ul>'.format(body)
-
-    def list_item(self, text):
-        return '<li>{}</li>'.format(text)
 
     def paragraph(self, text):
         if text.strip():
