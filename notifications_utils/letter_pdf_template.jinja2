@@ -1,74 +1,125 @@
-  <div class="letter">
-    {{ body }}
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      Preview – GOV.UK Notify
+    </title>
+    <style media="print">
+      @page {
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="utf-8" />
-      <title>
-        Preview – GOV.UK Notify
-      </title>
-      <style media="print">
-        @page {
-          size: A4 portrait;
-          margin: 5mm 10mm 40mm 10mm;
-        }
-        body {
+        size: A4 portrait;
+        margin: 15mm 10mm 15mm 15mm;
+
+        @bottom-right {
+          content: "Page " counter(page) " of " counter(pages);
           font-family: 'Helvetica Neue';
-          font-size: 14pt;
-          line-height: 17.5pt;
-          margin: 5mm 10mm 40mm 10mm;
-          padding: 90mm 50mm 0 0;
-        }
-        #logo {
-          height: 20mm;
-          width: 70mm;
-          position: absolute;
-          top: 5mm;
-          left: 10mm;
-          background: #999;
-        }
-        #to,
-        #from {
-          position: absolute;
-          top: 30mm;
-          height: 65mm;
           font-size: 10pt;
-          line-height: 12pt
+          text-align: right;
+          vertical-align: top;
         }
-        #to {
-          left: 10mm;
-          width: 100mm;
-        }
-        #from {
-          left: 140mm;
-          width: 100mm;
-        }
-        #barcode {
-          position: absolute;
-          top: 70mm;
-          width: 50mm;
-          height: 10mm;
-          background: #000;
-        }
-        h1 {
-          font-size: 21pt;
-          font-weight: bold;
-          margin: 0 0 27pt 0;
-        }
-        p {
-          margin: 0 0 14pt 0;
-        }
-      </style>
-    </head>
-    <body>
-      <div id="logo"></div>
-      <div id="to">
-        {{ address }}
-      </div>
-      <div id="barcode">
-      </div>
+
+      }
+      @page :first {
+        margin-top: 10mm;
+      }
+      body {
+        font-family: 'Helvetica Neue';
+        margin: 0;
+        padding: 90mm 50mm 0 0;
+      }
+      #logo {
+        height: 18mm;
+        width: 70mm;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: url(https://notifications.service.gov.uk/static/images/letter-template/hm-government.svg);
+        background-size: auto 18mm;
+        background-repeat: no-repeat;
+      }
+      #to,
+      #from {
+        position: absolute;
+        top: 30mm;
+        height: 65mm;
+        font-size: 10pt;
+        line-height: 12pt
+      }
+      #to {
+        width: 85mm;
+        height: 26.7mm;
+        left: 9.6mm;
+        top: 29.5mm;
+        overflow: hidden;
+      }
+      #from {
+        left: 140mm;
+        width: 100mm;
+      }
+      #barcode {
+        position: absolute;
+        top: 61mm;
+        left: 9.6mm;
+        width: 85mm;
+        height: 11.2mm;
+        background: url(https://notifications.service.gov.uk/static/images/letter-template/type29.png);
+        background-repeat: no-repeat;
+        background-size: auto 100%;
+      }
+      #qrcode {
+        position: absolute;
+        top: 26.9mm;
+        left: -10.6mm;
+        width: 5mm;
+        height: 5mm;
+        background: url(https://notifications.service.gov.uk/static/images/letter-template/qr1.png);
+        background-size: 100% 100%;
+      }
+      #content {
+        width: 137.5mm;
+      }
+      h1 {
+        font-size: 20pt;
+        line-height: 26pt;
+        font-weight: bold;
+        margin: 0 0 16pt 0;
+      }
+      h2 {
+        font-size: 14pt;
+        line-height: 16pt;
+        font-weight: bold;
+        margin: 16pt 0 0 0;
+      }
+      p {
+        font-size: 12.5pt;
+        line-height: 16pt;
+        margin: 16pt 0 0 0;
+      }
+      ul,
+      ol {
+        font-size: 12.5pt;
+        line-height: 16pt;
+        margin: 0;
+        padding: 0 0 0 0.8em;
+      }
+      li {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="logo"></div>
+    <div id="to">
+      {{ address }}
+    </div>
+    <div id="barcode">
+    </div>
+    <div id="qrcode">
+    </div>
+    <div id="content">
       {{ message }}
-    </body>
-  </html>
+    </div>
+  </body>
+</html>
