@@ -65,7 +65,7 @@
         height: 11.2mm;
         background: url(https://notifications.service.gov.uk/static/images/letter-template/type29.png);
         background-repeat: no-repeat;
-        background-size: auto 100%;
+        background-size: auto 110%;
       }
       #qrcode {
         position: absolute;
@@ -107,6 +107,43 @@
         margin: 0;
         padding: 0;
       }
+
+      .placeholder {
+        display: inline;
+        background-color: #FFBF47;
+        background-image: url(https://notifications.service.gov.uk/static/images/letter-template/placeholder-mask-left.svg), url(https://notifications.service.gov.uk/static/images/letter-template/placeholder-mask-right.svg);
+        background-size: auto 115%, auto 115%;
+        background-position: 0 -0.05em, right -0.05em;
+        color: #000;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        border-radius: 1.05em;
+      }
+
+      .placeholder-no-brackets {
+        display: inline;
+        background: #FFBF47;
+        color: #000;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        padding-left: 3px;
+        padding-right: 3px;
+        border-radius: 1px;
+      }
+
+      .placeholder-conditional {
+        display: inline;
+        background: #FFBF47;
+        background-image: url(https://notifications.service.gov.uk/static/images/letter-template/placeholder-mask-left.svg), url(https://notifications.service.gov.uk/static/images/letter-template/placeholder-mask-right-conditional.svg);
+        background-size: auto 115%, 5mm 100%;
+        background-position: 0 -0.05em, right 0;
+        background-repeat: no-repeat, no-repeat;
+        color: #000;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        border-radius: 1.05em;
+      }
+
     </style>
   </head>
   <body>
