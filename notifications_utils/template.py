@@ -1,5 +1,6 @@
 import math
 from os import path
+from datetime import datetime
 
 from jinja2 import Environment, FileSystemLoader
 from flask import Markup
@@ -285,7 +286,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 remove_empty_lines
             ).then(
                 nl2br
-            ).as_string
+            ).as_string,
+            'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
 

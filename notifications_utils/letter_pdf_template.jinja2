@@ -76,6 +76,13 @@
         background: url(https://notifications.service.gov.uk/static/images/letter-template/qr1.png);
         background-size: 100% 100%;
       }
+      #date {
+        position: absolute;
+        top: 80mm;
+        left: 142.5mm;
+        font-size: 12.5pt;
+        line-height: 16pt;
+      }
       #content {
         width: 137.5mm;
       }
@@ -154,6 +161,9 @@
     <div id="barcode">
     </div>
     <div id="qrcode">
+    </div>
+    <div id="date">
+      {{ date }}
     </div>
     <div id="content">
       {{ message }}

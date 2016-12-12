@@ -1,6 +1,7 @@
 import pytest
 import mock
 from flask import Markup
+from freezegun import freeze_time
 
 from notifications_utils.formatters import unlink_govuk_escaped, linkify
 from notifications_utils.field import Field
@@ -243,6 +244,7 @@ def test_sms_preview_adds_newlines(nl2br):
     nl2br.assert_called_once_with(content)
 
 
+@freeze_time("2001-01-01 12:00:00.000000")
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
 @mock.patch('notifications_utils.template.unlink_govuk_escaped')
@@ -258,7 +260,11 @@ def test_letter_preview_renderer(
     jinja_template
 ):
     str(LetterPreviewTemplate({'content': 'Foo', 'subject': 'Subject', 'values': {}}))
-    jinja_template.assert_called_once_with({'address': '123 Street', 'message': 'Bar'})
+    jinja_template.assert_called_once_with({
+        'address': '123 Street',
+        'message': 'Bar',
+        'date': '1 January 2001'
+    })
     prepare_newlines.assert_called_once_with('# Subject\n\nFoo')
     letter_markdown.assert_called_once_with('Baz')
     linkify.assert_not_called()
