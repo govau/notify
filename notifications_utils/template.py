@@ -119,16 +119,7 @@ class SMSMessageTemplate(Template):
         return len(str(self).encode(self.encoding))
 
     @property
-    def content_too_long(self):
-        return (
-            self.content_character_limit is not None and
-            self.content_count > self.content_character_limit
-        )
-
-    @property
-    def sms_fragment_count(self):
-        if self.template_type != 'sms':
-            raise TypeError("The template needs to have a template type of 'sms'")
+    def fragment_count(self):
         return get_sms_fragment_count(self.content_count)
 
 

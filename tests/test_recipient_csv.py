@@ -498,11 +498,10 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
 
 def test_detects_rows_which_result_in_overly_long_messages():
     template = SMSMessageTemplate(
-        {'content': '((placeholder))', 'template_type': 'sms'}
+        {'content': '((placeholder))', 'template_type': 'sms'},
+        sender=None,
+        prefix=None,
     )
-    template.content_character_limit = 10
-    template.sender = None
-    template.prefix = None
     recipients = RecipientCSV(
         """
             phone number,placeholder
@@ -512,7 +511,8 @@ def test_detects_rows_which_result_in_overly_long_messages():
             07700900463,123456789012345678901234567890
         """,
         template_type=template.template_type,
-        template=template
+        template=template,
+        sms_character_limit=10
     )
     assert recipients.rows_with_errors == {2, 3}
     assert recipients.rows_with_message_too_long == {2, 3}
