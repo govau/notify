@@ -34,7 +34,7 @@ test: venv ## Run tests
 .PHONY: prepare-docker-build-image
 prepare-docker-build-image: ## Prepare the Docker builder image
 	mkdir -p ${PIP_ACCEL_CACHE}
-	make -C docker build-build-image
+	make -C docker build
 
 .PHONY: build-with-docker
 build-with-docker: prepare-docker-build-image ## Build inside a Docker container
