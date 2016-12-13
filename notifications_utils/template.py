@@ -1,8 +1,28 @@
 import math
+from os import path
+
+from jinja2 import Environment, FileSystemLoader
+from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.renderers import SMSPreview, EmailPreview, LetterPreview
 from notifications_utils.field import Field
+from notifications_utils.formatters import (
+    unlink_govuk_escaped,
+    linkify,
+    nl2br,
+    add_prefix,
+    notify_email_markdown,
+    notify_letter_preview_markdown,
+    prepare_newlines_for_markdown,
+    prepend_subject,
+    remove_empty_lines
+)
+from notifications_utils.take import Take
+from notifications_utils.template_change import TemplateChange
+
+template_env = Environment(loader=FileSystemLoader(
+    path.dirname(path.abspath(__file__))
+))
 
 
 class Template():
@@ -13,44 +33,31 @@ class Template():
         self,
         template,
         values=None,
-        drop_values=(),
-        prefix=None,
-        sms_sender=None,
-        content_character_limit=None,
-        renderer=None
     ):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
         if values is not None and not isinstance(values, dict):
             raise TypeError('Values must be a dict')
-        if prefix is not None and not isinstance(prefix, str):
-            raise TypeError('Prefix must be a string')
         self.id = template.get("id", None)
         self.name = template.get("name", None)
         self.content = template["content"]
-        self.subject = template.get('subject', None)
         self.values = values
         self.template_type = template.get('template_type', None)
-        for value in drop_values:
-            self._values.pop(value, None)
-        self.content_character_limit = content_character_limit
         self._template = template
-        self._prefix = prefix
-        self._sms_sender = sms_sender
-        self.renderer = renderer
 
     def __repr__(self):
-        return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)  # TODO: more real
+        return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)
 
-    def to_dict(self):
-        return {
-            key: getattr(self, key)
-            for key in ['content', 'subject', 'values', 'id']
-        }
+    def __str__(self):
+        return str(
+            Field(self.content, self.values)
+        )
 
     @property
     def values(self):
-        return self._values
+        if hasattr(self, '_values'):
+            return self._values
+        return {}
 
     @values.setter
     def values(self, value):
@@ -66,47 +73,8 @@ class Template():
             )
 
     @property
-    def renderer(self):
-        return self._renderer
-
-    @renderer.setter
-    def renderer(self, value):
-        if value:
-            self._renderer = value
-        elif self.template_type == 'sms':
-            self._renderer = SMSPreview(
-                prefix=self._prefix,
-                sender=self._sms_sender
-            )
-        elif self.template_type == 'letter':
-            self._renderer = LetterPreview()
-        elif self.template_type == 'email' or not self.template_type:
-            self._renderer = EmailPreview()
-
-    @property
-    def rendered(self):
-        return self.renderer(self.to_dict())
-
-    @property
     def placeholders(self):
-        return Field(self.subject or '').placeholders | Field(self.content).placeholders
-
-    @property
-    def content_count(self):
-        return len(self.rendered.encode(self.encoding))
-
-    @property
-    def sms_fragment_count(self):
-        if self.template_type != 'sms':
-            raise TypeError("The template needs to have a template type of 'sms'")
-        return get_sms_fragment_count(self.content_count)
-
-    @property
-    def content_too_long(self):
-        return (
-            self.content_character_limit is not None and
-            self.content_count > self.content_character_limit
-        )
+        return Field(self.content).placeholders
 
     @property
     def missing_data(self):
@@ -126,6 +94,223 @@ class Template():
         return TemplateChange(self, new)
 
 
+class SMSMessageTemplate(Template):
+
+    def __init__(
+        self,
+        template,
+        values=None,
+        prefix=None,
+        sender=None
+    ):
+        self.prefix = prefix
+        self.sender = sender
+        super().__init__(template, values)
+
+    def __str__(self):
+        return Take.as_field(
+            self.content, self.values
+        ).then(
+            add_prefix, self.prefix if not self.sender else None
+        ).as_string.strip()
+
+    @property
+    def content_count(self):
+        return len(str(self).encode(self.encoding))
+
+    @property
+    def fragment_count(self):
+        return get_sms_fragment_count(self.content_count)
+
+
+class SMSPreviewTemplate(SMSMessageTemplate):
+
+    jinja_template = template_env.get_template('sms_preview_template.jinja2')
+
+    def __init__(
+        self,
+        template,
+        values=None,
+        prefix=None,
+        sender=None,
+        show_recipient=False
+    ):
+        self.show_recipient = show_recipient
+        super().__init__(template, values, prefix, sender)
+
+    def __str__(self):
+
+        return Markup(self.jinja_template.render({
+            'recipient': Field('((phone number))', self.values, with_brackets=False),
+            'show_recipient': self.show_recipient,
+            'body': Take.as_field(
+                self.content, self.values
+            ).then(
+                add_prefix, self.prefix if not self.sender else None
+            ).then(
+                nl2br
+            ).as_string
+        }))
+
+
+class WithSubjectTemplate(Template):
+
+    def __init__(
+        self,
+        template,
+        values=None
+    ):
+        self._subject = template['subject']
+        super().__init__(template, values)
+
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values))
+
+    @subject.setter
+    def subject(self, value):
+        self._subject = value
+
+    @property
+    def placeholders(self):
+        return Field(self._subject).placeholders | Field(self.content).placeholders
+
+
+class PlainTextEmailTemplate(WithSubjectTemplate):
+
+    def __str__(self):
+        return Take.as_field(
+            self.content, self.values
+        ).then(
+            unlink_govuk_escaped
+        ).as_string
+
+
+class HTMLEmailTemplate(WithSubjectTemplate):
+
+    jinja_template = template_env.get_template('email_template.jinja2')
+
+    def __init__(
+        self,
+        template,
+        values=None,
+        govuk_banner=True,
+        complete_html=True,
+        brand_logo=None,
+        brand_name=None,
+        brand_colour=None
+    ):
+        super().__init__(template, values)
+        self.govuk_banner = govuk_banner
+        self.complete_html = complete_html
+        self.brand_logo = brand_logo
+        self.brand_name = brand_name
+        self.brand_colour = brand_colour and brand_colour.replace('#', '')
+
+    def __str__(self):
+
+        return self.jinja_template.render({
+            'body': get_html_email_body(
+                self.content, self.values
+            ),
+            'govuk_banner': self.govuk_banner,
+            'complete_html': self.complete_html,
+            'brand_logo': self.brand_logo,
+            'brand_name': self.brand_name,
+            'brand_colour': self.brand_colour
+        })
+
+
+class EmailPreviewTemplate(WithSubjectTemplate):
+
+    jinja_template = template_env.get_template('email_preview_template.jinja2')
+
+    def __init__(
+        self,
+        template,
+        values=None,
+        from_name=None,
+        from_address=None,
+        expanded=False,
+        show_recipient=True
+    ):
+        super().__init__(template, values)
+        self.from_name = from_name
+        self.from_address = from_address
+        self.expanded = expanded
+        self.show_recipient = show_recipient
+
+    def __str__(self):
+        return Markup(self.jinja_template.render({
+            'body': get_html_email_body(
+                self.content, self.values
+            ),
+            'subject': self.subject,
+            'from_name': self.from_name,
+            'from_address': self.from_address,
+            'recipient': Field("((email address))", self.values, with_brackets=False),
+            'expanded': self.expanded,
+            'show_recipient': self.show_recipient
+        }))
+
+
+class LetterPreviewTemplate(WithSubjectTemplate):
+
+    jinja_template = template_env.get_template('letter_pdf_template.jinja2')
+
+    address_block = '\n'.join([
+        '((address line 1))',
+        '((address line 2))',
+        '((address line 3))',
+        '((address line 4))',
+        '((address line 5))',
+        '((address line 6))',
+        '((postcode))',
+    ])
+
+    def __str__(self):
+        return Markup(self.jinja_template.render({
+            'message': Take.as_field(
+                self.content, self.values
+            ).then(
+                prepend_subject, self.subject
+            ).then(
+                prepare_newlines_for_markdown
+            ).then(
+                notify_letter_preview_markdown
+            ).as_string,
+            'address': Take.from_field(
+                Field(self.address_block, self.values, with_brackets=False)
+            ).then(
+                remove_empty_lines
+            ).then(
+                nl2br
+            ).as_string
+        }))
+
+
+class LetterPDFLinkTemplate(Template):
+
+    jinja_template = template_env.get_template('letter_preview_template.jinja2')
+
+    def __init__(
+        self,
+        template,
+        values=None,
+        service_id=None
+    ):
+        super().__init__(template, values)
+        if not service_id:
+            raise TypeError('service_id is required')
+        self.service_id = service_id
+
+    def __str__(self):
+        return Markup(self.jinja_template.render({
+            'service_id': self.service_id,
+            'template_id': self.id
+        }))
+
+
 class NeededByTemplateError(Exception):
     def __init__(self, keys):
         super(NeededByTemplateError, self).__init__(", ".join(keys))
@@ -136,30 +321,20 @@ class NoPlaceholderForDataError(Exception):
         super(NoPlaceholderForDataError, self).__init__(", ".join(keys))
 
 
-class TemplateChange():
-
-    def __init__(self, old_template, new_template):
-        self.old_placeholders = Columns.from_keys(old_template.placeholders)
-        self.new_placeholders = Columns.from_keys(new_template.placeholders)
-
-    @property
-    def has_different_placeholders(self):
-        return bool(self.new_placeholders.keys() ^ self.old_placeholders.keys())
-
-    @property
-    def placeholders_added(self):
-        return set(
-            self.new_placeholders.get(key)
-            for key in self.new_placeholders.keys() - self.old_placeholders.keys()
-        )
-
-    @property
-    def placeholders_removed(self):
-        return set(
-            self.old_placeholders.get(key)
-            for key in self.old_placeholders.keys() - self.new_placeholders.keys()
-        )
-
-
 def get_sms_fragment_count(character_count):
     return 1 if character_count <= 160 else math.ceil(float(character_count) / 153)
+
+
+def get_html_email_body(template_content, template_values):
+
+    return Take.as_field(
+        template_content, template_values
+    ).then(
+        unlink_govuk_escaped
+    ).then(
+        linkify
+    ).then(
+        prepare_newlines_for_markdown
+    ).then(
+        notify_email_markdown
+    ).as_string

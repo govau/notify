@@ -1,7 +1,4 @@
 import pytest
-from notifications_utils.renderers import (
-    HTMLEmail, PlainTextEmail, SMSMessage, SMSPreview
-)
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
     linkify,
@@ -10,6 +7,12 @@ from notifications_utils.formatters import (
     prepare_newlines_for_markdown,
 )
 from notifications_utils.field import Field
+from notifications_utils.template import (
+    HTMLEmailTemplate,
+    PlainTextEmailTemplate,
+    SMSMessageTemplate,
+    SMSPreviewTemplate
+)
 
 
 @pytest.mark.parametrize(
@@ -25,7 +28,7 @@ from notifications_utils.field import Field
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
-    assert link in HTMLEmail()({'content': url})
+    assert link in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -55,7 +58,7 @@ def test_doesnt_make_links_out_of_invalid_urls(url):
 )
 def test_URLs_get_escaped(url, expected_html):
     assert linkify(url) == expected_html
-    assert expected_html in HTMLEmail()({'content': url})
+    assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -63,12 +66,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in HTMLEmail()({'content': '''
+    ) in str(HTMLEmailTemplate({'content': '''
         You’ve been invited to a service. Click this link:
         https://service.example.com/accept_invite/a1b2c3d4
 
         Thanks
-    '''})
+    ''', 'subject': ''}))
 
 
 def test_preserves_whitespace_when_making_links():
@@ -136,8 +139,8 @@ def test_add_spaces_after_single_newlines_so_markdown_converts_them():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert PlainTextEmail()({'content': template_content}) == expected
-    assert expected in HTMLEmail()({'content': template_content})
+    assert str(PlainTextEmailTemplate({'content': template_content, 'subject': ''})) == expected
+    assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -147,16 +150,22 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
     ]
 )
 def test_sms_message_adds_prefix(prefix, body, expected):
-    assert SMSMessage(prefix=prefix)({'content': body}) == expected
+    template = SMSMessageTemplate({'content': body})
+    template.prefix = prefix
+    template.sender = None
+    assert str(template) == expected
 
 
 def test_sms_preview_adds_newlines():
-    assert '<br>' in SMSPreview()({'content': """
+    template = SMSPreviewTemplate({'content': """
         the
         quick
 
         brown fox
     """})
+    template.prefix = None
+    template.sender = None
+    assert '<br>' in str(template)
 
 
 @pytest.mark.parametrize('markdown_function', (notify_letter_preview_markdown, notify_email_markdown))

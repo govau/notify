@@ -56,10 +56,12 @@ class RecipientCSV():
         max_initial_rows_shown=10,
         whitelist=None,
         template=None,
-        remaining_messages=sys.maxsize
+        remaining_messages=sys.maxsize,
+        sms_character_limit=0
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
+        self.character_limit = int(sms_character_limit) if self.template_type == 'sms' else sys.maxsize
         self.placeholders = placeholders
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown
@@ -199,7 +201,10 @@ class RecipientCSV():
                     )
                 } for key, value in row.items()}),
                 index=row_index,
-                message_too_long=bool(self.template and self.template.content_too_long)
+                message_too_long=bool(
+                    self.template and
+                    self.template.content_count > self.character_limit
+                )
             )
 
     @property

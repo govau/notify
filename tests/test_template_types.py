@@ -1,16 +1,20 @@
 import pytest
 import mock
 from flask import Markup
-from notifications_utils.renderers import (
-    PassThrough,
-    HTMLEmail,
-    PlainTextEmail,
-    SMSMessage,
-    SMSPreview,
-    LetterPreview,
-    LetterPDFLink,
-)
+
 from notifications_utils.formatters import unlink_govuk_escaped, linkify
+from notifications_utils.field import Field
+from notifications_utils.template import (
+    Template,
+    HTMLEmailTemplate,
+    LetterPreviewTemplate,
+    LetterPDFLinkTemplate,
+    PlainTextEmailTemplate,
+    SMSMessageTemplate,
+    SMSPreviewTemplate,
+    WithSubjectTemplate,
+    EmailPreviewTemplate,
+)
 
 
 def test_pass_through_renderer():
@@ -19,29 +23,32 @@ def test_pass_through_renderer():
         quick brown
         fox
     '''
-    assert PassThrough()({'content': message}) == message
+    assert str(Template({'content': message})) == message
 
 
 def test_html_email_inserts_body():
-    assert 'the <em>quick</em> brown fox' in HTMLEmail()({'content': 'the <em>quick</em> brown fox'})
+    assert 'the <em>quick</em> brown fox' in str(HTMLEmailTemplate(
+        {'content': 'the <em>quick</em> brown fox', 'subject': ''}
+    ))
 
 
 @pytest.mark.parametrize(
     "content", ('DOCTYPE', 'html', 'body', 'GOV.UK', 'hello world')
 )
 def test_default_template(content):
-    assert content in HTMLEmail()({'content': 'hello world'})
+    assert content in str(HTMLEmailTemplate({'content': 'hello world', 'subject': ''}))
 
 
 @pytest.mark.parametrize(
     "show_banner", (True, False)
 )
 def test_govuk_banner(show_banner):
-    email = HTMLEmail(govuk_banner=show_banner)({'content': 'hello world'})
+    email = HTMLEmailTemplate({'content': 'hello world', 'subject': ''})
+    email.govuk_banner = show_banner
     if show_banner:
-        assert "GOV.UK" in email
+        assert "GOV.UK" in str(email)
     else:
-        assert "GOV.UK" not in email
+        assert "GOV.UK" not in str(email)
 
 
 @pytest.mark.parametrize(
@@ -62,12 +69,13 @@ def test_govuk_banner(show_banner):
 )
 def test_complete_html(complete_html, branding_should_be_present, brand_logo, brand_name, brand_colour, content):
 
-    email = HTMLEmail(
+    email = str(HTMLEmailTemplate(
+        {'content': 'hello world', 'subject': ''},
         complete_html=complete_html,
         brand_logo=brand_logo,
         brand_name=brand_name,
-        brand_colour=brand_colour
-    )({'content': 'hello world'})
+        brand_colour=brand_colour,
+    ))
 
     if complete_html:
         assert content in email
@@ -81,6 +89,29 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
         if brand_colour:
             assert brand_colour in email
             assert '##' not in email
+
+
+@pytest.mark.parametrize(
+    'template_class', [HTMLEmailTemplate, LetterPreviewTemplate]
+)
+def test_markdown_in_templates(template_class):
+    template = template_class(
+        {
+            "content": (
+                'the quick ((colour)) ((animal))\n'
+                '\n'
+                'jumped over the lazy dog'
+            ),
+            'subject': 'animal story'
+        },
+        {'animal': 'fox', 'colour': 'brown'}
+    )
+    assert (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'the quick brown fox</p>'
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        'jumped over the lazy dog</p>'
+    ) in str(template)
 
 
 @pytest.mark.parametrize(
@@ -100,7 +131,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
-    assert link in HTMLEmail()({'content': url})
+    assert link in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -117,7 +148,7 @@ def test_makes_links_out_of_URLs(url):
 )
 def test_URLs_get_escaped(url, expected_html):
     assert linkify(url) == expected_html
-    assert expected_html in HTMLEmail()({'content': url})
+    assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -125,12 +156,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in HTMLEmail()({'content': '''
+    ) in str(HTMLEmailTemplate({'content': '''
         You’ve been invited to a service. Click this link:
         https://service.example.com/accept_invite/a1b2c3d4
 
         Thanks
-    '''})
+    ''', 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -147,13 +178,13 @@ def test_HTML_template_has_URLs_replaced_with_links():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert PlainTextEmail()({'content': template_content}) == expected
-    assert expected in HTMLEmail()({'content': template_content})
+    assert str(PlainTextEmailTemplate({'content': template_content, 'subject': ''})) == expected
+    assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
 
-@mock.patch('notifications_utils.renderers.add_prefix', return_value='')
+@mock.patch('notifications_utils.template.add_prefix', return_value='')
 @pytest.mark.parametrize(
-    'renderer', [SMSMessage, SMSPreview]
+    'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
 )
 @pytest.mark.parametrize(
     "prefix, body, expected_call", [
@@ -161,14 +192,17 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
         (None, "b", (Markup("b"), None)),
     ]
 )
-def test_sms_message_adds_prefix(add_prefix, renderer, prefix, body, expected_call):
-    renderer(prefix=prefix)({'content': body})
+def test_sms_message_adds_prefix(add_prefix, template_class, prefix, body, expected_call):
+    template = template_class({'content': body})
+    template.prefix = prefix
+    template.sender = None
+    str(template)
     add_prefix.assert_called_once_with(*expected_call)
 
 
-@mock.patch('notifications_utils.renderers.add_prefix', return_value='')
+@mock.patch('notifications_utils.template.add_prefix', return_value='')
 @pytest.mark.parametrize(
-    'renderer', [SMSMessage, SMSPreview]
+    'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
 )
 @pytest.mark.parametrize(
     "prefix, body, sender, expected_call", [
@@ -177,24 +211,25 @@ def test_sms_message_adds_prefix(add_prefix, renderer, prefix, body, expected_ca
         ("a", "b", False, (Markup("b"), "a")),
     ]
 )
-def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body, sender, expected_call, renderer):
-    renderer(prefix=prefix, sender=sender)({'content': body})
+def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body, sender, expected_call, template_class):
+    template = template_class({'content': body}, prefix=prefix, sender=sender)
+    str(template)
     add_prefix.assert_called_once_with(*expected_call)
 
 
-@mock.patch('notifications_utils.renderers.nl2br')
+@mock.patch('notifications_utils.template.nl2br')
 def test_sms_preview_adds_newlines(nl2br):
     content = "the\nquick\n\nbrown fox"
-    assert SMSPreview()({'content': content})
+    str(SMSPreviewTemplate({'content': content}))
     nl2br.assert_called_once_with(content)
 
 
-@mock.patch('notifications_utils.renderers.LetterPreview.jinja_template.render')
-@mock.patch('notifications_utils.renderers.remove_empty_lines', return_value='123 Street')
-@mock.patch('notifications_utils.renderers.unlink_govuk_escaped')
-@mock.patch('notifications_utils.renderers.linkify')
-@mock.patch('notifications_utils.renderers.notify_letter_preview_markdown', return_value='Bar')
-@mock.patch('notifications_utils.renderers.prepare_newlines_for_markdown', return_value='Baz')
+@mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
+@mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
+@mock.patch('notifications_utils.template.unlink_govuk_escaped')
+@mock.patch('notifications_utils.template.linkify')
+@mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
+@mock.patch('notifications_utils.template.prepare_newlines_for_markdown', return_value='Baz')
 def test_letter_preview_renderer(
     prepare_newlines,
     letter_markdown,
@@ -203,7 +238,7 @@ def test_letter_preview_renderer(
     remove_empty_lines,
     jinja_template
 ):
-    LetterPreview()({'content': 'Foo', 'subject': 'Subject', 'values': {}})
+    str(LetterPreviewTemplate({'content': 'Foo', 'subject': 'Subject', 'values': {}}))
     jinja_template.assert_called_once_with({'address': '123 Street', 'message': 'Bar'})
     prepare_newlines.assert_called_once_with('# Subject\n\nFoo')
     letter_markdown.assert_called_once_with('Baz')
@@ -211,10 +246,36 @@ def test_letter_preview_renderer(
     unlink_govuk.assert_not_called()
 
 
-@mock.patch('notifications_utils.renderers.LetterPDFLink.jinja_template.render')
+@mock.patch('notifications_utils.template.LetterPDFLinkTemplate.jinja_template.render')
 def test_letter_link_renderer(jinja_template):
-    LetterPDFLink(service_id='123')({'id': '456'})
+    str(LetterPDFLinkTemplate({'id': '456', 'content': ''}, service_id='123'))
     jinja_template.assert_called_once_with({
         'service_id': '123',
         'template_id': '456',
     })
+
+
+def test_sets_subject():
+    assert WithSubjectTemplate({"content": '', 'subject': 'Your tax is due'}).subject == 'Your tax is due'
+
+
+def test_subject_line_gets_applied_to_correct_template_types():
+    for cls in [
+        EmailPreviewTemplate,
+        HTMLEmailTemplate,
+        PlainTextEmailTemplate,
+        LetterPreviewTemplate,
+    ]:
+        assert issubclass(cls, WithSubjectTemplate)
+    for cls in [
+        SMSMessageTemplate,
+        SMSPreviewTemplate,
+    ]:
+        assert not issubclass(cls, WithSubjectTemplate)
+
+
+def test_subject_line_gets_replaced():
+    template = WithSubjectTemplate({"content": '', 'subject': '((name))'})
+    assert template.subject == Markup("<span class='placeholder'>((name))</span>")
+    template.values = {'name': 'Jo'}
+    assert template.subject == 'Jo'
