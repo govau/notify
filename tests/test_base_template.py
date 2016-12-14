@@ -119,22 +119,25 @@ def test_extracting_placeholders(template_content, template_subject, expected):
 
 
 @pytest.mark.parametrize(
-    "content,prefix,expected_length",
+    "content,prefix, expected_length, expected_replaced_length",
     [
-        ("The quick brown fox jumped over the lazy dog", None, 44),
-        ("深", None, 3),
-        ("'First line.\n", None, 12),
-        ("\t\n\r", None, 0),
-        ("((placeholder))", 'Service name', 17),
+        ("The quick brown fox jumped over the lazy dog", None, 44, 44),
+        ("深", None, 3, 3),
+        ("'First line.\n", None, 12, 12),
+        ("\t\n\r", None, 0, 0),
+        ("((placeholder))", None, 15, 3),
+        ("((placeholder))", 'Service name', 29, 17),
+        ("Foo", '((placeholder))', 20, 20),  # placeholder doesn’t work in service name
     ])
-def test_get_character_count_of_content(content, prefix, expected_length):
+def test_get_character_count_of_content(content, prefix, expected_length, expected_replaced_length):
     template = SMSMessageTemplate(
         {'content': content},
-        values={'placeholder': '123'}
     )
     template.prefix = prefix
     template.sender = None
     assert template.content_count == expected_length
+    template.values = {'placeholder': '123'}
+    assert template.content_count == expected_replaced_length
 
 
 @pytest.mark.parametrize(

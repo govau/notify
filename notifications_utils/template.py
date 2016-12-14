@@ -112,12 +112,22 @@ class SMSMessageTemplate(Template):
         return Take.as_field(
             self.content, self.values
         ).then(
-            add_prefix, self.prefix if not self.sender else None
+            add_prefix, self.prefix
         ).as_string.strip()
 
     @property
+    def prefix(self):
+        return self._prefix if not self.sender else None
+
+    @prefix.setter
+    def prefix(self, value):
+        self._prefix = value
+
+    @property
     def content_count(self):
-        return len(str(self).encode(self.encoding))
+        return len((
+            str(self) if self._values else add_prefix(self.content.strip(), self.prefix)
+        ).encode(self.encoding))
 
     @property
     def fragment_count(self):
