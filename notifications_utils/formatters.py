@@ -79,52 +79,16 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def header(self, text, level, raw=None):
         if level == 1:
-            return (
-                '<h2 style="Margin: 0 0 20px 0; padding: 0; '
-                'font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;">'
-                '{}'
-                '</h2>'
-            ).format(
-                text
-            )
+            return super().header(text, 2)
         return self.paragraph(text)
 
     def hrule(self):
         return ""
 
-    def list(self, body, ordered=True):
-        return (
-            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
-            '{}'
-            '</ol>'
-        ).format(
-            body
-        ) if ordered else (
-            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
-            '{}'
-            '</ul>'
-        ).format(
-            body
-        )
-
-    def list_item(self, text):
-        return (
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
-            'line-height: 25px; color: #0B0C0C;">'
-            '{}'
-            '</li>'
-        ).format(
-            text
-        )
-
     def paragraph(self, text):
         if text.strip():
-            return (
-                '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">{}</p>'
-            ).format(
-                text
-            )
-        return ""
+            return '<p>{}</p>'.format(text)
+        return ''
 
     def table(self, header, body):
         return ""
@@ -167,6 +131,52 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
 
 class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
+
+    def header(self, text, level, raw=None):
+        if level == 1:
+            return (
+                '<h2 style="Margin: 0 0 20px 0; padding: 0; '
+                'font-size: 27px; line-height: 35px; font-weight: bold; color: #0B0C0C;">'
+                '{}'
+                '</h2>'
+            ).format(
+                text
+            )
+        return self.paragraph(text)
+
+    def list(self, body, ordered=True):
+        return (
+            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
+            '{}'
+            '</ol>'
+        ).format(
+            body
+        ) if ordered else (
+            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
+            '{}'
+            '</ul>'
+        ).format(
+            body
+        )
+
+    def list_item(self, text):
+        return (
+            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            'line-height: 25px; color: #0B0C0C;">'
+            '{}'
+            '</li>'
+        ).format(
+            text
+        )
+
+    def paragraph(self, text):
+        if text.strip():
+            return (
+                '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">{}</p>'
+            ).format(
+                text
+            )
+        return ""
 
     def block_quote(self, text):
         return (

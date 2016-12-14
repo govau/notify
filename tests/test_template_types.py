@@ -1,6 +1,7 @@
 import pytest
 import mock
 from flask import Markup
+from freezegun import freeze_time
 
 from notifications_utils.formatters import unlink_govuk_escaped, linkify
 from notifications_utils.field import Field
@@ -91,27 +92,46 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
             assert '##' not in email
 
 
-@pytest.mark.parametrize(
-    'template_class', [HTMLEmailTemplate, LetterPreviewTemplate]
-)
-def test_markdown_in_templates(template_class):
-    template = template_class(
-        {
-            "content": (
-                'the quick ((colour)) ((animal))\n'
-                '\n'
-                'jumped over the lazy dog'
-            ),
-            'subject': 'animal story'
-        },
-        {'animal': 'fox', 'colour': 'brown'}
-    )
-    assert (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'the quick brown fox</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'jumped over the lazy dog</p>'
-    ) in str(template)
+@pytest.mark.parametrize('template_class, result, markdown_renderer', [
+    [
+        HTMLEmailTemplate,
+        (
+            'the quick brown fox\n'
+            '\n'
+            'jumped over the lazy dog'
+        ),
+        'notifications_utils.template.notify_email_markdown',
+    ],
+    [
+        LetterPreviewTemplate,
+        (
+            '# animal story\n'
+            '\n'
+            'the quick brown fox\n'
+            '\n'
+            'jumped over the lazy dog'
+        ),
+        'notifications_utils.template.notify_letter_preview_markdown'
+    ]
+])
+def test_markdown_in_templates(
+    template_class,
+    result,
+    markdown_renderer,
+):
+    with mock.patch(markdown_renderer) as mock_markdown_renderer:
+        str(template_class(
+            {
+                "content": (
+                    'the quick ((colour)) ((animal))\n'
+                    '\n'
+                    'jumped over the lazy dog'
+                ),
+                'subject': 'animal story'
+            },
+            {'animal': 'fox', 'colour': 'brown'}
+        ))
+    mock_markdown_renderer.assert_called_once_with(result)
 
 
 @pytest.mark.parametrize(
@@ -224,6 +244,7 @@ def test_sms_preview_adds_newlines(nl2br):
     nl2br.assert_called_once_with(content)
 
 
+@freeze_time("2001-01-01 12:00:00.000000")
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
 @mock.patch('notifications_utils.template.unlink_govuk_escaped')
@@ -239,7 +260,11 @@ def test_letter_preview_renderer(
     jinja_template
 ):
     str(LetterPreviewTemplate({'content': 'Foo', 'subject': 'Subject', 'values': {}}))
-    jinja_template.assert_called_once_with({'address': '123 Street', 'message': 'Bar'})
+    jinja_template.assert_called_once_with({
+        'address': '123 Street',
+        'message': 'Bar',
+        'date': '1 January 2001'
+    })
     prepare_newlines.assert_called_once_with('# Subject\n\nFoo')
     letter_markdown.assert_called_once_with('Baz')
     linkify.assert_not_called()
