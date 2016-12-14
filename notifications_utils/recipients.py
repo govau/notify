@@ -271,10 +271,6 @@ class RecipientCSV():
             key for key in self.placeholders
             if Columns.make_key(key) not in self.column_headers_as_column_keys
         )
-        return set(
-            key for key in self.placeholders
-            if Columns.make_key(key) not in self.column_headers
-        )
 
     @property
     def has_recipient_columns(self):
