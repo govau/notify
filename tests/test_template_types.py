@@ -273,11 +273,19 @@ def test_letter_preview_renderer(
 
 @mock.patch('notifications_utils.template.LetterPDFLinkTemplate.jinja_template.render')
 def test_letter_link_renderer(jinja_template):
-    str(LetterPDFLinkTemplate({'id': '456', 'content': ''}, service_id='123'))
+    str(LetterPDFLinkTemplate(
+        {'content': '', 'subject': ''},
+        preview_url='http://example.com/endpoint'
+    ))
     jinja_template.assert_called_once_with({
-        'service_id': '123',
-        'template_id': '456',
+        'pdf_url': 'http://example.com/endpoint.pdf',
+        'png_url': 'http://example.com/endpoint.png',
     })
+
+
+def test_letter_link_renderer_requires_url():
+    with pytest.raises(TypeError) as error:
+        LetterPDFLinkTemplate({'content': '', 'subject': ''})
 
 
 def test_sets_subject():
