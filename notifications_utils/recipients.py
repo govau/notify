@@ -322,8 +322,9 @@ class RecipientCSV():
 
 
 class InvalidEmailError(Exception):
+
     def __init__(self, message=None):
-        self.message = message or 'Not a valid email address.'
+        super().__init__(message or 'Not a valid email address')
 
 
 class InvalidPhoneError(InvalidEmailError):

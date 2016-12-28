@@ -173,6 +173,25 @@ def test_get_annotated_rows_with_errors():
     assert recipients.has_errors
 
 
+@pytest.mark.parametrize('template_type, row_count, header, filler, row_with_error', [
+    ('email', 500, "email address\n", "test@example.com\n", "test at example dot com"),
+    ('sms', 500, "phone number\n", "07900900123\n", "12345"),
+])
+def test_big_list_validates_right_through(template_type, row_count, header, filler, row_with_error):
+    big_csv = RecipientCSV(
+        header + (filler * (row_count - 1) + row_with_error),
+        template_type=template_type,
+        max_errors_shown=100,
+        max_initial_rows_shown=3
+    )
+    auto_generated_row_count = RecipientCSV.max_rows / 10
+    assert len(list(big_csv.annotated_rows)) == row_count
+    assert big_csv.rows_with_bad_recipients == {row_count - 1}  # 0 indexed
+    assert big_csv.rows_with_errors == {row_count - 1}
+    assert len(list(big_csv.initial_annotated_rows_with_errors)) == 1
+    assert big_csv.has_errors
+
+
 def test_big_list():
     big_csv = RecipientCSV(
         "email address,name\n" + ("a@b.com\n" * RecipientCSV.max_rows),

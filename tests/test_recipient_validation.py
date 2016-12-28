@@ -138,8 +138,9 @@ def test_validate_email_address_strips_whitespace():
 
 @pytest.mark.parametrize("email_address", invalid_email_addresses)
 def test_validate_email_address_raises_for_invalid(email_address):
-    with pytest.raises(InvalidEmailError):
+    with pytest.raises(InvalidEmailError) as e:
         validate_email_address(email_address)
+    assert str(e.value) == 'Not a valid email address'
 
 
 @pytest.mark.parametrize('column', [
