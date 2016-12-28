@@ -301,7 +301,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         }))
 
 
-class LetterPDFLinkTemplate(Template):
+class LetterPDFLinkTemplate(WithSubjectTemplate):
 
     jinja_template = template_env.get_template('letter_preview_template.jinja2')
 
@@ -309,17 +309,17 @@ class LetterPDFLinkTemplate(Template):
         self,
         template,
         values=None,
-        service_id=None
+        preview_url=None,
     ):
         super().__init__(template, values)
-        if not service_id:
-            raise TypeError('service_id is required')
-        self.service_id = service_id
+        if not preview_url:
+            raise TypeError('preview_url is required')
+        self.preview_url = preview_url
 
     def __str__(self):
         return Markup(self.jinja_template.render({
-            'service_id': self.service_id,
-            'template_id': self.id
+            'pdf_url': '{}.pdf'.format(self.preview_url),
+            'png_url': '{}.png'.format(self.preview_url),
         }))
 
 
