@@ -120,7 +120,6 @@ def test_get_handlers_sets_up_logging_appropriately(debug_mode, cloudfoundry, fo
     assert type(handlers[0].formatter) == formatter
 
 
-
 def test_get_handlers_sets_up_logging_appropriately_on_live(tmpdir):
     class App:
         config = {
