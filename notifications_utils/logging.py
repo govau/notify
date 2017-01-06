@@ -1,5 +1,6 @@
 from itertools import product
 import re
+import os
 import sys
 
 from flask import request, current_app, g
@@ -100,6 +101,9 @@ def get_handlers(app):
     if app.debug:
         handler = logging.StreamHandler(sys.stderr)
         handlers.append(configure_handler(handler, app, standard_formatter))
+    elif app.config['CLOUDFOUNDRY']:
+        handler = logging.StreamHandler(sys.stdout)
+        handlers.append(configure_handler(handler, app, json_formatter))
     else:
         handler = logging.FileHandler(app.config['NOTIFY_LOG_PATH'])
         handlers.append(configure_handler(handler, app, standard_formatter))

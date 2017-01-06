@@ -1,6 +1,6 @@
 import pytest
 from freezegun import freeze_time
-from mock import Mock
+from unittest.mock import Mock
 
 from notifications_utils.clients.redis import daily_limit_cache_key
 from notifications_utils.clients.redis.redis_client import RedisClient
