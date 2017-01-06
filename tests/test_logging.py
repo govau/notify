@@ -95,19 +95,19 @@ def test_should_build_statsd_line_without_service_id_or_time_taken():
     assert "method.endpoint.200" == logging.build_statsd_line(extra_fields)
 
 
-@pytest.mark.parametrize('debug_mode, cloudfoundry, formatter', [
+@pytest.mark.parametrize('debug_mode, stdout_json, formatter', [
     (True, True, logging.CustomLogFormatter),
     (True, False, logging.CustomLogFormatter),
     (False, True, logging.JSONFormatter),
     # false false is tested separately
 ])
-def test_get_handlers_sets_up_logging_appropriately(debug_mode, cloudfoundry, formatter):
+def test_get_handlers_sets_up_logging_appropriately(debug_mode, stdout_json, formatter):
     class App:
         config = {
             'NOTIFY_LOG_PATH': 'foo',
             'NOTIFY_APP_NAME': 'bar',
             'NOTIFY_LOG_LEVEL': 'ERROR',
-            'CLOUDFOUNDRY': cloudfoundry
+            'LOGGING_STDOUT_JSON': stdout_json
         }
         debug = debug_mode
 
@@ -127,7 +127,7 @@ def test_get_handlers_sets_up_logging_appropriately_on_live(tmpdir):
             'NOTIFY_LOG_PATH': str(tmpdir / 'foo'),
             'NOTIFY_APP_NAME': 'bar',
             'NOTIFY_LOG_LEVEL': 'ERROR',
-            'CLOUDFOUNDRY': False
+            'LOGGING_STDOUT_JSON': False
         }
         debug = False
 

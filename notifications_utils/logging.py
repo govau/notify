@@ -101,7 +101,7 @@ def get_handlers(app):
     if app.debug:
         handler = logging.StreamHandler(sys.stderr)
         handlers.append(configure_handler(handler, app, standard_formatter))
-    elif app.config['CLOUDFOUNDRY']:
+    elif app.config['LOGGING_STDOUT_JSON']:
         handler = logging.StreamHandler(sys.stdout)
         handlers.append(configure_handler(handler, app, json_formatter))
     else:
