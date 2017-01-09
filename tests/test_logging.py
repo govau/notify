@@ -1,5 +1,10 @@
-from notifications_utils import logging
+import logging as builtin_logging
 import uuid
+from pathlib import Path
+
+import pytest
+
+from notifications_utils import logging
 
 
 def test_should_build_complete_log_line():
@@ -88,3 +93,54 @@ def test_should_build_statsd_line_without_service_id_or_time_taken():
         'status': 200
     }
     assert "method.endpoint.200" == logging.build_statsd_line(extra_fields)
+
+
+@pytest.mark.parametrize('debug_mode, stdout_json, formatter', [
+    (True, True, logging.CustomLogFormatter),
+    (True, False, logging.CustomLogFormatter),
+    (False, True, logging.JSONFormatter),
+    # false false is tested separately
+])
+def test_get_handlers_sets_up_logging_appropriately(debug_mode, stdout_json, formatter):
+    class App:
+        config = {
+            'NOTIFY_LOG_PATH': 'foo',
+            'NOTIFY_APP_NAME': 'bar',
+            'NOTIFY_LOG_LEVEL': 'ERROR',
+            'LOGGING_STDOUT_JSON': stdout_json
+        }
+        debug = debug_mode
+
+    app = App()
+
+    handlers = logging.get_handlers(app)
+
+    assert len(handlers) == 1
+    assert type(handlers[0]) == builtin_logging.StreamHandler
+    assert type(handlers[0].formatter) == formatter
+
+
+def test_get_handlers_sets_up_logging_appropriately_on_live(tmpdir):
+    class App:
+        config = {
+            # make a tempfile called foo
+            'NOTIFY_LOG_PATH': str(tmpdir / 'foo'),
+            'NOTIFY_APP_NAME': 'bar',
+            'NOTIFY_LOG_LEVEL': 'ERROR',
+            'LOGGING_STDOUT_JSON': False
+        }
+        debug = False
+
+    app = App()
+
+    handlers = logging.get_handlers(app)
+
+    assert len(handlers) == 2
+    assert type(handlers[0]) == builtin_logging.FileHandler
+    assert type(handlers[0].formatter) == logging.CustomLogFormatter
+
+    assert type(handlers[1]) == builtin_logging.FileHandler
+    assert type(handlers[1].formatter) == logging.JSONFormatter
+
+    assert (tmpdir / 'foo').isfile()
+    assert (tmpdir / 'foo.json').isfile()

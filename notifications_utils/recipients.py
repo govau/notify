@@ -355,7 +355,6 @@ def validate_phone_number(number, column=None):
 
     # Split number on first 7
     number = number.split('7', 1)[1]
-
     if len(number) > 9:
         raise InvalidPhoneError('Too many digits')
 
