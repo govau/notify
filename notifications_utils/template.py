@@ -14,6 +14,7 @@ from notifications_utils.formatters import (
     add_prefix,
     notify_email_markdown,
     notify_letter_preview_markdown,
+    notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
     prepend_subject,
     remove_empty_lines
@@ -424,7 +425,13 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             '',
             '',
             str(Field(self.subject, self.values)),
-            str(Field(self.content, self.values)),
+            Take.as_field(
+                self.content, self.values
+            ).then(
+                prepare_newlines_for_markdown
+            ).then(
+                notify_letter_dvla_markdown
+            ).as_string,
         ])
 
 

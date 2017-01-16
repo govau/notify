@@ -93,9 +93,10 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
             assert '##' not in email
 
 
-@pytest.mark.parametrize('template_class, result, markdown_renderer', [
+@pytest.mark.parametrize('template_class, extra_args, result, markdown_renderer', [
     [
         HTMLEmailTemplate,
+        {},
         (
             'the quick brown fox\n'
             '\n'
@@ -105,6 +106,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
     ],
     [
         LetterPreviewTemplate,
+        {},
         (
             '# animal story\n'
             '\n'
@@ -113,10 +115,21 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
             'jumped over the lazy dog'
         ),
         'notifications_utils.template.notify_letter_preview_markdown'
+    ],
+    [
+        LetterDVLATemplate,
+        {'numeric_id': 1},
+        (
+            'the quick brown fox\n'
+            '\n'
+            'jumped over the lazy dog'
+        ),
+        'notifications_utils.template.notify_letter_dvla_markdown'
     ]
 ])
 def test_markdown_in_templates(
     template_class,
+    extra_args,
     result,
     markdown_renderer,
 ):
@@ -130,7 +143,8 @@ def test_markdown_in_templates(
                 ),
                 'subject': 'animal story'
             },
-            {'animal': 'fox', 'colour': 'brown'}
+            {'animal': 'fox', 'colour': 'brown'},
+            **extra_args
         ))
     mock_markdown_renderer.assert_called_once_with(result)
 
@@ -802,10 +816,10 @@ dvla_file_spec = [
             confirm approach to mark up and line breaks...
         """,
         'Example': (
-            'Dear Henry Hadlow Thank you for applying to register a'
-            'lasting power of attorney (LPA) for property and'
-            'financial affairs. We have checked your application'
-            'and...'
+            'Dear Henry Hadlow,<cr><cr>'
+            'Thank you for applying to register a lasting power of '
+            'attorney (LPA) for property and financial affairs. We '
+            'have checked your application and...<cr><cr>'
         ),
     }
 ]
@@ -817,10 +831,10 @@ dvla_file_spec = [
     LetterDVLATemplate(
         {
             "content": (
-                'Dear ((name)) Thank you for applying to register a'
-                'lasting power of attorney (LPA) for property and'
-                'financial affairs. We have checked your application'
-                'and...'
+                'Dear ((name)),\n\n'
+                'Thank you for applying to register a lasting power of '
+                'attorney (LPA) for property and financial affairs. We '
+                'have checked your application and...'
             ),
             'subject': 'Your ((thing)) is due soon',
         },
