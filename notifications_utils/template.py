@@ -370,14 +370,35 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         '((postcode))'
     ])
 
+    def __init__(
+        self,
+        template,
+        values=None,
+        numeric_id=None,
+    ):
+        super().__init__(template, values)
+        if not numeric_id:
+            raise TypeError('numeric_id is required')
+        if len(str(numeric_id)) > 7:
+            raise TypeError('numeric_id cannot be longer than 7 digits')
+        try:
+            int(numeric_id)
+        except ValueError:
+            raise TypeError('numeric_id must be a number')
+        self.numeric_id = int(numeric_id)
+
     def __str__(self):
         return '|'.join([
             '140',
             '001',
             '001',
             '',
-            datetime.utcnow().strftime('%Y%m%d') + '0000001',
-            datetime.utcnow().strftime('%d%m%Y'),
+            datetime.utcnow().strftime(
+                '%Y%m%d{0:07d}'.format(self.numeric_id)
+            ),
+            datetime.utcnow().strftime(
+                '%d%m%Y'
+            ),
             '',
             '',
             '',

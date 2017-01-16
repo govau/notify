@@ -831,10 +831,26 @@ def test_templates_handle_html(
             'address line 5': 'Norfolk',
             'address line 6': '',
             'postcode': 'NR1 5PQ',
-        }
+        },
+        numeric_id=1,
     )
 ])
 def test_letter_output_template(field, template):
     # To debug this test it’s helpful uncomment the following line:
     # print(field)
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
+
+
+@pytest.mark.parametrize('id, expected_exception', [
+    (None, 'numeric_id is required'),
+    ('abc123', 'numeric_id must be a number'),
+    (12345678, 'numeric_id cannot be longer than 7 digits'),
+    pytest.mark.xfail((1234567, 'numeric_id cannot be longer than 7 digits')),
+])
+def test_letter_output_numeric_id(id, expected_exception):
+    with pytest.raises(TypeError) as error:
+        LetterDVLATemplate(
+            {'content': '', 'subject': ''},
+            numeric_id=id,
+        )
+    assert str(error.value) == expected_exception
