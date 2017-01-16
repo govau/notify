@@ -388,7 +388,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         self.numeric_id = int(numeric_id)
 
     def __str__(self):
-        return '|'.join([
+        return '|'.join(line.replace('|', '') for line in [
             '140',
             '001',
             '001',

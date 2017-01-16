@@ -844,6 +844,32 @@ def test_letter_output_template(field, template):
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
 
 
+@pytest.mark.parametrize('template', [
+    LetterDVLATemplate(
+        {
+            "content": 'Pipes | pipes | everywhere',
+            'subject': 'Your | is due soon',
+        },
+        {
+            'thing': '|',
+            'name': '|',
+            'address line 1': '|',
+            'address line 2': 'Managing Director',
+            'address line 3': '123 Electric Avenue',
+            'address line 4': 'Great Yarmouth',
+            'address line 5': 'Norfolk',
+            'address line 6': '',
+            'postcode': 'NR1 5PQ',
+        },
+        numeric_id=1,
+    )
+])
+def test_letter_output_pipe_delimiting(template):
+
+    assert len(str(template).split('|')) == len(dvla_file_spec)
+    assert 'Pipes  pipes  everywhere' in str(template)
+
+
 @pytest.mark.parametrize('id, expected_exception', [
     (None, 'numeric_id is required'),
     ('abc123', 'numeric_id must be a number'),
