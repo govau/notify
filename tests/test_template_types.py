@@ -774,11 +774,17 @@ def test_templates_handle_html(
 @pytest.mark.parametrize('template', [
     LetterDVLATemplate(
         {
-            "content": '',
+            "content": (
+                'Dear ((name)) Thank you for applying to register a'
+                'lasting power of attorney (LPA) for property and'
+                'financial affairs. We have checked your application'
+                'and...'
+            ),
             'subject': 'Your ((thing)) is due soon',
         },
         {
             'thing': 'application',
+            'name': 'Henry Hadlow',
         }
     )
 ])
