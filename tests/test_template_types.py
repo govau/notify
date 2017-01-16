@@ -750,7 +750,7 @@ def test_templates_handle_html(
         'Mandatory': '',
         'Data type': 'A120',
         'Comment': '',
-        'Example': 'State Pension Statement - Summary',
+        'Example': 'Your application is due soon',
     },
     {
         'Field number': '34',
@@ -775,7 +775,10 @@ def test_templates_handle_html(
     LetterDVLATemplate(
         {
             "content": '',
-            'subject': '',
+            'subject': 'Your ((thing)) is due soon',
+        },
+        {
+            'thing': 'application',
         }
     )
 ])

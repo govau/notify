@@ -367,7 +367,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             '',
             '',
             '',
-            'State Pension Statement - Summary',  # Hardcoded for now
+            str(Field(self.subject, self.values)),
             (
                 'Dear Henry Hadlow Thank you for applying to register a'
                 'lasting power of attorney (LPA) for property and'
