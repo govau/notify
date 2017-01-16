@@ -21,6 +21,7 @@ from notifications_utils.formatters import (
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
 
+
 template_env = Environment(loader=FileSystemLoader(
     path.dirname(path.abspath(__file__))
 ))
@@ -295,7 +296,19 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 notify_letter_preview_markdown
             ).as_string,
             'address': Take.from_field(
-                Field(self.address_block, self.values, html='escape', with_brackets=False)
+                Field(
+                    self.address_block,
+                    (
+                        self.values_with_default_optional_address_lines
+                        if all(self.values.get(key) for key in {
+                            'address line 1',
+                            'address line 2',
+                            'postcode',
+                        }) else self.values
+                    ),
+                    html='escape',
+                    with_brackets=False
+                )
             ).then(
                 remove_empty_lines
             ).then(
@@ -307,6 +320,19 @@ class LetterPreviewTemplate(WithSubjectTemplate):
     @property
     def subject(self):
         return str(Field(self._subject, self.values, html='escape'))
+
+    @property
+    def values_with_default_optional_address_lines(self):
+        return dict(
+            dict.fromkeys({
+                'address line 2',
+                'address line 3',
+                'address line 4',
+                'address line 5',
+                'address line 6',
+            }, ''),
+            **self.values
+        )
 
 
 class LetterPDFLinkTemplate(WithSubjectTemplate):
@@ -333,6 +359,17 @@ class LetterPDFLinkTemplate(WithSubjectTemplate):
 
 class LetterDVLATemplate(LetterPreviewTemplate):
 
+    address_block = '\n'.join([
+        '((address line 1))',
+        '((address line 2))',
+        '((address line 3))',
+        '((address line 4))',
+        '((address line 5))',
+        '((address line 6))',
+        '',
+        '((postcode))'
+    ])
+
     def __str__(self):
         return '|'.join([
             '140',
@@ -352,14 +389,12 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             '',
             '',
             '',
-            'Mr Henry Hadlow',  # Hardcoded for now
-            'Managing Director',  # Hardcoded for now
-            '123 Electric Avenue',  # Hardcoded for now
-            'Great Yarmouth',  # Hardcoded for now
-            'Norfolk',  # Hardcoded for now
-            '',
-            '',
-            'NR1 5PQ',  # Hardcoded for now
+        ] + (
+            str(Field(
+                self.address_block,
+                self.values_with_default_optional_address_lines,
+            )).split('\n')
+        ) + [
             '',
             '',
             '',
@@ -368,12 +403,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             '',
             '',
             str(Field(self.subject, self.values)),
-            (
-                'Dear Henry Hadlow Thank you for applying to register a'
-                'lasting power of attorney (LPA) for property and'
-                'financial affairs. We have checked your application'
-                'and...'
-            ),  # Hardcoded for now
+            str(Field(self.content, self.values)),
         ])
 
 

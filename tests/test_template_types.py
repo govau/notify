@@ -261,15 +261,54 @@ def test_sms_preview_adds_newlines(nl2br):
 @mock.patch('notifications_utils.template.linkify')
 @mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.template.prepare_newlines_for_markdown', return_value='Baz')
+@pytest.mark.parametrize('values, expected_address', [
+    ({}, Markup(
+        "<span class='placeholder-no-brackets'>address line 1</span>\n"
+        "<span class='placeholder-no-brackets'>address line 2</span>\n"
+        "<span class='placeholder-no-brackets'>address line 3</span>\n"
+        "<span class='placeholder-no-brackets'>address line 4</span>\n"
+        "<span class='placeholder-no-brackets'>address line 5</span>\n"
+        "<span class='placeholder-no-brackets'>address line 6</span>\n"
+        "<span class='placeholder-no-brackets'>postcode</span>"
+    )),
+    ({
+        'address line 1': '123 Fake Street',
+        'address line 6': 'United Kingdom',
+    }, Markup(
+        "123 Fake Street\n"
+        "<span class='placeholder-no-brackets'>address line 2</span>\n"
+        "<span class='placeholder-no-brackets'>address line 3</span>\n"
+        "<span class='placeholder-no-brackets'>address line 4</span>\n"
+        "<span class='placeholder-no-brackets'>address line 5</span>\n"
+        "United Kingdom\n"
+        "<span class='placeholder-no-brackets'>postcode</span>"
+    )),
+    ({
+        'address line 1': '123 Fake Street',
+        'address line 2': 'City of Town',
+        'postcode': 'SW1A 1AA',
+    }, Markup(
+        "123 Fake Street\n"
+        "City of Town\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "SW1A 1AA"
+    ))
+])
 def test_letter_preview_renderer(
     prepare_newlines,
     letter_markdown,
     linkify,
     unlink_govuk,
     remove_empty_lines,
-    jinja_template
+    jinja_template,
+    values,
+    expected_address,
 ):
-    str(LetterPreviewTemplate({'content': 'Foo', 'subject': 'Subject', 'values': {}}))
+    str(LetterPreviewTemplate({'content': 'Foo', 'subject': 'Subject'}, values))
+    remove_empty_lines.assert_called_once_with(expected_address)
     jinja_template.assert_called_once_with({
         'address': '123 Street',
         'message': 'Bar',
@@ -785,6 +824,13 @@ def test_templates_handle_html(
         {
             'thing': 'application',
             'name': 'Henry Hadlow',
+            'address line 1': 'Mr Henry Hadlow',
+            'address line 2': 'Managing Director',
+            'address line 3': '123 Electric Avenue',
+            'address line 4': 'Great Yarmouth',
+            'address line 5': 'Norfolk',
+            'address line 6': '',
+            'postcode': 'NR1 5PQ',
         }
     )
 ])
