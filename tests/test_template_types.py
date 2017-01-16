@@ -371,5 +371,414 @@ def test_templates_handle_html(
     assert mock_field_init.call_args_list == expected_field_calls
 
 
-def test_letter_output_template():
-    assert str(LetterDVLATemplate({"content": '', 'subject': ''})) == ''
+@pytest.mark.parametrize('field', [
+    {
+        'Field number': '1',
+        'Field name': 'OTT',
+        'Mandatory': 'Y',
+        'Data type': 'N3',
+        'Comment': """
+            Current assumption is a single OTT for Notify = 140
+            141 has also been reserved for future use
+        """,
+        'Example': '140',
+    },
+    {
+        'Field number': '2',
+        'Field name': 'ORG-ID',
+        'Mandatory': 'Y',
+        'Data type': 'N3',
+        'Comment': 'Unique identifier for the sending organisation',
+        'Example': '001',
+    },
+    {
+        'Field number': '3',
+        'Field name': 'ORG-NOTIFICATION-TYPE',
+        'Mandatory': 'Y',
+        'Data type': 'N3',
+        'Comment': """
+            Identifies the specific letter type for this organisation
+        """,
+        'Example': '001',
+    },
+    {
+        'Field number': '4',
+        'Field name': 'ORG-NAME',
+        'Mandatory': 'Y',
+        'Data type': 'A90',
+        'Comment': """
+            Free text organisation name which appears under the
+            crest in large font
+
+            Not used by Notify
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '5',
+        'Field name': 'NOTIFICATION-ID',
+        'Mandatory': 'Y',
+        'Data type': 'A15',
+        'Comment': """
+            Unique identifier for each notification consisting of
+            the current date and a numeric counter that resets each
+            day.  Supports a maximum of 10 million notification
+            events per day. Format:
+                CCYYMMDDNNNNNNN
+            Where:
+                CCYY = Current year
+                MMDD = Current month and year (zero padded)
+                NNNNNNN = Daily counter (zero padded to 7 digits)
+        """,
+        'Example': '201604290000001',
+    },
+    {
+        'Field number': '6',
+        'Field name': 'NOTIFICATION-DATE',
+        'Mandatory': 'Y',
+        'Data type': 'A8',
+        'Comment': """
+            The date that will be shown on the notification Provided
+            in format': 'DDMMYYYY This will be formatted to a long
+            date format by the composition process
+        """,
+        'Example': '29042016',
+    },
+    {
+        'Field number': '7',
+        'Field name': 'CUSTOMER-REFERENCE',
+        'Mandatory': '',
+        'Data type': 'A30',
+        'Comment': """
+            Full text of customer\'s reference
+
+            Not implemented by Notify yet.
+
+            Given example was:
+                Our ref: 1234-5678
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '8',
+        'Field name': 'ADDITIONAL-LINE-1',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            In the example templates this information appears in the
+            footer in a small font.   These lines are free text,
+            they may contain an address, e.g. of originating
+            department, E9 but this will not be validated or used as
+            a return address.
+
+            Not used by Notify
+
+            Given example was:
+                The Pension Service
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '9',
+        'Field name': 'ADDITIONAL-LINE-2',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify
+
+            Given example was:
+                Mail Handling Site A
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '10',
+        'Field name': 'ADDITIONAL-LINE-3',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify.
+
+            Given example was:
+                Wolverhampton  WV9 1LU
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '11',
+        'Field name': 'ADDITIONAL-LINE-4',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify.
+
+            Given example was:
+                Telephone: 0845 300 0168
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '12',
+        'Field name': 'ADDITIONAL-LINE-5',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify.
+
+            Given example was:
+                Norfolk
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '13',
+        'Field name': 'ADDITIONAL-LINE-6',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify.
+
+            Given example was:
+                Email: fpc.customercare@dwp.gsi.gov.uk
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '14',
+        'Field name': 'ADDITIONAL-LINE-7',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify.
+
+            Given example was:
+                Monday - Friday  8am - 6pm
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '15',
+        'Field name': 'ADDITIONAL-LINE-8',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': """
+            Not used by Notify.
+
+            Given example was:
+                www.gov.uk
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '16',
+        'Field name': 'ADDITIONAL-LINE-9',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '17',
+        'Field name': 'ADDITIONAL-LINE-10',
+        'Mandatory': '',
+        'Data type': 'A50',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '18',
+        'Field name': 'TO-NAME-1',
+        'Mandatory': 'Y',
+        'Data type': 'A60',
+        'Comment': """
+            Recipient full name includes title Must be present -
+            validated by Notify
+        """,
+        'Example': 'Mr Henry Hadlow',
+    },
+    {
+        'Field number': '19',
+        'Field name': 'TO-NAME-2',
+        'Mandatory': '',
+        'Data type': 'A40',
+        'Comment': 'Additional name or title line',
+        'Example': 'Managing Director',
+    },
+    {
+        'Field number': '20',
+        'Field name': 'TO-ADDRESS-LINE-1',
+        'Mandatory': 'Y',
+        'Data type': 'A35',
+        'Comment': """
+            Must be present - PAF validation by Notify Must match
+            PAF (in combination with TO-POST-CODE) to maximise
+            postage discount
+        """,
+        'Example': '123 Electric Avenue',
+    },
+    {
+        'Field number': '21',
+        'Field name': 'TO-ADDRESS-LINE-2',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': """
+            Address lines 2 through 5 are optional Composition
+            process will remove blank address lines
+        """,
+        'Example': 'Great Yarmouth',
+    },
+    {
+        'Field number': '22',
+        'Field name': 'TO-ADDRESS-LINE-3',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': '',
+        'Example': 'Norfolk',
+    },
+    {
+        'Field number': '23',
+        'Field name': 'TO-ADDRESS-LINE-4',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '24',
+        'Field name': 'TO-ADDRESS-LINE-5',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '25',
+        'Field name': 'TO-POST-CODE',
+        'Mandatory': 'Y',
+        'Data type': 'A8',
+        'Comment': """,
+            Unformatted (ie. SA6 7JL not SA067JL) Must be present -
+            PAF validation by Notify Must match PAF (in combination
+            with TO-ADDRESS-LINE-1) to maximise postage discount
+        """,
+        'Example': 'NR1 5PQ',
+    },
+    {
+        'Field number': '26',
+        'Field name': 'RETURN-NAME',
+        'Mandatory': '',
+        'Data type': 'A40',
+        'Comment': """
+            This section added to handle return of undelivered mail
+            to a specific organisational address may be required in
+            a later release of the service.
+
+            Not used by Notify at the moment.
+
+            Given example:
+                DWP Pension Service
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '27',
+        'Field name': 'RETURN-ADDRESS-LINE-1',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': """
+            Not used by Notify at the moment.
+
+            Given example:
+                Mail Handling Site A
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '28',
+        'Field name': 'RETURN-ADDRESS-LINE-2',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': """
+            Not used by Notify at the moment.
+
+            Given example:
+                Wolverhampton
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '29',
+        'Field name': 'RETURN-ADDRESS-LINE-3',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '30',
+        'Field name': 'RETURN-ADDRESS-LINE-4',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '31',
+        'Field name': 'RETURN-ADDRESS-LINE-5',
+        'Mandatory': '',
+        'Data type': 'A35',
+        'Comment': '',
+        'Example': '',
+    },
+    {
+        'Field number': '32',
+        'Field name': 'RETURN-POST-CODE',
+        'Mandatory': '',
+        'Data type': 'A8',
+        'Comment': """
+            Not used by Notify at the moment.
+
+            Given example:
+                WV9 1LU
+        """,
+        'Example': '',
+    },
+    {
+        'Field number': '33',
+        'Field name': 'SUBJECT-LINE',
+        'Mandatory': '',
+        'Data type': 'A120',
+        'Comment': '',
+        'Example': 'State Pension Statement - Summary',
+    },
+    {
+        'Field number': '34',
+        'Field name': 'NOTIFICATION-BODY',
+        'Mandatory': '',
+        'Data type': 'A',
+        'Comment': """
+            Difficult to define a maximum length as dependent on
+            other formatting factors absolute maximum for OSG is 6
+            pages but ideally no more than 4 pages total. OSG to
+            confirm approach to mark up and line breaks...
+        """,
+        'Example': (
+            'Dear Henry Hadlow Thank you for applying to register a'
+            'lasting power of attorney (LPA) for property and'
+            'financial affairs. We have checked your application'
+            'and...'
+        ),
+    }
+])
+@pytest.mark.parametrize('template', [
+    LetterDVLATemplate(
+        {
+            "content": '',
+            'subject': '',
+        }
+    )
+])
+def test_letter_output_template(field, template):
+    # To debug this test it’s helpful uncomment the following line:
+    # print(field)
+    assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']

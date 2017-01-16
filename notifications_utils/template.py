@@ -334,7 +334,47 @@ class LetterPDFLinkTemplate(WithSubjectTemplate):
 class LetterDVLATemplate(LetterPreviewTemplate):
 
     def __str__(self):
-        return ''
+        return '|'.join([
+            '140',
+            '001',
+            '001',
+            '',
+            '201604290000001',
+            '29042016',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            'Mr Henry Hadlow',  # Hardcoded for now
+            'Managing Director',  # Hardcoded for now
+            '123 Electric Avenue',  # Hardcoded for now
+            'Great Yarmouth',  # Hardcoded for now
+            'Norfolk',  # Hardcoded for now
+            '',
+            '',
+            'NR1 5PQ',  # Hardcoded for now
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            'State Pension Statement - Summary',  # Hardcoded for now
+            (
+                'Dear Henry Hadlow Thank you for applying to register a'
+                'lasting power of attorney (LPA) for property and'
+                'financial affairs. We have checked your application'
+                'and...'
+            ),  # Hardcoded for now
+        ])
 
 
 class NeededByTemplateError(Exception):
