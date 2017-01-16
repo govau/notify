@@ -371,6 +371,7 @@ def test_templates_handle_html(
     assert mock_field_init.call_args_list == expected_field_calls
 
 
+@freeze_time("2016-04-29 12:00:00.000000")
 @pytest.mark.parametrize('field', [
     {
         'Field number': '1',
