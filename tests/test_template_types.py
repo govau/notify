@@ -10,6 +10,7 @@ from notifications_utils.template import (
     HTMLEmailTemplate,
     LetterPreviewTemplate,
     LetterPDFLinkTemplate,
+    LetterDVLATemplate,
     PlainTextEmailTemplate,
     SMSMessageTemplate,
     SMSPreviewTemplate,
@@ -307,6 +308,8 @@ def test_subject_line_gets_applied_to_correct_template_types():
         HTMLEmailTemplate,
         PlainTextEmailTemplate,
         LetterPreviewTemplate,
+        LetterPDFLinkTemplate,
+        LetterDVLATemplate,
     ]:
         assert issubclass(cls, WithSubjectTemplate)
     for cls in [
@@ -366,3 +369,7 @@ def test_templates_handle_html(
 ):
     assert str(template_class({'content': 'content', 'subject': 'subject'}, **extra_args))
     assert mock_field_init.call_args_list == expected_field_calls
+
+
+def test_letter_output_template():
+    assert str(LetterDVLATemplate({"content": '', 'subject': ''})) == ''

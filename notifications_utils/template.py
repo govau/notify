@@ -331,6 +331,12 @@ class LetterPDFLinkTemplate(WithSubjectTemplate):
         }))
 
 
+class LetterDVLATemplate(LetterPreviewTemplate):
+
+    def __str__(self):
+        return ''
+
+
 class NeededByTemplateError(Exception):
     def __init__(self, keys):
         super(NeededByTemplateError, self).__init__(", ".join(keys))
