@@ -28,6 +28,7 @@ class Field():
         self.sanitizer = {
             'strip': strip_html,
             'escape': escape_html,
+            'passthrough': str
         }[html]
 
     def __str__(self):
