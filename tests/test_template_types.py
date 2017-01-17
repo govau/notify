@@ -28,7 +28,7 @@ def test_pass_through_renderer():
 
 
 def test_html_email_inserts_body():
-    assert 'the quick brown fox' in str(HTMLEmailTemplate(
+    assert 'the &lt;em&gt;quick&lt;/em&gt; brown fox' in str(HTMLEmailTemplate(
         {'content': 'the <em>quick</em> brown fox', 'subject': ''}
     ))
 
@@ -320,3 +320,48 @@ def test_subject_line_gets_replaced():
     assert template.subject == Markup("<span class='placeholder'>((name))</span>")
     template.values = {'name': 'Jo'}
     assert template.subject == 'Jo'
+
+
+@pytest.mark.parametrize('template_class, extra_args, expected_field_calls', [
+    (HTMLEmailTemplate, {}, [
+        mock.call('bar', {}, html='escape')
+    ]),
+    (EmailPreviewTemplate, {}, [
+        mock.call('bar', {}, html='escape'),
+        mock.call('baz', {}, html='escape'),
+        mock.call('((email address))', {}, with_brackets=False),
+    ]),
+    (SMSMessageTemplate, {}, [
+        mock.call('bar', {}, html='passthrough'),
+    ]),
+    (SMSPreviewTemplate, {}, [
+        mock.call('((phone number))', {}, with_brackets=False, html='escape'),
+        mock.call('bar', {}, html='escape'),
+    ]),
+    (LetterPreviewTemplate, {}, [
+        mock.call('bar', {}, html='escape'),
+        mock.call('baz', {}, html='escape'),
+        mock.call((
+            '((address line 1))\n'
+            '((address line 2))\n'
+            '((address line 3))\n'
+            '((address line 4))\n'
+            '((address line 5))\n'
+            '((address line 6))\n'
+            '((postcode))'
+        ), {}, with_brackets=False, html='escape'),
+    ]),
+    (LetterPDFLinkTemplate, {'preview_url': 'http://example.com'}, [
+    ]),
+])
+@mock.patch('notifications_utils.template.Field.__init__', return_value=None)
+@mock.patch('notifications_utils.template.Field.__str__', return_value='foo')
+def test_templates_handle_html(
+    mock_field_str,
+    mock_field_init,
+    template_class,
+    extra_args,
+    expected_field_calls,
+):
+    assert str(template_class({'content': 'bar', 'subject': 'baz'}, **extra_args))
+    assert mock_field_init.call_args_list == expected_field_calls
