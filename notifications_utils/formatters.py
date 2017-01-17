@@ -32,7 +32,7 @@ def linkify(text):
         lambda match: '<a style="word-wrap: break-word;" href="{}">{}</a>{}'.format(
             urllib.parse.quote(
                 urllib.parse.unquote(match.group(1)),
-                safe=':/?#=&'
+                safe=':/?#=&;'
             ),
             match.group(1),
             match.group(2)

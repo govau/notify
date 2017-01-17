@@ -20,11 +20,15 @@ class Field():
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
 
-    def __init__(self, content, values=None, with_brackets=True):
+    def __init__(self, content, values=None, with_brackets=True, html='strip'):
         self.content = content
         self.values = values
         if not with_brackets:
             self.placeholder_tag = self.placeholder_tag_no_brackets
+        self.sanitizer = {
+            'strip': strip_html,
+            'escape': escape_html,
+        }[html]
 
     def __str__(self):
         if self.values:
@@ -49,18 +53,23 @@ class Field():
 
     def format_match(self, match):
         if match.group(2) and match.group(3):
-            return self.optional_placeholder_tag.format(match.group(1), match.group(3))
-        return self.placeholder_tag.format(match.group(1), match.group(3))
+            return self.optional_placeholder_tag.format(
+                self.sanitizer(match.group(1)),
+                self.sanitizer(match.group(3))
+            )
+        return self.placeholder_tag.format(
+            self.sanitizer(match.group(1)), self.sanitizer(match.group(3))
+        )
 
     def replace_match(self, match):
         if match.group(2) and match.group(3):
-            return strip_html(match.group(3)) if str2bool(self.values.get(match.group(1))) else ''
-        return strip_html(self.values.get(match.group(1) + match.group(3)))
+            return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
+        return self.sanitizer(self.values.get(match.group(1) + match.group(3)))
 
     @property
     def _raw_formatted(self):
         return re.sub(
-            self.placeholder_pattern, self.format_match, self.content
+            self.placeholder_pattern, self.format_match, self.sanitizer(self.content)
         )
 
     @property
@@ -78,12 +87,16 @@ class Field():
     @property
     def replaced(self):
         return re.sub(
-            self.placeholder_pattern, self.replace_match, self.content
+            self.placeholder_pattern, self.replace_match, self.sanitizer(self.content)
         )
 
 
 def strip_html(value):
     return bleach.clean(value, tags=[], strip=True)
+
+
+def escape_html(value):
+    return bleach.clean(value, tags=[], strip=False)
 
 
 def str2bool(value):

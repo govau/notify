@@ -28,7 +28,7 @@ def test_pass_through_renderer():
 
 
 def test_html_email_inserts_body():
-    assert 'the <em>quick</em> brown fox' in str(HTMLEmailTemplate(
+    assert 'the quick brown fox' in str(HTMLEmailTemplate(
         {'content': 'the <em>quick</em> brown fox', 'subject': ''}
     ))
 
@@ -135,23 +135,31 @@ def test_markdown_in_templates(
 
 
 @pytest.mark.parametrize(
-    "url", [
-        "http://example.com",
-        "http://www.gov.uk/",
-        "https://www.gov.uk/",
-        "http://service.gov.uk",
-        "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-        pytest.mark.xfail("example.com"),
-        pytest.mark.xfail("www.example.com"),
-        pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
-        pytest.mark.xfail("ftp://example.com"),
-        pytest.mark.xfail("mailto:test@example.com")
+    "url, url_with_entities_replaced", [
+        ("http://example.com", "http://example.com"),
+        ("http://www.gov.uk/", "http://www.gov.uk/"),
+        ("https://www.gov.uk/", "https://www.gov.uk/"),
+        ("http://service.gov.uk", "http://service.gov.uk"),
+        (
+            "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
+            "http://service.gov.uk/blah.ext?q=a%20b%20c&amp;order=desc#fragment",
+        ),
+        pytest.mark.xfail(("example.com", "example.com")),
+        pytest.mark.xfail(("www.example.com", "www.example.com")),
+        pytest.mark.xfail((
+            "http://service.gov.uk/blah.ext?q=one two three",
+            "http://service.gov.uk/blah.ext?q=one two three",
+        )),
+        pytest.mark.xfail(("ftp://example.com", "ftp://example.com")),
+        pytest.mark.xfail(("mailto:test@example.com", "mailto:test@example.com")),
     ]
 )
-def test_makes_links_out_of_URLs(url):
-    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
-    assert (linkify(url) == link)
+def test_makes_links_out_of_URLs(url, url_with_entities_replaced):
+    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(
+        url_with_entities_replaced, url_with_entities_replaced
+    )
     assert link in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
+    assert link in str(EmailPreviewTemplate({'content': url, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
