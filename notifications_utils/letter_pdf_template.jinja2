@@ -13,7 +13,7 @@
 
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
-          font-family: 'Helvetica Neue';
+          font-family: 'NimbusSanL';
           font-size: 10pt;
           text-align: right;
           vertical-align: top;
@@ -24,7 +24,9 @@
         margin-top: 10mm;
       }
       body {
-        font-family: 'Helvetica Neue';
+        font-family: 'NimbusSanL';
+        letter-spacing: 0.01em;
+        word-spacing: -0.04em;
         margin: 0;
         padding: 90mm 50mm 0 0;
       }
@@ -119,8 +121,8 @@
         display: inline;
         background-color: #FFBF47;
         background-image: url(http://localhost:6012/static/images/letter-template/placeholder-mask-left.svg), url(http://localhost:6012/static/images/letter-template/placeholder-mask-right.svg);
-        background-size: auto 115%, auto 115%;
-        background-position: 0 -0.05em, right -0.05em;
+        background-size: auto 150%, auto 150%;
+        background-position: 0 -0.17em, right -0.17em;
         color: #000;
         overflow-wrap: break-word;
         word-wrap: break-word;
