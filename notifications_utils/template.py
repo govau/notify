@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.field import Field
+from notifications_utils.field import Field, escape_html
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
     linkify,
@@ -157,7 +157,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
             'body': Take.as_field(
                 self.content, self.values, html='escape'
             ).then(
-                add_prefix, self.prefix if not self.sender else None
+                add_prefix, (escape_html(self.prefix) or None) if not self.sender else None
             ).then(
                 nl2br
             ).as_string
@@ -176,7 +176,7 @@ class WithSubjectTemplate(Template):
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values, html='escape'))
+        return str(Field(self._subject, self.values, html='passthrough'))
 
     @subject.setter
     def subject(self, value):
@@ -264,6 +264,10 @@ class EmailPreviewTemplate(WithSubjectTemplate):
             'show_recipient': self.show_recipient
         }))
 
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values, html='escape'))
+
 
 class LetterPreviewTemplate(WithSubjectTemplate):
 
@@ -299,6 +303,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).as_string,
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
+
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values, html='escape'))
 
 
 class LetterPDFLinkTemplate(WithSubjectTemplate):

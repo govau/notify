@@ -212,12 +212,13 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
 
 @mock.patch('notifications_utils.template.add_prefix', return_value='')
 @pytest.mark.parametrize(
-    'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
-)
-@pytest.mark.parametrize(
-    "prefix, body, expected_call", [
-        ("a", "b", (Markup("b"), "a")),
-        (None, "b", (Markup("b"), None)),
+    "template_class, prefix, body, expected_call", [
+        (SMSMessageTemplate, "a", "b", (Markup("b"), "a")),
+        (SMSPreviewTemplate, "a", "b", (Markup("b"), "a")),
+        (SMSMessageTemplate, None, "b", (Markup("b"), None)),
+        (SMSPreviewTemplate, None, "b", (Markup("b"), None)),
+        (SMSMessageTemplate, '<em>ht&ml</em>', "b", (Markup("b"), '<em>ht&ml</em>')),
+        (SMSPreviewTemplate, '<em>ht&ml</em>', "b", (Markup("b"), '&lt;em&gt;ht&amp;ml&lt;/em&gt;')),
     ]
 )
 def test_sms_message_adds_prefix(add_prefix, template_class, prefix, body, expected_call):
@@ -324,23 +325,23 @@ def test_subject_line_gets_replaced():
 
 @pytest.mark.parametrize('template_class, extra_args, expected_field_calls', [
     (HTMLEmailTemplate, {}, [
-        mock.call('bar', {}, html='escape')
+        mock.call('content', {}, html='escape')
     ]),
     (EmailPreviewTemplate, {}, [
-        mock.call('bar', {}, html='escape'),
-        mock.call('baz', {}, html='escape'),
+        mock.call('content', {}, html='escape'),
+        mock.call('subject', {}, html='escape'),
         mock.call('((email address))', {}, with_brackets=False),
     ]),
     (SMSMessageTemplate, {}, [
-        mock.call('bar', {}, html='passthrough'),
+        mock.call('content', {}, html='passthrough'),
     ]),
     (SMSPreviewTemplate, {}, [
         mock.call('((phone number))', {}, with_brackets=False, html='escape'),
-        mock.call('bar', {}, html='escape'),
+        mock.call('content', {}, html='escape'),
     ]),
     (LetterPreviewTemplate, {}, [
-        mock.call('bar', {}, html='escape'),
-        mock.call('baz', {}, html='escape'),
+        mock.call('content', {}, html='escape'),
+        mock.call('subject', {}, html='escape'),
         mock.call((
             '((address line 1))\n'
             '((address line 2))\n'
@@ -363,5 +364,5 @@ def test_templates_handle_html(
     extra_args,
     expected_field_calls,
 ):
-    assert str(template_class({'content': 'bar', 'subject': 'baz'}, **extra_args))
+    assert str(template_class({'content': 'content', 'subject': 'subject'}, **extra_args))
     assert mock_field_init.call_args_list == expected_field_calls
