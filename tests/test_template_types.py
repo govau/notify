@@ -28,7 +28,7 @@ def test_pass_through_renderer():
 
 
 def test_html_email_inserts_body():
-    assert 'the <em>quick</em> brown fox' in str(HTMLEmailTemplate(
+    assert 'the &lt;em&gt;quick&lt;/em&gt; brown fox' in str(HTMLEmailTemplate(
         {'content': 'the <em>quick</em> brown fox', 'subject': ''}
     ))
 
@@ -135,23 +135,31 @@ def test_markdown_in_templates(
 
 
 @pytest.mark.parametrize(
-    "url", [
-        "http://example.com",
-        "http://www.gov.uk/",
-        "https://www.gov.uk/",
-        "http://service.gov.uk",
-        "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-        pytest.mark.xfail("example.com"),
-        pytest.mark.xfail("www.example.com"),
-        pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
-        pytest.mark.xfail("ftp://example.com"),
-        pytest.mark.xfail("mailto:test@example.com")
+    "url, url_with_entities_replaced", [
+        ("http://example.com", "http://example.com"),
+        ("http://www.gov.uk/", "http://www.gov.uk/"),
+        ("https://www.gov.uk/", "https://www.gov.uk/"),
+        ("http://service.gov.uk", "http://service.gov.uk"),
+        (
+            "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
+            "http://service.gov.uk/blah.ext?q=a%20b%20c&amp;order=desc#fragment",
+        ),
+        pytest.mark.xfail(("example.com", "example.com")),
+        pytest.mark.xfail(("www.example.com", "www.example.com")),
+        pytest.mark.xfail((
+            "http://service.gov.uk/blah.ext?q=one two three",
+            "http://service.gov.uk/blah.ext?q=one two three",
+        )),
+        pytest.mark.xfail(("ftp://example.com", "ftp://example.com")),
+        pytest.mark.xfail(("mailto:test@example.com", "mailto:test@example.com")),
     ]
 )
-def test_makes_links_out_of_URLs(url):
-    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
-    assert (linkify(url) == link)
+def test_makes_links_out_of_URLs(url, url_with_entities_replaced):
+    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(
+        url_with_entities_replaced, url_with_entities_replaced
+    )
     assert link in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
+    assert link in str(EmailPreviewTemplate({'content': url, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -204,12 +212,13 @@ def test_escaping_govuk_in_email_templates(template_content, expected):
 
 @mock.patch('notifications_utils.template.add_prefix', return_value='')
 @pytest.mark.parametrize(
-    'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
-)
-@pytest.mark.parametrize(
-    "prefix, body, expected_call", [
-        ("a", "b", (Markup("b"), "a")),
-        (None, "b", (Markup("b"), None)),
+    "template_class, prefix, body, expected_call", [
+        (SMSMessageTemplate, "a", "b", (Markup("b"), "a")),
+        (SMSPreviewTemplate, "a", "b", (Markup("b"), "a")),
+        (SMSMessageTemplate, None, "b", (Markup("b"), None)),
+        (SMSPreviewTemplate, None, "b", (Markup("b"), None)),
+        (SMSMessageTemplate, '<em>ht&ml</em>', "b", (Markup("b"), '<em>ht&ml</em>')),
+        (SMSPreviewTemplate, '<em>ht&ml</em>', "b", (Markup("b"), '&lt;em&gt;ht&amp;ml&lt;/em&gt;')),
     ]
 )
 def test_sms_message_adds_prefix(add_prefix, template_class, prefix, body, expected_call):
@@ -312,3 +321,48 @@ def test_subject_line_gets_replaced():
     assert template.subject == Markup("<span class='placeholder'>((name))</span>")
     template.values = {'name': 'Jo'}
     assert template.subject == 'Jo'
+
+
+@pytest.mark.parametrize('template_class, extra_args, expected_field_calls', [
+    (HTMLEmailTemplate, {}, [
+        mock.call('content', {}, html='escape')
+    ]),
+    (EmailPreviewTemplate, {}, [
+        mock.call('content', {}, html='escape'),
+        mock.call('subject', {}, html='escape'),
+        mock.call('((email address))', {}, with_brackets=False),
+    ]),
+    (SMSMessageTemplate, {}, [
+        mock.call('content', {}, html='passthrough'),
+    ]),
+    (SMSPreviewTemplate, {}, [
+        mock.call('((phone number))', {}, with_brackets=False, html='escape'),
+        mock.call('content', {}, html='escape'),
+    ]),
+    (LetterPreviewTemplate, {}, [
+        mock.call('content', {}, html='escape'),
+        mock.call('subject', {}, html='escape'),
+        mock.call((
+            '((address line 1))\n'
+            '((address line 2))\n'
+            '((address line 3))\n'
+            '((address line 4))\n'
+            '((address line 5))\n'
+            '((address line 6))\n'
+            '((postcode))'
+        ), {}, with_brackets=False, html='escape'),
+    ]),
+    (LetterPDFLinkTemplate, {'preview_url': 'http://example.com'}, [
+    ]),
+])
+@mock.patch('notifications_utils.template.Field.__init__', return_value=None)
+@mock.patch('notifications_utils.template.Field.__str__', return_value='foo')
+def test_templates_handle_html(
+    mock_field_str,
+    mock_field_init,
+    template_class,
+    extra_args,
+    expected_field_calls,
+):
+    assert str(template_class({'content': 'content', 'subject': 'subject'}, **extra_args))
+    assert mock_field_init.call_args_list == expected_field_calls

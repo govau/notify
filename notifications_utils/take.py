@@ -11,8 +11,8 @@ class Take():
         return cls(str(field))
 
     @classmethod
-    def as_field(cls, content, values):
-        return cls.from_field(Field(content, values))
+    def as_field(cls, *args, **kwargs):
+        return cls.from_field(Field(*args, **kwargs))
 
     def then(self, func, *args, **kwargs):
         return self.__class__(func(self.thing, *args, **kwargs))

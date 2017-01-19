@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.field import Field
+from notifications_utils.field import Field, escape_html
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
     linkify,
@@ -110,7 +110,7 @@ class SMSMessageTemplate(Template):
 
     def __str__(self):
         return Take.as_field(
-            self.content, self.values
+            self.content, self.values, html='passthrough'
         ).then(
             add_prefix, self.prefix
         ).as_string.strip()
@@ -152,12 +152,12 @@ class SMSPreviewTemplate(SMSMessageTemplate):
     def __str__(self):
 
         return Markup(self.jinja_template.render({
-            'recipient': Field('((phone number))', self.values, with_brackets=False),
+            'recipient': Field('((phone number))', self.values, with_brackets=False, html='escape'),
             'show_recipient': self.show_recipient,
             'body': Take.as_field(
-                self.content, self.values
+                self.content, self.values, html='escape'
             ).then(
-                add_prefix, self.prefix if not self.sender else None
+                add_prefix, (escape_html(self.prefix) or None) if not self.sender else None
             ).then(
                 nl2br
             ).as_string
@@ -176,7 +176,7 @@ class WithSubjectTemplate(Template):
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values))
+        return str(Field(self._subject, self.values, html='passthrough'))
 
     @subject.setter
     def subject(self, value):
@@ -191,7 +191,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
 
     def __str__(self):
         return Take.as_field(
-            self.content, self.values
+            self.content, self.values, html='passthrough'
         ).then(
             unlink_govuk_escaped
         ).as_string
@@ -264,6 +264,10 @@ class EmailPreviewTemplate(WithSubjectTemplate):
             'show_recipient': self.show_recipient
         }))
 
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values, html='escape'))
+
 
 class LetterPreviewTemplate(WithSubjectTemplate):
 
@@ -282,7 +286,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
     def __str__(self):
         return Markup(self.jinja_template.render({
             'message': Take.as_field(
-                self.content, self.values
+                self.content, self.values, html='escape'
             ).then(
                 prepend_subject, self.subject
             ).then(
@@ -291,7 +295,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 notify_letter_preview_markdown
             ).as_string,
             'address': Take.from_field(
-                Field(self.address_block, self.values, with_brackets=False)
+                Field(self.address_block, self.values, html='escape', with_brackets=False)
             ).then(
                 remove_empty_lines
             ).then(
@@ -299,6 +303,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).as_string,
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
+
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values, html='escape'))
 
 
 class LetterPDFLinkTemplate(WithSubjectTemplate):
@@ -340,7 +348,7 @@ def get_sms_fragment_count(character_count):
 def get_html_email_body(template_content, template_values):
 
     return Take.as_field(
-        template_content, template_values
+        template_content, template_values, html='escape'
     ).then(
         unlink_govuk_escaped
     ).then(

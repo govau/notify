@@ -28,7 +28,6 @@ from notifications_utils.template import (
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (linkify(url) == link)
-    assert link in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 @pytest.mark.parametrize(
