@@ -108,8 +108,6 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
         LetterPreviewTemplate,
         {},
         (
-            '# animal story\n'
-            '\n'
             'the quick brown fox\n'
             '\n'
             'jumped over the lazy dog'
@@ -325,10 +323,11 @@ def test_letter_preview_renderer(
     remove_empty_lines.assert_called_once_with(expected_address)
     jinja_template.assert_called_once_with({
         'address': '123 Street',
+        'subject': 'Subject',
         'message': 'Bar',
         'date': '1 January 2001'
     })
-    prepare_newlines.assert_called_once_with('# Subject\n\nFoo')
+    prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')
     linkify.assert_not_called()
     unlink_govuk.assert_not_called()
@@ -396,8 +395,8 @@ def test_subject_line_gets_replaced():
         mock.call('content', {}, html='escape'),
     ]),
     (LetterPreviewTemplate, {}, [
-        mock.call('content', {}, html='escape'),
         mock.call('subject', {}, html='escape'),
+        mock.call('content', {}, html='escape'),
         mock.call((
             '((address line 1))\n'
             '((address line 2))\n'

@@ -287,10 +287,9 @@ class LetterPreviewTemplate(WithSubjectTemplate):
 
     def __str__(self):
         return Markup(self.jinja_template.render({
+            'subject': self.subject,
             'message': Take.as_field(
                 self.content, self.values, html='escape'
-            ).then(
-                prepend_subject, self.subject
             ).then(
                 prepare_newlines_for_markdown
             ).then(
