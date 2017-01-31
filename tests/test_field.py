@@ -120,6 +120,29 @@ def test_formatting_of_placeholders(content, expected):
 
 
 @pytest.mark.parametrize(
+    "content, values, expected", [
+        (
+            "((name)) ((colour))",
+            {'name': 'Jo'},
+            "Jo <span class='placeholder'>((colour))</span>",
+        ),
+        (
+            "((name)) ((colour))",
+            {'name': ''},
+            "<span class='placeholder'>((name))</span> <span class='placeholder'>((colour))</span>",
+        ),
+        (
+            "((show_thing??thing)) ((colour))",
+            {'colour': 'red'},
+            "<span class='placeholder-conditional'>((show_thing??</span>thing)) red",
+        ),
+    ]
+)
+def test_handling_of_missing_values(content, values, expected):
+    assert str(Field(content, values)) == expected
+
+
+@pytest.mark.parametrize(
     "value", [
         '0',
         0, 2, 99.99999,
