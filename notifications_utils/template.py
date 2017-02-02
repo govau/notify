@@ -388,49 +388,90 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         self.numeric_id = int(numeric_id)
 
     def __str__(self):
-        return '|'.join(line.replace('|', '') for line in [
-            '140',
-            '001',
-            '001',
-            '',
-            datetime.utcnow().strftime(
-                '%Y%m%d{0:07d}'.format(self.numeric_id)
-            ),
-            datetime.utcnow().strftime(
-                '%d%m%Y'
-            ),
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-        ] + (
-            str(Field(
+
+        OTT = '140'
+        ORG_ID = '001'
+        ORG_NOTIFICATION_TYPE = '001'
+        ORG_NAME = ''
+        NOTIFICATION_ID = datetime.utcnow().strftime(
+            '%Y%m%d{0:07d}'.format(self.numeric_id)
+        )
+        NOTIFICATION_DATE = datetime.utcnow().strftime(
+            '%d%m%Y'
+        )
+        CUSTOMER_REFERENCE = ''
+        ADDITIONAL_LINE_1 = ''
+        ADDITIONAL_LINE_2 = ''
+        ADDITIONAL_LINE_3 = ''
+        ADDITIONAL_LINE_4 = ''
+        ADDITIONAL_LINE_5 = ''
+        ADDITIONAL_LINE_6 = ''
+        ADDITIONAL_LINE_7 = ''
+        ADDITIONAL_LINE_8 = ''
+        ADDITIONAL_LINE_9 = ''
+        ADDITIONAL_LINE_10 = ''
+        TO_NAME_1,\
+            TO_NAME_2,\
+            TO_ADDRESS_LINE_1,\
+            TO_ADDRESS_LINE_2,\
+            TO_ADDRESS_LINE_3,\
+            TO_ADDRESS_LINE_4,\
+            TO_ADDRESS_LINE_5,\
+            TO_POST_CODE, = str(Field(
                 self.address_block,
                 self.values_with_default_optional_address_lines,
             )).split('\n')
-        ) + [
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            str(Field(self.subject, self.values)),
-            Take.as_field(
-                self.content, self.values
-            ).then(
-                prepare_newlines_for_markdown
-            ).then(
-                notify_letter_dvla_markdown
-            ).as_string,
+        RETURN_NAME = ''
+        RETURN_ADDRESS_LINE_1 = ''
+        RETURN_ADDRESS_LINE_2 = ''
+        RETURN_ADDRESS_LINE_3 = ''
+        RETURN_ADDRESS_LINE_4 = ''
+        RETURN_ADDRESS_LINE_5 = ''
+        RETURN_POST_CODE = ''
+        SUBJECT_LINE = str(Field(self.subject, self.values))
+        NOTIFICATION_BODY = Take.as_field(
+            self.content, self.values
+        ).then(
+            prepare_newlines_for_markdown
+        ).then(
+            notify_letter_dvla_markdown
+        ).as_string
+
+        return '|'.join(line.replace('|', '') for line in [
+            OTT,
+            ORG_ID,
+            ORG_NOTIFICATION_TYPE,
+            ORG_NAME,
+            NOTIFICATION_ID,
+            NOTIFICATION_DATE,
+            CUSTOMER_REFERENCE,
+            ADDITIONAL_LINE_1,
+            ADDITIONAL_LINE_2,
+            ADDITIONAL_LINE_3,
+            ADDITIONAL_LINE_4,
+            ADDITIONAL_LINE_5,
+            ADDITIONAL_LINE_6,
+            ADDITIONAL_LINE_7,
+            ADDITIONAL_LINE_8,
+            ADDITIONAL_LINE_9,
+            ADDITIONAL_LINE_10,
+            TO_NAME_1,
+            TO_NAME_2,
+            TO_ADDRESS_LINE_1,
+            TO_ADDRESS_LINE_2,
+            TO_ADDRESS_LINE_3,
+            TO_ADDRESS_LINE_4,
+            TO_ADDRESS_LINE_5,
+            TO_POST_CODE,
+            RETURN_NAME,
+            RETURN_ADDRESS_LINE_1,
+            RETURN_ADDRESS_LINE_2,
+            RETURN_ADDRESS_LINE_3,
+            RETURN_ADDRESS_LINE_4,
+            RETURN_ADDRESS_LINE_5,
+            RETURN_POST_CODE,
+            SUBJECT_LINE,
+            NOTIFICATION_BODY,
         ])
 
 
