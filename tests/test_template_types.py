@@ -885,8 +885,9 @@ def test_letter_output_pipe_delimiting(template):
 
 @pytest.mark.parametrize('id, expected_exception', [
     (None, 'numeric_id is required'),
-    ('abc123', 'numeric_id must be a number'),
+    ('abc123', 'numeric_id must be an integer'),
     (12345678, 'numeric_id cannot be longer than 7 digits'),
+    (1.34567, 'numeric_id must be an integer')
 ])
 def test_letter_output_numeric_id(id, expected_exception):
     with pytest.raises(TypeError) as error:

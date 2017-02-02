@@ -391,11 +391,9 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             raise TypeError('numeric_id is required')
         if len(str(value)) > 7:
             raise TypeError('numeric_id cannot be longer than 7 digits')
-        try:
-            int(value)
-        except ValueError:
-            raise TypeError('numeric_id must be a number')
-        self._numeric_id = value
+        if not isinstance(value, int):
+            raise TypeError('numeric_id must be an integer')
+        self._numeric_id = int(value)
 
     def __str__(self):
 
