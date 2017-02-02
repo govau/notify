@@ -65,7 +65,7 @@ class Field():
     def replace_match(self, match):
         if match.group(2) and match.group(3) and self.values.get(match.group(1)) is not None:
             return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
-        if self.values.get(match.group(1) + match.group(3)):
+        if self.values.get(match.group(1) + match.group(3)) is not None:
             return self.sanitizer(self.values.get(match.group(1) + match.group(3)))
         return self.format_match(match)
 

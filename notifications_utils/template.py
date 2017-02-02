@@ -14,12 +14,14 @@ from notifications_utils.formatters import (
     add_prefix,
     notify_email_markdown,
     notify_letter_preview_markdown,
+    notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
     prepend_subject,
     remove_empty_lines
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
+
 
 template_env = Environment(loader=FileSystemLoader(
     path.dirname(path.abspath(__file__))
@@ -285,17 +287,28 @@ class LetterPreviewTemplate(WithSubjectTemplate):
 
     def __str__(self):
         return Markup(self.jinja_template.render({
+            'subject': self.subject,
             'message': Take.as_field(
                 self.content, self.values, html='escape'
-            ).then(
-                prepend_subject, self.subject
             ).then(
                 prepare_newlines_for_markdown
             ).then(
                 notify_letter_preview_markdown
             ).as_string,
             'address': Take.from_field(
-                Field(self.address_block, self.values, html='escape', with_brackets=False)
+                Field(
+                    self.address_block,
+                    (
+                        self.values_with_default_optional_address_lines
+                        if all(self.values.get(key) for key in {
+                            'address line 1',
+                            'address line 2',
+                            'postcode',
+                        }) else self.values
+                    ),
+                    html='escape',
+                    with_brackets=False
+                )
             ).then(
                 remove_empty_lines
             ).then(
@@ -307,6 +320,19 @@ class LetterPreviewTemplate(WithSubjectTemplate):
     @property
     def subject(self):
         return str(Field(self._subject, self.values, html='escape'))
+
+    @property
+    def values_with_default_optional_address_lines(self):
+        return dict(
+            dict.fromkeys({
+                'address line 2',
+                'address line 3',
+                'address line 4',
+                'address line 5',
+                'address line 6',
+            }, ''),
+            **self.values
+        )
 
 
 class LetterPDFLinkTemplate(WithSubjectTemplate):
@@ -329,6 +355,128 @@ class LetterPDFLinkTemplate(WithSubjectTemplate):
             'pdf_url': '{}.pdf'.format(self.preview_url),
             'png_url': '{}.png'.format(self.preview_url),
         }))
+
+
+class LetterDVLATemplate(LetterPreviewTemplate):
+
+    address_block = '\n'.join([
+        '((address line 1))',
+        '((address line 2))',
+        '((address line 3))',
+        '((address line 4))',
+        '((address line 5))',
+        '((address line 6))',
+        '',
+        '((postcode))'
+    ])
+
+    def __init__(
+        self,
+        template,
+        values=None,
+        numeric_id=None,
+    ):
+        super().__init__(template, values)
+        self.numeric_id = numeric_id
+
+    @property
+    def numeric_id(self):
+        return datetime.utcnow().strftime(
+            '%Y%m%d{0:07d}'.format(self._numeric_id)
+        )
+
+    @numeric_id.setter
+    def numeric_id(self, value):
+        if not value:
+            raise TypeError('numeric_id is required')
+        if len(str(value)) > 7:
+            raise TypeError('numeric_id cannot be longer than 7 digits')
+        if not isinstance(value, int):
+            raise TypeError('numeric_id must be an integer')
+        self._numeric_id = int(value)
+
+    def __str__(self):
+
+        OTT = '140'
+        ORG_ID = '001'
+        ORG_NOTIFICATION_TYPE = '001'
+        ORG_NAME = ''
+        NOTIFICATION_ID = self.numeric_id
+        NOTIFICATION_DATE = datetime.utcnow().strftime('%d%m%Y')
+        CUSTOMER_REFERENCE = ''
+        ADDITIONAL_LINE_1 = ''
+        ADDITIONAL_LINE_2 = ''
+        ADDITIONAL_LINE_3 = ''
+        ADDITIONAL_LINE_4 = ''
+        ADDITIONAL_LINE_5 = ''
+        ADDITIONAL_LINE_6 = ''
+        ADDITIONAL_LINE_7 = ''
+        ADDITIONAL_LINE_8 = ''
+        ADDITIONAL_LINE_9 = ''
+        ADDITIONAL_LINE_10 = ''
+        TO_NAME_1,\
+            TO_NAME_2,\
+            TO_ADDRESS_LINE_1,\
+            TO_ADDRESS_LINE_2,\
+            TO_ADDRESS_LINE_3,\
+            TO_ADDRESS_LINE_4,\
+            TO_ADDRESS_LINE_5,\
+            TO_POST_CODE, = str(Field(
+                self.address_block,
+                self.values_with_default_optional_address_lines,
+            )).split('\n')
+        RETURN_NAME = ''
+        RETURN_ADDRESS_LINE_1 = ''
+        RETURN_ADDRESS_LINE_2 = ''
+        RETURN_ADDRESS_LINE_3 = ''
+        RETURN_ADDRESS_LINE_4 = ''
+        RETURN_ADDRESS_LINE_5 = ''
+        RETURN_POST_CODE = ''
+        SUBJECT_LINE = str(Field(self.subject, self.values))
+        NOTIFICATION_BODY = Take.as_field(
+            self.content, self.values
+        ).then(
+            prepare_newlines_for_markdown
+        ).then(
+            notify_letter_dvla_markdown
+        ).as_string
+
+        return '|'.join(line.replace('|', '') for line in [
+            OTT,
+            ORG_ID,
+            ORG_NOTIFICATION_TYPE,
+            ORG_NAME,
+            NOTIFICATION_ID,
+            NOTIFICATION_DATE,
+            CUSTOMER_REFERENCE,
+            ADDITIONAL_LINE_1,
+            ADDITIONAL_LINE_2,
+            ADDITIONAL_LINE_3,
+            ADDITIONAL_LINE_4,
+            ADDITIONAL_LINE_5,
+            ADDITIONAL_LINE_6,
+            ADDITIONAL_LINE_7,
+            ADDITIONAL_LINE_8,
+            ADDITIONAL_LINE_9,
+            ADDITIONAL_LINE_10,
+            TO_NAME_1,
+            TO_NAME_2,
+            TO_ADDRESS_LINE_1,
+            TO_ADDRESS_LINE_2,
+            TO_ADDRESS_LINE_3,
+            TO_ADDRESS_LINE_4,
+            TO_ADDRESS_LINE_5,
+            TO_POST_CODE,
+            RETURN_NAME,
+            RETURN_ADDRESS_LINE_1,
+            RETURN_ADDRESS_LINE_2,
+            RETURN_ADDRESS_LINE_3,
+            RETURN_ADDRESS_LINE_4,
+            RETURN_ADDRESS_LINE_5,
+            RETURN_POST_CODE,
+            SUBJECT_LINE,
+            NOTIFICATION_BODY,
+        ])
 
 
 class NeededByTemplateError(Exception):

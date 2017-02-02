@@ -127,11 +127,6 @@ def test_formatting_of_placeholders(content, expected):
             "Jo <span class='placeholder'>((colour))</span>",
         ),
         (
-            "((name)) ((colour))",
-            {'name': ''},
-            "<span class='placeholder'>((name))</span> <span class='placeholder'>((colour))</span>",
-        ),
-        (
             "((show_thing??thing)) ((colour))",
             {'colour': 'red'},
             "<span class='placeholder-conditional'>((show_thing??</span>thing)) red",

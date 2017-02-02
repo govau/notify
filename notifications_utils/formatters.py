@@ -94,7 +94,9 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
         return ""
 
     def autolink(self, link, is_email=False):
-        return link
+        return '<strong>{}</strong>'.format(
+            link.replace('http://', '').replace('https://', '')
+        )
 
     def codespan(self, text):
         return text
@@ -128,6 +130,47 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def footnotes(self, text):
         return text
+
+
+class NotifyLetterMarkdownDVLARenderer(NotifyLetterMarkdownPreviewRenderer):
+
+    def header(self, text, level, raw=None):
+        if level == 1:
+            return '<h2>{}<normal>'.format(text)
+        return self.paragraph(text)
+
+    def paragraph(self, text):
+        if text.strip():
+            return '{}<cr><cr>'.format(text)
+        return ''
+
+    def linebreak(self):
+        return "<cr>"
+
+    def newline(self):
+        return "<cr>"
+
+    def list(self, body, ordered=True):
+        return '{}<cr>'.format(
+            ''.join(
+                '{}{}<cr>'.format(
+                    '<np>' if ordered else '<bul><tab>',
+                    line
+                )
+                for line in filter(None, body.split('\n'))
+            )
+        )
+
+    def list_item(self, text):
+        return '{}\n'.format(text)
+
+    def link(self, link, title, content):
+        return '{}: {}'.format(content, link)
+
+    def autolink(self, link, is_email=False):
+        return '<b>{}<normal>'.format(
+            link.replace('http://', '').replace('https://', '')
+        )
 
 
 class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
@@ -190,6 +233,10 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
             text
         )
 
+    def autolink(self, link, is_email=False):
+        return link
+
 
 notify_email_markdown = mistune.Markdown(renderer=NotifyEmailMarkdownRenderer())
 notify_letter_preview_markdown = mistune.Markdown(renderer=NotifyLetterMarkdownPreviewRenderer())
+notify_letter_dvla_markdown = mistune.Markdown(renderer=NotifyLetterMarkdownDVLARenderer())
