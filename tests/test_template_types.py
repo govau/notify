@@ -826,8 +826,10 @@ dvla_file_spec = [
 
 @freeze_time("2016-04-29 12:00:00.000000")
 @pytest.mark.parametrize('field', dvla_file_spec)
-@pytest.mark.parametrize('template', [
-    LetterDVLATemplate(
+def test_letter_output_template(field):
+    # To debug this test it’s helpful uncomment the following line:
+    # print(field)
+    template = LetterDVLATemplate(
         {
             "content": (
                 'Dear ((name)),\n\n'
@@ -850,15 +852,11 @@ dvla_file_spec = [
         },
         numeric_id=1,
     )
-])
-def test_letter_output_template(field, template):
-    # To debug this test it’s helpful uncomment the following line:
-    # print(field)
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
 
 
-@pytest.mark.parametrize('template', [
-    LetterDVLATemplate(
+def test_letter_output_pipe_delimiting():
+    template = LetterDVLATemplate(
         {
             "content": 'Pipes | pipes | everywhere',
             'subject': 'Your | is due soon',
@@ -876,8 +874,6 @@ def test_letter_output_template(field, template):
         },
         numeric_id=1,
     )
-])
-def test_letter_output_pipe_delimiting(template):
 
     assert len(str(template).split('|')) == len(dvla_file_spec)
     assert 'Pipes  pipes  everywhere' in str(template)
