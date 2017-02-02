@@ -887,7 +887,6 @@ def test_letter_output_pipe_delimiting(template):
     (None, 'numeric_id is required'),
     ('abc123', 'numeric_id must be a number'),
     (12345678, 'numeric_id cannot be longer than 7 digits'),
-    pytest.mark.xfail((1234567, 'numeric_id cannot be longer than 7 digits')),
 ])
 def test_letter_output_numeric_id(id, expected_exception):
     with pytest.raises(TypeError) as error:
@@ -896,3 +895,10 @@ def test_letter_output_numeric_id(id, expected_exception):
             numeric_id=id,
         )
     assert str(error.value) == expected_exception
+
+
+def test_letter_output_stores_valid_numeric_id():
+    assert LetterDVLATemplate(
+        {'content': '', 'subject': ''},
+        numeric_id=1234567,
+    )._numeric_id == 1234567
