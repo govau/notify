@@ -21,14 +21,14 @@ This is done through [pip](pip.readthedocs.org/) and [virtualenv](https://virtua
 [VirtualEnvWrapper](http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html) for our virtual environemnts.
 
 Setting up a virtualenvwrapper for python3
-    
+
     mkvirtualenv -p /usr/local/bin/python3 notifications-python-client
 
 
 The boostrap script will set the application up. *Ensure you have activated the virtual environment first.*
 
     ./scripts/bootstrap.sh
-    
+
 This will
 
 * Use pip to install dependencies.
@@ -37,7 +37,6 @@ This will
 
 The `./scripts/run_tests.py` script will run all the tests. [py.test](http://pytest.org/latest/) is used for testing.
 
-Running tests will also apply syntax checking, using [pep8](https://www.python.org/dev/peps/pep-0008/).
+Running tests will also apply syntax checking, using [pycodestyle](https://pypi.python.org/pypi/pycodestyle).
 
 Additionally code coverage is checked via pytest-cov:
-

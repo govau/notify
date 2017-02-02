@@ -26,7 +26,7 @@ if [ -d venv ]; then
   source ./venv/bin/activate
 fi
 
-pep8 .
+pycodestyle .
 display_result $? 1 "Code style check"
 
 ## Code coverage
