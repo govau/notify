@@ -377,15 +377,25 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         numeric_id=None,
     ):
         super().__init__(template, values)
-        if not numeric_id:
+        self.numeric_id = numeric_id
+
+    @property
+    def numeric_id(self):
+        return datetime.utcnow().strftime(
+            '%Y%m%d{0:07d}'.format(self._numeric_id)
+        )
+
+    @numeric_id.setter
+    def numeric_id(self, value):
+        if not value:
             raise TypeError('numeric_id is required')
-        if len(str(numeric_id)) > 7:
+        if len(str(value)) > 7:
             raise TypeError('numeric_id cannot be longer than 7 digits')
         try:
-            int(numeric_id)
+            int(value)
         except ValueError:
             raise TypeError('numeric_id must be a number')
-        self.numeric_id = int(numeric_id)
+        self._numeric_id = value
 
     def __str__(self):
 
@@ -393,12 +403,8 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         ORG_ID = '001'
         ORG_NOTIFICATION_TYPE = '001'
         ORG_NAME = ''
-        NOTIFICATION_ID = datetime.utcnow().strftime(
-            '%Y%m%d{0:07d}'.format(self.numeric_id)
-        )
-        NOTIFICATION_DATE = datetime.utcnow().strftime(
-            '%d%m%Y'
-        )
+        NOTIFICATION_ID = self.numeric_id
+        NOTIFICATION_DATE = datetime.utcnow().strftime('%d%m%Y')
         CUSTOMER_REFERENCE = ''
         ADDITIONAL_LINE_1 = ''
         ADDITIONAL_LINE_2 = ''
