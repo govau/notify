@@ -259,7 +259,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
                 self.content, self.values
             ),
             'subject': self.subject,
-            'from_name': self.from_name,
+            'from_name': escape_html(self.from_name),
             'from_address': self.from_address,
             'recipient': Field("((email address))", self.values, with_brackets=False),
             'expanded': self.expanded,

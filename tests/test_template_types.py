@@ -423,6 +423,16 @@ def test_templates_handle_html(
     assert mock_field_init.call_args_list == expected_field_calls
 
 
+def test_email_preview_escapes_html_in_from_name():
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        from_name='<script>alert("")</script>',
+        from_address='test@example.com',
+    )
+    assert '<script>' not in str(template)
+    assert '&lt;script&gt;alert("")&lt;/script&gt;' in str(template)
+
+
 dvla_file_spec = [
     {
         'Field number': '1',
