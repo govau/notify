@@ -4,10 +4,10 @@ from flask import current_app
 
 class RedisClient:
     redis_store = FlaskRedis()
-    active = True
+    active = False
 
     def init_app(self, app):
-        # self.active = app.config.get('REDIS_ENABLED')
+        self.active = app.config.get('REDIS_ENABLED')
         if self.active:
             self.redis_store.init_app(app)
 
