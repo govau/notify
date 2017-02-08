@@ -17,6 +17,12 @@ def build_redis_client(app, mocker):
     redis_client.init_app(app)
     mocker.patch.object(redis_client.redis_store, 'get', return_value=100)
     mocker.patch.object(redis_client.redis_store, 'set')
+    mocker.patch.object(redis_client.redis_store, 'hincrby')
+    mocker.patch.object(redis_client.redis_store, 'hgetall',
+                        return_value={b'template-1111': b'8', b'template-2222': b'8'})
+    mocker.patch.object(redis_client.redis_store, 'hmset')
+    mocker.patch.object(redis_client.redis_store, 'expire')
+
     return redis_client
 
 
@@ -75,3 +81,25 @@ def test_should_call_get_if_enabled(mocked_redis_client):
 def test_should_build_cache_key_service_and_action(sample_service):
     with freeze_time("2016-01-01 12:00:00.000000"):
         assert daily_limit_cache_key(sample_service.id) == '{}-2016-01-01-count'.format(sample_service.id)
+
+
+def test_incr_hash_value_should_increment_value_by_one_for_key(mocked_redis_client):
+    key = '12345'
+    value = "template-1111"
+
+    mocked_redis_client.increment_hash_value(key, value)
+    mocked_redis_client.redis_store.hincrby.assert_called_with(key, value, 1)
+
+
+def test_get_all_from_hash_returns_hash_for_key(mocked_redis_client):
+    key = '12345'
+    assert mocked_redis_client.get_all_from_hash(key) == {b'template-1111': b'8', b'template-2222': b'8'}
+    mocked_redis_client.redis_store.hgetall.assert_called_with(key)
+
+
+def test_set_hash_and_expire(mocked_redis_client):
+    key = 'hash-key'
+    values = {'key': 10}
+    mocked_redis_client.set_hash_and_expire(key, values, 1)
+    mocked_redis_client.redis_store.hmset.assert_called_with(key, values)
+    mocked_redis_client.redis_store.expire.assert_called_with(key, 1)

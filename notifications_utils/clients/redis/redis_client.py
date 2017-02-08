@@ -16,25 +16,47 @@ class RedisClient:
             try:
                 self.redis_store.set(key, value, ex, px, nx, xx)
             except Exception as e:
-                current_app.logger.exception(e)
-                if raise_exception:
-                    raise e
+                self.__handle_exception(e, raise_exception)
 
     def incr(self, key, raise_exception=False):
         if self.active:
             try:
                 return self.redis_store.incr(key)
             except Exception as e:
-                current_app.logger.exception(e)
-                if raise_exception:
-                    raise e
+                self.__handle_exception(e, raise_exception)
 
     def get(self, key, raise_exception=False):
         if self.active:
             try:
                 return self.redis_store.get(key)
             except Exception as e:
-                current_app.logger.exception(e)
-                if raise_exception:
-                    raise e
+                self.__handle_exception(e, raise_exception)
+
         return None
+
+    def increment_hash_value(self, key, value, raise_exception=False):
+        if self.active:
+            try:
+                return self.redis_store.hincrby(key, value, 1)
+            except Exception as e:
+                self.__handle_exception(e, raise_exception)
+
+    def get_all_from_hash(self, key, raise_exception=False):
+        if self.active:
+            try:
+                return self.redis_store.hgetall(key)
+            except Exception as e:
+                self.__handle_exception(e, raise_exception)
+
+    def set_hash_and_expire(self, key, values, expire_in_seconds, raise_exception=False):
+        if self.active:
+            try:
+                self.redis_store.hmset(key, values)
+                return self.redis_store.expire(key, expire_in_seconds)
+            except Exception as e:
+                self.__handle_exception(e, raise_exception)
+
+    def __handle_exception(self, e, raise_exception):
+        current_app.logger.exception(e)
+        if raise_exception:
+            raise e
