@@ -25,22 +25,6 @@ def unlink_govuk_escaped(message):
     )
 
 
-def linkify(text):
-    return re.sub(
-        #             url is anything without whitespace, >, or <
-        r'(https?:\/\/[^\s\<\>]+)($|\s)',
-        lambda match: '<a style="word-wrap: break-word;" href="{}">{}</a>{}'.format(
-            urllib.parse.quote(
-                urllib.parse.unquote(match.group(1)),
-                safe=':/?#=&;'
-            ),
-            match.group(1),
-            match.group(2)
-        ),
-        text
-    )
-
-
 def prepare_newlines_for_markdown(text):
     return re.sub(
         single_newlines,
@@ -233,8 +217,19 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
             text
         )
 
+    def link(self, link, title, content):
+        return '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(link, content)
+
     def autolink(self, link, is_email=False):
-        return link
+        if is_email:
+            return link
+        return '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(
+            urllib.parse.quote(
+                urllib.parse.unquote(link),
+                safe=':/?#=&;'
+            ),
+            link
+        )
 
 
 notify_email_markdown = mistune.Markdown(renderer=NotifyEmailMarkdownRenderer())
