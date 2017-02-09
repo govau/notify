@@ -1,7 +1,6 @@
 import pytest
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
-    linkify,
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
@@ -28,7 +27,40 @@ from notifications_utils.template import (
 )
 def test_makes_links_out_of_URLs(url):
     link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
-    assert (linkify(url) == link)
+    assert (notify_email_markdown(url) == (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        '{}'
+        '</p>'
+    ).format(link))
+
+
+@pytest.mark.parametrize('input, output', [
+    (
+        (
+            'this is some text with a link http://example.com in the middle'
+        ),
+        (
+            'this is some text with a link '
+            '<a style="word-wrap: break-word;" href="http://example.com">http://example.com</a>'
+            ' in the middle'
+        ),
+    ),
+    (
+        (
+            'this link is in brackets (http://example.com)'
+        ),
+        (
+            'this link is in brackets '
+            '(<a style="word-wrap: break-word;" href="http://example.com">http://example.com</a>)'
+        ),
+    )
+])
+def test_makes_links_out_of_URLs_in_context(input, output):
+    assert notify_email_markdown(input) == (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        '{}'
+        '</p>'
+    ).format(output)
 
 
 @pytest.mark.parametrize(
@@ -36,28 +68,50 @@ def test_makes_links_out_of_URLs(url):
         "example.com",
         "www.example.com",
         "ftp://example.com",
+        "test@example.com",
         "mailto:test@example.com",
-        "http://service.gov.uk/register/<span class='placeholder'>((token))</span>"
+        "<a href=\"https://example.com\">Example</a>",
     ]
 )
 def test_doesnt_make_links_out_of_invalid_urls(url):
-    assert url == linkify(url)
+    assert notify_email_markdown(url) == (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        '{}'
+        '</p>'
+    ).format(url)
+
+
+def test_handles_placeholders_in_urls():
+    assert notify_email_markdown(
+        "http://example.com/?token=<span class='placeholder'>((token))</span>&key=1"
+    ) == (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        '<a style="word-wrap: break-word;" href="http://example.com/?token=">'
+        'http://example.com/?token='
+        '</a>'
+        '<span class=\'placeholder\'>((token))</span>&amp;key=1'
+        '</p>'
+    )
 
 
 @pytest.mark.parametrize(
     "url, expected_html", [
         (
             """https://example.com"onclick="alert('hi')""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>')"""  # noqa
         ),
         (
             """https://example.com"style='text-decoration:blink'""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>'"""  # noqa
         ),
     ]
 )
 def test_URLs_get_escaped(url, expected_html):
-    assert linkify(url) == expected_html
+    assert notify_email_markdown(url) == (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+        '{}'
+        '</p>'
+    ).format(expected_html)
     assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
@@ -76,12 +130,15 @@ def test_HTML_template_has_URLs_replaced_with_links():
 
 def test_preserves_whitespace_when_making_links():
     assert (
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         '<a style="word-wrap: break-word;" href="https://example.com">'
         'https://example.com'
-        '</a>\n'
-        '\n'
+        '</a>'
+        '</p>'
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         'Next paragraph'
-    ) == linkify(
+        '</p>'
+    ) == notify_email_markdown(
         'https://example.com\n'
         '\n'
         'Next paragraph'
@@ -424,24 +481,40 @@ def test_table(markdown_function):
     )
 
 
-@pytest.mark.parametrize('markdown_function, expected', (
+@pytest.mark.parametrize('markdown_function, link, expected', (
     [
         notify_letter_preview_markdown,
+        'http://example.com',
         '<p><strong>example.com</strong></p>'
     ],
     [
         notify_letter_dvla_markdown,
+        'http://example.com',
         '<b>example.com<normal><cr><cr>'
     ],
     [
         notify_email_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">http://example.com</p>'
+        'http://example.com',
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            '<a style="word-wrap: break-word;" href="http://example.com">http://example.com</a>'
+            '</p>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        """https://example.com"onclick="alert('hi')""",
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            '<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">'
+            'https://example.com"onclick="alert(\'hi'
+            '</a>\')'
+            '</p>'
+        )
     ]
 ))
-def test_autolink(markdown_function, expected):
-    assert markdown_function(
-        'http://example.com'
-    ) == expected
+def test_autolink(markdown_function, link, expected):
+    assert markdown_function(link) == expected
 
 
 @pytest.mark.parametrize('markdown_function, expected', (
@@ -532,7 +605,9 @@ def test_image(markdown_function):
         notify_email_markdown,
         (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
-            'color: #0B0C0C;">Example: http://example.com</p>'
+            'color: #0B0C0C;">'
+            '<a style="word-wrap: break-word;" href="http://example.com">Example</a>'
+            '</p>'
         )
     ]
 ))

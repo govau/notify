@@ -9,7 +9,6 @@ from notifications_utils.columns import Columns
 from notifications_utils.field import Field, escape_html
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
-    linkify,
     nl2br,
     add_prefix,
     notify_email_markdown,
@@ -499,8 +498,6 @@ def get_html_email_body(template_content, template_values):
         template_content, template_values, html='escape'
     ).then(
         unlink_govuk_escaped
-    ).then(
-        linkify
     ).then(
         prepare_newlines_for_markdown
     ).then(

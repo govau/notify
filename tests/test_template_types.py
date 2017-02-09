@@ -3,7 +3,7 @@ import mock
 from flask import Markup
 from freezegun import freeze_time
 
-from notifications_utils.formatters import unlink_govuk_escaped, linkify
+from notifications_utils.formatters import unlink_govuk_escaped
 from notifications_utils.field import Field
 from notifications_utils.template import (
     Template,
@@ -175,23 +175,6 @@ def test_makes_links_out_of_URLs(url, url_with_entities_replaced):
     assert link in str(EmailPreviewTemplate({'content': url, 'subject': ''}))
 
 
-@pytest.mark.parametrize(
-    "url, expected_html", [
-        (
-            """https://example.com"onclick="alert('hi')""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi%27%29">https://example.com"onclick="alert('hi')</a>"""  # noqa
-        ),
-        (
-            """https://example.com"style='text-decoration:blink'""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink%27">https://example.com"style='text-decoration:blink'</a>"""  # noqa
-        ),
-    ]
-)
-def test_URLs_get_escaped(url, expected_html):
-    assert linkify(url) == expected_html
-    assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
-
-
 def test_HTML_template_has_URLs_replaced_with_links():
     assert (
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
@@ -270,7 +253,6 @@ def test_sms_preview_adds_newlines(nl2br):
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
 @mock.patch('notifications_utils.template.unlink_govuk_escaped')
-@mock.patch('notifications_utils.template.linkify')
 @mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.template.prepare_newlines_for_markdown', return_value='Baz')
 @pytest.mark.parametrize('values, expected_address', [
@@ -312,7 +294,6 @@ def test_sms_preview_adds_newlines(nl2br):
 def test_letter_preview_renderer(
     prepare_newlines,
     letter_markdown,
-    linkify,
     unlink_govuk,
     remove_empty_lines,
     jinja_template,
@@ -329,7 +310,6 @@ def test_letter_preview_renderer(
     })
     prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')
-    linkify.assert_not_called()
     unlink_govuk.assert_not_called()
 
 
