@@ -2,6 +2,7 @@ import re
 import urllib
 import mistune
 
+from notifications_utils import gsm
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
 mistune.BlockGrammar.block_quote = re.compile(r'^( *\^[^\n]+(\n[^\n]+)*\n*)+')
@@ -51,6 +52,10 @@ def prepend_subject(body, subject):
 
 def remove_empty_lines(lines):
     return '\n'.join(filter(None, str(lines).split('\n')))
+
+
+def gsm_encode(content):
+    return gsm.encode(content)
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):

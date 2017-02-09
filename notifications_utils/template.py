@@ -16,7 +16,8 @@ from notifications_utils.formatters import (
     notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
     prepend_subject,
-    remove_empty_lines
+    remove_empty_lines,
+    gsm_encode
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -114,6 +115,8 @@ class SMSMessageTemplate(Template):
             self.content, self.values, html='passthrough'
         ).then(
             add_prefix, self.prefix
+        ).then(
+            gsm_encode
         ).as_string.strip()
 
     @property
@@ -127,7 +130,7 @@ class SMSMessageTemplate(Template):
     @property
     def content_count(self):
         return len((
-            str(self) if self._values else add_prefix(self.content.strip(), self.prefix)
+            str(self) if self._values else gsm_encode(add_prefix(self.content.strip(), self.prefix))
         ).encode(self.encoding))
 
     @property
