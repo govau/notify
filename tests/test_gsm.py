@@ -45,11 +45,12 @@ def test_get_unicode_char_from_codepoint(codepoint, char):
 
 @pytest.mark.parametrize('bad_input', [
     '',
-    'GHIJ',
+    'GJ',
+    '00001',
     '0001";import sys;sys.exit(0)"'
 ])
 def test_get_unicode_char_from_codepoint_rejects_bad_input(bad_input):
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         gsm.get_unicode_char_from_codepoint(bad_input)
 
 
@@ -59,3 +60,12 @@ def test_get_unicode_char_from_codepoint_rejects_bad_input(bad_input):
 ])
 def test_encode_string(content, expected):
     assert gsm.encode(content) == expected
+
+
+@pytest.mark.parametrize('content, expected', [
+    ('The quick brown fox jumps over the lazy dog', set()),
+    ('The “quick” brown fox has some downgradable characters', {'“', '”'}),
+    ('Need more 🐮🔔', {'🐮', '🔔'})
+])
+def test_get_non_gsm_characters(content, expected):
+    assert gsm.get_non_gsm_characters(content) == expected

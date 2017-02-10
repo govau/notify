@@ -22,6 +22,10 @@ REPLACEMENT_CHARACTERS = {
 }
 
 
+def get_non_gsm_characters(content):
+    return set(content) - GSM_CHARACTERS
+
+
 def encode(content):
     """
     Given an input string, makes it GSM compatible. This involves removing all non-gsm characters by applying the
@@ -48,8 +52,8 @@ def get_unicode_char_from_codepoint(codepoint):
     unicodedata.decomposition returns strings containing codepoints, so we need to eval them ourselves
     """
     # lets just make sure we aren't evaling anything weird
-    assert set(codepoint) <= set('0123456789ABCDEF')
-    assert len(codepoint) == 4
+    if not set(codepoint) <= set('0123456789ABCDEF') or not len(codepoint) == 4:
+        raise ValueError('{} is not a valid unicode codepoint'.format(codepoint))
     return eval('"\\u{}"'.format(codepoint))
 
 

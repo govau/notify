@@ -125,7 +125,7 @@ def test_extracting_placeholders(template_content, template_subject, expected):
         # should be replaced with a ?
         ("深", None, 1, 1),
         ("'First line.\n", None, 12, 12),
-        (" \n\r", None, 0, 0),
+        ("\t\n\r", None, 0, 0),
         ("((placeholder))", None, 15, 3),
         ("((placeholder))", 'Service name', 29, 17),
         ("Foo", '((placeholder))', 20, 20),  # placeholder doesn’t work in service name
