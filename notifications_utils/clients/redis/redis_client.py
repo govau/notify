@@ -34,10 +34,13 @@ class RedisClient:
 
         return None
 
-    def increment_hash_value(self, key, value, raise_exception=False):
+    def decrement_hash_value(self, key, value, raise_exception=False):
+        return self.increment_hash_value(key, value, raise_exception, incr_by=-1)
+
+    def increment_hash_value(self, key, value, raise_exception=False, incr_by=1):
         if self.active:
             try:
-                return self.redis_store.hincrby(key, value, 1)
+                return self.redis_store.hincrby(key, value, incr_by)
             except Exception as e:
                 self.__handle_exception(e, raise_exception)
 
