@@ -83,6 +83,14 @@ def test_should_build_cache_key_service_and_action(sample_service):
         assert daily_limit_cache_key(sample_service.id) == '{}-2016-01-01-count'.format(sample_service.id)
 
 
+def test_decrement_hash_value_should_decrement_value_by_one_for_key(mocked_redis_client):
+    key = '12345'
+    value = "template-1111"
+
+    mocked_redis_client.decrement_hash_value(key, value, -1)
+    mocked_redis_client.redis_store.hincrby.assert_called_with(key, value, -1)
+
+
 def test_incr_hash_value_should_increment_value_by_one_for_key(mocked_redis_client):
     key = '12345'
     value = "template-1111"
