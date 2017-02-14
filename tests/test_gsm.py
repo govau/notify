@@ -64,8 +64,8 @@ def test_encode_string(content, expected):
 
 @pytest.mark.parametrize('content, expected', [
     ('The quick brown fox jumps over the lazy dog', set()),
-    ('The “quick” brown fox has some downgradable characters', {'“', '”'}),
+    ('The “quick” brown fox has some downgradable characters', set()),
     ('Need more 🐮🔔', {'🐮', '🔔'})
 ])
-def test_get_non_gsm_characters(content, expected):
-    assert gsm.get_non_gsm_characters(content) == expected
+def test_get_non_gsm_compatible_characters(content, expected):
+    assert gsm.get_non_gsm_compatible_characters(content) == expected

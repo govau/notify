@@ -22,10 +22,6 @@ REPLACEMENT_CHARACTERS = {
 }
 
 
-def get_non_gsm_characters(content):
-    return set(content) - GSM_CHARACTERS
-
-
 def encode(content):
     """
     Given an input string, makes it GSM compatible. This involves removing all non-gsm characters by applying the
@@ -45,6 +41,15 @@ def encode(content):
     return ''.join(encode_char(char) for char in content)
 
 
+def get_non_gsm_compatible_characters(content):
+    """
+    Given an input string, return a set of non GSM compatible characters.
+
+    This follows the same rules as `gsm.encode`, but returns just the characters that encode would replace with `?`
+    """
+    return set(c for c in content if c not in GSM_CHARACTERS and downgrade_character(c) is None)
+
+
 def get_unicode_char_from_codepoint(codepoint):
     """
     Given a unicode codepoint (eg 002E for '.', 0061 for 'a', etc), return that actual unicode character.
@@ -57,6 +62,24 @@ def get_unicode_char_from_codepoint(codepoint):
     return eval('"\\u{}"'.format(codepoint))
 
 
+def downgrade_character(c):
+    """
+    Attempt to downgrade a non-gsm character to gsm.
+
+    Will return None if character is either already GSM
+    """
+    decomposed = unicodedata.decomposition(c)
+    if decomposed != '' and '<compat>' not in decomposed:
+        # if there is a decomposition, which is not a compatibility decomposition (eg … -> ...),
+        # then it's probably a letter with a modifier, eg á
+        # ASSUMPTION: The first character of a combined unicode character (eg 'á' == '0061 0301')
+        # will be the ascii char
+        return get_unicode_char_from_codepoint(decomposed.split()[0])
+    else:
+        # try and find a mapping (eg en dash -> hyphen ('–': '-')), else return None
+        return REPLACEMENT_CHARACTERS.get(c)
+
+
 def encode_char(c):
     """
     Given a single unicode character, return a GSM compatible character.
@@ -65,13 +88,5 @@ def encode_char(c):
     if c in GSM_CHARACTERS:
         return c
     else:
-        decomposed = unicodedata.decomposition(c)
-        if decomposed != '' and '<compat>' not in decomposed:
-            # if there is a decomposition, which is not a compatibility decomposition (eg … -> ...),
-            # then it's probably a letter with a modifier, eg á
-            # ASSUMPTION: The first character of a combined unicode character (eg 'á' == '0061 0301')
-            # will be the ascii char
-            return get_unicode_char_from_codepoint(decomposed.split()[0])
-        else:
-            # try and find a mapping (eg en dash -> hyphen ('–': '-')), else return a '?'
-            return REPLACEMENT_CHARACTERS.get(c, '?')
+        c = downgrade_character(c)
+        return c if c is not None else '?'
