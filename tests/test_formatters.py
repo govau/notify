@@ -1,12 +1,13 @@
 import pytest
+
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
+    gsm_encode
 )
-from notifications_utils.field import Field
 from notifications_utils.template import (
     HTMLEmailTemplate,
     PlainTextEmailTemplate,
@@ -638,3 +639,7 @@ def test_strikethrough(markdown_function, expected):
 def test_footnotes():
     # Can’t work out how to test this
     pass
+
+
+def test_gsm_encode():
+    assert gsm_encode('aàá…') == 'aàa...'
