@@ -593,13 +593,13 @@ def test_image(markdown_function):
     [
         notify_letter_preview_markdown,
         (
-            '<p>Example: http://example.com</p>'
+            '<p>Example: <strong>example.com</strong></p>'
         )
     ],
     [
         notify_letter_dvla_markdown,
         (
-            'Example: http://example.com<cr><cr>'
+            'Example: <b>example.com<normal><cr><cr>'
         )
     ],
     [

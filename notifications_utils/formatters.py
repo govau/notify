@@ -106,7 +106,7 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
         return "<br/>"
 
     def link(self, link, title, content):
-        return '{}: {}'.format(content, link)
+        return '{}: {}'.format(content, self.autolink(link))
 
     def strikethrough(self, text):
         return text
@@ -154,7 +154,7 @@ class NotifyLetterMarkdownDVLARenderer(NotifyLetterMarkdownPreviewRenderer):
         return '{}\n'.format(text)
 
     def link(self, link, title, content):
-        return '{}: {}'.format(content, link)
+        return '{}: {}'.format(content, self.autolink(link))
 
     def autolink(self, link, is_email=False):
         return '<b>{}<normal>'.format(
