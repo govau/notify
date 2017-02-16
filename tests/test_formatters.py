@@ -607,7 +607,7 @@ def test_image(markdown_function):
         (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
             'color: #0B0C0C;">'
-            '<a style="word-wrap: break-word;" href="http://example.com">Example</a>'
+            'Example: <a style="word-wrap: break-word;" href="http://example.com">http://example.com</a>'
             '</p>'
         )
     ]
