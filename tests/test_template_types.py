@@ -242,6 +242,16 @@ def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body,
     add_prefix.assert_called_once_with(*expected_call)
 
 
+@mock.patch('notifications_utils.template.gsm_encode', return_value='downgraded')
+@pytest.mark.parametrize(
+    'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
+)
+def test_sms_messages_downgrade_non_gsm(mock_gsm_encode, template_class):
+    template = str(template_class({'content': 'Message'}, prefix='Service name'))
+    assert 'downgraded' in str(template)
+    mock_gsm_encode.assert_called_once_with('Service name: Message')
+
+
 @mock.patch('notifications_utils.template.nl2br')
 def test_sms_preview_adds_newlines(nl2br):
     content = "the\nquick\n\nbrown fox"

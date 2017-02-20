@@ -163,6 +163,8 @@ class SMSPreviewTemplate(SMSMessageTemplate):
             ).then(
                 add_prefix, (escape_html(self.prefix) or None) if not self.sender else None
             ).then(
+                gsm_encode
+            ).then(
                 nl2br
             ).as_string
         }))
