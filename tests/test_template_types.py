@@ -301,6 +301,16 @@ def test_sms_preview_adds_newlines(nl2br):
         "SW1A 1AA"
     ))
 ])
+@pytest.mark.parametrize('contact_block, expected_rendered_contact_block', [
+    (
+        None,
+        ''
+    ),
+    (
+        '',
+        ''
+    ),
+])
 def test_letter_preview_renderer(
     prepare_newlines,
     letter_markdown,
@@ -309,14 +319,21 @@ def test_letter_preview_renderer(
     jinja_template,
     values,
     expected_address,
+    contact_block,
+    expected_rendered_contact_block,
 ):
-    str(LetterPreviewTemplate({'content': 'Foo', 'subject': 'Subject'}, values))
+    str(LetterPreviewTemplate(
+        {'content': 'Foo', 'subject': 'Subject'},
+        values,
+        contact_block=contact_block,
+    ))
     remove_empty_lines.assert_called_once_with(expected_address)
     jinja_template.assert_called_once_with({
         'address': '123 Street',
         'subject': 'Subject',
         'message': 'Bar',
-        'date': '1 January 2001'
+        'date': '1 January 2001',
+        'contact_block': expected_rendered_contact_block,
     })
     prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')
@@ -851,6 +868,7 @@ def test_letter_output_template(field):
             'postcode': 'NR1 5PQ',
         },
         numeric_id=1,
+        contact_block='',
     )
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
 
