@@ -428,7 +428,11 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             ADDITIONAL_LINE_7, \
             ADDITIONAL_LINE_8, \
             ADDITIONAL_LINE_9, \
-            ADDITIONAL_LINE_10 = ([''] * 10)
+            ADDITIONAL_LINE_10 = [
+                line.strip()
+                for line in
+                (self.contact_block.split('\n') + ([''] * 10))
+            ][:10]
         TO_NAME_1,\
             TO_NAME_2,\
             TO_ADDRESS_LINE_1,\

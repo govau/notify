@@ -539,51 +539,31 @@ dvla_file_spec = [
             they may contain an address, e.g. of originating
             department, E9 but this will not be validated or used as
             a return address.
-
-            Not used by Notify
-
-            Given example was:
-                The Pension Service
         """,
-        'Example': '',
+        'Example': 'The Pension Service',
     },
     {
         'Field number': '9',
         'Field name': 'ADDITIONAL-LINE-2',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify
-
-            Given example was:
-                Mail Handling Site A
-        """,
-        'Example': '',
+        'Comment': '',
+        'Example': 'Mail Handling Site A',
     },
     {
         'Field number': '10',
         'Field name': 'ADDITIONAL-LINE-3',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify.
-
-            Given example was:
-                Wolverhampton  WV9 1LU
-        """,
-        'Example': '',
+        'Comment': '',
+        'Example': 'Wolverhampton  WV9 1LU',
     },
     {
         'Field number': '11',
         'Field name': 'ADDITIONAL-LINE-4',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify.
-
-            Given example was:
-                Telephone: 0845 300 0168
-        """,
+        'Comment': 'Deliberate blank line',
         'Example': '',
     },
     {
@@ -591,52 +571,32 @@ dvla_file_spec = [
         'Field name': 'ADDITIONAL-LINE-5',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify.
-
-            Given example was:
-                Norfolk
-        """,
-        'Example': '',
+        'Comment': '',
+        'Example': 'Telephone: 0845 300 0168',
     },
     {
         'Field number': '13',
         'Field name': 'ADDITIONAL-LINE-6',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify.
-
-            Given example was:
-                Email: fpc.customercare@dwp.gsi.gov.uk
-        """,
-        'Example': '',
+        'Comment': '',
+        'Example': 'Email: fpc.customercare@dwp.gsi.gov.uk',
     },
     {
         'Field number': '14',
         'Field name': 'ADDITIONAL-LINE-7',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify.
-
-            Given example was:
-                Monday - Friday  8am - 6pm
-        """,
-        'Example': '',
+        'Comment': '',
+        'Example': 'Monday - Friday  8am - 6pm',
     },
     {
         'Field number': '15',
         'Field name': 'ADDITIONAL-LINE-8',
         'Mandatory': '',
         'Data type': 'A50',
-        'Comment': """
-            Not used by Notify.
-
-            Given example was:
-                www.gov.uk
-        """,
-        'Example': '',
+        'Comment': '',
+        'Example': 'www.gov.uk',
     },
     {
         'Field number': '16',
@@ -868,7 +828,16 @@ def test_letter_output_template(field):
             'postcode': 'NR1 5PQ',
         },
         numeric_id=1,
-        contact_block='',
+        contact_block="""
+            The Pension Service
+            Mail Handling Site A
+            Wolverhampton  WV9 1LU
+
+            Telephone: 0845 300 0168
+            Email: fpc.customercare@dwp.gsi.gov.uk
+            Monday - Friday  8am - 6pm
+            www.gov.uk
+        """,
     )
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
 
