@@ -310,6 +310,28 @@ def test_sms_preview_adds_newlines(nl2br):
         '',
         ''
     ),
+    (
+        """
+            The Pension Service
+            Mail Handling Site A
+            Wolverhampton  WV9 1LU
+
+            Telephone: 0845 300 0168
+            Email: fpc.customercare@dwp.gsi.gov.uk
+            Monday - Friday  8am - 6pm
+            www.gov.uk
+        """,
+        (
+            'The Pension Service<br/>'
+            'Mail Handling Site A<br/>'
+            'Wolverhampton  WV9 1LU<br/>'
+            '<br/>'
+            'Telephone: 0845 300 0168<br/>'
+            'Email: fpc.customercare@dwp.gsi.gov.uk<br/>'
+            'Monday - Friday  8am - 6pm<br/>'
+            'www.gov.uk'
+        )
+    )
 ])
 def test_letter_preview_renderer(
     prepare_newlines,

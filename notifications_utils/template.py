@@ -327,7 +327,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 nl2br
             ).as_string,
-            'contact_block': '',
+            'contact_block': '<br/>'.join(
+                line.strip()
+                for line in self.contact_block.split('\n')
+            ),
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
