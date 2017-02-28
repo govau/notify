@@ -289,6 +289,15 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         '((postcode))',
     ])
 
+    def __init__(
+        self,
+        template,
+        values=None,
+        contact_block=None
+    ):
+        super().__init__(template, values)
+        self.contact_block = (contact_block or '').strip()
+
     def __str__(self):
         return Markup(self.jinja_template.render({
             'subject': self.subject,
@@ -318,6 +327,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 nl2br
             ).as_string,
+            'contact_block': '<br/>'.join(
+                line.strip()
+                for line in self.contact_block.split('\n')
+            ),
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
@@ -379,8 +392,9 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         template,
         values=None,
         numeric_id=None,
+        contact_block=None,
     ):
-        super().__init__(template, values)
+        super().__init__(template, values, contact_block=contact_block)
         self.numeric_id = numeric_id
 
     @property
@@ -408,16 +422,20 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         NOTIFICATION_ID = self.numeric_id
         NOTIFICATION_DATE = datetime.utcnow().strftime('%d%m%Y')
         CUSTOMER_REFERENCE = ''
-        ADDITIONAL_LINE_1 = ''
-        ADDITIONAL_LINE_2 = ''
-        ADDITIONAL_LINE_3 = ''
-        ADDITIONAL_LINE_4 = ''
-        ADDITIONAL_LINE_5 = ''
-        ADDITIONAL_LINE_6 = ''
-        ADDITIONAL_LINE_7 = ''
-        ADDITIONAL_LINE_8 = ''
-        ADDITIONAL_LINE_9 = ''
-        ADDITIONAL_LINE_10 = ''
+        ADDITIONAL_LINE_1, \
+            ADDITIONAL_LINE_2, \
+            ADDITIONAL_LINE_3, \
+            ADDITIONAL_LINE_4, \
+            ADDITIONAL_LINE_5, \
+            ADDITIONAL_LINE_6, \
+            ADDITIONAL_LINE_7, \
+            ADDITIONAL_LINE_8, \
+            ADDITIONAL_LINE_9, \
+            ADDITIONAL_LINE_10 = [
+                line.strip()
+                for line in
+                (self.contact_block.split('\n') + ([''] * 10))
+            ][:10]
         TO_NAME_1,\
             TO_NAME_2,\
             TO_ADDRESS_LINE_1,\
