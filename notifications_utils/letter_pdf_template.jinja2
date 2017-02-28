@@ -45,8 +45,6 @@
         position: absolute;
         top: 30mm;
         height: 65mm;
-        font-size: 10pt;
-        line-height: 12pt
       }
       #to {
         width: 85mm;
@@ -54,10 +52,16 @@
         left: 9.6mm;
         top: 29.5mm;
         overflow: hidden;
+        font-size: 8pt;
+        line-height: 8.5pt;
+        text-transform: uppercase;
       }
       #from {
         left: 140mm;
         width: 100mm;
+      }
+      #mdi {
+        font-size: 6pt;
       }
       #barcode {
         position: absolute;
@@ -109,8 +113,11 @@
       ol {
         font-size: 12.5pt;
         line-height: 16pt;
-        margin: 0;
+        margin: 16pt 0 0 0;
         padding: 0 0 0 0.8em;
+      }
+      ol {
+        padding-left: 1.4em;
       }
       li {
         margin: 0;
@@ -138,6 +145,7 @@
         padding-left: 3px;
         padding-right: 3px;
         border-radius: 1px;
+        text-transform: none;
       }
 
       .placeholder-conditional {
@@ -158,6 +166,9 @@
   <body>
     <div id="logo"></div>
     <div id="to">
+      <div id="mdi">
+        000_000_0000000_000000_0000_00000
+      </div>
       {{ address }}
     </div>
     <div id="barcode">
