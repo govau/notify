@@ -40,8 +40,8 @@ prepare-docker-build-image: ## Prepare the Docker builder image
 build-with-docker: prepare-docker-build-image ## Build inside a Docker container
 	@docker run -i --rm \
 		--name "${DOCKER_CONTAINER_PREFIX}-build" \
-		-v `pwd`:/var/project \
-		-v ${PIP_ACCEL_CACHE}:/var/project/cache/pip-accel \
+		-v "`pwd`:/var/project" \
+		-v "${PIP_ACCEL_CACHE}:/var/project/cache/pip-accel" \
 		-e http_proxy="${HTTP_PROXY}" \
 		-e HTTP_PROXY="${HTTP_PROXY}" \
 		-e https_proxy="${HTTPS_PROXY}" \
@@ -54,7 +54,7 @@ build-with-docker: prepare-docker-build-image ## Build inside a Docker container
 test-with-docker: prepare-docker-build-image ## Run tests inside a Docker container
 	@docker run -i --rm \
 		--name "${DOCKER_CONTAINER_PREFIX}-test" \
-		-v `pwd`:/var/project \
+		-v "`pwd`:/var/project" \
 		-e http_proxy="${HTTP_PROXY}" \
 		-e HTTP_PROXY="${HTTP_PROXY}" \
 		-e https_proxy="${HTTPS_PROXY}" \
