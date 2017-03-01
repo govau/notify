@@ -393,9 +393,10 @@ def test_recipient_column(placeholders, file_contents, template_type):
                 07700900460,test1,test1
                 07700900460,test1
                 +44 123,test1,test1
+                ,test1,test1
             """,
             'sms',
-            {2, 5}, {1, 4}
+            {2, 5}, {1, 4, 6}
         ),
         (
             """
@@ -419,7 +420,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
                 name,          building,      street,        town,          county,        ,        today
             """,
             'letter',
-            {1}, set()
+            set(), {1}
         ),
         (
             # only required address fields
