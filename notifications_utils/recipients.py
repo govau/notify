@@ -45,6 +45,8 @@ class RecipientCSV():
         'skipinitialspace': True
     }
 
+    missing_field_error = 'Missing'
+
     max_rows = 50000
 
     def __init__(
@@ -153,10 +155,7 @@ class RecipientCSV():
     def rows_with_missing_data(self):
         return set(
             row['index'] for row in self.annotated_rows if any(
-                (
-                    Columns.make_key(key) not in self.recipient_column_headers_as_column_keys and
-                    value.get('error')
-                )
+                value.get('error') == self.missing_field_error
                 for key, value in row['columns'].items()
             )
         )
@@ -164,10 +163,9 @@ class RecipientCSV():
     @property
     def rows_with_bad_recipients(self):
         return set(
-            row['index']
-            for row in self.annotated_rows
-            if any(
+            row['index'] for row in self.annotated_rows if any(
                 row['columns'].get(recipient_column, {}).get('error')
+                not in [None, self.missing_field_error]
                 for recipient_column in self.recipient_column_headers
             )
         )
@@ -282,6 +280,8 @@ class RecipientCSV():
     def _get_error_for_field(self, key, value):
 
         if key in self.recipient_column_headers_as_column_keys:
+            if value in [None, '']:
+                return self.missing_field_error
             try:
                 validate_recipient(value, self.template_type, column=key)
             except (InvalidEmailError, InvalidPhoneError, InvalidAddressError) as error:
@@ -297,7 +297,7 @@ class RecipientCSV():
             return
 
         if value in [None, '']:
-            return 'Missing'
+            return self.missing_field_error
 
     def _get_recipient_from_row(self, row):
         if len(self.recipient_column_headers) == 1:
