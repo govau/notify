@@ -155,14 +155,18 @@ class RecipientCSV():
 
         for row in rows_as_lists_of_columns:
 
-            output_dict = OrderedDict(zip(column_headers, row))
+            output_dict = OrderedDict()
+
+            for column_name, column_value in zip(column_headers, row):
+                insert_or_append_to_dict(output_dict, column_name, column_value)
+
             length_of_row = len(row)
 
             if length_of_column_headers < length_of_row:
                 output_dict[None] = row[length_of_column_headers:]
             elif length_of_column_headers > length_of_row:
                 for key in column_headers[length_of_row:]:
-                    output_dict[key] = None
+                    insert_or_append_to_dict(output_dict, key, None)
 
             yield Columns(output_dict)
 
@@ -468,3 +472,13 @@ def allowed_to_send_to(recipient, whitelist):
     return format_recipient(recipient) in [
         format_recipient(recipient) for recipient in whitelist
     ]
+
+
+def insert_or_append_to_dict(dict_, key, value, default=None):
+    if dict_.get(key):
+        if isinstance(dict_[key], list):
+            dict_[key].append(value)
+        else:
+            dict_[key] = [dict_[key], value]
+    else:
+        dict_.update({key: value})

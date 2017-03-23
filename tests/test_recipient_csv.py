@@ -91,6 +91,29 @@ from notifications_utils.template import Template, SMSMessageTemplate
                 [('address_line_1', 'Alice')],
                 [('address_line_1', 'Bob')]
             ]
+        ),
+        (
+            """
+                phone number, list, list, list
+                07900900001, cat, rat, gnat
+                07900900002, dog, hog, frog
+                07900900003, elephant
+            """,
+            "sms",
+            [
+                [
+                    ('phone number', '07900900001'),
+                    ('list', ['cat', 'rat', 'gnat'])
+                ],
+                [
+                    ('phone number', '07900900002'),
+                    ('list', ['dog', 'hog', 'frog'])
+                ],
+                [
+                    ('phone number', '07900900003'),
+                    ('list', ['elephant', None, None])
+                ],
+            ]
         )
     ]
 )
