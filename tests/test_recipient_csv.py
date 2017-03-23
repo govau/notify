@@ -11,6 +11,16 @@ from notifications_utils.template import Template, SMSMessageTemplate
     "file_contents,template_type,expected",
     [
         (
+            "",
+            "sms",
+            [],
+        ),
+        (
+            "phone number",
+            "sms",
+            [],
+        ),
+        (
             """
                 phone number,name
                 +44 123, test1
@@ -86,6 +96,8 @@ from notifications_utils.template import Template, SMSMessageTemplate
 )
 def test_get_rows(file_contents, template_type, expected):
     rows = list(RecipientCSV(file_contents, template_type=template_type).rows)
+    if not expected:
+        assert rows == expected
     for index, row in enumerate(expected):
         assert len(rows[index].items()) == len(row)
         for key, value in row:
