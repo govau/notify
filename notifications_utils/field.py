@@ -20,9 +20,10 @@ class Field():
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
 
-    def __init__(self, content, values=None, with_brackets=True, html='strip'):
+    def __init__(self, content, values=None, with_brackets=True, html='strip', markdown_lists=False):
         self.content = content
         self.values = values
+        self.markdown_lists = markdown_lists
         if not with_brackets:
             self.placeholder_tag = self.placeholder_tag_no_brackets
         self.sanitizer = {
@@ -74,9 +75,18 @@ class Field():
         replacement = self.values.get(match.group(1) + match.group(3))
 
         if isinstance(replacement, list):
-            return self.sanitizer(comma_separated_string(replacement)) or None
+            replacement = list(filter(None, replacement))
+            if not replacement:
+                return None
+            if self.markdown_lists:
+                return self.sanitizer('\n\n' + '\n'.join(
+                    '* ' + item for item in replacement
+                ))
+            return self.sanitizer(comma_separated_string(replacement))
+
         if isinstance(replacement, str):
             return self.sanitizer(replacement) or ''
+
         return None
 
     @property
@@ -119,9 +129,6 @@ def str2bool(value):
 
 
 def comma_separated_string(list_of_strings):
-
-    list_of_strings = list(filter(None, list_of_strings))
-
     if len(list_of_strings) == 0:
         return None
     if len(list_of_strings) == 1:
