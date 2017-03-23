@@ -196,7 +196,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
 
     def __str__(self):
         return Take.as_field(
-            self.content, self.values, html='passthrough'
+            self.content, self.values, html='passthrough', markdown_lists=True
         ).then(
             unlink_govuk_escaped
         ).as_string
@@ -304,7 +304,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             'admin_base_url': self.admin_base_url,
             'subject': self.subject,
             'message': Take.as_field(
-                self.content, self.values, html='escape'
+                self.content, self.values, html='escape', markdown_lists=True
             ).then(
                 prepare_newlines_for_markdown
             ).then(
@@ -462,7 +462,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         RETURN_POST_CODE = ''
         SUBJECT_LINE = str(Field(self.subject, self.values))
         NOTIFICATION_BODY = Take.as_field(
-            self.content, self.values
+            self.content, self.values, markdown_lists=True
         ).then(
             prepare_newlines_for_markdown
         ).then(
@@ -524,7 +524,7 @@ def get_sms_fragment_count(character_count):
 def get_html_email_body(template_content, template_values):
 
     return Take.as_field(
-        template_content, template_values, html='escape'
+        template_content, template_values, html='escape', markdown_lists=True
     ).then(
         unlink_govuk_escaped
     ).then(
