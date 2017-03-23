@@ -65,12 +65,19 @@ class Field():
     def replace_match(self, match):
         if match.group(2) and match.group(3) and self.values.get(match.group(1)) is not None:
             return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
-        if self.values.get(match.group(1) + match.group(3)) is not None:
+        if self.get_replacement(match) is not None:
             return self.get_replacement(match)
         return self.format_match(match)
 
     def get_replacement(self, match):
-        return self.sanitizer(self.values.get(match.group(1) + match.group(3)))
+
+        replacement = self.values.get(match.group(1) + match.group(3))
+
+        if isinstance(replacement, list):
+            return self.sanitizer(comma_separated_string(replacement)) or None
+        if isinstance(replacement, str):
+            return self.sanitizer(replacement) or ''
+        return None
 
     @property
     def _raw_formatted(self):
@@ -109,3 +116,19 @@ def str2bool(value):
     if not value:
         return False
     return str(value).lower() in ("yes", "y", "true", "t", "1", "include", "show")
+
+
+def comma_separated_string(list_of_strings):
+
+    list_of_strings = list(filter(None, list_of_strings))
+
+    if len(list_of_strings) == 0:
+        return None
+    if len(list_of_strings) == 1:
+        return list_of_strings[0]
+    if len(list_of_strings) == 2:
+        return '{} and {}'.format(*list_of_strings)
+    return '{} and {}'.format(
+        ', '.join(list_of_strings[:-1]),
+        list_of_strings[-1],
+    )

@@ -170,3 +170,33 @@ def test_what_will_not_trigger_optional_placeholder(value):
 )
 def test_what_will_trigger_optional_placeholder(value):
     assert str2bool(value) is True
+
+
+@pytest.mark.parametrize("values, expected", [
+    (
+        {'placeholder': []},
+        '<span class=\'placeholder\'>((placeholder))</span>',
+    ),
+    (
+        {'placeholder': ['', '']},
+        '<span class=\'placeholder\'>((placeholder))</span>',
+    ),
+    (
+        {'placeholder': ['one']},
+        'one',
+    ),
+    (
+        {'placeholder': ['one', 'two']},
+        'one and two',
+    ),
+    (
+        {'placeholder': ['one', 'two', 'three']},
+        'one, two and three',
+    ),
+    (
+        {'placeholder': ['<script>', 'alert("foo")', '</script>']},
+        ', alert("foo") and ',
+    ),
+])
+def test_field_renders_lists_as_strings(values, expected):
+    assert str(Field("((placeholder))", values)) == expected
