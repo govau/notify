@@ -367,7 +367,15 @@ def test_get_recipient_respects_order(file_contents,
             'letter',
             ['address_line_1', 'address_line_2', 'name'],
             set(['postcode', 'address line 3', 'address line 4', 'address line 5', 'address line 6'])
-        )
+        ),
+        (
+            """
+                phone number,list,list,name,list
+            """,
+            'sms',
+            ['phone number', 'list', 'name'],
+            set()
+        ),
     ]
 )
 def test_column_headers(file_contents, template_type, expected, expected_missing):

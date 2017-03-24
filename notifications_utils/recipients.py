@@ -4,6 +4,7 @@ import csv
 from contextlib import suppress
 from functools import lru_cache
 from collections import OrderedDict
+from orderedset import OrderedSet
 
 from flask import Markup
 
@@ -146,7 +147,7 @@ class RecipientCSV():
     @property
     def rows(self):
 
-        column_headers = self.column_headers  # this is for caching
+        column_headers = self._raw_column_headers  # this is for caching
         length_of_column_headers = len(column_headers)
 
         rows_as_lists_of_columns = self._rows
@@ -274,10 +275,14 @@ class RecipientCSV():
             )
 
     @property
-    def column_headers(self):
+    def _raw_column_headers(self):
         for row in self._rows:
             return row
         return []
+
+    @property
+    def column_headers(self):
+        return list(OrderedSet(self._raw_column_headers))
 
     @property
     def column_headers_as_column_keys(self):
