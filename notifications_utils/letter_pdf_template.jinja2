@@ -43,22 +43,22 @@
       #to,
       #from {
         position: absolute;
-        top: 30mm;
-        height: 65mm;
       }
       #to {
         width: 85mm;
-        height: 26.7mm;
+        max-height: 26.7mm;
         left: 9.6mm;
-        top: 29.5mm;
+        bottom: 215.8mm;
         overflow: hidden;
         font-size: 8pt;
         line-height: 8.5pt;
         text-transform: uppercase;
       }
       #from {
-        left: 142.5mm;
-        width: 42.5mm;
+        bottom: 199.8mm;
+        right: 0mm;
+        width: 71.2mm;
+        max-height: 132pt;
         font-size: 10pt;
         line-height: 12pt;
       }
@@ -84,13 +84,6 @@
         background: url(http://localhost:6012/static/images/letter-template/qr1.png);
         background-size: 100% 100%;
       }
-      #date {
-        position: absolute;
-        top: 80mm;
-        left: 142.5mm;
-        font-size: 12.5pt;
-        line-height: 16pt;
-      }
       #content {
         width: 137.5mm;
       }
@@ -98,7 +91,7 @@
         font-size: 20pt;
         line-height: 26pt;
         font-weight: bold;
-        margin: 0 0 16pt 0;
+        margin: 12.5pt 0 16pt 0;
       }
       h2 {
         font-size: 14pt;
@@ -180,10 +173,10 @@
     <div id="from">
       {{ contact_block }}
     </div>
-    <div id="date">
-      {{ date }}
-    </div>
     <div id="content">
+      <p>
+        {{ date }}
+      </p>
       <h1>
         {{ subject }}
       </h1>
