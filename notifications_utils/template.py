@@ -15,7 +15,6 @@ from notifications_utils.formatters import (
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
-    prepend_subject,
     remove_empty_lines,
     gsm_encode
 )
@@ -340,16 +339,20 @@ class LetterPreviewTemplate(WithSubjectTemplate):
 
     @property
     def values_with_default_optional_address_lines(self):
-        return dict(
-            dict.fromkeys({
+        keys = Columns.from_keys(
+            set(self.values.keys()) | {
                 'address line 2',
                 'address line 3',
                 'address line 4',
                 'address line 5',
                 'address line 6',
-            }, ''),
-            **self.values
-        )
+            }
+        ).keys()
+
+        return {
+            key: Columns(self.values).get(key, '')
+            for key in keys
+        }
 
 
 class LetterPDFLinkTemplate(WithSubjectTemplate):
