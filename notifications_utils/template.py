@@ -428,7 +428,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         ORG_NOTIFICATION_TYPE = '001'
         ORG_NAME = ''
         NOTIFICATION_ID = self.numeric_id
-        NOTIFICATION_DATE = datetime.utcnow().strftime('%d%m%Y')
+        NOTIFICATION_DATE = ''
         CUSTOMER_REFERENCE = ''
         ADDITIONAL_LINE_1, \
             ADDITIONAL_LINE_2, \
@@ -462,16 +462,24 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         RETURN_ADDRESS_LINE_4 = ''
         RETURN_ADDRESS_LINE_5 = ''
         RETURN_POST_CODE = ''
-        SUBJECT_LINE = str(Field(self.subject, self.values))
-        NOTIFICATION_BODY = Take.as_field(
-            self.content, self.values, markdown_lists=True
-        ).then(
-            prepare_newlines_for_markdown
-        ).then(
-            notify_letter_dvla_markdown
-        ).then(
-            fix_extra_newlines_in_dvla_lists
-        ).as_string
+        SUBJECT_LINE = ''
+        NOTIFICATION_BODY = (
+            '{}<cr><cr>'
+            '<h1>{}<normal><cr><cr>'
+            '{}'
+        ).format(
+            datetime.utcnow().strftime('%-d %B %Y'),
+            str(Field(self.subject, self.values)),
+            Take.as_field(
+                self.content, self.values, markdown_lists=True
+            ).then(
+                prepare_newlines_for_markdown
+            ).then(
+                notify_letter_dvla_markdown
+            ).then(
+                fix_extra_newlines_in_dvla_lists
+            ).as_string
+        )
 
         return '|'.join(line.replace('|', '') for line in [
             OTT,
