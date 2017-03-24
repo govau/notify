@@ -861,7 +861,6 @@ def test_letter_output_template(field):
             www.gov.uk
         """,
     )
-    print(str(template))
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
 
 
