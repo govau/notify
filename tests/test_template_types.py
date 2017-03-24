@@ -841,12 +841,12 @@ def test_letter_output_template(field):
         {
             'thing': 'application',
             'name': 'Henry Hadlow',
-            'address line 1': 'Mr Henry Hadlow',
-            'address line 2': 'Managing Director',
-            'address line 3': '123 Electric Avenue',
-            'address line 4': 'Great Yarmouth',
-            'address line 5': 'Norfolk',
-            'address line 6': '',
+            'addressline1': 'Mr Henry Hadlow',
+            'addressline2': 'Managing Director',
+            'addressline3': '123 Electric Avenue',
+            'addressline4': 'Great Yarmouth',
+            'addressline5': 'Norfolk',
+            'addressline6': '',
             'postcode': 'NR1 5PQ',
         },
         numeric_id=1,
@@ -861,6 +861,7 @@ def test_letter_output_template(field):
             www.gov.uk
         """,
     )
+    print(str(template))
     assert str(template).split('|')[int(field['Field number']) - 1] == field['Example']
 
 
@@ -908,3 +909,54 @@ def test_letter_output_stores_valid_numeric_id():
         {'content': '', 'subject': ''},
         numeric_id=1234567,
     )._numeric_id == 1234567
+
+
+@pytest.mark.parametrize("address, expected",
+                         (
+                                 [{"address line 1": "line 1",
+                                   "address line 2": "line 2",
+                                   "address line 3": "line 3",
+                                   "address line 4": "line 4",
+                                   "address line 5": "line 5",
+                                   "address line 6": "line 6",
+                                   "postcode": "N1 4W2"},
+                                  {"addressline1": "line 1",
+                                   "addressline2": "line 2",
+                                   "addressline3": "line 3",
+                                   "addressline4": "line 4",
+                                   "addressline5": "line 5",
+                                   "addressline6": "line 6",
+                                   "postcode": "N1 4W2"}],
+
+                                 [{"addressline1": "line 1",
+                                   "addressline2": "line 2",
+                                   "addressline3": "line 3",
+                                   "addressline4": "line 4",
+                                   "addressline5": "line 5",
+                                   "addressLine6": "line 6",
+                                   "postcode": "N1 4W2"},
+                                  {"addressline1": "line 1", "addressline2": "line 2", "addressline3": "line 3",
+                                   "addressline4": "line 4", "addressline5": "line 5", "addressline6": "line 6",
+                                   "postcode": "N1 4W2"}
+                                  ],
+
+                                 [{"addressline1": "line 1",
+                                   "addressline3": "line 3",
+                                   "addressline5": "line 5",
+                                   "addressline6": "line 6",
+                                   "postcode": "N1 4W2"},
+                                  {"addressline1": "line 1",
+                                   "addressline2": "",
+                                   "addressline3": "line 3",
+                                   "addressline4": "",
+                                   "addressline5": "line 5",
+                                   "addressline6": "line 6",
+                                   "postcode": "N1 4W2"}
+                                  ]
+                         ))
+def test_letter_address_format(address, expected):
+    assert LetterDVLATemplate(
+        {'content': '', 'subject': ''},
+        address,
+        numeric_id=1234567,
+    ).values_with_default_optional_address_lines == expected
