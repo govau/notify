@@ -356,6 +356,7 @@ def test_letter_preview_renderer(
         'message': 'Bar',
         'date': '1 January 2001',
         'contact_block': expected_rendered_contact_block,
+        'admin_base_url': 'http://localhost:6012'
     })
     prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')

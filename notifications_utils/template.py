@@ -292,13 +292,16 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         self,
         template,
         values=None,
-        contact_block=None
+        contact_block=None,
+        admin_base_url='http://localhost:6012'
     ):
         super().__init__(template, values)
         self.contact_block = (contact_block or '').strip()
+        self.admin_base_url = admin_base_url
 
     def __str__(self):
         return Markup(self.jinja_template.render({
+            'admin_base_url': self.admin_base_url,
             'subject': self.subject,
             'message': Take.as_field(
                 self.content, self.values, html='escape'
