@@ -419,7 +419,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
     def __str__(self):
 
         OTT = '140'
-        ORG_ID = '001'
+        ORG_ID = '500'
         ORG_NOTIFICATION_TYPE = '001'
         ORG_NAME = ''
         NOTIFICATION_ID = self.numeric_id
