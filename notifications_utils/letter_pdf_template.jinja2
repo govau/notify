@@ -36,7 +36,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        background: url(http://localhost:6012/static/images/letter-template/hm-government.svg);
+        background: url({{admin_base_url}}/static/images/letter-template/hm-government.svg);
         background-size: auto 18mm;
         background-repeat: no-repeat;
       }
@@ -71,7 +71,7 @@
         left: 9.6mm;
         width: 85mm;
         height: 11.2mm;
-        background: url(http://localhost:6012/static/images/letter-template/type29.png);
+        background: url({{admin_base_url}}/static/images/letter-template/type29.png);
         background-repeat: no-repeat;
         background-size: auto 110%;
       }
@@ -81,7 +81,7 @@
         left: -10.6mm;
         width: 5mm;
         height: 5mm;
-        background: url(http://localhost:6012/static/images/letter-template/qr1.png);
+        background: url({{admin_base_url}}/static/images/letter-template/qr1.png);
         background-size: 100% 100%;
       }
       #content {
@@ -122,7 +122,7 @@
       .placeholder {
         display: inline;
         background-color: #FFBF47;
-        background-image: url(http://localhost:6012/static/images/letter-template/placeholder-mask-left.svg), url(http://localhost:6012/static/images/letter-template/placeholder-mask-right.svg);
+        background-image: url({{admin_base_url}}/static/images/letter-template/placeholder-mask-left.svg), url({{admin_base_url}}/static/images/letter-template/placeholder-mask-right.svg);
         background-size: auto 150%, auto 150%;
         background-position: 0 -0.17em, right -0.17em;
         color: #000;
@@ -146,7 +146,7 @@
       .placeholder-conditional {
         display: inline;
         background: #FFBF47;
-        background-image: url(http://localhost:6012/static/images/letter-template/placeholder-mask-left.svg), url(http://localhost:6012/static/images/letter-template/placeholder-mask-right-conditional.svg);
+        background-image: url({{admin_base_url}}/static/images/letter-template/placeholder-mask-left.svg), url({{admin_base_url}}/static/images/letter-template/placeholder-mask-right-conditional.svg);
         background-size: auto 115%, 5mm 100%;
         background-position: 0 -0.05em, right 0;
         background-repeat: no-repeat, no-repeat;
