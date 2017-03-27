@@ -480,7 +480,7 @@ dvla_file_spec = [
         'Mandatory': 'Y',
         'Data type': 'N3',
         'Comment': 'Unique identifier for the sending organisation',
-        'Example': '001',
+        'Example': '500',
     },
     {
         'Field number': '3',
