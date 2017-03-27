@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.field import Field, escape_html
+from notifications_utils.field import Field
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
     nl2br,
@@ -16,7 +16,8 @@ from notifications_utils.formatters import (
     notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
     remove_empty_lines,
-    gsm_encode
+    gsm_encode,
+    escape_html
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange

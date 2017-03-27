@@ -1,10 +1,10 @@
 import re
-import bleach
 
 from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
+from notifications_utils.formatters import unescaped_formatted_list, strip_html, escape_html
 
 
 class Field():
@@ -82,7 +82,7 @@ class Field():
                 return self.sanitizer('\n\n' + '\n'.join(
                     '* ' + item for item in replacement
                 ))
-            return self.sanitizer(comma_separated_string(replacement))
+            return self.sanitizer(unescaped_formatted_list(replacement, before_each='', after_each=''))
 
         if isinstance(replacement, str):
             return self.sanitizer(replacement) or ''
@@ -114,28 +114,7 @@ class Field():
         )
 
 
-def strip_html(value):
-    return bleach.clean(value, tags=[], strip=True)
-
-
-def escape_html(value):
-    return bleach.clean(value, tags=[], strip=False)
-
-
 def str2bool(value):
     if not value:
         return False
     return str(value).lower() in ("yes", "y", "true", "t", "1", "include", "show")
-
-
-def comma_separated_string(list_of_strings):
-    if len(list_of_strings) == 0:
-        return None
-    if len(list_of_strings) == 1:
-        return list_of_strings[0]
-    if len(list_of_strings) == 2:
-        return '{} and {}'.format(*list_of_strings)
-    return '{} and {}'.format(
-        ', '.join(list_of_strings[:-1]),
-        list_of_strings[-1],
-    )

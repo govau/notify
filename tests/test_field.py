@@ -210,5 +210,5 @@ def test_what_will_trigger_optional_placeholder(value):
     ),
 ])
 def test_field_renders_lists_as_strings(values, expected, expected_as_markdown):
-    assert str(Field("list: ((placeholder))", values)) == expected
     assert str(Field("list: ((placeholder))", values, markdown_lists=True)) == expected_as_markdown
+    assert str(Field("list: ((placeholder))", values)) == expected
