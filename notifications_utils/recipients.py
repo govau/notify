@@ -3,6 +3,8 @@ import sys
 import csv
 from contextlib import suppress
 from functools import lru_cache
+from collections import OrderedDict
+from orderedset import OrderedSet
 
 from flask import Markup
 
@@ -39,11 +41,6 @@ tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECA
 
 
 class RecipientCSV():
-
-    reader_options = {
-        'quoting': csv.QUOTE_MINIMAL,
-        'skipinitialspace': True
-    }
 
     missing_field_error = 'Missing'
 
@@ -140,12 +137,39 @@ class RecipientCSV():
         )
 
     @property
-    def rows(self):
-        for row in csv.DictReader(
+    def _rows(self):
+        return csv.reader(
             self.file_data.strip().splitlines(),
-            **RecipientCSV.reader_options
-        ):
-            yield Columns(row)
+            quoting=csv.QUOTE_MINIMAL,
+            skipinitialspace=True,
+        )
+
+    @property
+    def rows(self):
+
+        column_headers = self._raw_column_headers  # this is for caching
+        length_of_column_headers = len(column_headers)
+
+        rows_as_lists_of_columns = self._rows
+
+        next(rows_as_lists_of_columns)  # skip the header row
+
+        for row in rows_as_lists_of_columns:
+
+            output_dict = OrderedDict()
+
+            for column_name, column_value in zip(column_headers, row):
+                insert_or_append_to_dict(output_dict, column_name, column_value)
+
+            length_of_row = len(row)
+
+            if length_of_column_headers < length_of_row:
+                output_dict[None] = row[length_of_column_headers:]
+            elif length_of_column_headers > length_of_row:
+                for key in column_headers[length_of_row:]:
+                    insert_or_append_to_dict(output_dict, key, None)
+
+            yield Columns(output_dict)
 
     @property
     def rows_with_errors(self):
@@ -251,13 +275,14 @@ class RecipientCSV():
             )
 
     @property
-    def column_headers(self):
-        for row in csv.reader(
-            self.file_data.strip().splitlines(),
-            **RecipientCSV.reader_options
-        ):
+    def _raw_column_headers(self):
+        for row in self._rows:
             return row
         return []
+
+    @property
+    def column_headers(self):
+        return list(OrderedSet(self._raw_column_headers))
 
     @property
     def column_headers_as_column_keys(self):
@@ -452,3 +477,13 @@ def allowed_to_send_to(recipient, whitelist):
     return format_recipient(recipient) in [
         format_recipient(recipient) for recipient in whitelist
     ]
+
+
+def insert_or_append_to_dict(dict_, key, value, default=None):
+    if dict_.get(key):
+        if isinstance(dict_[key], list):
+            dict_[key].append(value)
+        else:
+            dict_[key] = [dict_[key], value]
+    else:
+        dict_.update({key: value})

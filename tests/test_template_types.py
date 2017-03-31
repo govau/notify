@@ -409,11 +409,14 @@ def test_subject_line_gets_replaced():
 
 
 @pytest.mark.parametrize('template_class, extra_args, expected_field_calls', [
+    (PlainTextEmailTemplate, {}, [
+        mock.call('content', {}, html='passthrough', markdown_lists=True)
+    ]),
     (HTMLEmailTemplate, {}, [
-        mock.call('content', {}, html='escape')
+        mock.call('content', {}, html='escape', markdown_lists=True)
     ]),
     (EmailPreviewTemplate, {}, [
-        mock.call('content', {}, html='escape'),
+        mock.call('content', {}, html='escape', markdown_lists=True),
         mock.call('subject', {}, html='escape'),
         mock.call('((email address))', {}, with_brackets=False),
     ]),
@@ -426,7 +429,7 @@ def test_subject_line_gets_replaced():
     ]),
     (LetterPreviewTemplate, {}, [
         mock.call('subject', {}, html='escape'),
-        mock.call('content', {}, html='escape'),
+        mock.call('content', {}, html='escape', markdown_lists=True),
         mock.call((
             '((address line 1))\n'
             '((address line 2))\n'
@@ -439,9 +442,30 @@ def test_subject_line_gets_replaced():
     ]),
     (LetterPDFLinkTemplate, {'preview_url': 'http://example.com'}, [
     ]),
+    (LetterDVLATemplate, {'numeric_id': 1}, [
+        mock.call((
+            '((address line 1))\n'
+            '((address line 2))\n'
+            '((address line 3))\n'
+            '((address line 4))\n'
+            '((address line 5))\n'
+            '((address line 6))\n'
+            '\n'
+            '((postcode))'
+        ), {
+            'addressline2': '',
+            'addressline3': '',
+            'addressline4': '',
+            'addressline5': '',
+            'addressline6': '',
+        }),
+        mock.call('subject', {}, html='escape'),
+        mock.call('1\n2\n3\n4\n5\n6\n7\n8', {}),
+        mock.call('content', {}, markdown_lists=True),
+    ]),
 ])
 @mock.patch('notifications_utils.template.Field.__init__', return_value=None)
-@mock.patch('notifications_utils.template.Field.__str__', return_value='foo')
+@mock.patch('notifications_utils.template.Field.__str__', return_value='1\n2\n3\n4\n5\n6\n7\n8')
 def test_templates_handle_html(
     mock_field_str,
     mock_field_init,

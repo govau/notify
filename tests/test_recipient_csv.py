@@ -11,6 +11,16 @@ from notifications_utils.template import Template, SMSMessageTemplate
     "file_contents,template_type,expected",
     [
         (
+            "",
+            "sms",
+            [],
+        ),
+        (
+            "phone number",
+            "sms",
+            [],
+        ),
+        (
             """
                 phone number,name
                 +44 123, test1
@@ -81,11 +91,36 @@ from notifications_utils.template import Template, SMSMessageTemplate
                 [('address_line_1', 'Alice')],
                 [('address_line_1', 'Bob')]
             ]
+        ),
+        (
+            """
+                phone number, list, list, list
+                07900900001, cat, rat, gnat
+                07900900002, dog, hog, frog
+                07900900003, elephant
+            """,
+            "sms",
+            [
+                [
+                    ('phone number', '07900900001'),
+                    ('list', ['cat', 'rat', 'gnat'])
+                ],
+                [
+                    ('phone number', '07900900002'),
+                    ('list', ['dog', 'hog', 'frog'])
+                ],
+                [
+                    ('phone number', '07900900003'),
+                    ('list', ['elephant', None, None])
+                ],
+            ]
         )
     ]
 )
 def test_get_rows(file_contents, template_type, expected):
     rows = list(RecipientCSV(file_contents, template_type=template_type).rows)
+    if not expected:
+        assert rows == expected
     for index, row in enumerate(expected):
         assert len(rows[index].items()) == len(row)
         for key, value in row:
@@ -332,7 +367,15 @@ def test_get_recipient_respects_order(file_contents,
             'letter',
             ['address_line_1', 'address_line_2', 'name'],
             set(['postcode', 'address line 3', 'address line 4', 'address line 5', 'address line 6'])
-        )
+        ),
+        (
+            """
+                phone number,list,list,name,list
+            """,
+            'sms',
+            ['phone number', 'list', 'name'],
+            set()
+        ),
     ]
 )
 def test_column_headers(file_contents, template_type, expected, expected_missing):

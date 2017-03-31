@@ -170,3 +170,45 @@ def test_what_will_not_trigger_optional_placeholder(value):
 )
 def test_what_will_trigger_optional_placeholder(value):
     assert str2bool(value) is True
+
+
+@pytest.mark.parametrize("values, expected, expected_as_markdown", [
+    (
+        {'placeholder': []},
+        'list: <span class=\'placeholder\'>((placeholder))</span>',
+        'list: <span class=\'placeholder\'>((placeholder))</span>',
+    ),
+    (
+        {'placeholder': ['', '']},
+        'list: <span class=\'placeholder\'>((placeholder))</span>',
+        'list: <span class=\'placeholder\'>((placeholder))</span>',
+    ),
+    (
+        {'placeholder': ['one']},
+        'list: one',
+        'list: \n\n* one',
+    ),
+    (
+        {'placeholder': ['one', 'two']},
+        'list: one and two',
+        'list: \n\n* one\n* two',
+    ),
+    (
+        {'placeholder': ['one', 'two', 'three']},
+        'list: one, two and three',
+        'list: \n\n* one\n* two\n* three',
+    ),
+    (
+        {'placeholder': ['one', None, None]},
+        'list: one',
+        'list: \n\n* one',
+    ),
+    (
+        {'placeholder': ['<script>', 'alert("foo")', '</script>']},
+        'list: , alert("foo") and ',
+        'list: \n\n* \n* alert("foo")\n* ',
+    ),
+])
+def test_field_renders_lists_as_strings(values, expected, expected_as_markdown):
+    assert str(Field("list: ((placeholder))", values, markdown_lists=True)) == expected_as_markdown
+    assert str(Field("list: ((placeholder))", values)) == expected

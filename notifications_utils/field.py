@@ -1,10 +1,10 @@
 import re
-import bleach
 
 from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
+from notifications_utils.formatters import unescaped_formatted_list, strip_html, escape_html
 
 
 class Field():
@@ -20,9 +20,10 @@ class Field():
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
 
-    def __init__(self, content, values=None, with_brackets=True, html='strip'):
+    def __init__(self, content, values=None, with_brackets=True, html='strip', markdown_lists=False):
         self.content = content
         self.values = values
+        self.markdown_lists = markdown_lists
         if not with_brackets:
             self.placeholder_tag = self.placeholder_tag_no_brackets
         self.sanitizer = {
@@ -65,9 +66,28 @@ class Field():
     def replace_match(self, match):
         if match.group(2) and match.group(3) and self.values.get(match.group(1)) is not None:
             return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
-        if self.values.get(match.group(1) + match.group(3)) is not None:
-            return self.sanitizer(self.values.get(match.group(1) + match.group(3)))
+        if self.get_replacement(match) is not None:
+            return self.get_replacement(match)
         return self.format_match(match)
+
+    def get_replacement(self, match):
+
+        replacement = self.values.get(match.group(1) + match.group(3))
+
+        if isinstance(replacement, list):
+            replacement = list(filter(None, replacement))
+            if not replacement:
+                return None
+            if self.markdown_lists:
+                return self.sanitizer('\n\n' + '\n'.join(
+                    '* ' + item for item in replacement
+                ))
+            return self.sanitizer(unescaped_formatted_list(replacement, before_each='', after_each=''))
+
+        if isinstance(replacement, str):
+            return self.sanitizer(replacement) or ''
+
+        return None
 
     @property
     def _raw_formatted(self):
@@ -92,14 +112,6 @@ class Field():
         return re.sub(
             self.placeholder_pattern, self.replace_match, self.sanitizer(self.content)
         )
-
-
-def strip_html(value):
-    return bleach.clean(value, tags=[], strip=True)
-
-
-def escape_html(value):
-    return bleach.clean(value, tags=[], strip=False)
 
 
 def str2bool(value):

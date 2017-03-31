@@ -1,7 +1,9 @@
 import re
 import urllib
-import mistune
 
+import mistune
+import bleach
+from flask import Markup
 from notifications_utils import gsm
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
@@ -56,6 +58,62 @@ def remove_empty_lines(lines):
 
 def gsm_encode(content):
     return gsm.encode(content)
+
+
+def strip_html(value):
+    return bleach.clean(value, tags=[], strip=True)
+
+
+def escape_html(value):
+    return bleach.clean(value, tags=[], strip=False)
+
+
+def unescaped_formatted_list(
+    items,
+    conjunction='and',
+    before_each='‘',
+    after_each='’',
+    separator=', ',
+    prefix='',
+    prefix_plural=''
+):
+    if prefix:
+        prefix += ' '
+    if prefix_plural:
+        prefix_plural += ' '
+
+    if len(items) == 1:
+        return '{prefix}{before_each}{items[0]}{after_each}'.format(**locals())
+    elif items:
+        formatted_items = ['{}{}{}'.format(before_each, item, after_each) for item in items]
+
+        first_items = separator.join(formatted_items[:-1])
+        last_item = formatted_items[-1]
+        return (
+            '{prefix_plural}{first_items} {conjunction} {last_item}'
+        ).format(**locals())
+
+
+def formatted_list(
+    items,
+    conjunction='and',
+    before_each='‘',
+    after_each='’',
+    separator=', ',
+    prefix='',
+    prefix_plural=''
+):
+    return Markup(
+        unescaped_formatted_list(
+            [escape_html(x) for x in items],
+            conjunction,
+            before_each,
+            after_each,
+            separator,
+            prefix,
+            prefix_plural
+        )
+    )
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
