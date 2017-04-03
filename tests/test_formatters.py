@@ -289,7 +289,7 @@ def test_block_quote(markdown_function, expected):
         ],
         [
             notify_letter_dvla_markdown,
-            '<h2>heading<normal>'
+            '<h2>heading<normal><cr><cr>'
         ],
         [
             notify_email_markdown,
