@@ -183,7 +183,7 @@ class NotifyLetterMarkdownDVLARenderer(NotifyLetterMarkdownPreviewRenderer):
 
     def header(self, text, level, raw=None):
         if level == 1:
-            return '<h2>{}<normal>'.format(text)
+            return '<h2>{}<normal><cr><cr>'.format(text)
         return self.paragraph(text)
 
     def paragraph(self, text):
