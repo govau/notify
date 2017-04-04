@@ -80,12 +80,18 @@ class Field():
                 return None
             if self.markdown_lists:
                 return self.sanitizer('\n\n' + '\n'.join(
-                    '* ' + item for item in replacement
+                    '* {}'.format(item) for item in replacement
                 ))
             return self.sanitizer(unescaped_formatted_list(replacement, before_each='', after_each=''))
 
-        if isinstance(replacement, str):
-            return self.sanitizer(replacement) or ''
+        if isinstance(replacement, bool):
+            return str(replacement)
+
+        if replacement:
+            return self.sanitizer(str(replacement)) or ''
+
+        if replacement == '':
+            return ''
 
         return None
 
