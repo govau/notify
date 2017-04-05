@@ -557,8 +557,12 @@ dvla_file_spec = [
             The date that will be shown on the notification Provided
             in format': 'DDMMYYYY This will be formatted to a long
             date format by the composition process
+
+            Not used by Notify
+
+            Given example was: 29042016
         """,
-        'Example': '29042016',
+        'Example': '',
     },
     {
         'Field number': '7',
@@ -824,8 +828,12 @@ dvla_file_spec = [
         'Field name': 'SUBJECT-LINE',
         'Mandatory': '',
         'Data type': 'A120',
-        'Comment': '',
-        'Example': 'Your application is due soon',
+        'Comment': """
+            Not used by Notify any more, passed in the body
+
+            Your application is due soon
+        """,
+        'Example': '',
     },
     {
         'Field number': '34',
@@ -839,6 +847,8 @@ dvla_file_spec = [
             confirm approach to mark up and line breaks...
         """,
         'Example': (
+            '29 April 2016<cr><cr>'
+            '<h1>Your application is due soon<normal><cr><cr>'
             'Dear Henry Hadlow,<cr><cr>'
             'Thank you for applying to register a lasting power of '
             'attorney (LPA) for property and financial affairs. We '
@@ -986,6 +996,7 @@ def test_letter_address_format(address, expected):
     ).values_with_default_optional_address_lines == expected
 
 
+@freeze_time("2001-01-01 12:00:00.000000")
 @pytest.mark.parametrize('markdown, expected', [
     (
         (
@@ -1044,7 +1055,7 @@ def test_letter_address_format(address, expected):
 ])
 def test_lists_in_combination_with_other_elements_in_letters(markdown, expected):
     assert str(LetterDVLATemplate(
-        {'content': markdown, 'subject': ''},
+        {'content': markdown, 'subject': 'Hello'},
         {},
         numeric_id=1234567,
-    )).split('|')[33] == expected
+    )).split('|')[33] == '1 January 2001<cr><cr><h1>Hello<normal><cr><cr>' + expected
