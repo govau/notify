@@ -303,6 +303,12 @@ class RecipientCSV():
 
     def _get_error_for_field(self, key, value):
 
+        if (
+            self.template_type == 'letter' and
+            Columns.make_key(key) in Columns.from_keys(optional_address_columns).keys()
+        ):
+            return
+
         if key in self.recipient_column_headers_as_column_keys:
             if value in [None, '']:
                 return self.missing_field_error
@@ -312,12 +318,6 @@ class RecipientCSV():
                 return str(error)
 
         if key not in self.placeholders_as_column_keys:
-            return
-
-        if (
-            self.template_type == 'letter' and
-            Columns.make_key(key) in Columns.from_keys(optional_address_columns).keys()
-        ):
             return
 
         if value in [None, '']:

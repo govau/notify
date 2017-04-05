@@ -482,6 +482,15 @@ def test_recipient_column(placeholders, file_contents, template_type):
             'letter',
             set(), set()
         ),
+        (
+            # optional address fields not filled in
+            """
+                address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,postcode,date
+                name          ,123 fake st.  ,              ,              ,              ,postcode,today
+            """,
+            'letter',
+            set(), set()
+        ),
     ]
 )
 def test_bad_or_missing_data(file_contents, template_type, rows_with_bad_recipients, rows_with_missing_data):
