@@ -46,6 +46,41 @@ def test_returns_a_string_without_placeholders(content):
             "the quick alert('foo') fox"
         ),
         (
+            'before ((placeholder)) after',
+            {'placeholder': True},
+            'before True after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': False},
+            'before False after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': 0},
+            'before 0 after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': 0.0},
+            'before 0.0 after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': 123},
+            'before 123 after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': 0.1 + 0.2},
+            'before 0.30000000000000004 after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': {"key": "value"}},
+            'before {\'key\': \'value\'} after',
+        ),
+        (
             "((warning?))",
             {"warning?": "This is not a conditional"},
             "This is not a conditional"
@@ -124,6 +159,11 @@ def test_formatting_of_placeholders(content, expected):
         (
             "((name)) ((colour))",
             {'name': 'Jo'},
+            "Jo <span class='placeholder'>((colour))</span>",
+        ),
+        (
+            "((name)) ((colour))",
+            {'name': 'Jo', 'colour': None},
             "Jo <span class='placeholder'>((colour))</span>",
         ),
         (
@@ -207,6 +247,16 @@ def test_what_will_trigger_optional_placeholder(value):
         {'placeholder': ['<script>', 'alert("foo")', '</script>']},
         'list: , alert("foo") and ',
         'list: \n\n* \n* alert("foo")\n* ',
+    ),
+    (
+        {'placeholder': [1, {'two': 2}, 'three', None]},
+        'list: 1, {\'two\': 2} and three',
+        'list: \n\n* 1\n* {\'two\': 2}\n* three',
+    ),
+    (
+        {'placeholder': [[1, 2], [3, 4]]},
+        'list: [1, 2] and [3, 4]',
+        'list: \n\n* [1, 2]\n* [3, 4]',
     ),
 ])
 def test_field_renders_lists_as_strings(values, expected, expected_as_markdown):

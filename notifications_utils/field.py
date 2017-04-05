@@ -75,19 +75,28 @@ class Field():
         replacement = self.values.get(match.group(1) + match.group(3))
 
         if isinstance(replacement, list):
-            replacement = list(filter(None, replacement))
-            if not replacement:
-                return None
-            if self.markdown_lists:
-                return self.sanitizer('\n\n' + '\n'.join(
-                    '* ' + item for item in replacement
-                ))
-            return self.sanitizer(unescaped_formatted_list(replacement, before_each='', after_each=''))
+            return self.get_replacement_as_list(list(filter(None, replacement)))
 
-        if isinstance(replacement, str):
-            return self.sanitizer(replacement) or ''
+        if (
+            isinstance(replacement, bool) or
+            replacement == 0 or
+            replacement == ''
+        ):
+            return str(replacement)
+
+        if replacement:
+            return self.sanitizer(str(replacement)) or ''
 
         return None
+
+    def get_replacement_as_list(self, replacement):
+        if not replacement:
+            return None
+        if self.markdown_lists:
+            return self.sanitizer('\n\n' + '\n'.join(
+                '* {}'.format(item) for item in replacement
+            ))
+        return self.sanitizer(unescaped_formatted_list(replacement, before_each='', after_each=''))
 
     @property
     def _raw_formatted(self):
