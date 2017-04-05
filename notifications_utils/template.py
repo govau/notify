@@ -17,7 +17,8 @@ from notifications_utils.formatters import (
     prepare_newlines_for_markdown,
     remove_empty_lines,
     gsm_encode,
-    escape_html
+    escape_html,
+    fix_extra_newlines_in_dvla_lists,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -468,6 +469,8 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             prepare_newlines_for_markdown
         ).then(
             notify_letter_dvla_markdown
+        ).then(
+            fix_extra_newlines_in_dvla_lists
         ).as_string
 
         return '|'.join(line.replace('|', '') for line in [
