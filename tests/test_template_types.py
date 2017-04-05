@@ -984,3 +984,50 @@ def test_letter_address_format(address, expected):
         address,
         numeric_id=1234567,
     ).values_with_default_optional_address_lines == expected
+
+
+@pytest.mark.parametrize('markdown, expected', [
+    (
+        (
+            'Here is a list of bullets:\n'
+            '\n'
+            '* one\n'
+            '* two\n'
+            '* three\n'
+            '\n'
+            'New paragraph'
+        ),
+        (
+            'Here is a list of bullets:'
+            '<cr>'
+            '<op><bul><tab>one  <cr>'
+            '<op><bul><tab>two  <cr>'
+            '<op><bul><tab>three<cr>'
+            '<p><cr>'
+            'New paragraph<cr><cr>'
+        )
+    ),
+    (
+        (
+            '# List title:\n'
+            '\n'
+            '* one\n'
+            '* two\n'
+            '* three\n'
+        ),
+        (
+            '<h2>List title:<normal>'
+            '<cr>'
+            '<op><bul><tab>one  <cr>'
+            '<op><bul><tab>two  <cr>'
+            '<op><bul><tab>three<cr>'
+            '<p><cr>'
+        )
+    ),
+])
+def test_lists_in_combination_with_other_elements_in_letters(markdown, expected):
+    assert str(LetterDVLATemplate(
+        {'content': markdown, 'subject': ''},
+        {},
+        numeric_id=1234567,
+    )).split('|')[33] == expected

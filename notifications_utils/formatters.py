@@ -116,6 +116,13 @@ def formatted_list(
     )
 
 
+def fix_extra_newlines_in_dvla_lists(dvla_markup):
+    return dvla_markup.replace(
+        '<cr><cr><cr><op>',
+        '<cr><op>',
+    )
+
+
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):
