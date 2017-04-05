@@ -1024,6 +1024,23 @@ def test_letter_address_format(address, expected):
             '<p><cr>'
         )
     ),
+    (
+        (
+            'Here’s an ordered list:\n'
+            '\n'
+            '1. one\n'
+            '2. two\n'
+            '3. three\n'
+        ),
+        (
+            'Here’s an ordered list:'
+            '<cr><cr>'
+            '<np>one  '
+            '<np>two  '
+            '<np>three '
+            '<p><cr>'
+        )
+    ),
 ])
 def test_lists_in_combination_with_other_elements_in_letters(markdown, expected):
     assert str(LetterDVLATemplate(

@@ -366,10 +366,10 @@ def test_hrule(markdown_function, expected):
     [
         notify_letter_dvla_markdown,
         (
-            '<np>one<cr>'
-            '<np>two<cr>'
-            '<np>three<cr>'
-            '<cr>'
+            '<np>one'
+            '<np>two'
+            '<np>three'
+            ' <p><cr>'
         )
     ],
     [
