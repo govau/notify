@@ -57,6 +57,16 @@ def test_returns_a_string_without_placeholders(content):
         ),
         (
             'before ((placeholder)) after',
+            {'placeholder': 0},
+            'before 0 after',
+        ),
+        (
+            'before ((placeholder)) after',
+            {'placeholder': 0.0},
+            'before 0.0 after',
+        ),
+        (
+            'before ((placeholder)) after',
             {'placeholder': 123},
             'before 123 after',
         ),

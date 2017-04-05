@@ -77,14 +77,15 @@ class Field():
         if isinstance(replacement, list):
             return self.get_replacement_as_list(list(filter(None, replacement)))
 
-        if isinstance(replacement, bool):
+        if (
+            isinstance(replacement, bool) or
+            replacement == 0 or
+            replacement == ''
+        ):
             return str(replacement)
 
         if replacement:
             return self.sanitizer(str(replacement)) or ''
-
-        if replacement == '':
-            return ''
 
         return None
 
