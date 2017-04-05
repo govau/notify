@@ -358,7 +358,7 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'letter',
             ['address_line_1', 'address_line_2', 'postcode', 'name'],
-            set(['address line 3', 'address line 4', 'address line 5', 'address line 6'])
+            set()
         ),
         (
             """
@@ -374,7 +374,7 @@ def test_get_recipient_respects_order(file_contents,
             """,
             'letter',
             ['address_line_1', 'address_line_2', 'name'],
-            set(['postcode', 'address line 3', 'address line 4', 'address line 5', 'address line 6'])
+            set(['postcode'])
         ),
         (
             """
@@ -411,17 +411,16 @@ def test_column_headers(file_contents, template_type, expected, expected_missing
             'address_line_1, address_line_2, address_line_3, address_line_4, address_line_5',
             'letter'
         )),
-        pytest.mark.xfail((
-            # all address columns required, not just non-optional
-            'address_line_1, address_line_2, postcode',
-            'letter'
-        )),
         ('phone number', 'sms'),
         ('phone number,name', 'sms'),
         ('email address', 'email'),
         ('email address,name', 'email'),
         ('PHONENUMBER', 'sms'),
         ('email_address', 'email'),
+        (
+            'address_line_1, address_line_2, postcode',
+            'letter'
+        ),
         (
             'address_line_1, address_line_2, address_line_3, address_line_4, address_line_5, address_line_6, postcode',
             'letter'
@@ -497,7 +496,8 @@ def test_bad_or_missing_data(file_contents, template_type, rows_with_bad_recipie
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['date'])
     assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
     assert recipients.rows_with_missing_data == rows_with_missing_data
-    assert recipients.has_errors is True
+    if rows_with_bad_recipients or rows_with_missing_data:
+        assert recipients.has_errors is True
 
 
 def test_errors_when_too_many_rows():
