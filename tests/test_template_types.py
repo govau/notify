@@ -453,7 +453,6 @@ def test_subject_line_gets_replaced():
             '\n'
             '((postcode))'
         ), {
-            'addressline2': '',
             'addressline3': '',
             'addressline4': '',
             'addressline5': '',
@@ -980,7 +979,7 @@ def test_letter_output_stores_valid_numeric_id():
                                    "addressline6": "line 6",
                                    "postcode": "N1 4W2"},
                                   {"addressline1": "line 1",
-                                   "addressline2": "",
+                                   # addressline2 is required, but not given
                                    "addressline3": "line 3",
                                    "addressline4": "",
                                    "addressline5": "line 5",

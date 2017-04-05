@@ -27,7 +27,6 @@ first_column_headings = {
 }
 
 optional_address_columns = {
-    'address line 2',
     'address line 3',
     'address line 4',
     'address line 5',

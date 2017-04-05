@@ -317,7 +317,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                     self.address_block,
                     (
                         self.values_with_default_optional_address_lines
-                        if all(self.values.get(key) for key in {
+                        if all(Columns(self.values).get(key) for key in {
                             'address line 1',
                             'address line 2',
                             'postcode',
@@ -346,7 +346,6 @@ class LetterPreviewTemplate(WithSubjectTemplate):
     def values_with_default_optional_address_lines(self):
         keys = Columns.from_keys(
             set(self.values.keys()) | {
-                'address line 2',
                 'address line 3',
                 'address line 4',
                 'address line 5',

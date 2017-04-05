@@ -354,6 +354,14 @@ def test_get_recipient_respects_order(file_contents,
         ),
         (
             """
+                address_line_1, address_line_2, postcode, name
+            """,
+            'letter',
+            ['address_line_1', 'address_line_2', 'postcode', 'name'],
+            set(['address line 3', 'address line 4', 'address line 5', 'address line 6'])
+        ),
+        (
+            """
                 email address,colour
             """,
             'email',
@@ -405,7 +413,7 @@ def test_column_headers(file_contents, template_type, expected, expected_missing
         )),
         pytest.mark.xfail((
             # all address columns required, not just non-optional
-            'address_line_1, postcode',
+            'address_line_1, address_line_2, postcode',
             'letter'
         )),
         ('phone number', 'sms'),
