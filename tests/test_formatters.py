@@ -408,10 +408,11 @@ def test_ordered_list(markdown_function, expected):
     [
         notify_letter_dvla_markdown,
         (
-            '<bul><tab>one<cr>'
-            '<bul><tab>two<cr>'
-            '<bul><tab>three<cr>'
             '<cr>'
+            '<op><bul><tab>one<cr>'
+            '<op><bul><tab>two<cr>'
+            '<op><bul><tab>three<cr>'
+            '<p><cr>'
         )
     ],
     [

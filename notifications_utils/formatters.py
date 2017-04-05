@@ -198,14 +198,21 @@ class NotifyLetterMarkdownDVLARenderer(NotifyLetterMarkdownPreviewRenderer):
         return "<cr>"
 
     def list(self, body, ordered=True):
-        return '{}<cr>'.format(
+        return (
+            '{}'
+            '{}'
+            '{}'
+            '<cr>'
+        ).format(
+            '' if ordered else '<cr>',
             ''.join(
                 '{}{}<cr>'.format(
-                    '<np>' if ordered else '<bul><tab>',
+                    '<np>' if ordered else '<op><bul><tab>',
                     line
                 )
                 for line in filter(None, body.split('\n'))
-            )
+            ),
+            '' if ordered else '<p>',
         )
 
     def list_item(self, text):
