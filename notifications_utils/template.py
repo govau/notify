@@ -317,7 +317,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                     self.address_block,
                     (
                         self.values_with_default_optional_address_lines
-                        if all(self.values.get(key) for key in {
+                        if all(Columns(self.values).get(key) for key in {
                             'address line 1',
                             'address line 2',
                             'postcode',
@@ -346,7 +346,6 @@ class LetterPreviewTemplate(WithSubjectTemplate):
     def values_with_default_optional_address_lines(self):
         keys = Columns.from_keys(
             set(self.values.keys()) | {
-                'address line 2',
                 'address line 3',
                 'address line 4',
                 'address line 5',
@@ -386,12 +385,12 @@ class LetterDVLATemplate(LetterPreviewTemplate):
 
     address_block = '\n'.join([
         '((address line 1))',
+        '',
         '((address line 2))',
         '((address line 3))',
         '((address line 4))',
         '((address line 5))',
         '((address line 6))',
-        '',
         '((postcode))'
     ])
 
@@ -445,7 +444,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
                 (self.contact_block.split('\n') + ([''] * 10))
             ][:10]
         TO_NAME_1,\
-            TO_NAME_2,\
+            _,\
             TO_ADDRESS_LINE_1,\
             TO_ADDRESS_LINE_2,\
             TO_ADDRESS_LINE_3,\
@@ -455,6 +454,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
                 self.address_block,
                 self.values_with_default_optional_address_lines,
             )).split('\n')
+        TO_NAME_2 = ''
         RETURN_NAME = ''
         RETURN_ADDRESS_LINE_1 = ''
         RETURN_ADDRESS_LINE_2 = ''
