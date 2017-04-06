@@ -7,3 +7,4 @@ orderedset==2.0
 Jinja2==2.8
 statsd==3.2.1
 Flask-Redis==0.1.0
+boto3==1.4.4
