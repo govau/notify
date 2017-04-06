@@ -34,6 +34,18 @@ from notifications_utils.template import Template, SMSMessageTemplate
         ),
         (
             """
+                phone number,name
+                +44 123,
+                +44 456
+            """,
+            "sms",
+            [
+                [('phone number', '+44 123'), ('name', None)],
+                [('phone number', '+44 456'), ('name', None)]
+            ]
+        ),
+        (
+            """
                 email address,name
                 test@example.com,test1
                 test2@example.com, test2
@@ -91,6 +103,23 @@ from notifications_utils.template import Template, SMSMessageTemplate
                 [('address_line_1', 'Alice')],
                 [('address_line_1', 'Bob')]
             ]
+        ),
+        (
+            """
+                address line 1,address line 2,address line 5,address line 6,postcode,name,thing
+                A. Name,,,,XM4 5HQ,example,example
+            """,
+            "letter",
+            [[
+                ('addressline1', 'A. Name'),
+                ('addressline2', None),
+                # optional address rows 3 and 4 not in file
+                ('addressline5', None),
+                ('addressline5', None),
+                ('postcode', 'XM4 5HQ'),
+                ('name', 'example'),
+                ('thing', 'example'),
+            ]]
         ),
         (
             """
@@ -256,7 +285,7 @@ def test_big_list():
             'sms',
             ['name'],
             ['+44 123', '+44456'],
-            [{'name': 'test1'}, {'name': ''}]
+            [{'name': 'test1'}, {'name': None}]
         ),
         (
             """

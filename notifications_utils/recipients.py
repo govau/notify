@@ -158,7 +158,7 @@ class RecipientCSV():
             output_dict = OrderedDict()
 
             for column_name, column_value in zip(column_headers, row):
-                insert_or_append_to_dict(output_dict, column_name, column_value)
+                insert_or_append_to_dict(output_dict, column_name, column_value or None)
 
             length_of_row = len(row)
 
@@ -485,7 +485,7 @@ def allowed_to_send_to(recipient, whitelist):
     ]
 
 
-def insert_or_append_to_dict(dict_, key, value, default=None):
+def insert_or_append_to_dict(dict_, key, value):
     if dict_.get(key):
         if isinstance(dict_[key], list):
             dict_[key].append(value)
