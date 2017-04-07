@@ -445,15 +445,14 @@ def test_subject_line_gets_replaced():
     (LetterDVLATemplate, {'numeric_id': 1}, [
         mock.call((
             '((address line 1))\n'
+            '\n'
             '((address line 2))\n'
             '((address line 3))\n'
             '((address line 4))\n'
             '((address line 5))\n'
             '((address line 6))\n'
-            '\n'
             '((postcode))'
         ), {
-            'addressline2': '',
             'addressline3': '',
             'addressline4': '',
             'addressline5': '',
@@ -681,8 +680,14 @@ dvla_file_spec = [
         'Field name': 'TO-NAME-2',
         'Mandatory': '',
         'Data type': 'A40',
-        'Comment': 'Additional name or title line',
-        'Example': 'Managing Director',
+        'Comment': """
+            Additional name or title line
+
+            Not able to pass this through at the moment
+
+            Given example was: Managing Director
+        """,
+        'Example': '',
     },
     {
         'Field number': '20',
@@ -877,10 +882,10 @@ def test_letter_output_template(field):
             'thing': 'application',
             'name': 'Henry Hadlow',
             'addressline1': 'Mr Henry Hadlow',
-            'addressline2': 'Managing Director',
-            'addressline3': '123 Electric Avenue',
-            'addressline4': 'Great Yarmouth',
-            'addressline5': 'Norfolk',
+            'addressline2': '123 Electric Avenue',
+            'addressline3': 'Great Yarmouth',
+            'addressline4': 'Norfolk',
+            'addressline5': '',
             'addressline6': '',
             'postcode': 'NR1 5PQ',
         },
@@ -980,7 +985,7 @@ def test_letter_output_stores_valid_numeric_id():
                                    "addressline6": "line 6",
                                    "postcode": "N1 4W2"},
                                   {"addressline1": "line 1",
-                                   "addressline2": "",
+                                   # addressline2 is required, but not given
                                    "addressline3": "line 3",
                                    "addressline4": "",
                                    "addressline5": "line 5",
@@ -1011,9 +1016,9 @@ def test_letter_address_format(address, expected):
         (
             'Here is a list of bullets:'
             '<cr>'
-            '<op><bul><tab>one  <cr>'
-            '<op><bul><tab>two  <cr>'
-            '<op><bul><tab>three<cr>'
+            '<op><bul><tab>one  '
+            '<op><bul><tab>two  '
+            '<op><bul><tab>three'
             '<p><cr>'
             'New paragraph<cr><cr>'
         )
@@ -1029,9 +1034,9 @@ def test_letter_address_format(address, expected):
         (
             '<h2>List title:<normal>'
             '<cr>'
-            '<op><bul><tab>one  <cr>'
-            '<op><bul><tab>two  <cr>'
-            '<op><bul><tab>three<cr>'
+            '<op><bul><tab>one  '
+            '<op><bul><tab>two  '
+            '<op><bul><tab>three'
             '<p><cr>'
         )
     ),
@@ -1048,7 +1053,7 @@ def test_letter_address_format(address, expected):
             '<cr><cr>'
             '<np>one  '
             '<np>two  '
-            '<np>three '
+            '<np>three'
             '<p><cr>'
         )
     ),

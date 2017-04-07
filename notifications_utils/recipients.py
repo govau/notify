@@ -27,7 +27,6 @@ first_column_headings = {
 }
 
 optional_address_columns = {
-    'address line 2',
     'address line 3',
     'address line 4',
     'address line 5',
@@ -159,7 +158,7 @@ class RecipientCSV():
             output_dict = OrderedDict()
 
             for column_name, column_value in zip(column_headers, row):
-                insert_or_append_to_dict(output_dict, column_name, column_value)
+                insert_or_append_to_dict(output_dict, column_name, column_value or None)
 
             length_of_row = len(row)
 
@@ -292,7 +291,16 @@ class RecipientCSV():
     def missing_column_headers(self):
         return set(
             key for key in self.placeholders
-            if Columns.make_key(key) not in self.column_headers_as_column_keys
+            if (
+                Columns.make_key(key) not in self.column_headers_as_column_keys and
+                not self.is_optional_address_column(key)
+            )
+        )
+
+    def is_optional_address_column(self, key):
+        return (
+            self.template_type == 'letter' and
+            Columns.make_key(key) in Columns.from_keys(optional_address_columns).keys()
         )
 
     @property
@@ -300,9 +308,13 @@ class RecipientCSV():
         return set(
             Columns.make_key(recipient_column)
             for recipient_column in self.recipient_column_headers
+            if not self.is_optional_address_column(recipient_column)
         ) <= self.column_headers_as_column_keys
 
     def _get_error_for_field(self, key, value):
+
+        if self.is_optional_address_column(key):
+            return
 
         if key in self.recipient_column_headers_as_column_keys:
             if value in [None, '']:
@@ -313,12 +325,6 @@ class RecipientCSV():
                 return str(error)
 
         if key not in self.placeholders_as_column_keys:
-            return
-
-        if (
-            self.template_type == 'letter' and
-            Columns.make_key(key) in Columns.from_keys(optional_address_columns).keys()
-        ):
             return
 
         if value in [None, '']:
@@ -479,7 +485,7 @@ def allowed_to_send_to(recipient, whitelist):
     ]
 
 
-def insert_or_append_to_dict(dict_, key, value, default=None):
+def insert_or_append_to_dict(dict_, key, value):
     if dict_.get(key):
         if isinstance(dict_[key], list):
             dict_[key].append(value)

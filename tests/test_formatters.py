@@ -369,7 +369,7 @@ def test_hrule(markdown_function, expected):
             '<np>one'
             '<np>two'
             '<np>three'
-            ' <p><cr>'
+            '<p><cr>'
         )
     ],
     [
@@ -409,9 +409,9 @@ def test_ordered_list(markdown_function, expected):
         notify_letter_dvla_markdown,
         (
             '<cr>'
-            '<op><bul><tab>one<cr>'
-            '<op><bul><tab>two<cr>'
-            '<op><bul><tab>three<cr>'
+            '<op><bul><tab>one'
+            '<op><bul><tab>two'
+            '<op><bul><tab>three'
             '<p><cr>'
         )
     ],

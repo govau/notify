@@ -157,10 +157,10 @@ def test_validate_address_raises_for_missing_required_columns(column, contents):
 
 
 @pytest.mark.parametrize('column', [
-    'address_line_2',
     'address_line_3',
     'address_line_4',
     'address_line_5',
+    'address_line_6',
 ])
 def test_validate_address_doesnt_raise_for_missing_optional_columns(column):
     assert validate_recipient('', 'letter', column=column) == ''
