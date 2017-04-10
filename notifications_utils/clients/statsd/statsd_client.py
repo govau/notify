@@ -25,6 +25,10 @@ class StatsdClient():
         if self.active:
             self.statsd_client.incr(self.format_stat_name(stat), count, rate)
 
+    def gauge(self, stat, count):
+        if self.active:
+            self.statsd_client.gauge(self.format_stat_name(stat), count)
+
     def timing(self, stat, delta, rate=1):
         if self.active:
             self.statsd_client.timing(self.format_stat_name(stat), delta, rate)

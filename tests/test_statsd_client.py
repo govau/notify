@@ -24,6 +24,7 @@ def build_statsd_client(app, mocker):
     app.config['STATSD_PREFIX'] = "prefix"
     client.init_app(app)
     mocker.patch.object(client.statsd_client, "incr")
+    mocker.patch.object(client.statsd_client, "gauge")
     mocker.patch.object(client.statsd_client, "timing")
     return client
 
@@ -77,3 +78,13 @@ def test_should_call_timing_from_dates_method_with_params_if_enabled(enabled_sta
     now = datetime.utcnow()
     enabled_statsd_client.timing_with_dates('key', now + timedelta(seconds=3), now, 99)
     enabled_statsd_client.statsd_client.timing.assert_called_with('test.notifications.api.key', 3, 99)
+
+
+def test_should_not_call_gauge_if_not_enabled(disabled_statsd_client):
+    disabled_statsd_client.gauge('key', 10)
+    disabled_statsd_client.statsd_client.gauge.assert_not_called()
+
+
+def test_should_call_gauge_if_enabled(enabled_statsd_client):
+    enabled_statsd_client.gauge('key', 100)
+    enabled_statsd_client.statsd_client.gauge.assert_called_with('test.notifications.api.key', 100)
