@@ -949,6 +949,19 @@ def test_letter_output_stores_valid_numeric_id():
     )._numeric_id == 1234567
 
 
+@pytest.mark.parametrize('extra_args, expected_field', [
+    ({}, '500'),
+    ({'org_id': '001'}, '001'),
+])
+def test_letter_output_numeric_id(extra_args, expected_field):
+    template = LetterDVLATemplate(
+        {'content': '', 'subject': ''},
+        numeric_id=1234567,
+        **extra_args
+    )
+    assert str(template).split('|')[1] == expected_field
+
+
 @pytest.mark.parametrize("address, expected",
                          (
                                  [{"address line 1": "line 1",
