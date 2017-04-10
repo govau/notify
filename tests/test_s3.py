@@ -1,20 +1,11 @@
-import boto
-from moto import mock_s3
 from notifications_utils.s3 import s3upload
 
 
-def test_s3upload_save_file_to_bucket():
-    import os
-
-    os.environ['http_proxy'] = ''
-
-    mock = mock_s3()
-    mock.start()
+def test_s3upload_save_file_to_bucket(mocker):
+    mocked = mocker.patch('notifications_utils.s3.resource')
     s3upload(filedata='some file data',
              region='eu-west-1',
              bucket_name='some_bucket',
              file_location='some_file_location')
-    conn = boto.connect_s3()
-    assert conn.get_bucket('some_bucket').get_key('some_file_location').get_contents_as_string() == b'some file data'
-
-    mock.stop()
+    mocked_put = mocked.return_value.Object.return_value.put
+    mocked_put.assert_called_once_with(Body='some file data', ServerSideEncryption='AES256')
