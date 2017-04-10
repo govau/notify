@@ -11,8 +11,7 @@ def s3upload(filedata, region, bucket_name, file_location):
 
     exists = True
     try:
-        _s3.meta.client.head_bucket(
-            Bucket=bucket_name)
+        _s3.meta.client.head_bucket(Bucket=bucket_name)
     except botocore.exceptions.ClientError as e:
         error_code = int(e.response['Error']['Code'])
         if error_code == 404:
