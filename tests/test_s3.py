@@ -4,6 +4,10 @@ from notifications_utils.s3 import s3upload
 
 
 def test_s3upload_save_file_to_bucket():
+    import os
+
+    os.environ['http_proxy'] = ''
+
     mock = mock_s3()
     mock.start()
     s3upload(filedata='some file data',
