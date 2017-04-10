@@ -37,7 +37,7 @@ def test_get_request_id_with_no_downstream_header_configured(uuid4_mock):
 
     request_id = request._get_request_id('NotifyRequestID', '')
 
-    uuid4_mock.assert_called_once()
+    uuid4_mock.called == 1
     assert request_id == 'generated'
 
 
@@ -50,7 +50,7 @@ def test_get_request_id_generates_id(uuid4_mock):
     request_id = request._get_request_id('NotifyRequestID',
                                          'NotifyDownstreamRequestID')
 
-    uuid4_mock.assert_called_once()
+    uuid4_mock.called == 1
     assert request_id == 'generated'
 
 
