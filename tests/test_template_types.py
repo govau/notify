@@ -1,10 +1,9 @@
 import pytest
-import mock
+from unittest import mock
 from flask import Markup
 from freezegun import freeze_time
 
 from notifications_utils.formatters import unlink_govuk_escaped
-from notifications_utils.field import Field
 from notifications_utils.template import (
     Template,
     HTMLEmailTemplate,
