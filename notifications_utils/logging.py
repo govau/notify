@@ -89,7 +89,7 @@ def init_app(app, statsd_client=None):
     for l, handler in product(loggers, handlers):
         l.addHandler(handler)
         l.setLevel(loglevel)
-
+    logging.getLogger('boto3').setLevel(logging.WARNING)
     app.logger.info("Logging configured")
 
 
