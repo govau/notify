@@ -26,9 +26,6 @@ def s3upload(filedata, region, bucket_name, file_location):
         _s3.create_bucket(Bucket=bucket_name,
                           CreateBucketConfiguration={'LocationConstraint': region})
 
-    upload_id = uuid.uuid4()
     upload_file_name = file_location
     key = _s3.Object(bucket_name, upload_file_name)
     key.put(Body=contents, ServerSideEncryption='AES256')
-
-    return upload_id
