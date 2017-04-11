@@ -332,6 +332,10 @@ def test_sms_preview_adds_newlines(nl2br):
         )
     )
 ])
+@pytest.mark.parametrize('extra_args, expected_logo_file_name', [
+    ({}, 'hm-government.svg'),
+    ({'logo_file_name': 'example.jpg'}, 'example.jpg'),
+])
 def test_letter_preview_renderer(
     prepare_newlines,
     letter_markdown,
@@ -342,11 +346,14 @@ def test_letter_preview_renderer(
     expected_address,
     contact_block,
     expected_rendered_contact_block,
+    extra_args,
+    expected_logo_file_name,
 ):
     str(LetterPreviewTemplate(
         {'content': 'Foo', 'subject': 'Subject'},
         values,
         contact_block=contact_block,
+        **extra_args
     ))
     remove_empty_lines.assert_called_once_with(expected_address)
     jinja_template.assert_called_once_with({
@@ -355,7 +362,8 @@ def test_letter_preview_renderer(
         'message': 'Bar',
         'date': '1 January 2001',
         'contact_block': expected_rendered_contact_block,
-        'admin_base_url': 'http://localhost:6012'
+        'admin_base_url': 'http://localhost:6012',
+        'logo_file_name': expected_logo_file_name,
     })
     prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')
@@ -947,6 +955,19 @@ def test_letter_output_stores_valid_numeric_id():
         {'content': '', 'subject': ''},
         numeric_id=1234567,
     )._numeric_id == 1234567
+
+
+@pytest.mark.parametrize('extra_args, expected_field', [
+    ({}, '500'),
+    ({'org_id': '001'}, '001'),
+])
+def test_letter_output_numeric_id(extra_args, expected_field):
+    template = LetterDVLATemplate(
+        {'content': '', 'subject': ''},
+        numeric_id=1234567,
+        **extra_args
+    )
+    assert str(template).split('|')[1] == expected_field
 
 
 @pytest.mark.parametrize("address, expected",

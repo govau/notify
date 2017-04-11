@@ -295,15 +295,18 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         template,
         values=None,
         contact_block=None,
-        admin_base_url='http://localhost:6012'
+        admin_base_url='http://localhost:6012',
+        logo_file_name='hm-government.svg',
     ):
         super().__init__(template, values)
         self.contact_block = (contact_block or '').strip()
         self.admin_base_url = admin_base_url
+        self.logo_file_name = logo_file_name
 
     def __str__(self):
         return Markup(self.jinja_template.render({
             'admin_base_url': self.admin_base_url,
+            'logo_file_name': self.logo_file_name,
             'subject': self.subject,
             'message': Take.as_field(
                 self.content, self.values, html='escape', markdown_lists=True
@@ -400,9 +403,11 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         values=None,
         numeric_id=None,
         contact_block=None,
+        org_id='500',
     ):
         super().__init__(template, values, contact_block=contact_block)
         self.numeric_id = numeric_id
+        self.org_id = org_id
 
     @property
     def numeric_id(self):
@@ -423,7 +428,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
     def __str__(self):
 
         OTT = '140'
-        ORG_ID = '500'
+        ORG_ID = self.org_id
         ORG_NOTIFICATION_TYPE = '001'
         ORG_NAME = ''
         NOTIFICATION_ID = self.numeric_id
