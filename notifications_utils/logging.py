@@ -90,6 +90,7 @@ def init_app(app, statsd_client=None):
         l.addHandler(handler)
         l.setLevel(loglevel)
     logging.getLogger('boto3').setLevel(logging.WARNING)
+    logging.getLogger('s3transfer').setLevel(logging.WARNING)
     app.logger.info("Logging configured")
 
 
