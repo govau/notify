@@ -8,7 +8,8 @@ from notifications_utils.formatters import (
     notify_letter_dvla_markdown,
     prepare_newlines_for_markdown,
     gsm_encode,
-    formatted_list
+    formatted_list,
+    strip_dvla_markup,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -665,3 +666,14 @@ def test_formatted_list(items, kwargs, expected_output):
 
 def test_formatted_list_returns_markup():
     assert isinstance(formatted_list([0]), Markup)
+
+
+def test_removing_dvla_markup():
+    assert strip_dvla_markup(
+        (
+            'some words & some more <words>'
+            '<cr><h1><h2><p><normal><op><np><bul><tab>'
+            '<CR><H1><H2><P><NORMAL><OP><NP><BUL><TAB>'
+            '<tAb>'
+        )
+    ) == 'some words & some more <words>'

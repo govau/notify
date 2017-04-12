@@ -465,8 +465,8 @@ def test_subject_line_gets_replaced():
             'addressline5': '',
             'addressline6': '',
         }),
-        mock.call('subject', {}, html='passthrough'),
-        mock.call('content', {}, markdown_lists=True),
+        mock.call('subject', {}, html='strip_dvla_markup'),
+        mock.call('content', {}, markdown_lists=True, html='strip_dvla_markup'),
     ]),
 ])
 @mock.patch('notifications_utils.template.Field.__init__', return_value=None)
@@ -490,6 +490,20 @@ def test_email_preview_escapes_html_in_from_name():
     )
     assert '<script>' not in str(template)
     assert '&lt;script&gt;alert("")&lt;/script&gt;' in str(template)
+
+
+@mock.patch('notifications_utils.template.strip_dvla_markup', return_value='FOOBARBAZ')
+def test_letter_preview_strips_dvla_markup(mock_strip_dvla_markup):
+    assert 'FOOBARBAZ' in str(LetterPreviewTemplate(
+        {
+            "content": 'content',
+            'subject': 'subject',
+        },
+    ))
+    assert mock_strip_dvla_markup.call_args_list == [
+        mock.call(Markup('subject')),
+        mock.call('content'),
+    ]
 
 
 dvla_file_spec = [

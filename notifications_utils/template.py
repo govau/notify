@@ -19,6 +19,7 @@ from notifications_utils.formatters import (
     gsm_encode,
     escape_html,
     fix_extra_newlines_in_dvla_lists,
+    strip_dvla_markup,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -307,9 +308,9 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         return Markup(self.jinja_template.render({
             'admin_base_url': self.admin_base_url,
             'logo_file_name': self.logo_file_name,
-            'subject': self.subject,
+            'subject': strip_dvla_markup(self.subject),
             'message': Take.as_field(
-                self.content, self.values, html='escape', markdown_lists=True
+                strip_dvla_markup(self.content), self.values, html='escape', markdown_lists=True
             ).then(
                 prepare_newlines_for_markdown
             ).then(
@@ -427,7 +428,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values, html='passthrough'))
+        return str(Field(self._subject, self.values, html='strip_dvla_markup'))
 
     def __str__(self):
 
@@ -480,7 +481,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             datetime.utcnow().strftime('%-d %B %Y'),
             self.subject,
             Take.as_field(
-                self.content, self.values, markdown_lists=True
+                self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
             ).then(
                 prepare_newlines_for_markdown
             ).then(
