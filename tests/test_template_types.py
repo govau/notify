@@ -970,49 +970,65 @@ def test_letter_output_numeric_id(extra_args, expected_field):
     assert str(template).split('|')[1] == expected_field
 
 
-@pytest.mark.parametrize("address, expected",
-                         (
-                                 [{"address line 1": "line 1",
-                                   "address line 2": "line 2",
-                                   "address line 3": "line 3",
-                                   "address line 4": "line 4",
-                                   "address line 5": "line 5",
-                                   "address line 6": "line 6",
-                                   "postcode": "N1 4W2"},
-                                  {"addressline1": "line 1",
-                                   "addressline2": "line 2",
-                                   "addressline3": "line 3",
-                                   "addressline4": "line 4",
-                                   "addressline5": "line 5",
-                                   "addressline6": "line 6",
-                                   "postcode": "N1 4W2"}],
-
-                                 [{"addressline1": "line 1",
-                                   "addressline2": "line 2",
-                                   "addressline3": "line 3",
-                                   "addressline4": "line 4",
-                                   "addressline5": "line 5",
-                                   "addressLine6": "line 6",
-                                   "postcode": "N1 4W2"},
-                                  {"addressline1": "line 1", "addressline2": "line 2", "addressline3": "line 3",
-                                   "addressline4": "line 4", "addressline5": "line 5", "addressline6": "line 6",
-                                   "postcode": "N1 4W2"}
-                                  ],
-
-                                 [{"addressline1": "line 1",
-                                   "addressline3": "line 3",
-                                   "addressline5": "line 5",
-                                   "addressline6": "line 6",
-                                   "postcode": "N1 4W2"},
-                                  {"addressline1": "line 1",
-                                   # addressline2 is required, but not given
-                                   "addressline3": "line 3",
-                                   "addressline4": "",
-                                   "addressline5": "line 5",
-                                   "addressline6": "line 6",
-                                   "postcode": "N1 4W2"}
-                                  ]
-                         ))
+@pytest.mark.parametrize("address, expected", [
+    (
+        {
+            "address line 1": "line 1",
+            "address line 2": "line 2",
+            "address line 3": "line 3",
+            "address line 4": "line 4",
+            "address line 5": "line 5",
+            "address line 6": "line 6",
+            "postcode": "N1 4W2",
+        },
+        {
+            "addressline1": "line 1",
+            "addressline2": "line 2",
+            "addressline3": "line 3",
+            "addressline4": "line 4",
+            "addressline5": "line 5",
+            "addressline6": "line 6",
+            "postcode": "N1 4W2",
+        },
+    ), (
+        {
+            "addressline1": "line 1",
+            "addressline2": "line 2",
+            "addressline3": "line 3",
+            "addressline4": "line 4",
+            "addressline5": "line 5",
+            "addressLine6": "line 6",
+            "postcode": "N1 4W2",
+        },
+        {
+            "addressline1": "line 1",
+            "addressline2": "line 2",
+            "addressline3": "line 3",
+            "addressline4": "line 4",
+            "addressline5": "line 5",
+            "addressline6": "line 6",
+            "postcode": "N1 4W2",
+        },
+    ),
+    (
+        {
+            "addressline1": "line 1",
+            "addressline3": "line 3",
+            "addressline5": "line 5",
+            "addressline6": "line 6",
+            "postcode": "N1 4W2",
+        },
+        {
+            "addressline1": "line 1",
+            # addressline2 is required, but not given
+            "addressline3": "line 3",
+            "addressline4": "",
+            "addressline5": "line 5",
+            "addressline6": "line 6",
+            "postcode": "N1 4W2",
+        },
+    ),
+])
 def test_letter_address_format(address, expected):
     assert LetterDVLATemplate(
         {'content': '', 'subject': ''},
