@@ -134,6 +134,10 @@ def fix_extra_newlines_in_dvla_lists(dvla_markup):
     )
 
 
+def strip_pipes(value):
+    return value.replace('|', '')
+
+
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):

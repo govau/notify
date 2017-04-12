@@ -264,6 +264,7 @@ def test_sms_preview_adds_newlines(nl2br):
 @mock.patch('notifications_utils.template.unlink_govuk_escaped')
 @mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.template.prepare_newlines_for_markdown', return_value='Baz')
+@mock.patch('notifications_utils.template.strip_pipes', side_effect=lambda x: x)
 @pytest.mark.parametrize('values, expected_address', [
     ({}, Markup(
         "<span class='placeholder-no-brackets'>address line 1</span>\n"
@@ -337,6 +338,7 @@ def test_sms_preview_adds_newlines(nl2br):
     ({'logo_file_name': 'example.jpg'}, 'example.jpg'),
 ])
 def test_letter_preview_renderer(
+    strip_pipes,
     prepare_newlines,
     letter_markdown,
     unlink_govuk,
@@ -368,6 +370,12 @@ def test_letter_preview_renderer(
     prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')
     unlink_govuk.assert_not_called()
+    assert strip_pipes.call_args_list == [
+        mock.call('Subject'),
+        mock.call('Foo'),
+        mock.call(expected_address),
+        mock.call(expected_rendered_contact_block),
+    ]
 
 
 @mock.patch('notifications_utils.template.LetterPDFLinkTemplate.jinja_template.render')

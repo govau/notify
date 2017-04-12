@@ -10,6 +10,7 @@ from notifications_utils.formatters import (
     gsm_encode,
     formatted_list,
     strip_dvla_markup,
+    strip_pipes,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -677,3 +678,7 @@ def test_removing_dvla_markup():
             '<tAb>'
         )
     ) == 'some words & some more <words>'
+
+
+def test_removing_pipes():
+    assert strip_pipes('|a|b|c') == 'abc'

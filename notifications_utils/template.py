@@ -20,6 +20,7 @@ from notifications_utils.formatters import (
     escape_html,
     fix_extra_newlines_in_dvla_lists,
     strip_dvla_markup,
+    strip_pipes,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -308,43 +309,51 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         return Markup(self.jinja_template.render({
             'admin_base_url': self.admin_base_url,
             'logo_file_name': self.logo_file_name,
-            'subject': strip_dvla_markup(self.subject),
+            'subject': self.subject,
             'message': Take.as_field(
                 strip_dvla_markup(self.content), self.values, html='escape', markdown_lists=True
+            ).then(
+                strip_pipes
             ).then(
                 prepare_newlines_for_markdown
             ).then(
                 notify_letter_preview_markdown
             ).as_string,
-            'address': Take.from_field(
-                Field(
-                    self.address_block,
-                    (
-                        self.values_with_default_optional_address_lines
-                        if all(Columns(self.values).get(key) for key in {
-                            'address line 1',
-                            'address line 2',
-                            'postcode',
-                        }) else self.values
-                    ),
-                    html='escape',
-                    with_brackets=False
-                )
+            'address': Take.as_field(
+                self.address_block,
+                (
+                    self.values_with_default_optional_address_lines
+                    if all(Columns(self.values).get(key) for key in {
+                        'address line 1',
+                        'address line 2',
+                        'postcode',
+                    }) else self.values
+                ),
+                html='escape',
+                with_brackets=False
+            ).then(
+                strip_pipes
             ).then(
                 remove_empty_lines
             ).then(
                 nl2br
             ).as_string,
-            'contact_block': '<br/>'.join(
+            'contact_block': strip_pipes('<br/>'.join(
                 line.strip()
                 for line in self.contact_block.split('\n')
-            ),
+            )),
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values, html='escape'))
+        return Take.as_field(
+            self._subject, self.values, html='escape'
+        ).then(
+            strip_pipes
+        ).then(
+            strip_dvla_markup
+        ).as_string
 
     @property
     def values_with_default_optional_address_lines(self):
@@ -491,7 +500,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             ).as_string
         )
 
-        return '|'.join(line.replace('|', '') for line in [
+        return '|'.join(strip_pipes(line) for line in [
             OTT,
             ORG_ID,
             ORG_NOTIFICATION_TYPE,
