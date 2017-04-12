@@ -401,29 +401,25 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         self,
         template,
         values=None,
-        numeric_id=None,
+        notification_reference=None,
         contact_block=None,
         org_id='500',
     ):
         super().__init__(template, values, contact_block=contact_block)
-        self.numeric_id = numeric_id
+        self.notification_reference = notification_reference
         self.org_id = org_id
 
     @property
-    def numeric_id(self):
-        return datetime.utcnow().strftime(
-            '%Y%m%d{0:07d}'.format(self._numeric_id)
-        )
+    def notification_reference(self):
+        return self._notification_reference
 
-    @numeric_id.setter
-    def numeric_id(self, value):
+    @notification_reference.setter
+    def notification_reference(self, value):
         if not value:
-            raise TypeError('numeric_id is required')
-        if len(str(value)) > 7:
-            raise TypeError('numeric_id cannot be longer than 7 digits')
-        if not isinstance(value, int):
-            raise TypeError('numeric_id must be an integer')
-        self._numeric_id = int(value)
+            raise TypeError('notification_reference is required')
+        if len(str(value)) > 16:
+            raise TypeError('notification_reference cannot be longer than 16 chars')
+        self._notification_reference = str(value)
 
     def __str__(self):
 
@@ -431,7 +427,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
         ORG_ID = self.org_id
         ORG_NOTIFICATION_TYPE = '001'
         ORG_NAME = ''
-        NOTIFICATION_ID = self.numeric_id
+        NOTIFICATION_ID = self.notification_reference
         NOTIFICATION_DATE = ''
         CUSTOMER_REFERENCE = ''
         ADDITIONAL_LINE_1, \
