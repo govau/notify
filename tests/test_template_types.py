@@ -1028,6 +1028,24 @@ def test_letter_output_numeric_id(extra_args, expected_field):
             "postcode": "N1 4W2",
         },
     ),
+    (
+        {
+            "addressline1": "line 1",
+            "addressline2": "line 2",
+            "addressline3": None,
+            "addressline6": None,
+            "postcode": "N1 4W2",
+        },
+        {
+            "addressline1": "line 1",
+            "addressline2": "line 2",
+            "addressline3": "",
+            "addressline4": "",
+            "addressline5": "",
+            "addressline6": "",
+            "postcode": "N1 4W2",
+        },
+    ),
 ])
 def test_letter_address_format(address, expected):
     assert LetterDVLATemplate(
