@@ -115,7 +115,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
     ],
     [
         LetterDVLATemplate,
-        {'numeric_id': 1},
+        {'notification_reference': "1"},
         (
             'the quick brown fox\n'
             '\n'
@@ -457,7 +457,7 @@ def test_subject_line_gets_replaced():
     ]),
     (LetterPDFLinkTemplate, {'preview_url': 'http://example.com'}, [
     ]),
-    (LetterDVLATemplate, {'numeric_id': 1}, [
+    (LetterDVLATemplate, {'notification_reference': "1"}, [
         mock.call((
             '((address line 1))\n'
             '\n'
@@ -573,7 +573,7 @@ dvla_file_spec = [
                 MMDD = Current month and year (zero padded)
                 NNNNNNN = Daily counter (zero padded to 7 digits)
         """,
-        'Example': '201604290000001',
+        'Example': 'reference',
     },
     {
         'Field number': '6',
@@ -917,7 +917,7 @@ def test_letter_output_template(field):
             'addressline6': '',
             'postcode': 'NR1 5PQ',
         },
-        numeric_id=1,
+        notification_reference="reference",
         contact_block="""
             The Pension Service
             Mail Handling Site A
@@ -949,7 +949,7 @@ def test_letter_output_pipe_delimiting():
             'address line 6': '',
             'postcode': 'NR1 5PQ',
         },
-        numeric_id=1,
+        notification_reference="1",
     )
 
     assert len(str(template).split('|')) == len(dvla_file_spec)
@@ -957,35 +957,33 @@ def test_letter_output_pipe_delimiting():
 
 
 @pytest.mark.parametrize('id, expected_exception', [
-    (None, 'numeric_id is required'),
-    ('abc123', 'numeric_id must be an integer'),
-    (12345678, 'numeric_id cannot be longer than 7 digits'),
-    (1.34567, 'numeric_id must be an integer')
+    (None, 'notification_reference is required'),
+    ("01234567891234567", 'notification_reference cannot be longer than 16 chars')
 ])
 def test_letter_output_numeric_id(id, expected_exception):
     with pytest.raises(TypeError) as error:
         LetterDVLATemplate(
             {'content': '', 'subject': ''},
-            numeric_id=id,
+            notification_reference=id,
         )
     assert str(error.value) == expected_exception
 
 
-def test_letter_output_stores_valid_numeric_id():
+def test_letter_output_stores_valid_notification_reference():
     assert LetterDVLATemplate(
         {'content': '', 'subject': ''},
-        numeric_id=1234567,
-    )._numeric_id == 1234567
+        notification_reference="1234567",
+    ).notification_reference == "1234567"
 
 
 @pytest.mark.parametrize('extra_args, expected_field', [
     ({}, '500'),
     ({'org_id': '001'}, '001'),
 ])
-def test_letter_output_numeric_id(extra_args, expected_field):
+def test_letter_output_notification_reference(extra_args, expected_field):
     template = LetterDVLATemplate(
         {'content': '', 'subject': ''},
-        numeric_id=1234567,
+        notification_reference="1234567",
         **extra_args
     )
     assert str(template).split('|')[1] == expected_field
@@ -1072,7 +1070,7 @@ def test_letter_address_format(address, expected):
     assert LetterDVLATemplate(
         {'content': '', 'subject': ''},
         address,
-        numeric_id=1234567,
+        notification_reference="1234567",
     ).values_with_default_optional_address_lines == expected
 
 
@@ -1137,5 +1135,5 @@ def test_lists_in_combination_with_other_elements_in_letters(markdown, expected)
     assert str(LetterDVLATemplate(
         {'content': markdown, 'subject': 'Hello'},
         {},
-        numeric_id=1234567,
+        notification_reference="1234567",
     )).split('|')[33] == '1 January 2001<cr><cr><h1>Hello<normal><cr><cr>' + expected
