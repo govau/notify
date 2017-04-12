@@ -465,8 +465,7 @@ def test_subject_line_gets_replaced():
             'addressline5': '',
             'addressline6': '',
         }),
-        mock.call('subject', {}, html='escape'),
-        mock.call('1\n2\n3\n4\n5\n6\n7\n8', {}),
+        mock.call('subject', {}, html='passthrough'),
         mock.call('content', {}, markdown_lists=True),
     ]),
 ])
@@ -860,7 +859,7 @@ dvla_file_spec = [
         """,
         'Example': (
             '29 April 2016<cr><cr>'
-            '<h1>Your application is due soon<normal><cr><cr>'
+            '<h1>Your application is something & something<normal><cr><cr>'
             'Dear Henry Hadlow,<cr><cr>'
             'Thank you for applying to register a lasting power of '
             'attorney (LPA) for property and financial affairs. We '
@@ -883,7 +882,7 @@ def test_letter_output_template(field):
                 'attorney (LPA) for property and financial affairs. We '
                 'have checked your application and...'
             ),
-            'subject': 'Your ((thing)) is due soon',
+            'subject': 'Your ((thing)) is something & something',
         },
         {
             'thing': 'application',

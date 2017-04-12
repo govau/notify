@@ -425,6 +425,10 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             raise TypeError('numeric_id must be an integer')
         self._numeric_id = int(value)
 
+    @property
+    def subject(self):
+        return str(Field(self._subject, self.values, html='passthrough'))
+
     def __str__(self):
 
         OTT = '140'
@@ -474,7 +478,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             '{}'
         ).format(
             datetime.utcnow().strftime('%-d %B %Y'),
-            str(Field(self.subject, self.values)),
+            self.subject,
             Take.as_field(
                 self.content, self.values, markdown_lists=True
             ).then(
