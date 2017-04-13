@@ -980,7 +980,7 @@ def test_letter_output_stores_valid_notification_reference():
     ({}, '500'),
     ({'org_id': '001'}, '001'),
 ])
-def test_letter_output_notification_reference(extra_args, expected_field):
+def test_letter_outputs_org_id(extra_args, expected_field):
     template = LetterDVLATemplate(
         {'content': '', 'subject': ''},
         notification_reference="1234567",
