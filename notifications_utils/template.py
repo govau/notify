@@ -357,7 +357,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         ).keys()
 
         return {
-            key: Columns(self.values).get(key, '')
+            key: Columns(self.values).get(key) or ''
             for key in keys
         }
 
