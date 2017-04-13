@@ -19,6 +19,13 @@ single_newlines = re.compile(
     re.MULTILINE
 )
 
+dvla_markup_tags = re.compile(
+    str('|'.join('\<{}\>'.format(tag) for tag in {
+        'cr', 'h1', 'h2', 'p', 'normal', 'op', 'np', 'bul', 'tab'
+    })),
+    re.IGNORECASE
+)
+
 
 def unlink_govuk_escaped(message):
     return re.sub(
@@ -66,6 +73,10 @@ def strip_html(value):
 
 def escape_html(value):
     return bleach.clean(value, tags=[], strip=False)
+
+
+def strip_dvla_markup(value):
+    return re.sub(dvla_markup_tags, '', value)
 
 
 def unescaped_formatted_list(
@@ -121,6 +132,10 @@ def fix_extra_newlines_in_dvla_lists(dvla_markup):
         '<cr><cr><cr><op>',
         '<cr><op>',
     )
+
+
+def strip_pipes(value):
+    return value.replace('|', '')
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
