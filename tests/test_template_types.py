@@ -264,6 +264,7 @@ def test_sms_preview_adds_newlines(nl2br):
 @mock.patch('notifications_utils.template.unlink_govuk_escaped')
 @mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.template.prepare_newlines_for_markdown', return_value='Baz')
+@mock.patch('notifications_utils.template.strip_pipes', side_effect=lambda x: x)
 @pytest.mark.parametrize('values, expected_address', [
     ({}, Markup(
         "<span class='placeholder-no-brackets'>address line 1</span>\n"
@@ -337,6 +338,7 @@ def test_sms_preview_adds_newlines(nl2br):
     ({'logo_file_name': 'example.jpg'}, 'example.jpg'),
 ])
 def test_letter_preview_renderer(
+    strip_pipes,
     prepare_newlines,
     letter_markdown,
     unlink_govuk,
@@ -368,6 +370,12 @@ def test_letter_preview_renderer(
     prepare_newlines.assert_called_once_with('Foo')
     letter_markdown.assert_called_once_with('Baz')
     unlink_govuk.assert_not_called()
+    assert strip_pipes.call_args_list == [
+        mock.call('Subject'),
+        mock.call('Foo'),
+        mock.call(expected_address),
+        mock.call(expected_rendered_contact_block),
+    ]
 
 
 @mock.patch('notifications_utils.template.LetterPDFLinkTemplate.jinja_template.render')
@@ -465,9 +473,8 @@ def test_subject_line_gets_replaced():
             'addressline5': '',
             'addressline6': '',
         }),
-        mock.call('subject', {}, html='escape'),
-        mock.call('1\n2\n3\n4\n5\n6\n7\n8', {}),
-        mock.call('content', {}, markdown_lists=True),
+        mock.call('subject', {}, html='strip_dvla_markup'),
+        mock.call('content', {}, markdown_lists=True, html='strip_dvla_markup'),
     ]),
 ])
 @mock.patch('notifications_utils.template.Field.__init__', return_value=None)
@@ -491,6 +498,20 @@ def test_email_preview_escapes_html_in_from_name():
     )
     assert '<script>' not in str(template)
     assert '&lt;script&gt;alert("")&lt;/script&gt;' in str(template)
+
+
+@mock.patch('notifications_utils.template.strip_dvla_markup', return_value='FOOBARBAZ')
+def test_letter_preview_strips_dvla_markup(mock_strip_dvla_markup):
+    assert 'FOOBARBAZ' in str(LetterPreviewTemplate(
+        {
+            "content": 'content',
+            'subject': 'subject',
+        },
+    ))
+    assert mock_strip_dvla_markup.call_args_list == [
+        mock.call(Markup('subject')),
+        mock.call('content'),
+    ]
 
 
 dvla_file_spec = [
@@ -860,7 +881,7 @@ dvla_file_spec = [
         """,
         'Example': (
             '29 April 2016<cr><cr>'
-            '<h1>Your application is due soon<normal><cr><cr>'
+            '<h1>Your application is something & something<normal><cr><cr>'
             'Dear Henry Hadlow,<cr><cr>'
             'Thank you for applying to register a lasting power of '
             'attorney (LPA) for property and financial affairs. We '
@@ -883,7 +904,7 @@ def test_letter_output_template(field):
                 'attorney (LPA) for property and financial affairs. We '
                 'have checked your application and...'
             ),
-            'subject': 'Your ((thing)) is due soon',
+            'subject': 'Your ((thing)) is something & something',
         },
         {
             'thing': 'application',

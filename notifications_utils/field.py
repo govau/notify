@@ -4,7 +4,12 @@ from orderedset import OrderedSet
 from flask import Markup
 
 from notifications_utils.columns import Columns
-from notifications_utils.formatters import unescaped_formatted_list, strip_html, escape_html
+from notifications_utils.formatters import (
+    unescaped_formatted_list,
+    strip_html,
+    escape_html,
+    strip_dvla_markup,
+)
 
 
 class Field():
@@ -29,7 +34,8 @@ class Field():
         self.sanitizer = {
             'strip': strip_html,
             'escape': escape_html,
-            'passthrough': str
+            'passthrough': str,
+            'strip_dvla_markup': strip_dvla_markup,
         }[html]
 
     def __str__(self):
