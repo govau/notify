@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from datetime import datetime, timedelta
 from notifications_utils.clients.statsd.statsd_client import StatsdClient
@@ -23,6 +25,9 @@ def build_statsd_client(app, mocker):
     app.config['STATSD_PORT'] = "8000"
     app.config['STATSD_PREFIX'] = "prefix"
     client.init_app(app)
+    if not app.config['STATSD_ENABLED']:
+        # statsd_client not initialised if statsd not enabled, so lets mock it
+        client.statsd_client = Mock()
     mocker.patch.object(client.statsd_client, "incr")
     mocker.patch.object(client.statsd_client, "gauge")
     mocker.patch.object(client.statsd_client, "timing")

@@ -2,7 +2,8 @@ from statsd import StatsClient
 
 
 class StatsdClient():
-    statsd_client = StatsClient()
+    def __init__(self):
+        self.statsd_client = None
 
     def init_app(self, app, *args, **kwargs):
         self.active = app.config.get('STATSD_ENABLED')
@@ -12,7 +13,7 @@ class StatsdClient():
         )
 
         if self.active:
-            self.statsd_client.__init__(
+            self.statsd_client = StatsClient(
                 app.config.get('STATSD_HOST'),
                 app.config.get('STATSD_PORT'),
                 prefix=app.config.get('STATSD_PREFIX')
