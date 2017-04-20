@@ -381,16 +381,21 @@ class LetterPDFLinkTemplate(WithSubjectTemplate):
         template,
         values=None,
         preview_url=None,
+        page_count=None,
     ):
         super().__init__(template, values)
         if not preview_url:
             raise TypeError('preview_url is required')
+        if not page_count:
+            raise TypeError('page_count is required')
         self.preview_url = preview_url
+        self.page_count = int(page_count)
 
     def __str__(self):
         return Markup(self.jinja_template.render({
             'pdf_url': '{}.pdf'.format(self.preview_url),
             'png_url': '{}.png'.format(self.preview_url),
+            'page_count': self.page_count,
         }))
 
 
