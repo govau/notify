@@ -425,15 +425,7 @@ def validate_phone_number(number, column=None, international=False):
     return number
 
 
-def format_phone_number(number, international=False):
-    return validate_phone_number(number, international=international)
-
-
-def validate_and_format_phone_number(number, international=False):
-    return format_phone_number(
-        validate_phone_number(number, international=international),
-        international=international
-    )
+validate_and_format_phone_number = validate_phone_number
 
 
 def validate_email_address(email_address, column=None):

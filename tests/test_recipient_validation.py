@@ -5,7 +5,6 @@ from functools import partial
 
 from notifications_utils.recipients import (
     validate_phone_number,
-    format_phone_number,
     validate_and_format_phone_number,
     InvalidPhoneError,
     validate_email_address,
@@ -166,7 +165,6 @@ def test_phone_number_accepts_valid_international_values(validator, phone_number
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
 def test_valid_uk_phone_number_can_be_formatted_consistently(phone_number):
-    assert format_phone_number(validate_phone_number(phone_number)) == '447123456789'
     assert validate_and_format_phone_number(phone_number) == '447123456789'
 
 
@@ -179,10 +177,6 @@ def test_valid_uk_phone_number_can_be_formatted_consistently(phone_number):
     ('23051234567', '23051234567'),
 ])
 def test_valid_international_phone_number_can_be_formatted_consistently(phone_number, expected_formatted):
-    assert format_phone_number(
-        validate_phone_number(phone_number, international=True),
-        international=True,
-    ) == expected_formatted
     assert validate_and_format_phone_number(
         phone_number, international=True
     ) == expected_formatted
