@@ -366,41 +366,41 @@ class InvalidAddressError(InvalidEmailError):
     pass
 
 
-def validate_phone_number(number, column=None):
+def normalise_phone_number(number):
 
-    for character in ['(', ')', ' ', '-']:
+    for character in ['(', ')', ' ', '-', '+']:
         number = number.replace(character, '')
 
-    number = number.lstrip('+').lstrip('0')
+    return number.lstrip('0').lstrip('44').lstrip('0')
+
+
+def validate_phone_number(number, column=None):
+
+    number = normalise_phone_number(number)
 
     try:
         list(map(int, number))
     except ValueError:
         raise InvalidPhoneError('Must not contain letters or symbols')
 
-    if not any(
-        number.startswith(prefix)
-        for prefix in ['7', '447', '4407', '00447']
-    ):
+    if not number.startswith('7'):
         raise InvalidPhoneError('Not a UK mobile number')
 
-    # Split number on first 7
-    number = number.split('7', 1)[1]
-    if len(number) > 9:
+    if len(number) > 10:
         raise InvalidPhoneError('Too many digits')
 
-    if len(number) < 9:
+    if len(number) < 10:
         raise InvalidPhoneError('Not enough digits')
 
     return number
 
 
 def format_phone_number(number):
-    return '+447{}'.format(number)
+    return '+44{}'.format(number)
 
 
 def format_phone_number_human_readable(number):
-    return '07{} {} {}'.format(*re.findall('...', number))
+    return '0{} {} {}'.format(number[:4], number[4:7], number[7:10])
 
 
 def validate_and_format_phone_number(number, human_readable=False):
