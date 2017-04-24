@@ -429,17 +429,7 @@ def format_phone_number(number, international=False):
     return validate_phone_number(number, international=international)
 
 
-def format_phone_number_human_readable(number):
-    if number.startswith(uk_prefix):
-        return '0{} {} {}'.format(number[2:6], number[6:9], number[9:12])
-    return '+{}'.format(number)
-
-
-def validate_and_format_phone_number(number, human_readable=False, international=False):
-    if human_readable:
-        return format_phone_number_human_readable(
-            validate_phone_number(number, international=international)
-        )
+def validate_and_format_phone_number(number, international=False):
     return format_phone_number(
         validate_phone_number(number, international=international),
         international=international
