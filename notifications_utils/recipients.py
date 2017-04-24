@@ -380,7 +380,7 @@ def validate_phone_number(number, column=None):
 
     if not any(
         number.startswith(prefix)
-        for prefix in ['7', '07', '447', '4407', '00447']
+        for prefix in ['7', '447', '4407', '00447']
     ):
         raise InvalidPhoneError('Not a UK mobile number')
 

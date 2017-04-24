@@ -30,6 +30,7 @@ invalid_phone_numbers = sum([
         (phone_number, error) for phone_number in group
     ] for error, group in [
         ('Too many digits', (
+            '712345678910',
             '0712345678910',
             '0044712345678910',
             '0044712345678910',
