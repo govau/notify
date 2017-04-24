@@ -1,5 +1,8 @@
 import re
 import pytest
+
+from functools import partial
+
 from notifications_utils.recipients import (
     validate_phone_number,
     format_phone_number,
@@ -136,17 +139,27 @@ invalid_email_addresses = (
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
-def test_phone_number_accepts_valid_values(phone_number):
+@pytest.mark.parametrize("validator", [
+    partial(validate_recipient, template_type='sms'),
+    partial(validate_recipient, template_type='sms', international_sms=False),
+    partial(validate_phone_number),
+    partial(validate_phone_number, international=False),
+])
+def test_phone_number_accepts_valid_values(validator, phone_number):
     try:
-        validate_phone_number(phone_number)
+        validator(phone_number)
     except InvalidPhoneError:
         pytest.fail('Unexpected InvalidPhoneError')
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
-def test_phone_number_accepts_valid_international_values(phone_number):
+@pytest.mark.parametrize("validator", [
+    partial(validate_recipient, template_type='sms', international_sms=True),
+    partial(validate_phone_number, international=True),
+])
+def test_phone_number_accepts_valid_international_values(validator, phone_number):
     try:
-        validate_phone_number(phone_number, international=True)
+        validator(phone_number)
     except InvalidPhoneError:
         pytest.fail('Unexpected InvalidPhoneError')
 
@@ -159,16 +172,26 @@ def test_valid_phone_number_can_be_formatted_consistently(phone_number):
 
 
 @pytest.mark.parametrize("phone_number, error_message", invalid_phone_numbers)
-def test_phone_number_rejects_invalid_values(phone_number, error_message):
+@pytest.mark.parametrize("validator", [
+    partial(validate_recipient, template_type='sms'),
+    partial(validate_recipient, template_type='sms', international_sms=False),
+    partial(validate_phone_number),
+    partial(validate_phone_number, international=False),
+])
+def test_phone_number_rejects_invalid_values(validator, phone_number, error_message):
     with pytest.raises(InvalidPhoneError) as e:
-        validate_phone_number(phone_number)
+        validator(phone_number)
     assert error_message == str(e.value)
 
 
 @pytest.mark.parametrize("phone_number, error_message", invalid_international_phone_numbers)
-def test_phone_number_rejects_invalid_international_values(phone_number, error_message):
+@pytest.mark.parametrize("validator", [
+    partial(validate_recipient, template_type='sms', international_sms=True),
+    partial(validate_phone_number, international=True),
+])
+def test_phone_number_rejects_invalid_international_values(validator, phone_number, error_message):
     with pytest.raises(InvalidPhoneError) as e:
-        validate_phone_number(phone_number, international=True)
+        validator(phone_number)
     assert error_message == str(e.value)
 
 

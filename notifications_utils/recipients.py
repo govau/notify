@@ -2,7 +2,7 @@ import re
 import sys
 import csv
 from contextlib import suppress
-from functools import lru_cache
+from functools import lru_cache, partial
 from collections import OrderedDict
 from orderedset import OrderedSet
 
@@ -406,16 +406,13 @@ def validate_phone_number(number, column=None, international=False):
     ):
         return validate_uk_phone_number(number)
 
-    if (number.startswith('0') and not number.startswith('00')):
-        return validate_phone_number(number)
-
     number = normalise_phone_number(number)
 
     if (
         number.startswith('44') or
         (number.startswith('7') and len(number) < 11)
     ):
-        return validate_phone_number(number)
+        return validate_uk_phone_number(number)
 
     if len(number) < 5:
         raise InvalidPhoneError('Not enough digits')
@@ -495,11 +492,11 @@ def validate_address(address_line, column):
     return address_line
 
 
-def validate_recipient(recipient, template_type, column=None):
+def validate_recipient(recipient, template_type, column=None, international_sms=False):
     return {
         'email': validate_email_address,
-        'sms': validate_phone_number,
-        'letter': validate_address
+        'sms': partial(validate_phone_number, international=international_sms),
+        'letter': validate_address,
     }[template_type](recipient, column)
 
 
