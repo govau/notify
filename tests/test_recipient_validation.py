@@ -165,10 +165,33 @@ def test_phone_number_accepts_valid_international_values(validator, phone_number
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
-def test_valid_phone_number_can_be_formatted_consistently(phone_number):
-    assert format_phone_number(validate_phone_number(phone_number)) == '+447123456789'
-    assert validate_and_format_phone_number(phone_number) == '+447123456789'
+def test_valid_uk_phone_number_can_be_formatted_consistently(phone_number):
+    assert format_phone_number(validate_phone_number(phone_number)) == '447123456789'
+    assert validate_and_format_phone_number(phone_number) == '447123456789'
     assert validate_and_format_phone_number(phone_number, human_readable=True) == '07123 456 789'
+
+
+@pytest.mark.parametrize("phone_number, expected_formatted, expected_human_readable", [
+    ('71234567890', '71234567890', '+71234567890'),
+    ('1-202-555-0104', '12025550104', '+12025550104'),
+    ('+12025550104', '12025550104', '+12025550104'),
+    ('0012025550104', '12025550104', '+12025550104'),
+    ('+0012025550104', '12025550104', '+12025550104'),
+    ('23051234567', '23051234567', '+23051234567'),
+])
+def test_valid_international_phone_number_can_be_formatted_consistently(
+    phone_number, expected_formatted, expected_human_readable
+):
+    assert format_phone_number(
+        validate_phone_number(phone_number, international=True),
+        international=True,
+    ) == expected_formatted
+    assert validate_and_format_phone_number(
+        phone_number, international=True
+    ) == expected_formatted
+    assert validate_and_format_phone_number(
+        phone_number, human_readable=True, international=True
+    ) == expected_human_readable
 
 
 @pytest.mark.parametrize("phone_number, error_message", invalid_phone_numbers)

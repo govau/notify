@@ -384,7 +384,7 @@ def normalise_phone_number(number):
 
 def validate_uk_phone_number(number, column=None):
 
-    number = normalise_phone_number(number).lstrip('44').lstrip('0')
+    number = normalise_phone_number(number).lstrip(uk_prefix).lstrip('0')
 
     if not number.startswith('7'):
         raise InvalidPhoneError('Not a UK mobile number')
@@ -395,7 +395,7 @@ def validate_uk_phone_number(number, column=None):
     if len(number) < 10:
         raise InvalidPhoneError('Not enough digits')
 
-    return number
+    return '{}{}'.format(uk_prefix, number)
 
 
 def validate_phone_number(number, column=None, international=False):
@@ -409,7 +409,7 @@ def validate_phone_number(number, column=None, international=False):
     number = normalise_phone_number(number)
 
     if (
-        number.startswith('44') or
+        number.startswith(uk_prefix) or
         (number.startswith('7') and len(number) < 11)
     ):
         return validate_uk_phone_number(number)
@@ -425,18 +425,25 @@ def validate_phone_number(number, column=None, international=False):
     return number
 
 
-def format_phone_number(number):
-    return '+44{}'.format(number)
+def format_phone_number(number, international=False):
+    return validate_phone_number(number, international=international)
 
 
 def format_phone_number_human_readable(number):
-    return '0{} {} {}'.format(number[:4], number[4:7], number[7:10])
+    if number.startswith(uk_prefix):
+        return '0{} {} {}'.format(number[2:6], number[6:9], number[9:12])
+    return '+{}'.format(number)
 
 
-def validate_and_format_phone_number(number, human_readable=False):
+def validate_and_format_phone_number(number, human_readable=False, international=False):
     if human_readable:
-        return format_phone_number_human_readable(validate_phone_number(number))
-    return format_phone_number(validate_phone_number(number))
+        return format_phone_number_human_readable(
+            validate_phone_number(number, international=international)
+        )
+    return format_phone_number(
+        validate_phone_number(number, international=international),
+        international=international
+    )
 
 
 def validate_email_address(email_address, column=None):
