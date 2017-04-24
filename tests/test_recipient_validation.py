@@ -76,11 +76,7 @@ invalid_phone_numbers = sum([
 
 invalid_international_phone_numbers = list(filter(
     lambda number: number[0] not in {
-        '08081 570364',   # Could be international (but isn’t)
-        '0117 496 0860',  # Could be USA
-        '020 7946 0991',  # Could be Egypt
         '712345678910',   # Could be Russia
-        '0712345678910',  # Could be Russia
     },
     invalid_phone_numbers
 )) + list(sum([

@@ -406,6 +406,9 @@ def validate_phone_number(number, column=None, international=False):
     ):
         return validate_uk_phone_number(number)
 
+    if (number.startswith('0') and not number.startswith('00')):
+        return validate_phone_number(number)
+
     number = normalise_phone_number(number)
 
     if (
