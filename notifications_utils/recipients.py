@@ -10,7 +10,10 @@ from flask import Markup
 
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns
+from notifications_utils.international_billing_rates import COUNTRY_PREFIXES
 
+
+uk_prefix = '44'
 
 first_column_headings = {
     'email': ['email address'],
@@ -371,17 +374,17 @@ def normalise_phone_number(number):
     for character in ['(', ')', ' ', '-', '+']:
         number = number.replace(character, '')
 
-    return number.lstrip('0').lstrip('44').lstrip('0')
-
-
-def validate_phone_number(number, column=None):
-
-    number = normalise_phone_number(number)
-
     try:
         list(map(int, number))
     except ValueError:
         raise InvalidPhoneError('Must not contain letters or symbols')
+
+    return number.lstrip('0')
+
+
+def validate_uk_phone_number(number, column=None):
+
+    number = normalise_phone_number(number).lstrip('44').lstrip('0')
 
     if not number.startswith('7'):
         raise InvalidPhoneError('Not a UK mobile number')
@@ -391,6 +394,33 @@ def validate_phone_number(number, column=None):
 
     if len(number) < 10:
         raise InvalidPhoneError('Not enough digits')
+
+    return number
+
+
+def validate_phone_number(number, column=None, international=False):
+
+    if (
+        (not international) or
+        (number.startswith('0') and not number.startswith('00'))
+    ):
+        return validate_uk_phone_number(number)
+
+    number = normalise_phone_number(number)
+
+    if (
+        number.startswith('44') or
+        (number.startswith('7') and len(number) < 11)
+    ):
+        return validate_phone_number(number)
+
+    if len(number) < 5:
+        raise InvalidPhoneError('Not enough digits')
+
+    if not any(
+        number.startswith(prefix) for prefix in COUNTRY_PREFIXES
+    ):
+        raise InvalidPhoneError('Not a valid country prefix')
 
     return number
 

@@ -9,7 +9,8 @@ from notifications_utils.recipients import (
     InvalidEmailError,
     allowed_to_send_to,
     InvalidAddressError,
-    validate_recipient
+    validate_recipient,
+    validate_phone_number,
 )
 
 
@@ -24,6 +25,17 @@ valid_phone_numbers = [
     '+44 7123 456 789',
     '+44 (0)7123 456 789'
 ]
+
+
+valid_international_phone_numbers = valid_phone_numbers + [
+    '71234567890',  # Russia
+    '1-202-555-0104',  # USA
+    '+12025550104',  # USA
+    '0012025550104',  # USA
+    '+0012025550104',  # USA
+    '23051234567',  # Mauritius
+]
+
 
 invalid_phone_numbers = sum([
     [
@@ -60,6 +72,30 @@ invalid_phone_numbers = sum([
         ))
     ]
 ], [])
+
+
+invalid_international_phone_numbers = list(filter(
+    lambda number: number[0] not in {
+        '08081 570364',   # Could be international (but isn’t)
+        '0117 496 0860',  # Could be USA
+        '020 7946 0991',  # Could be Egypt
+        '712345678910',   # Could be Russia
+        '0712345678910',  # Could be Russia
+    },
+    invalid_phone_numbers
+)) + list(sum([
+    [
+        (phone_number, error) for phone_number in group
+    ] for error, group in [
+        ('Not a valid country prefix', (
+            '800000000000',
+        )),
+        ('Not enough digits', (
+            '1234',
+        )),
+    ]
+], []))
+
 
 valid_email_addresses = (
     'email@domain.com',
@@ -112,6 +148,14 @@ def test_phone_number_accepts_valid_values(phone_number):
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
+def test_phone_number_accepts_valid_international_values(phone_number):
+    try:
+        validate_phone_number(phone_number, international=True)
+    except InvalidPhoneError:
+        pytest.fail('Unexpected InvalidPhoneError')
+
+
+@pytest.mark.parametrize("phone_number", valid_phone_numbers)
 def test_valid_phone_number_can_be_formatted_consistently(phone_number):
     assert format_phone_number(validate_phone_number(phone_number)) == '+447123456789'
     assert validate_and_format_phone_number(phone_number) == '+447123456789'
@@ -122,6 +166,13 @@ def test_valid_phone_number_can_be_formatted_consistently(phone_number):
 def test_phone_number_rejects_invalid_values(phone_number, error_message):
     with pytest.raises(InvalidPhoneError) as e:
         validate_phone_number(phone_number)
+    assert error_message == str(e.value)
+
+
+@pytest.mark.parametrize("phone_number, error_message", invalid_international_phone_numbers)
+def test_phone_number_rejects_invalid_international_values(phone_number, error_message):
+    with pytest.raises(InvalidPhoneError) as e:
+        validate_phone_number(phone_number, international=True)
     assert error_message == str(e.value)
 
 
