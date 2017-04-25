@@ -382,6 +382,24 @@ def normalise_phone_number(number):
     return number.lstrip('0')
 
 
+def is_uk_phone_number(number):
+
+    if (
+        (number.startswith('0') and not number.startswith('00'))
+    ):
+        return True
+
+    number = normalise_phone_number(number)
+
+    if (
+        number.startswith(uk_prefix) or
+        (number.startswith('7') and len(number) < 11)
+    ):
+        return True
+
+    return False
+
+
 def validate_uk_phone_number(number, column=None):
 
     number = normalise_phone_number(number).lstrip(uk_prefix).lstrip('0')
@@ -400,19 +418,10 @@ def validate_uk_phone_number(number, column=None):
 
 def validate_phone_number(number, column=None, international=False):
 
-    if (
-        (not international) or
-        (number.startswith('0') and not number.startswith('00'))
-    ):
+    if (not international) or is_uk_phone_number(number):
         return validate_uk_phone_number(number)
 
     number = normalise_phone_number(number)
-
-    if (
-        number.startswith(uk_prefix) or
-        (number.startswith('7') and len(number) < 11)
-    ):
-        return validate_uk_phone_number(number)
 
     if len(number) < 5:
         raise InvalidPhoneError('Not enough digits')
