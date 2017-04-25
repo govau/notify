@@ -61,7 +61,8 @@ class RecipientCSV():
         whitelist=None,
         template=None,
         remaining_messages=sys.maxsize,
-        sms_character_limit=0
+        sms_character_limit=0,
+        international_sms=False,
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
@@ -71,6 +72,7 @@ class RecipientCSV():
         self.max_initial_rows_shown = max_initial_rows_shown
         self.whitelist = whitelist
         self.template = template if isinstance(template, Template) else None
+        self.international_sms = international_sms
         self.annotated_rows = list(self.get_annotated_rows())
         self.remaining_messages = remaining_messages
 
@@ -326,7 +328,12 @@ class RecipientCSV():
             if value in [None, '']:
                 return self.missing_field_error
             try:
-                validate_recipient(value, self.template_type, column=key)
+                validate_recipient(
+                    value,
+                    self.template_type,
+                    column=key,
+                    international_sms=self.international_sms
+                )
             except (InvalidEmailError, InvalidPhoneError, InvalidAddressError) as error:
                 return str(error)
 
