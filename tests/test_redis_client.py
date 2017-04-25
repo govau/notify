@@ -8,32 +8,7 @@ from notifications_utils.clients.redis import (
 )
 from notifications_utils.clients.redis.redis_client import RedisClient
 
-
-class RedisMock():
-    """
-    Used to mock out return value of redis.pipeline()
-    """
-
-    def __init__(self):
-        pass
-
-    def zadd(self, cache_key, score, item):
-        pass
-
-    def zremrangebyscore(self, cache_key, min, max):
-        pass
-
-    def zcard(self, cache_key):
-        pass
-
-    def expire(self, cache_key, interval):
-        pass
-
-    def execute(self):
-        pass
-
-
-my_redis_mock = RedisMock()
+my_redis_mock = Mock()
 
 
 @pytest.fixture(scope='function')
@@ -161,37 +136,31 @@ def test_set_hash_and_expire(mocked_redis_client):
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_add_correct_calls_to_the_pipe(mocked_redis_client, mocker):
-    zadd = mocker.patch('tests.test_redis_client.RedisMock.zadd')
-    zremrangebyscore = mocker.patch('tests.test_redis_client.RedisMock.zremrangebyscore')
-    zcard = mocker.patch('tests.test_redis_client.RedisMock.zcard')
-    expire = mocker.patch('tests.test_redis_client.RedisMock.expire')
-    execute = mocker.patch('tests.test_redis_client.RedisMock.execute')
-
+def test_should_add_correct_calls_to_the_pipe(mocked_redis_client):
     mocked_redis_client.exceeded_rate_limit("key", 100, 100)
     assert mocked_redis_client.redis_store.pipeline.called
-    zadd.assert_called_with("key", 978350400.0, 978350400.0)
-    zremrangebyscore.assert_called_with("key", '-inf', 978350300.0)
-    zcard.assert_called_with("key")
-    expire.assert_called_with("key", 100)
-    assert execute.called
+    my_redis_mock.zadd.assert_called_with("key", 978350400.0, 978350400.0)
+    my_redis_mock.zremrangebyscore.assert_called_with("key", '-inf', 978350300.0)
+    my_redis_mock.zcard.assert_called_with("key")
+    my_redis_mock.expire.assert_called_with("key", 100)
+    assert my_redis_mock.execute.called
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_fail_request_if_over_limit(mocked_redis_client, mocker):
-    mocker.patch('tests.test_redis_client.RedisMock.execute', return_value=[True, True, 100, True])
+def test_should_fail_request_if_over_limit(mocked_redis_client):
+    my_redis_mock.execute.return_value = [True, True, 100, True]
     assert mocked_redis_client.exceeded_rate_limit("key", 99, 100)
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_allow_request_if_not_over_limit(mocked_redis_client, mocker):
-    mocker.patch('tests.test_redis_client.RedisMock.execute', return_value=[True, True, 100, True])
+def test_should_allow_request_if_not_over_limit(mocked_redis_client):
+    my_redis_mock.execute.return_value = [True, True, 100, True]
     assert not mocked_redis_client.exceeded_rate_limit("key", 101, 100)
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_allow_request_if_not_over_limit(mocked_redis_client, mocker):
-    mocker.patch('tests.test_redis_client.RedisMock.execute', return_value=[True, True, 100, True])
+def test_should_allow_request_if_not_over_limit(mocked_redis_client):
+    my_redis_mock.execute.return_value = [True, True, 100, True]
     assert not mocked_redis_client.exceeded_rate_limit("key", 101, 100)
 
 
