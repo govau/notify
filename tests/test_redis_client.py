@@ -8,16 +8,19 @@ from notifications_utils.clients.redis import (
 )
 from notifications_utils.clients.redis.redis_client import RedisClient
 
-my_redis_mock = Mock()
+
+@pytest.fixture(scope='function')
+def mocked_redis_pipeline():
+    return Mock()
 
 
 @pytest.fixture(scope='function')
-def mocked_redis_client(app, mocker):
+def mocked_redis_client(app, mocked_redis_pipeline, mocker):
     app.config['REDIS_ENABLED'] = True
-    return build_redis_client(app, mocker)
+    return build_redis_client(app, mocked_redis_pipeline, mocker)
 
 
-def build_redis_client(app, mocker):
+def build_redis_client(app, mocked_redis_pipeline, mocker):
     redis_client = RedisClient()
     redis_client.init_app(app)
     mocker.patch.object(redis_client.redis_store, 'get', return_value=100)
@@ -27,7 +30,7 @@ def build_redis_client(app, mocker):
                         return_value={b'template-1111': b'8', b'template-2222': b'8'})
     mocker.patch.object(redis_client.redis_store, 'hmset')
     mocker.patch.object(redis_client.redis_store, 'expire')
-    mocker.patch.object(redis_client.redis_store, 'pipeline', return_value=my_redis_mock)
+    mocker.patch.object(redis_client.redis_store, 'pipeline', return_value=mocked_redis_pipeline)
 
     return redis_client
 
@@ -136,35 +139,35 @@ def test_set_hash_and_expire(mocked_redis_client):
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_add_correct_calls_to_the_pipe(mocked_redis_client):
+def test_should_add_correct_calls_to_the_pipe(mocked_redis_client, mocked_redis_pipeline):
     mocked_redis_client.exceeded_rate_limit("key", 100, 100)
     assert mocked_redis_client.redis_store.pipeline.called
-    my_redis_mock.zadd.assert_called_with("key", 978350400.0, 978350400.0)
-    my_redis_mock.zremrangebyscore.assert_called_with("key", '-inf', 978350300.0)
-    my_redis_mock.zcard.assert_called_with("key")
-    my_redis_mock.expire.assert_called_with("key", 100)
-    assert my_redis_mock.execute.called
+    mocked_redis_pipeline.zadd.assert_called_with("key", 978350400.0, 978350400.0)
+    mocked_redis_pipeline.zremrangebyscore.assert_called_with("key", '-inf', 978350300.0)
+    mocked_redis_pipeline.zcard.assert_called_with("key")
+    mocked_redis_pipeline.expire.assert_called_with("key", 100)
+    assert mocked_redis_pipeline.execute.called
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_fail_request_if_over_limit(mocked_redis_client):
-    my_redis_mock.execute.return_value = [True, True, 100, True]
+def test_should_fail_request_if_over_limit(mocked_redis_client, mocked_redis_pipeline):
+    mocked_redis_pipeline.execute.return_value = [True, True, 100, True]
     assert mocked_redis_client.exceeded_rate_limit("key", 99, 100)
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_allow_request_if_not_over_limit(mocked_redis_client):
-    my_redis_mock.execute.return_value = [True, True, 100, True]
+def test_should_allow_request_if_not_over_limit(mocked_redis_client, mocked_redis_pipeline):
+    mocked_redis_pipeline.execute.return_value = [True, True, 100, True]
     assert not mocked_redis_client.exceeded_rate_limit("key", 101, 100)
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_allow_request_if_not_over_limit(mocked_redis_client):
-    my_redis_mock.execute.return_value = [True, True, 100, True]
-    assert not mocked_redis_client.exceeded_rate_limit("key", 101, 100)
+def test_should_allow_request_if_not_over_limit(mocked_redis_client, mocked_redis_pipeline):
+    mocked_redis_pipeline.execute.return_value = [True, True, 80, True]
+    assert not mocked_redis_client.exceeded_rate_limit("key", 90, 100)
 
 
-def test_should_not_call_set_if_not_enabled(mocked_redis_client):
+def test_should_not_call_set_if_not_enabled(mocked_redis_client, mocked_redis_pipeline):
     mocked_redis_client.active = False
 
     assert not mocked_redis_client.exceeded_rate_limit('key', 100, 100)
