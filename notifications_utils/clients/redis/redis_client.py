@@ -24,7 +24,7 @@ class RedisClient:
         (2) Use zremrangebyscore to delete all set members with a score between
             - Earliest entry (lowest score == earliest timestamp) - represented as '-inf'
                 and
-            - Current timestamp - the interval
+            - Current timestamp minus the interval
             - Leaves only relevant entries in the set (those between now and now - interval)
         (3) Count the set
         (4) If count > limit fail request
@@ -32,14 +32,14 @@ class RedisClient:
 
         Notes:
         - Failed requests count. If over the limit and keep making requests you'll stay over the limit.
-        - The actual value in the set is just the timestamp, the same as the score.
+        - The actual value in the set is just the timestamp, the same as the score. We don't store any requets details.
         - return value of pip.execute() is an array containing the outcome of each call.
             - result[2] == outcome of pipe.zcard()
         - If redis is inactive, or we get an exception, allow the request
 
         :param cache_key:
         :param limit: Number of requests permitted within interval
-        :param interval: Time period we measure requests in
+        :param interval: Interval we measure requests in
         :param raise_exception: Should throw exception
         :return:
         """

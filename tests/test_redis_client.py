@@ -1,5 +1,4 @@
 import pytest
-from freezegun import freeze_time
 from unittest.mock import Mock
 from freezegun import freeze_time
 
@@ -10,7 +9,10 @@ from notifications_utils.clients.redis import (
 from notifications_utils.clients.redis.redis_client import RedisClient
 
 
-class RedisMock(Mock):
+class RedisMock():
+    """
+    Used to mock out return value of redis.pipeline()
+    """
 
     def __init__(self):
         pass
