@@ -15,6 +15,8 @@ from notifications_utils.recipients import (
     validate_phone_number,
     is_uk_phone_number,
     normalise_phone_number,
+    international_phone_info,
+    get_international_phone_info,
 )
 
 
@@ -144,6 +146,47 @@ def test_detect_international_phone_numbers(phone_number):
     assert is_uk_phone_number(phone_number) is True
 
 
+@pytest.mark.parametrize("phone_number, expected_info", [
+    ('07900900123', international_phone_info(
+        international=False,
+        country_prefix='44',  # UK
+        billable_units=1,
+    )),
+    ('20-12-1234-1234', international_phone_info(
+        international=True,
+        country_prefix='20',  # Egypt
+        billable_units=3,
+    )),
+    ('00201212341234', international_phone_info(
+        international=True,
+        country_prefix='20',  # Egypt
+        billable_units=3,
+    )),
+    ('1664000000000', international_phone_info(
+        international=True,
+        country_prefix='1664',  # Montserrat
+        billable_units=1,
+    )),
+    ('71234567890', international_phone_info(
+        international=True,
+        country_prefix='7',  # Russia
+        billable_units=1,
+    )),
+    ('1-202-555-0104', international_phone_info(
+        international=True,
+        country_prefix='1',  # USA
+        billable_units=1,
+    )),
+    ('+23051234567', international_phone_info(
+        international=True,
+        country_prefix='230',  # Mauritius
+        billable_units=2,
+    ))
+])
+def test_get_international_info(phone_number, expected_info):
+    assert get_international_phone_info(phone_number) == expected_info
+
+
 @pytest.mark.parametrize('phone_number', [
     'abcd',
     '079OO900123',
@@ -157,6 +200,18 @@ def test_detect_international_phone_numbers(phone_number):
 def test_normalise_phone_number_raises_if_unparseable_characters(phone_number):
     with pytest.raises(InvalidPhoneError) as e:
         normalise_phone_number(phone_number)
+
+
+@pytest.mark.parametrize('phone_number', [
+    '+21 4321 0987',
+    '00997 1234 7890',
+    '801234-7890'
+    '(8-0)-1234-7890',
+])
+def test_get_international_info_raises(phone_number):
+    with pytest.raises(InvalidPhoneError) as error:
+        get_international_phone_info(phone_number)
+    assert str(error.value) == 'Not a valid country prefix'
 
 
 @pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
