@@ -2,7 +2,7 @@ import re
 import sys
 import csv
 from contextlib import suppress
-from functools import lru_cache
+from functools import lru_cache, partial
 from collections import OrderedDict
 from orderedset import OrderedSet
 
@@ -10,7 +10,10 @@ from flask import Markup
 
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns
+from notifications_utils.international_billing_rates import COUNTRY_PREFIXES
 
+
+uk_prefix = '44'
 
 first_column_headings = {
     'email': ['email address'],
@@ -366,47 +369,63 @@ class InvalidAddressError(InvalidEmailError):
     pass
 
 
-def validate_phone_number(number, column=None):
+def normalise_phone_number(number):
 
-    for character in ['(', ')', ' ', '-']:
+    for character in ['(', ')', ' ', '-', '+']:
         number = number.replace(character, '')
-
-    number = number.lstrip('+').lstrip('0')
 
     try:
         list(map(int, number))
     except ValueError:
         raise InvalidPhoneError('Must not contain letters or symbols')
 
-    if not any(
-        number.startswith(prefix)
-        for prefix in ['7', '07', '447', '4407', '00447']
-    ):
+    return number.lstrip('0')
+
+
+def validate_uk_phone_number(number, column=None):
+
+    number = normalise_phone_number(number).lstrip(uk_prefix).lstrip('0')
+
+    if not number.startswith('7'):
         raise InvalidPhoneError('Not a UK mobile number')
 
-    # Split number on first 7
-    number = number.split('7', 1)[1]
-    if len(number) > 9:
+    if len(number) > 10:
         raise InvalidPhoneError('Too many digits')
 
-    if len(number) < 9:
+    if len(number) < 10:
         raise InvalidPhoneError('Not enough digits')
+
+    return '{}{}'.format(uk_prefix, number)
+
+
+def validate_phone_number(number, column=None, international=False):
+
+    if (
+        (not international) or
+        (number.startswith('0') and not number.startswith('00'))
+    ):
+        return validate_uk_phone_number(number)
+
+    number = normalise_phone_number(number)
+
+    if (
+        number.startswith(uk_prefix) or
+        (number.startswith('7') and len(number) < 11)
+    ):
+        return validate_uk_phone_number(number)
+
+    if len(number) < 5:
+        raise InvalidPhoneError('Not enough digits')
+
+    if not any(
+        number.startswith(prefix) for prefix in COUNTRY_PREFIXES
+    ):
+        raise InvalidPhoneError('Not a valid country prefix')
 
     return number
 
 
-def format_phone_number(number):
-    return '+447{}'.format(number)
-
-
-def format_phone_number_human_readable(number):
-    return '07{} {} {}'.format(*re.findall('...', number))
-
-
-def validate_and_format_phone_number(number, human_readable=False):
-    if human_readable:
-        return format_phone_number_human_readable(validate_phone_number(number))
-    return format_phone_number(validate_phone_number(number))
+validate_and_format_phone_number = validate_phone_number
 
 
 def validate_email_address(email_address, column=None):
@@ -462,11 +481,11 @@ def validate_address(address_line, column):
     return address_line
 
 
-def validate_recipient(recipient, template_type, column=None):
+def validate_recipient(recipient, template_type, column=None, international_sms=False):
     return {
         'email': validate_email_address,
-        'sms': validate_phone_number,
-        'letter': validate_address
+        'sms': partial(validate_phone_number, international=international_sms),
+        'letter': validate_address,
     }[template_type](recipient, column)
 
 

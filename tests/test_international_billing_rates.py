@@ -1,6 +1,9 @@
 import pytest
 
-from notifications_utils.international_billing_rates import INTERNATIONAL_BILLING_RATES
+from notifications_utils.international_billing_rates import (
+    INTERNATIONAL_BILLING_RATES,
+    COUNTRY_PREFIXES,
+)
 
 
 def test_international_billing_rates_exists():
@@ -22,3 +25,7 @@ def test_international_billing_rates_are_in_correct_format(country_prefix, value
     assert all(isinstance(country, str) for country in values['names'])
 
     assert isinstance(values['attributes'], dict)
+
+
+def test_country_codes():
+    assert len(COUNTRY_PREFIXES) == 214

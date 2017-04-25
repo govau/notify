@@ -23,3 +23,4 @@ import yaml
 
 with open('./notifications_utils/international_billing_rates.yml') as f:
     INTERNATIONAL_BILLING_RATES = yaml.safe_load(f)
+    COUNTRY_PREFIXES = frozenset(INTERNATIONAL_BILLING_RATES.keys())
