@@ -81,18 +81,10 @@ invalid_international_phone_numbers = list(filter(
         '712345678910',   # Could be Russia
     },
     invalid_phone_numbers
-)) + list(sum([
-    [
-        (phone_number, error) for phone_number in group
-    ] for error, group in [
-        ('Not a valid country prefix', (
-            '800000000000',
-        )),
-        ('Not enough digits', (
-            '1234',
-        )),
-    ]
-], []))
+)) + [
+    ('800000000000', 'Not a valid country prefix'),
+    ('1234', 'Not enough digits'),
+]
 
 
 valid_email_addresses = (
