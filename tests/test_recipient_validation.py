@@ -13,6 +13,7 @@ from notifications_utils.recipients import (
     InvalidAddressError,
     validate_recipient,
     validate_phone_number,
+    normalise_phone_number,
 )
 
 
@@ -127,6 +128,21 @@ invalid_email_addresses = (
     'spaces-in-domain@dom ain.com',
     'underscores-in-domain@dom_ain.com',
 )
+
+
+@pytest.mark.parametrize('phone_number', [
+    'abcd',
+    '079OO900123',
+    pytest.mark.xfail(''),
+    pytest.mark.xfail('12345'),
+    pytest.mark.xfail('+12345'),
+    pytest.mark.xfail('1-2-3-4-5'),
+    pytest.mark.xfail('1 2 3 4 5'),
+    pytest.mark.xfail('(1)2345'),
+])
+def test_normalise_phone_number_raises_if_unparseable_characters(phone_number):
+    with pytest.raises(InvalidPhoneError) as e:
+        normalise_phone_number(phone_number)
 
 
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
