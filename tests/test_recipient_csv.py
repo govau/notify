@@ -471,7 +471,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
                 +44 123,test1,test1
                 07700900460,test1,test1
                 07700900460,test1
-                +44 123,test1,test1
+                +1644000000,test1,test1
                 ,test1,test1
             """,
             'sms',
