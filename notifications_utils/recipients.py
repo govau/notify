@@ -3,14 +3,17 @@ import sys
 import csv
 from contextlib import suppress
 from functools import lru_cache, partial
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
 
 from flask import Markup
 
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns
-from notifications_utils.international_billing_rates import COUNTRY_PREFIXES
+from notifications_utils.international_billing_rates import (
+    COUNTRY_PREFIXES,
+    INTERNATIONAL_BILLING_RATES,
+)
 
 
 uk_prefix = '44'
@@ -382,6 +385,54 @@ def normalise_phone_number(number):
     return number.lstrip('0')
 
 
+def is_uk_phone_number(number):
+
+    if (
+        (number.startswith('0') and not number.startswith('00'))
+    ):
+        return True
+
+    number = normalise_phone_number(number)
+
+    if (
+        number.startswith(uk_prefix) or
+        (number.startswith('7') and len(number) < 11)
+    ):
+        return True
+
+    return False
+
+
+international_phone_info = namedtuple('PhoneNumber', [
+    'international',
+    'country_prefix',
+    'billable_units',
+])
+
+
+def get_international_phone_info(number):
+
+    number = validate_phone_number(number, international=True)
+    prefix = get_international_prefix(number)
+
+    return international_phone_info(
+        international=(prefix != uk_prefix),
+        country_prefix=prefix,
+        billable_units=get_billable_units_for_prefix(prefix)
+    )
+
+
+def get_international_prefix(number):
+    return next(
+        (prefix for prefix in COUNTRY_PREFIXES if number.startswith(prefix)),
+        None
+    )
+
+
+def get_billable_units_for_prefix(prefix):
+    return INTERNATIONAL_BILLING_RATES[prefix]['billable_units']
+
+
 def validate_uk_phone_number(number, column=None):
 
     number = normalise_phone_number(number).lstrip(uk_prefix).lstrip('0')
@@ -400,26 +451,15 @@ def validate_uk_phone_number(number, column=None):
 
 def validate_phone_number(number, column=None, international=False):
 
-    if (
-        (not international) or
-        (number.startswith('0') and not number.startswith('00'))
-    ):
+    if (not international) or is_uk_phone_number(number):
         return validate_uk_phone_number(number)
 
     number = normalise_phone_number(number)
 
-    if (
-        number.startswith(uk_prefix) or
-        (number.startswith('7') and len(number) < 11)
-    ):
-        return validate_uk_phone_number(number)
-
     if len(number) < 5:
         raise InvalidPhoneError('Not enough digits')
 
-    if not any(
-        number.startswith(prefix) for prefix in COUNTRY_PREFIXES
-    ):
+    if get_international_prefix(number) is None:
         raise InvalidPhoneError('Not a valid country prefix')
 
     return number
