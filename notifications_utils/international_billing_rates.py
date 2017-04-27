@@ -19,8 +19,10 @@ Format of the yaml file looks like:
 """
 
 import yaml
+import os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
-with open('./notifications_utils/international_billing_rates.yml') as f:
+with open('{}/international_billing_rates.yml'.format(dir_path)) as f:
     INTERNATIONAL_BILLING_RATES = yaml.safe_load(f)
     COUNTRY_PREFIXES = list(reversed(sorted(INTERNATIONAL_BILLING_RATES.keys(), key=len)))
