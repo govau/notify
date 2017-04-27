@@ -2,6 +2,7 @@ import pytest
 from unittest import mock
 import itertools
 from flask import Markup
+from functools import partial
 
 from notifications_utils.recipients import RecipientCSV, Columns
 from notifications_utils.template import Template, SMSMessageTemplate
@@ -471,7 +472,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
                 +44 123,test1,test1
                 07700900460,test1,test1
                 07700900460,test1
-                +44 123,test1,test1
+                +1644000000,test1,test1
                 ,test1,test1
             """,
             'sms',
@@ -521,12 +522,43 @@ def test_recipient_column(placeholders, file_contents, template_type):
         ),
     ]
 )
-def test_bad_or_missing_data(file_contents, template_type, rows_with_bad_recipients, rows_with_missing_data):
-    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['date'])
+@pytest.mark.parametrize('partial_instance', [
+    partial(RecipientCSV),
+    partial(RecipientCSV, international_sms=False),
+])
+def test_bad_or_missing_data(
+    file_contents, template_type, rows_with_bad_recipients, rows_with_missing_data, partial_instance
+):
+    recipients = partial_instance(file_contents, template_type=template_type, placeholders=['date'])
     assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
     assert recipients.rows_with_missing_data == rows_with_missing_data
     if rows_with_bad_recipients or rows_with_missing_data:
         assert recipients.has_errors is True
+
+
+@pytest.mark.parametrize("file_contents,rows_with_bad_recipients", [
+    (
+        """
+            phone number
+            800000000000
+            1234
+            +447900123
+        """,
+        {0, 1, 2},
+    ),
+    (
+        """
+            phone number, country
+            1-202-555-0104, USA
+            +12025550104, USA
+            23051234567, Mauritius
+        """,
+        set(),
+    ),
+])
+def test_international_recipients(file_contents, rows_with_bad_recipients):
+    recipients = RecipientCSV(file_contents, template_type='sms', international_sms=True)
+    assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
 
 
 def test_errors_when_too_many_rows():
