@@ -394,7 +394,7 @@ class LetterImageTemplate(WithSubjectTemplate):
     def __str__(self):
         return Markup(self.jinja_template.render({
             'image_url': self.image_url,
-            'page_count': self.page_count,
+            'page_numbers': range(1, self.page_count + 1),
         }))
 
 

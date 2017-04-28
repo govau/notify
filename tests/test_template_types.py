@@ -389,7 +389,7 @@ def test_letter_image_renderer(jinja_template):
     ))
     jinja_template.assert_called_once_with({
         'image_url': 'http://example.com/endpoint.png',
-        'page_count': 99,
+        'page_numbers': range(1, 100),
     })
 
 
