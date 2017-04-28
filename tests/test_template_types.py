@@ -10,7 +10,7 @@ from notifications_utils.template import (
     Template,
     HTMLEmailTemplate,
     LetterPreviewTemplate,
-    LetterPDFLinkTemplate,
+    LetterImageTemplate,
     LetterDVLATemplate,
     PlainTextEmailTemplate,
     SMSMessageTemplate,
@@ -380,54 +380,53 @@ def test_letter_preview_renderer(
     ]
 
 
-@mock.patch('notifications_utils.template.LetterPDFLinkTemplate.jinja_template.render')
-def test_letter_link_renderer(jinja_template):
-    str(LetterPDFLinkTemplate(
+@mock.patch('notifications_utils.template.LetterImageTemplate.jinja_template.render')
+def test_letter_image_renderer(jinja_template):
+    str(LetterImageTemplate(
         {'content': '', 'subject': ''},
-        preview_url='http://example.com/endpoint',
+        image_url='http://example.com/endpoint.png',
         page_count=99,
     ))
     jinja_template.assert_called_once_with({
-        'pdf_url': 'http://example.com/endpoint.pdf',
-        'png_url': 'http://example.com/endpoint.png',
+        'image_url': 'http://example.com/endpoint.png',
         'page_count': 99,
     })
 
 
-@pytest.mark.parametrize('image_url', [
+@pytest.mark.parametrize('page_image_url', [
     pytest.mark.xfail('http://example.com/endpoint.png?page=0'),
     'http://example.com/endpoint.png?page=1',
     'http://example.com/endpoint.png?page=2',
     'http://example.com/endpoint.png?page=3',
     pytest.mark.xfail('http://example.com/endpoint.png?page=4'),
 ])
-def test_letter_link_renderer_pagination(image_url):
-    assert image_url in str(LetterPDFLinkTemplate(
+def test_letter_image_renderer_pagination(page_image_url):
+    assert page_image_url in str(LetterImageTemplate(
         {'content': '', 'subject': ''},
-        preview_url='http://example.com/endpoint',
+        image_url='http://example.com/endpoint.png',
         page_count=3,
     ))
 
 
 @pytest.mark.parametrize('partial_call, expected_exception', [
     (
-        partial(LetterPDFLinkTemplate),
+        partial(LetterImageTemplate),
         TypeError
     ),
     (
-        partial(LetterPDFLinkTemplate, page_count=1),
+        partial(LetterImageTemplate, page_count=1),
         TypeError
     ),
     (
-        partial(LetterPDFLinkTemplate, preview_url='foo'),
+        partial(LetterImageTemplate, image_url='foo'),
         TypeError
     ),
     (
-        partial(LetterPDFLinkTemplate, preview_url='foo', page_count='foo'),
+        partial(LetterImageTemplate, image_url='foo', page_count='foo'),
         ValueError
     ),
 ])
-def test_letter_link_renderer_requires_arguments(partial_call, expected_exception):
+def test_letter_image_renderer_requires_arguments(partial_call, expected_exception):
     with pytest.raises(expected_exception) as error:
         partial_call({'content': '', 'subject': ''})
 
@@ -442,7 +441,7 @@ def test_subject_line_gets_applied_to_correct_template_types():
         HTMLEmailTemplate,
         PlainTextEmailTemplate,
         LetterPreviewTemplate,
-        LetterPDFLinkTemplate,
+        LetterImageTemplate,
         LetterDVLATemplate,
     ]:
         assert issubclass(cls, WithSubjectTemplate)
@@ -492,7 +491,7 @@ def test_subject_line_gets_replaced():
             '((postcode))'
         ), {}, with_brackets=False, html='escape'),
     ]),
-    (LetterPDFLinkTemplate, {'preview_url': 'http://example.com', 'page_count': 1}, [
+    (LetterImageTemplate, {'image_url': 'http://example.com', 'page_count': 1}, [
     ]),
     (LetterDVLATemplate, {'notification_reference': "1"}, [
         mock.call((

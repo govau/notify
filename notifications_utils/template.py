@@ -372,29 +372,28 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         }
 
 
-class LetterPDFLinkTemplate(WithSubjectTemplate):
+class LetterImageTemplate(WithSubjectTemplate):
 
-    jinja_template = template_env.get_template('letter_preview_template.jinja2')
+    jinja_template = template_env.get_template('letter_image_template.jinja2')
 
     def __init__(
         self,
         template,
         values=None,
-        preview_url=None,
+        image_url=None,
         page_count=None,
     ):
         super().__init__(template, values)
-        if not preview_url:
-            raise TypeError('preview_url is required')
+        if not image_url:
+            raise TypeError('image_url is required')
         if not page_count:
             raise TypeError('page_count is required')
-        self.preview_url = preview_url
+        self.image_url = image_url
         self.page_count = int(page_count)
 
     def __str__(self):
         return Markup(self.jinja_template.render({
-            'pdf_url': '{}.pdf'.format(self.preview_url),
-            'png_url': '{}.png'.format(self.preview_url),
+            'image_url': self.image_url,
             'page_count': self.page_count,
         }))
 
