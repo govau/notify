@@ -1,6 +1,2 @@
-include notifications_utils/email_preview_template.jinja2
-include notifications_utils/email_template.jinja2
-include notifications_utils/letter_pdf_template.jinja2
-include notifications_utils/letter_preview_template.jinja2
-include notifications_utils/sms_preview_template.jinja2
+recursive-include notifications_utils *.jinja2
 include notifications_utils/international_billing_rates.yml

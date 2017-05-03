@@ -35,3 +35,5 @@ display_result $? 1 "Code style check"
 
 py.test -v tests/
 display_result $? 3 "Unit tests"
+
+python setup.py sdist
