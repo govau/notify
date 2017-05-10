@@ -338,10 +338,18 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 nl2br
             ).as_string,
-            'contact_block': strip_pipes('<br/>'.join(
-                line.strip()
-                for line in self.contact_block.split('\n')
-            )),
+            'contact_block': Take.as_field(
+                '\n'.join(
+                    line.strip()
+                    for line in self.contact_block.split('\n')
+                ),
+                self.values,
+                html='escape',
+            ).then(
+                nl2br
+            ).then(
+                strip_pipes
+            ).as_string,
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
@@ -460,7 +468,9 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             ADDITIONAL_LINE_10 = [
                 line.strip()
                 for line in
-                (self.contact_block.split('\n') + ([''] * 10))
+                ((
+                    Take.as_field(self.contact_block, self.values, html='strip_dvla_markup')
+                ).as_string.split('\n') + ([''] * 10))
             ][:10]
         TO_NAME_1,\
             _,\

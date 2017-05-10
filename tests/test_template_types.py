@@ -324,13 +324,13 @@ def test_sms_preview_adds_newlines(nl2br):
             www.gov.uk
         """,
         (
-            'The Pension Service<br/>'
-            'Mail Handling Site A<br/>'
-            'Wolverhampton  WV9 1LU<br/>'
-            '<br/>'
-            'Telephone: 0845 300 0168<br/>'
-            'Email: fpc.customercare@dwp.gsi.gov.uk<br/>'
-            'Monday - Friday  8am - 6pm<br/>'
+            'The Pension Service<br>'
+            'Mail Handling Site A<br>'
+            'Wolverhampton  WV9 1LU<br>'
+            '<br>'
+            'Telephone: 0845 300 0168<br>'
+            'Email: fpc.customercare@dwp.gsi.gov.uk<br>'
+            'Monday - Friday  8am - 6pm<br>'
             'www.gov.uk'
         )
     )
@@ -478,7 +478,7 @@ def test_subject_line_gets_replaced():
         mock.call('((phone number))', {}, with_brackets=False, html='escape'),
         mock.call('content', {}, html='escape'),
     ]),
-    (LetterPreviewTemplate, {}, [
+    (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
         mock.call('subject', {}, html='escape'),
         mock.call('content', {}, html='escape', markdown_lists=True),
         mock.call((
@@ -490,10 +490,12 @@ def test_subject_line_gets_replaced():
             '((address line 6))\n'
             '((postcode))'
         ), {}, with_brackets=False, html='escape'),
+        mock.call('www.gov.uk', {}, html='escape'),
     ]),
     (LetterImageTemplate, {'image_url': 'http://example.com', 'page_count': 1}, [
     ]),
-    (LetterDVLATemplate, {'notification_reference': "1"}, [
+    (LetterDVLATemplate, {'notification_reference': "1", 'contact_block': 'www.gov.uk  '}, [
+        mock.call('www.gov.uk', {}, html='strip_dvla_markup'),
         mock.call((
             '((address line 1))\n'
             '\n'
