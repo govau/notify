@@ -300,8 +300,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         admin_base_url='http://localhost:6012',
         logo_file_name='hm-government.svg',
     ):
-        super().__init__(template, values)
         self.contact_block = (contact_block or '').strip()
+        super().__init__(template, values)
         self.admin_base_url = admin_base_url
         self.logo_file_name = logo_file_name
 
@@ -364,6 +364,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         ).as_string
 
     @property
+    def placeholders(self):
+        return super().placeholders | Field(self.contact_block).placeholders
+
+    @property
     def values_with_default_optional_address_lines(self):
         keys = Columns.from_keys(
             set(self.values.keys()) | {
@@ -380,7 +384,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         }
 
 
-class LetterImageTemplate(WithSubjectTemplate):
+class LetterImageTemplate(LetterPreviewTemplate):
 
     jinja_template = template_env.get_template('letter_image_template.jinja2')
 
@@ -390,8 +394,9 @@ class LetterImageTemplate(WithSubjectTemplate):
         values=None,
         image_url=None,
         page_count=None,
+        contact_block=None,
     ):
-        super().__init__(template, values)
+        super().__init__(template, values, contact_block=contact_block)
         if not image_url:
             raise TypeError('image_url is required')
         if not page_count:
