@@ -528,6 +528,69 @@ def test_templates_handle_html(
     assert mock_field_init.call_args_list == expected_field_calls
 
 
+@pytest.mark.parametrize('template_instance, expected_placeholders', [
+    (
+        SMSMessageTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+        ),
+        ['content'],
+    ),
+    (
+        SMSPreviewTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+        ),
+        ['content'],
+    ),
+    (
+        PlainTextEmailTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+        ),
+        ['content', 'subject'],
+    ),
+    (
+        HTMLEmailTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+        ),
+        ['content', 'subject'],
+    ),
+    (
+        EmailPreviewTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+        ),
+        ['content', 'subject'],
+    ),
+    (
+        LetterPreviewTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+            contact_block='((contact_block))',
+        ),
+        ['content', 'subject', 'contact_block'],
+    ),
+    (
+        LetterImageTemplate(
+            {"content": "((content))", "subject": "((subject))"},
+            contact_block='((contact_block))',
+            image_url='http://example.com',
+            page_count=99,
+        ),
+        ['content', 'subject', 'contact_block'],
+    ),
+    (
+        LetterDVLATemplate(
+            {"content": "((content))", "subject": "((subject))"},
+            contact_block='((contact_block))',
+            notification_reference='foo',
+        ),
+        ['content', 'subject', 'contact_block'],
+    ),
+])
+def test_templates_extract_placeholders(
+    template_instance,
+    expected_placeholders,
+):
+    assert template_instance.placeholders == set(expected_placeholders)
+
+
 def test_email_preview_escapes_html_in_from_name():
     template = EmailPreviewTemplate(
         {'content': 'content', 'subject': 'subject'},
