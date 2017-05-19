@@ -25,6 +25,7 @@ def test_international_billing_rates_are_in_correct_format(country_prefix, value
     assert all(isinstance(country, str) for country in values['names'])
 
     assert isinstance(values['attributes'], dict)
+    assert values['attributes']['dlr'] is None or isinstance(values['attributes']['dlr'], str)
 
 
 def test_country_codes():

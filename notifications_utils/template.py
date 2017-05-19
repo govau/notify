@@ -300,8 +300,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         admin_base_url='http://localhost:6012',
         logo_file_name='hm-government.svg',
     ):
-        super().__init__(template, values)
         self.contact_block = (contact_block or '').strip()
+        super().__init__(template, values)
         self.admin_base_url = admin_base_url
         self.logo_file_name = logo_file_name
 
@@ -338,10 +338,18 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 nl2br
             ).as_string,
-            'contact_block': strip_pipes('<br/>'.join(
-                line.strip()
-                for line in self.contact_block.split('\n')
-            )),
+            'contact_block': Take.as_field(
+                '\n'.join(
+                    line.strip()
+                    for line in self.contact_block.split('\n')
+                ),
+                self.values,
+                html='escape',
+            ).then(
+                nl2br
+            ).then(
+                strip_pipes
+            ).as_string,
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
@@ -354,6 +362,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         ).then(
             strip_dvla_markup
         ).as_string
+
+    @property
+    def placeholders(self):
+        return super().placeholders | Field(self.contact_block).placeholders
 
     @property
     def values_with_default_optional_address_lines(self):
@@ -372,7 +384,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         }
 
 
-class LetterImageTemplate(WithSubjectTemplate):
+class LetterImageTemplate(LetterPreviewTemplate):
 
     jinja_template = template_env.get_template('letter_image_template.jinja2')
 
@@ -382,8 +394,9 @@ class LetterImageTemplate(WithSubjectTemplate):
         values=None,
         image_url=None,
         page_count=None,
+        contact_block=None,
     ):
-        super().__init__(template, values)
+        super().__init__(template, values, contact_block=contact_block)
         if not image_url:
             raise TypeError('image_url is required')
         if not page_count:
@@ -460,7 +473,9 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             ADDITIONAL_LINE_10 = [
                 line.strip()
                 for line in
-                (self.contact_block.split('\n') + ([''] * 10))
+                ((
+                    Take.as_field(self.contact_block, self.values, html='strip_dvla_markup')
+                ).as_string.split('\n') + ([''] * 10))
             ][:10]
         TO_NAME_1,\
             _,\
