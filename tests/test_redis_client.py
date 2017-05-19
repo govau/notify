@@ -4,7 +4,8 @@ from freezegun import freeze_time
 
 from notifications_utils.clients.redis import (
     daily_limit_cache_key,
-    rate_limit_cache_key
+    rate_limit_cache_key,
+    sms_billable_units_cache_key
 )
 from notifications_utils.clients.redis.redis_client import RedisClient
 
@@ -106,6 +107,10 @@ def test_should_build_cache_key_service_and_action(sample_service):
 
 def test_should_build_daily_limit_cache_key(sample_service):
     assert rate_limit_cache_key(sample_service.id, 'TEST') == '{}-TEST'.format(sample_service.id)
+
+
+def test_should_build_sms_billable_units_cache_key(sample_service):
+    assert sms_billable_units_cache_key(sample_service.id) == '{}-sms_billable_units'.format(sample_service.id)
 
 
 def test_decrement_hash_value_should_decrement_value_by_one_for_key(mocked_redis_client):
