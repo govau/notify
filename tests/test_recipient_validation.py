@@ -17,6 +17,7 @@ from notifications_utils.recipients import (
     normalise_phone_number,
     international_phone_info,
     get_international_phone_info,
+    format_phone_number_human_readable,
 )
 
 
@@ -351,3 +352,18 @@ def test_validates_against_whitelist_of_phone_numbers(phone_number):
 @pytest.mark.parametrize("email_address", valid_email_addresses)
 def test_validates_against_whitelist_of_email_addresses(email_address):
     assert not allowed_to_send_to(email_address, ['very_special_and_unique@example.com'])
+
+
+@pytest.mark.parametrize("phone_number, expected_formatted", [
+    ('07900900123', '07900 900 123'),  # UK
+    ('20-12-1234-1234', '+20 121 234 1234'),  # Egypt
+    ('00201212341234', '+20 121 234 1234'),  # Egypt
+    ('1664000000000', '+1664 000 000 000'),  # Montserrat
+    ('71234567890', '+7 123 456 7890'),  # Russia
+    ('1-202-555-0104', '+1 202 555 0104'),  # USA
+    ('+23051234567', '+230 512 345 67'),  # Mauritius
+    ('1-40604', '+1 406 04'),  # USA shortcode
+    ('33(0)1 12 34 56 78 90 12 34', '+33 011 234 5678901234'),  # Long number
+])
+def test_get_international_info(phone_number, expected_formatted):
+    assert format_phone_number_human_readable(phone_number) == expected_formatted

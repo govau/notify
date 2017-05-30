@@ -545,6 +545,23 @@ def format_recipient(recipient):
     return recipient
 
 
+def format_phone_number_human_readable(phone_number):
+
+    phone_number = normalise_phone_number(phone_number)
+    international_phone_info = get_international_phone_info(phone_number)
+    prefix_length = len(international_phone_info.country_prefix)
+
+    if not international_phone_info.international:
+        return '07{} {} {}'.format(*re.findall('...', phone_number[1:]))
+    else:
+        return '+{} {} {} {}'.format(
+            international_phone_info.country_prefix,
+            phone_number[prefix_length:prefix_length + 3],
+            phone_number[prefix_length + 3:prefix_length + 6],
+            phone_number[prefix_length + 6:],
+        ).strip()
+
+
 def allowed_to_send_to(recipient, whitelist):
     return format_recipient(recipient) in [
         format_recipient(recipient) for recipient in whitelist
