@@ -355,15 +355,18 @@ def test_validates_against_whitelist_of_email_addresses(email_address):
 
 
 @pytest.mark.parametrize("phone_number, expected_formatted", [
-    ('07900900123', '07900 900 123'),  # UK
+    ('07900900123', '07900 900123'),  # UK
+    ('+44(0)7900900123', '07900 900123'),  # UK
+    ('447900900123', '07900 900123'),  # UK
     ('20-12-1234-1234', '+20 121 234 1234'),  # Egypt
     ('00201212341234', '+20 121 234 1234'),  # Egypt
-    ('1664000000000', '+1664 000 000 000'),  # Montserrat
-    ('71234567890', '+7 123 456 7890'),  # Russia
-    ('1-202-555-0104', '+1 202 555 0104'),  # USA
-    ('+23051234567', '+230 512 345 67'),  # Mauritius
-    ('1-40604', '+1 406 04'),  # USA shortcode
-    ('33(0)1 12 34 56 78 90 12 34', '+33 011 234 5678901234'),  # Long number
+    ('1664 0000000', '+1 664-000-0000'),  # Montserrat
+    ('7 499 1231212', '+7 499 123-12-12'),  # Moscow (Russia)
+    ('1-202-555-0104', '+1 202-555-0104'),  # Washington DC (USA)
+    ('+23051234567', '+230 5123 4567'),  # Mauritius
+    ('1-40604', '+1 40604'),  # USA shortcode
+    ('33(0)1 12345678', '+33 1 12 34 56 78'),  # Paris (France)
+    ('33(0)1 12 34 56 78 90 12 34', '+33 112345678901234'),  # Long, not real, number
 ])
 def test_get_international_info(phone_number, expected_formatted):
     assert format_phone_number_human_readable(phone_number) == expected_formatted

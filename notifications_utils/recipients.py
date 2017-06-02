@@ -1,6 +1,7 @@
 import re
 import sys
 import csv
+import phonenumbers
 from contextlib import suppress
 from functools import lru_cache, partial
 from collections import OrderedDict, namedtuple
@@ -547,19 +548,17 @@ def format_recipient(recipient):
 
 def format_phone_number_human_readable(phone_number):
 
-    phone_number = normalise_phone_number(phone_number)
+    phone_number = validate_phone_number(phone_number, international=True)
     international_phone_info = get_international_phone_info(phone_number)
-    prefix_length = len(international_phone_info.country_prefix)
 
-    if not international_phone_info.international:
-        return '07{} {} {}'.format(*re.findall('...', phone_number[1:]))
-    else:
-        return '+{} {} {} {}'.format(
-            international_phone_info.country_prefix,
-            phone_number[prefix_length:prefix_length + 3],
-            phone_number[prefix_length + 3:prefix_length + 6],
-            phone_number[prefix_length + 6:],
-        ).strip()
+    return phonenumbers.format_number(
+        phonenumbers.parse('+' + phone_number, None),
+        (
+            phonenumbers.PhoneNumberFormat.INTERNATIONAL
+            if international_phone_info.international
+            else phonenumbers.PhoneNumberFormat.NATIONAL
+        )
+    )
 
 
 def allowed_to_send_to(recipient, whitelist):
