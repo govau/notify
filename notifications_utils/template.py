@@ -151,9 +151,11 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         values=None,
         prefix=None,
         sender=None,
-        show_recipient=False
+        show_recipient=False,
+        downgrade_non_gsm_characters=True,
     ):
         self.show_recipient = show_recipient
+        self.downgrade_non_gsm_characters = downgrade_non_gsm_characters
         super().__init__(template, values, prefix, sender)
 
     def __str__(self):
@@ -166,7 +168,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
             ).then(
                 add_prefix, (escape_html(self.prefix) or None) if not self.sender else None
             ).then(
-                gsm_encode
+                gsm_encode if self.downgrade_non_gsm_characters else str
             ).then(
                 nl2br
             ).as_string
