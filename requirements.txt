@@ -9,3 +9,4 @@ statsd==3.2.1
 Flask-Redis==0.3.0
 boto3==1.4.4
 pyyaml==3.12
+phonenumbers==8.5.0

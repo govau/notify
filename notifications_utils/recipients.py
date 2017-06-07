@@ -1,6 +1,7 @@
 import re
 import sys
 import csv
+import phonenumbers
 from contextlib import suppress
 from functools import lru_cache, partial
 from collections import OrderedDict, namedtuple
@@ -543,6 +544,21 @@ def format_recipient(recipient):
     with suppress(InvalidEmailError):
         return validate_and_format_email_address(recipient)
     return recipient
+
+
+def format_phone_number_human_readable(phone_number):
+
+    phone_number = validate_phone_number(phone_number, international=True)
+    international_phone_info = get_international_phone_info(phone_number)
+
+    return phonenumbers.format_number(
+        phonenumbers.parse('+' + phone_number, None),
+        (
+            phonenumbers.PhoneNumberFormat.INTERNATIONAL
+            if international_phone_info.international
+            else phonenumbers.PhoneNumberFormat.NATIONAL
+        )
+    )
 
 
 def allowed_to_send_to(recipient, whitelist):
