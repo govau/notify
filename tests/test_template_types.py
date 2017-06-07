@@ -253,6 +253,17 @@ def test_sms_messages_downgrade_non_gsm(mock_gsm_encode, template_class):
     mock_gsm_encode.assert_called_once_with('Service name: Message')
 
 
+@mock.patch('notifications_utils.template.gsm_encode', return_value='downgraded')
+def test_sms_messages_downgrade_non_gsm(mock_gsm_encode):
+    template = str(SMSPreviewTemplate(
+        {'content': '😎'},
+        prefix='👉',
+        downgrade_non_gsm_characters=False,
+    ))
+    assert '👉: 😎' in str(template)
+    assert mock_gsm_encode.called is False
+
+
 @mock.patch('notifications_utils.template.nl2br')
 def test_sms_preview_adds_newlines(nl2br):
     content = "the\nquick\n\nbrown fox"
