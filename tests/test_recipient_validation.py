@@ -343,6 +343,27 @@ def test_validate_address_allows_any_non_empty_value(column):
     assert validate_recipient('any', 'letter', column=column) == 'any'
 
 
+@pytest.mark.parametrize('column', [
+    'address_line_1',
+    'address_line_2',
+    'address_line_3',
+    'address_line_4',
+    'address_line_5',
+    'address_line_6',
+    'postcode',
+])
+def test_non_ascii_address_line_raises_invalid_address_error(column):
+    invalid_address = u'\u041F\u0435\u0442\u044F'
+    with pytest.raises(InvalidAddressError) as e:
+        validate_recipient(invalid_address, 'letter', column=column)
+    assert str(e.value) == u'Can’t include \u041F, \u0435, \u0442 or \u044F'
+
+
+def test_valid_address_line_does_not_raise_error():
+    invalid_address = u'Fran\u00e7oise'
+    assert validate_recipient(invalid_address, 'letter', column='address_line_1')
+
+
 @pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
 def test_validates_against_whitelist_of_phone_numbers(phone_number):
     assert allowed_to_send_to(phone_number, ['07123456789', '07700900460', 'test@example.com'])
