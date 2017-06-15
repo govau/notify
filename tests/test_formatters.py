@@ -11,6 +11,7 @@ from notifications_utils.formatters import (
     formatted_list,
     strip_dvla_markup,
     strip_pipes,
+    escape_html,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -682,3 +683,11 @@ def test_removing_dvla_markup():
 
 def test_removing_pipes():
     assert strip_pipes('|a|b|c') == 'abc'
+
+
+def test_bleach_doesnt_try_to_make_valid_html_before_cleaning():
+    assert escape_html(
+        "<to cancel daily cat facts reply 'cancel'>"
+    ) == (
+        "&lt;to cancel daily cat facts reply 'cancel'&gt;"
+    )
