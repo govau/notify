@@ -522,7 +522,7 @@ def validate_and_format_email_address(email_address):
 
 def validate_address(address_line, column):
     if address_line:
-        invalid_chars = sorted(set([c for c in address_line if ord(c) > 255]))
+        invalid_chars = sorted(set(c for c in address_line if ord(c) > 255))
         if invalid_chars:
             raise InvalidAddressError(
                 "Can’t include {}".format(
