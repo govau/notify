@@ -72,6 +72,9 @@ def strip_html(value):
 
 
 def escape_html(value):
+    if not value:
+        return value
+    value = str(value).replace('<', '&lt;')
     return bleach.clean(value, tags=[], strip=False)
 
 
