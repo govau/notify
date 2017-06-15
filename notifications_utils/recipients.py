@@ -522,14 +522,10 @@ def validate_and_format_email_address(email_address):
 
 def validate_address(address_line, column):
     if address_line:
-        def get_invalid_chars(s):
-            invalid_chars = [c for c in s if ord(c) > 255]
-            return sorted(set(invalid_chars))
-
-        invalid_chars = get_invalid_chars(address_line)
-        if len(invalid_chars) > 0:
+        invalid_chars = sorted(set([c for c in address_line if ord(c) > 255]))
+        if invalid_chars:
             raise InvalidAddressError(
-                "Can`t include: {}".format(
+                "Can’t include {}".format(
                     formatted_list(items=invalid_chars, before_each='', after_each='', conjunction='or')))
 
     if Columns.make_key(column) in Columns.from_keys(optional_address_columns).keys():

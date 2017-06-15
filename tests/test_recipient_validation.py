@@ -356,7 +356,7 @@ def test_non_ascii_address_line_raises_invalid_address_error(column):
     invalid_address = u'\u041F\u0435\u0442\u044F'
     with pytest.raises(InvalidAddressError) as e:
         validate_recipient(invalid_address, 'letter', column=column)
-    assert str(e.value) == u'Can`t include: \u041F, \u0435, \u0442 or \u044F'
+    assert str(e.value) == u'Can’t include \u041F, \u0435, \u0442 or \u044F'
 
 
 def test_valid_address_line_does_not_raise_error():
