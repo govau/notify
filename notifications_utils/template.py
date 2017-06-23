@@ -39,6 +39,7 @@ class Template():
         self,
         template,
         values=None,
+        redact_missing_personalisation=False,
     ):
         if not isinstance(template, dict):
             raise TypeError('Template must be a dict')
@@ -50,14 +51,18 @@ class Template():
         self.values = values
         self.template_type = template.get('template_type', None)
         self._template = template
+        self.redact_missing_personalisation = redact_missing_personalisation
 
     def __repr__(self):
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)
 
     def __str__(self):
-        return Markup(
-            Field(self.content, self.values, html='escape')
-        )
+        return Markup(Field(
+            self.content,
+            self.values,
+            html='escape',
+            redact_missing_personalisation=self.redact_missing_personalisation
+        ))
 
     @property
     def values(self):
@@ -153,10 +158,12 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         sender=None,
         show_recipient=False,
         downgrade_non_gsm_characters=True,
+        redact_missing_personalisation=False,
     ):
         self.show_recipient = show_recipient
         self.downgrade_non_gsm_characters = downgrade_non_gsm_characters
         super().__init__(template, values, prefix, sender)
+        self.redact_missing_personalisation = redact_missing_personalisation
 
     def __str__(self):
 
@@ -164,7 +171,10 @@ class SMSPreviewTemplate(SMSMessageTemplate):
             'recipient': Field('((phone number))', self.values, with_brackets=False, html='escape'),
             'show_recipient': self.show_recipient,
             'body': Take.as_field(
-                self.content, self.values, html='escape'
+                self.content,
+                self.values,
+                html='escape',
+                redact_missing_personalisation=self.redact_missing_personalisation,
             ).then(
                 add_prefix, (escape_html(self.prefix) or None) if not self.sender else None
             ).then(
@@ -180,14 +190,20 @@ class WithSubjectTemplate(Template):
     def __init__(
         self,
         template,
-        values=None
+        values=None,
+        redact_missing_personalisation=False,
     ):
         self._subject = template['subject']
-        super().__init__(template, values)
+        super().__init__(template, values, redact_missing_personalisation=redact_missing_personalisation)
 
     @property
     def subject(self):
-        return Markup(Field(self._subject, self.values, html='escape'))
+        return Markup(Field(
+            self._subject,
+            self.values,
+            html='escape',
+            redact_missing_personalisation=self.redact_missing_personalisation,
+        ))
 
     @subject.setter
     def subject(self, value):
@@ -209,7 +225,12 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
 
     @property
     def subject(self):
-        return Markup(Field(self._subject, self.values, html='passthrough', redact_missing=self.redact_missing))
+        return Markup(Field(
+            self._subject,
+            self.values,
+            html='passthrough',
+            redact_missing_personalisation=self.redact_missing_personalisation
+        ))
 
 
 class HTMLEmailTemplate(WithSubjectTemplate):
@@ -258,9 +279,10 @@ class EmailPreviewTemplate(WithSubjectTemplate):
         from_name=None,
         from_address=None,
         expanded=False,
-        show_recipient=True
+        show_recipient=True,
+        redact_missing_personalisation=False,
     ):
-        super().__init__(template, values)
+        super().__init__(template, values, redact_missing_personalisation=redact_missing_personalisation)
         self.from_name = from_name
         self.from_address = from_address
         self.expanded = expanded
@@ -269,7 +291,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
     def __str__(self):
         return Markup(self.jinja_template.render({
             'body': get_html_email_body(
-                self.content, self.values
+                self.content, self.values, redact_missing_personalisation=self.redact_missing_personalisation
             ),
             'subject': self.subject,
             'from_name': escape_html(self.from_name),
@@ -281,7 +303,12 @@ class EmailPreviewTemplate(WithSubjectTemplate):
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values, html='escape'))
+        return str(Field(
+            self._subject,
+            self.values,
+            html='escape',
+            redact_missing_personalisation=self.redact_missing_personalisation
+        ))
 
 
 class LetterPreviewTemplate(WithSubjectTemplate):
@@ -305,9 +332,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
         contact_block=None,
         admin_base_url='http://localhost:6012',
         logo_file_name='hm-government.svg',
+        redact_missing_personalisation=False,
     ):
         self.contact_block = (contact_block or '').strip()
-        super().__init__(template, values)
+        super().__init__(template, values, redact_missing_personalisation=redact_missing_personalisation)
         self.admin_base_url = admin_base_url
         self.logo_file_name = logo_file_name
 
@@ -317,7 +345,11 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             'logo_file_name': self.logo_file_name,
             'subject': self.subject,
             'message': Take.as_field(
-                strip_dvla_markup(self.content), self.values, html='escape', markdown_lists=True
+                strip_dvla_markup(self.content),
+                self.values,
+                html='escape',
+                markdown_lists=True,
+                redact_missing_personalisation=self.redact_missing_personalisation,
             ).then(
                 strip_pipes
             ).then(
@@ -350,6 +382,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                     for line in self.contact_block.split('\n')
                 ),
                 self.values,
+                redact_missing_personalisation=self.redact_missing_personalisation,
                 html='escape',
             ).then(
                 nl2br
@@ -362,7 +395,10 @@ class LetterPreviewTemplate(WithSubjectTemplate):
     @property
     def subject(self):
         return Take.as_field(
-            self._subject, self.values, html='escape'
+            self._subject,
+            self.values,
+            redact_missing_personalisation=self.redact_missing_personalisation,
+            html='escape',
         ).then(
             strip_pipes
         ).then(
@@ -573,10 +609,14 @@ def get_sms_fragment_count(character_count):
     return 1 if character_count <= 160 else math.ceil(float(character_count) / 153)
 
 
-def get_html_email_body(template_content, template_values):
+def get_html_email_body(template_content, template_values, redact_missing_personalisation=False):
 
     return Take.as_field(
-        template_content, template_values, html='escape', markdown_lists=True
+        template_content,
+        template_values,
+        html='escape',
+        markdown_lists=True,
+        redact_missing_personalisation=redact_missing_personalisation,
     ).then(
         unlink_govuk_escaped
     ).then(
