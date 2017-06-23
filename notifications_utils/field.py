@@ -25,7 +25,14 @@ class Field():
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
 
-    def __init__(self, content, values=None, with_brackets=True, html='strip', markdown_lists=False):
+    def __init__(
+        self,
+        content,
+        values=None,
+        with_brackets=True,
+        html='strip',
+        markdown_lists=False,
+    ):
         self.content = content
         self.values = values
         self.markdown_lists = markdown_lists
