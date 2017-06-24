@@ -55,8 +55,8 @@ class Template():
         return "{}(\"{}\", {})".format(self.__class__.__name__, self.content, self.values)
 
     def __str__(self):
-        return str(
-            Field(self.content, self.values)
+        return Markup(
+            Field(self.content, self.values, html='escape')
         )
 
     @property
@@ -187,7 +187,7 @@ class WithSubjectTemplate(Template):
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values, html='passthrough'))
+        return Markup(Field(self._subject, self.values, html='escape'))
 
     @subject.setter
     def subject(self, value):
@@ -206,6 +206,10 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
         ).then(
             unlink_govuk_escaped
         ).as_string
+
+    @property
+    def subject(self):
+        return Markup(Field(self._subject, self.values, html='passthrough', redact_missing=self.redact_missing))
 
 
 class HTMLEmailTemplate(WithSubjectTemplate):
