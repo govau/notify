@@ -116,7 +116,7 @@ def test_replacement_of_placeholders(template_content, data, expected):
         (
             "((code)) is your security code",
             {},
-            "<span class='placeholder-redacted'>redacted</span> is your security code"
+            "<span class='placeholder-redacted'>hidden</span> is your security code"
         ),
         (
             "Hey ((name)), click http://example.com/reset-password/?token=((token))",
@@ -124,7 +124,7 @@ def test_replacement_of_placeholders(template_content, data, expected):
             (
                 "Hey Example, click "
                 "http://example.com/reset-password/?token="
-                "<span class='placeholder-redacted'>redacted</span>"
+                "<span class='placeholder-redacted'>hidden</span>"
             )
         ),
     ]

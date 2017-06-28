@@ -24,7 +24,7 @@ class Field():
     placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
-    placeholder_tag_redacted = "<span class='placeholder-redacted'>redacted</span>"
+    placeholder_tag_redacted = "<span class='placeholder-redacted'>hidden</span>"
 
     def __init__(
         self,
