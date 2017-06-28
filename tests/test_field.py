@@ -107,6 +107,33 @@ def test_replacement_of_placeholders(template_content, data, expected):
 
 
 @pytest.mark.parametrize(
+    "template_content,data,expected", [
+        (
+            "((code)) is your security code",
+            {"code": "12345"},
+            "12345 is your security code"
+        ),
+        (
+            "((code)) is your security code",
+            {},
+            "<span class='placeholder-redacted'>hidden</span> is your security code"
+        ),
+        (
+            "Hey ((name)), click http://example.com/reset-password/?token=((token))",
+            {'name': 'Example'},
+            (
+                "Hey Example, click "
+                "http://example.com/reset-password/?token="
+                "<span class='placeholder-redacted'>hidden</span>"
+            )
+        ),
+    ]
+)
+def test_optional_redacting_of_missing_values(template_content, data, expected):
+    assert str(Field(template_content, data, redact_missing_personalisation=True)) == expected
+
+
+@pytest.mark.parametrize(
     "content,expected", [
         (
             "((colour))",

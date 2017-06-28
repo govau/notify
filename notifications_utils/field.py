@@ -24,8 +24,17 @@ class Field():
     placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
     optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
+    placeholder_tag_redacted = "<span class='placeholder-redacted'>hidden</span>"
 
-    def __init__(self, content, values=None, with_brackets=True, html='strip', markdown_lists=False):
+    def __init__(
+        self,
+        content,
+        values=None,
+        with_brackets=True,
+        html='strip',
+        markdown_lists=False,
+        redact_missing_personalisation=False,
+    ):
         self.content = content
         self.values = values
         self.markdown_lists = markdown_lists
@@ -37,6 +46,7 @@ class Field():
             'passthrough': str,
             'strip_dvla_markup': strip_dvla_markup,
         }[html]
+        self.redact_missing_personalisation = redact_missing_personalisation
 
     def __str__(self):
         if self.values:
@@ -60,6 +70,11 @@ class Field():
         return match[0] + match[2]
 
     def format_match(self, match):
+        if self.redact_missing_personalisation:
+            return self.placeholder_tag_redacted.format(
+                self.sanitizer(match.group(1)),
+                self.sanitizer(match.group(3)) or ''
+            )
         if match.group(2) and match.group(3):
             return self.optional_placeholder_tag.format(
                 self.sanitizer(match.group(1)),

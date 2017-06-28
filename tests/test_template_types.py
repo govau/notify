@@ -471,15 +471,21 @@ def test_subject_line_gets_replaced():
 
 
 @pytest.mark.parametrize('template_class, extra_args, expected_field_calls', [
+    (Template, {}, [
+        mock.call('content', {}, html='escape', redact_missing_personalisation=False),
+    ]),
+    (WithSubjectTemplate, {}, [
+        mock.call('content', {}, html='escape', redact_missing_personalisation=False),
+    ]),
     (PlainTextEmailTemplate, {}, [
         mock.call('content', {}, html='passthrough', markdown_lists=True)
     ]),
     (HTMLEmailTemplate, {}, [
-        mock.call('content', {}, html='escape', markdown_lists=True)
+        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False)
     ]),
     (EmailPreviewTemplate, {}, [
-        mock.call('content', {}, html='escape', markdown_lists=True),
-        mock.call('subject', {}, html='escape'),
+        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
+        mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
         mock.call('((email address))', {}, with_brackets=False),
     ]),
     (SMSMessageTemplate, {}, [
@@ -487,11 +493,11 @@ def test_subject_line_gets_replaced():
     ]),
     (SMSPreviewTemplate, {}, [
         mock.call('((phone number))', {}, with_brackets=False, html='escape'),
-        mock.call('content', {}, html='escape'),
+        mock.call('content', {}, html='escape', redact_missing_personalisation=False),
     ]),
     (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
-        mock.call('subject', {}, html='escape'),
-        mock.call('content', {}, html='escape', markdown_lists=True),
+        mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
+        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
         mock.call((
             '((address line 1))\n'
             '((address line 2))\n'
@@ -501,7 +507,7 @@ def test_subject_line_gets_replaced():
             '((address line 6))\n'
             '((postcode))'
         ), {}, with_brackets=False, html='escape'),
-        mock.call('www.gov.uk', {}, html='escape'),
+        mock.call('www.gov.uk', {}, html='escape', redact_missing_personalisation=False),
     ]),
     (LetterImageTemplate, {'image_url': 'http://example.com', 'page_count': 1}, [
     ]),
@@ -525,10 +531,39 @@ def test_subject_line_gets_replaced():
         mock.call('subject', {}, html='strip_dvla_markup'),
         mock.call('content', {}, markdown_lists=True, html='strip_dvla_markup'),
     ]),
+    (Template, {'redact_missing_personalisation': True}, [
+        mock.call('content', {}, html='escape', redact_missing_personalisation=True),
+    ]),
+    (WithSubjectTemplate, {'redact_missing_personalisation': True}, [
+        mock.call('content', {}, html='escape', redact_missing_personalisation=True),
+    ]),
+    (EmailPreviewTemplate, {'redact_missing_personalisation': True}, [
+        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=True),
+        mock.call('subject', {}, html='escape', redact_missing_personalisation=True),
+        mock.call('((email address))', {}, with_brackets=False),
+    ]),
+    (SMSPreviewTemplate, {'redact_missing_personalisation': True}, [
+        mock.call('((phone number))', {}, with_brackets=False, html='escape'),
+        mock.call('content', {}, html='escape', redact_missing_personalisation=True),
+    ]),
+    (LetterPreviewTemplate, {'contact_block': 'www.gov.uk', 'redact_missing_personalisation': True}, [
+        mock.call('subject', {}, html='escape', redact_missing_personalisation=True),
+        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=True),
+        mock.call((
+            '((address line 1))\n'
+            '((address line 2))\n'
+            '((address line 3))\n'
+            '((address line 4))\n'
+            '((address line 5))\n'
+            '((address line 6))\n'
+            '((postcode))'
+        ), {}, with_brackets=False, html='escape'),
+        mock.call('www.gov.uk', {}, html='escape', redact_missing_personalisation=True),
+    ]),
 ])
 @mock.patch('notifications_utils.template.Field.__init__', return_value=None)
 @mock.patch('notifications_utils.template.Field.__str__', return_value='1\n2\n3\n4\n5\n6\n7\n8')
-def test_templates_handle_html(
+def test_templates_handle_html_and_redacting(
     mock_field_str,
     mock_field_init,
     template_class,
@@ -537,6 +572,18 @@ def test_templates_handle_html(
 ):
     assert str(template_class({'content': 'content', 'subject': 'subject'}, **extra_args))
     assert mock_field_init.call_args_list == expected_field_calls
+
+
+def test_basic_templates_return_markup():
+
+    template_dict = {'content': 'content', 'subject': 'subject'}
+
+    for output in [
+        str(Template(template_dict)),
+        str(WithSubjectTemplate(template_dict)),
+        WithSubjectTemplate(template_dict).subject,
+    ]:
+        assert isinstance(output, Markup)
 
 
 @pytest.mark.parametrize('template_instance, expected_placeholders', [
