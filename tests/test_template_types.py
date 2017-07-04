@@ -1245,8 +1245,8 @@ def test_letter_address_format(address, expected):
         (
             'Here is a list of bullets:'
             '<cr>'
-            '<op><bul><tab>one  '
-            '<op><bul><tab>two  '
+            '<op><bul><tab>one'
+            '<op><bul><tab>two'
             '<op><bul><tab>three'
             '<p><cr>'
             'New paragraph<cr><cr>'
@@ -1263,8 +1263,8 @@ def test_letter_address_format(address, expected):
         (
             '<h2>List title:<normal>'
             '<cr>'
-            '<op><bul><tab>one  '
-            '<op><bul><tab>two  '
+            '<op><bul><tab>one'
+            '<op><bul><tab>two'
             '<op><bul><tab>three'
             '<p><cr>'
         )
@@ -1280,8 +1280,8 @@ def test_letter_address_format(address, expected):
         (
             'Here’s an ordered list:'
             '<cr><cr>'
-            '<np>one  '
-            '<np>two  '
+            '<np>one'
+            '<np>two'
             '<np>three'
             '<p><cr>'
         )

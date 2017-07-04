@@ -550,8 +550,6 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             Take.as_field(
                 self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
             ).then(
-                prepare_newlines_for_markdown
-            ).then(
                 notify_letter_dvla_markdown
             ).then(
                 fix_extra_newlines_in_dvla_lists
