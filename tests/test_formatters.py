@@ -437,6 +437,29 @@ def test_paragraphs(markdown_function, expected):
     ) == expected
 
 
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        '<p>before</p><p>after</p>'
+    ],
+    [
+        notify_letter_dvla_markdown,
+        'before<cr><cr>after<cr><cr>'
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">before</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">after</p>'
+        )
+    ]
+))
+def test_multiple_newlines_get_truncated(markdown_function, expected):
+    assert markdown_function(
+        'before\n\n\n\n\n\nafter'
+    ) == expected
+
+
 @pytest.mark.parametrize('markdown_function', (
     notify_letter_preview_markdown, notify_letter_dvla_markdown, notify_email_markdown
 ))
