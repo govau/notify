@@ -444,7 +444,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p>line one\n'
+            '<p>line one<br/>'
             'line two</p>'
             '<p>new paragraph</p>'
         )
@@ -452,7 +452,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_dvla_markdown,
         (
-            'line one\n'
+            'line one<cr>'
             'line two<cr><cr>'
             'new paragraph<cr><cr>'
         )
@@ -460,7 +460,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_email_markdown,
         (
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one<br/>'
             'line two</p>'
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
         )

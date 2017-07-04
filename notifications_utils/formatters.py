@@ -326,6 +326,18 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
         )
 
 
-notify_email_markdown = mistune.Markdown(renderer=NotifyEmailMarkdownRenderer())
-notify_letter_preview_markdown = mistune.Markdown(renderer=NotifyLetterMarkdownPreviewRenderer())
-notify_letter_dvla_markdown = mistune.Markdown(renderer=NotifyLetterMarkdownDVLARenderer())
+notify_email_markdown = mistune.Markdown(
+    renderer=NotifyEmailMarkdownRenderer(),
+    hard_wrap=True,
+    use_xhtml=False,
+)
+notify_letter_preview_markdown = mistune.Markdown(
+    renderer=NotifyLetterMarkdownPreviewRenderer(),
+    hard_wrap=True,
+    use_xhtml=False,
+)
+notify_letter_dvla_markdown = mistune.Markdown(
+    renderer=NotifyLetterMarkdownDVLARenderer(),
+    hard_wrap=True,
+    use_xhtml=False,
+)
