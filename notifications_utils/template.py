@@ -619,7 +619,5 @@ def get_html_email_body(template_content, template_values, redact_missing_person
     ).then(
         unlink_govuk_escaped
     ).then(
-        prepare_newlines_for_markdown
-    ).then(
         notify_email_markdown
     ).as_string

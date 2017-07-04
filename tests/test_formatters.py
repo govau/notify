@@ -126,12 +126,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in str(HTMLEmailTemplate({'content': '''
-        You’ve been invited to a service. Click this link:
-        https://service.example.com/accept_invite/a1b2c3d4
-
-        Thanks
-    ''', 'subject': ''}))
+    ) in str(HTMLEmailTemplate({'content': (
+        'You’ve been invited to a service. Click this link:\n'
+        'https://service.example.com/accept_invite/a1b2c3d4\n'
+        '\n'
+        'Thanks\n'
+    ), 'subject': ''}))
 
 
 def test_preserves_whitespace_when_making_links():
