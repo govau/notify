@@ -356,8 +356,6 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 strip_pipes
             ).then(
-                prepare_newlines_for_markdown
-            ).then(
                 notify_letter_preview_markdown
             ).as_string,
             'address': Take.as_field(
