@@ -6,7 +6,6 @@ from notifications_utils.formatters import (
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
-    prepare_newlines_for_markdown,
     gsm_encode,
     formatted_list,
     strip_dvla_markup,
@@ -148,43 +147,6 @@ def test_preserves_whitespace_when_making_links():
         'https://example.com\n'
         '\n'
         'Next paragraph'
-    )
-
-
-def test_add_spaces_after_single_newlines_so_markdown_converts_them():
-    converted = prepare_newlines_for_markdown(
-        'Paragraph one\n'
-        '\n'
-        'Paragraph two has linebreaks\n'
-        'This is the second line\n'
-        'The third has 2 spaces after it  \n'
-        'And this is the fourth\n'
-        '\n'
-        'Next paragraph'
-    )
-    assert converted == (
-        'Paragraph one\n'
-        '\n'
-        'Paragraph two has linebreaks  \n'
-        'This is the second line  \n'
-        'The third has 2 spaces after it  \n'
-        'And this is the fourth\n'
-        '\n'
-        'Next paragraph'
-    )
-    assert notify_email_markdown(converted) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Paragraph one'
-        '</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Paragraph two has linebreaks<br/>'
-        'This is the second line<br/>'
-        'The third has 2 spaces after it<br/>'
-        'And this is the fourth'
-        '</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Next paragraph'
-        '</p>'
     )
 
 

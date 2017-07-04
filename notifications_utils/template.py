@@ -14,7 +14,6 @@ from notifications_utils.formatters import (
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
-    prepare_newlines_for_markdown,
     remove_empty_lines,
     gsm_encode,
     escape_html,

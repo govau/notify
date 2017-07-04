@@ -14,11 +14,6 @@ govuk_not_a_link = re.compile(
     re.IGNORECASE
 )
 
-single_newlines = re.compile(
-    r'^(.+)\n(?=[^\n])',
-    re.MULTILINE
-)
-
 dvla_markup_tags = re.compile(
     str('|'.join('\<{}\>'.format(tag) for tag in {
         'cr', 'h1', 'h2', 'p', 'normal', 'op', 'np', 'bul', 'tab'
@@ -32,16 +27,6 @@ def unlink_govuk_escaped(message):
         govuk_not_a_link,
         r'\1' + '.\u200B' + r'\2',  # Unicode zero-width space
         message
-    )
-
-
-def prepare_newlines_for_markdown(text):
-    return re.sub(
-        single_newlines,
-        lambda match: '{}  \n'.format(
-            match.group(1).strip()
-        ),
-        text
     )
 
 
