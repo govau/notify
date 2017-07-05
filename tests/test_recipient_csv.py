@@ -647,16 +647,19 @@ def test_detects_rows_which_result_in_overly_long_messages():
         """
             phone number,placeholder
             07700900460,1
-            07700900461,1234567890
-            07700900462,12345678901
-            07700900463,123456789012345678901234567890
-        """,
+            07700900461,{one_under}
+            07700900462,{exactly}
+            07700900463,{one_over}
+        """.format(
+            one_under='a' * 458,
+            exactly='a' * 459,
+            one_over='a' * 460,
+        ),
         template_type=template.template_type,
-        template=template,
-        sms_character_limit=10
+        template=template
     )
-    assert recipients.rows_with_errors == {2, 3}
-    assert recipients.rows_with_message_too_long == {2, 3}
+    assert recipients.rows_with_errors == {3}
+    assert recipients.rows_with_message_too_long == {3}
     assert recipients.has_errors
 
 
