@@ -181,12 +181,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in str(HTMLEmailTemplate({'content': '''
-        You’ve been invited to a service. Click this link:
-        https://service.example.com/accept_invite/a1b2c3d4
-
-        Thanks
-    ''', 'subject': ''}))
+    ) in str(HTMLEmailTemplate({'content': (
+        'You’ve been invited to a service. Click this link:\n'
+        'https://service.example.com/accept_invite/a1b2c3d4\n'
+        '\n'
+        'Thanks\n'
+    ), 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -276,7 +276,6 @@ def test_sms_preview_adds_newlines(nl2br):
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
 @mock.patch('notifications_utils.template.unlink_govuk_escaped')
 @mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
-@mock.patch('notifications_utils.template.prepare_newlines_for_markdown', return_value='Baz')
 @mock.patch('notifications_utils.template.strip_pipes', side_effect=lambda x: x)
 @pytest.mark.parametrize('values, expected_address', [
     ({}, Markup(
@@ -352,7 +351,6 @@ def test_sms_preview_adds_newlines(nl2br):
 ])
 def test_letter_preview_renderer(
     strip_pipes,
-    prepare_newlines,
     letter_markdown,
     unlink_govuk,
     remove_empty_lines,
@@ -380,8 +378,7 @@ def test_letter_preview_renderer(
         'admin_base_url': 'http://localhost:6012',
         'logo_file_name': expected_logo_file_name,
     })
-    prepare_newlines.assert_called_once_with('Foo')
-    letter_markdown.assert_called_once_with('Baz')
+    letter_markdown.assert_called_once_with(Markup('Foo'))
     unlink_govuk.assert_not_called()
     assert strip_pipes.call_args_list == [
         mock.call('Subject'),
@@ -1248,8 +1245,8 @@ def test_letter_address_format(address, expected):
         (
             'Here is a list of bullets:'
             '<cr>'
-            '<op><bul><tab>one  '
-            '<op><bul><tab>two  '
+            '<op><bul><tab>one'
+            '<op><bul><tab>two'
             '<op><bul><tab>three'
             '<p><cr>'
             'New paragraph<cr><cr>'
@@ -1266,8 +1263,8 @@ def test_letter_address_format(address, expected):
         (
             '<h2>List title:<normal>'
             '<cr>'
-            '<op><bul><tab>one  '
-            '<op><bul><tab>two  '
+            '<op><bul><tab>one'
+            '<op><bul><tab>two'
             '<op><bul><tab>three'
             '<p><cr>'
         )
@@ -1283,8 +1280,8 @@ def test_letter_address_format(address, expected):
         (
             'Here’s an ordered list:'
             '<cr><cr>'
-            '<np>one  '
-            '<np>two  '
+            '<np>one'
+            '<np>two'
             '<np>three'
             '<p><cr>'
         )

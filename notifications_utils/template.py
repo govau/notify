@@ -14,7 +14,6 @@ from notifications_utils.formatters import (
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
-    prepare_newlines_for_markdown,
     remove_empty_lines,
     gsm_encode,
     escape_html,
@@ -356,8 +355,6 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 strip_pipes
             ).then(
-                prepare_newlines_for_markdown
-            ).then(
                 notify_letter_preview_markdown
             ).as_string,
             'address': Take.as_field(
@@ -552,8 +549,6 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             Take.as_field(
                 self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
             ).then(
-                prepare_newlines_for_markdown
-            ).then(
                 notify_letter_dvla_markdown
             ).then(
                 fix_extra_newlines_in_dvla_lists
@@ -622,8 +617,6 @@ def get_html_email_body(template_content, template_values, redact_missing_person
         redact_missing_personalisation=redact_missing_personalisation,
     ).then(
         unlink_govuk_escaped
-    ).then(
-        prepare_newlines_for_markdown
     ).then(
         notify_email_markdown
     ).as_string

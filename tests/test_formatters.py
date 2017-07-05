@@ -6,7 +6,6 @@ from notifications_utils.formatters import (
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_letter_dvla_markdown,
-    prepare_newlines_for_markdown,
     gsm_encode,
     formatted_list,
     strip_dvla_markup,
@@ -126,12 +125,12 @@ def test_HTML_template_has_URLs_replaced_with_links():
         '<a style="word-wrap: break-word;" href="https://service.example.com/accept_invite/a1b2c3d4">'
         'https://service.example.com/accept_invite/a1b2c3d4'
         '</a>'
-    ) in str(HTMLEmailTemplate({'content': '''
-        You’ve been invited to a service. Click this link:
-        https://service.example.com/accept_invite/a1b2c3d4
-
-        Thanks
-    ''', 'subject': ''}))
+    ) in str(HTMLEmailTemplate({'content': (
+        'You’ve been invited to a service. Click this link:\n'
+        'https://service.example.com/accept_invite/a1b2c3d4\n'
+        '\n'
+        'Thanks\n'
+    ), 'subject': ''}))
 
 
 def test_preserves_whitespace_when_making_links():
@@ -148,43 +147,6 @@ def test_preserves_whitespace_when_making_links():
         'https://example.com\n'
         '\n'
         'Next paragraph'
-    )
-
-
-def test_add_spaces_after_single_newlines_so_markdown_converts_them():
-    converted = prepare_newlines_for_markdown(
-        'Paragraph one\n'
-        '\n'
-        'Paragraph two has linebreaks\n'
-        'This is the second line\n'
-        'The third has 2 spaces after it  \n'
-        'And this is the fourth\n'
-        '\n'
-        'Next paragraph'
-    )
-    assert converted == (
-        'Paragraph one\n'
-        '\n'
-        'Paragraph two has linebreaks  \n'
-        'This is the second line  \n'
-        'The third has 2 spaces after it  \n'
-        'And this is the fourth\n'
-        '\n'
-        'Next paragraph'
-    )
-    assert notify_email_markdown(converted) == (
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Paragraph one'
-        '</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Paragraph two has linebreaks<br/>'
-        'This is the second line<br/>'
-        'The third has 2 spaces after it<br/>'
-        'And this is the fourth'
-        '</p>'
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
-        'Next paragraph'
-        '</p>'
     )
 
 
@@ -444,7 +406,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p>line one\n'
+            '<p>line one<br/>'
             'line two</p>'
             '<p>new paragraph</p>'
         )
@@ -452,7 +414,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_dvla_markdown,
         (
-            'line one\n'
+            'line one<cr>'
             'line two<cr><cr>'
             'new paragraph<cr><cr>'
         )
@@ -460,7 +422,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_email_markdown,
         (
-            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one\n'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one<br/>'
             'line two</p>'
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">new paragraph</p>'
         )
@@ -472,6 +434,29 @@ def test_paragraphs(markdown_function, expected):
         'line two\n'
         '\n'
         'new paragraph'
+    ) == expected
+
+
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        '<p>before</p><p>after</p>'
+    ],
+    [
+        notify_letter_dvla_markdown,
+        'before<cr><cr>after<cr><cr>'
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">before</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">after</p>'
+        )
+    ]
+))
+def test_multiple_newlines_get_truncated(markdown_function, expected):
+    assert markdown_function(
+        'before\n\n\n\n\n\nafter'
     ) == expected
 
 
