@@ -1,6 +1,6 @@
 bleach==2.0.0
 mistune==0.7.4
-requests==2.7.0
+requests==2.18.1
 python-json-logger==0.1.4
 Flask>=0.10
 orderedset==2.0
