@@ -236,7 +236,7 @@ class RecipientCSV():
                 index=row_index,
                 message_too_long=bool(
                     self.template and
-                    self.template.content_count > self.character_limit
+                    self.template.is_message_too_long()
                 )
             )
 

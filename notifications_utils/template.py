@@ -104,8 +104,13 @@ class Template():
     def compare_to(self, new):
         return TemplateChange(self, new)
 
+    def is_message_too_long(self):
+        return False
+
 
 class SMSMessageTemplate(Template):
+
+    char_count_limit = 459  # 153 * 3
 
     def __init__(
         self,
@@ -149,6 +154,9 @@ class SMSMessageTemplate(Template):
     @property
     def fragment_count(self):
         return get_sms_fragment_count(self.content_count)
+
+    def is_message_too_long(self):
+        return self.content_count > self.char_count_limit
 
 
 class SMSPreviewTemplate(SMSMessageTemplate):
