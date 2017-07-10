@@ -105,9 +105,9 @@ class RedisClient:
                 self.redis_store.hmset(key, values)
                 return self.redis_store.expire(key, expire_in_seconds)
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, "Error setting key: {} in redis cache".format(key))
 
-    def __handle_exception(self, e, raise_exception):
-        current_app.logger.exception(e)
+    def __handle_exception(self, e, raise_exception, message=None):
+        current_app.logger.exception("{} \n {}".format(message, e))
         if raise_exception:
             raise e
