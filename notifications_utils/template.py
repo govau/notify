@@ -20,6 +20,7 @@ from notifications_utils.formatters import (
     fix_extra_newlines_in_dvla_lists,
     strip_dvla_markup,
     strip_pipes,
+    remove_whitespace_before_commas,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -124,6 +125,8 @@ class SMSMessageTemplate(Template):
             add_prefix, self.prefix
         ).then(
             gsm_encode
+        ).then(
+            remove_whitespace_before_commas
         ).as_string.strip()
 
     @property
@@ -182,6 +185,8 @@ class SMSPreviewTemplate(SMSMessageTemplate):
             ).then(
                 gsm_encode if self.downgrade_non_gsm_characters else str
             ).then(
+                remove_whitespace_before_commas
+            ).then(
                 nl2br
             ).as_string
         }))
@@ -200,12 +205,14 @@ class WithSubjectTemplate(Template):
 
     @property
     def subject(self):
-        return Markup(Field(
+        return Markup(Take.as_field(
             self._subject,
             self.values,
             html='escape',
             redact_missing_personalisation=self.redact_missing_personalisation,
-        ))
+        ).then(
+            remove_whitespace_before_commas
+        ).as_string)
 
     @subject.setter
     def subject(self, value):
@@ -223,16 +230,20 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
             self.content, self.values, html='passthrough', markdown_lists=True
         ).then(
             unlink_govuk_escaped
+        ).then(
+            remove_whitespace_before_commas
         ).as_string
 
     @property
     def subject(self):
-        return Markup(Field(
+        return Markup(Take.as_field(
             self._subject,
             self.values,
             html='passthrough',
             redact_missing_personalisation=self.redact_missing_personalisation
-        ))
+        ).then(
+            remove_whitespace_before_commas
+        ).as_string)
 
 
 class HTMLEmailTemplate(WithSubjectTemplate):
@@ -305,12 +316,14 @@ class EmailPreviewTemplate(WithSubjectTemplate):
 
     @property
     def subject(self):
-        return str(Field(
+        return Take.as_field(
             self._subject,
             self.values,
             html='escape',
             redact_missing_personalisation=self.redact_missing_personalisation
-        ))
+        ).then(
+            remove_whitespace_before_commas
+        ).as_string
 
 
 class LetterPreviewTemplate(WithSubjectTemplate):
@@ -355,6 +368,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 strip_pipes
             ).then(
+                remove_whitespace_before_commas
+            ).then(
                 notify_letter_preview_markdown
             ).as_string,
             'address': Take.as_field(
@@ -374,6 +389,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 remove_empty_lines
             ).then(
+                remove_whitespace_before_commas
+            ).then(
                 nl2br
             ).as_string,
             'contact_block': Take.as_field(
@@ -384,6 +401,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 self.values,
                 redact_missing_personalisation=self.redact_missing_personalisation,
                 html='escape',
+            ).then(
+                remove_whitespace_before_commas
             ).then(
                 nl2br
             ).then(
@@ -399,6 +418,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             self.values,
             redact_missing_personalisation=self.redact_missing_personalisation,
             html='escape',
+        ).then(
+            remove_whitespace_before_commas
         ).then(
             strip_pipes
         ).then(
@@ -492,7 +513,13 @@ class LetterDVLATemplate(LetterPreviewTemplate):
 
     @property
     def subject(self):
-        return str(Field(self._subject, self.values, html='strip_dvla_markup'))
+        return Take.as_field(
+            self._subject,
+            self.values,
+            html='strip_dvla_markup'
+        ).then(
+            remove_whitespace_before_commas
+        ).as_string
 
     def __str__(self):
 
@@ -515,9 +542,13 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             ADDITIONAL_LINE_10 = [
                 line.strip()
                 for line in
-                ((
-                    Take.as_field(self.contact_block, self.values, html='strip_dvla_markup')
-                ).as_string.split('\n') + ([''] * 10))
+                Take.as_field(
+                    self.contact_block,
+                    self.values,
+                    html='strip_dvla_markup'
+                ).then(
+                    remove_whitespace_before_commas
+                ).as_string.split('\n') + ([''] * 10)
             ][:10]
         TO_NAME_1,\
             _,\
@@ -526,10 +557,10 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             TO_ADDRESS_LINE_3,\
             TO_ADDRESS_LINE_4,\
             TO_ADDRESS_LINE_5,\
-            TO_POST_CODE, = str(Field(
+            TO_POST_CODE, = Take.as_field(
                 self.address_block,
                 self.values_with_default_optional_address_lines,
-            )).split('\n')
+            ).then(remove_whitespace_before_commas).as_string.split('\n')
         TO_NAME_2 = ''
         RETURN_NAME = ''
         RETURN_ADDRESS_LINE_1 = ''
@@ -548,6 +579,8 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             self.subject,
             Take.as_field(
                 self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
+            ).then(
+                remove_whitespace_before_commas
             ).then(
                 notify_letter_dvla_markdown
             ).then(
@@ -617,6 +650,8 @@ def get_html_email_body(template_content, template_values, redact_missing_person
         redact_missing_personalisation=redact_missing_personalisation,
     ).then(
         unlink_govuk_escaped
+    ).then(
+        remove_whitespace_before_commas
     ).then(
         notify_email_markdown
     ).as_string

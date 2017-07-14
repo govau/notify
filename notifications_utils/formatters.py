@@ -21,6 +21,8 @@ dvla_markup_tags = re.compile(
     re.IGNORECASE
 )
 
+whitespace_before_commas = re.compile(r'\s+,')
+
 
 def unlink_govuk_escaped(message):
     return re.sub(
@@ -124,6 +126,10 @@ def fix_extra_newlines_in_dvla_lists(dvla_markup):
 
 def strip_pipes(value):
     return value.replace('|', '')
+
+
+def remove_whitespace_before_commas(value):
+    return re.sub(whitespace_before_commas, ',', value)
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):

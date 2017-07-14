@@ -132,7 +132,7 @@ def test_markdown_in_templates(
     result,
     markdown_renderer,
 ):
-    with mock.patch(markdown_renderer) as mock_markdown_renderer:
+    with mock.patch(markdown_renderer, return_value='') as mock_markdown_renderer:
         str(template_class(
             {
                 "content": (
@@ -569,6 +569,75 @@ def test_templates_handle_html_and_redacting(
 ):
     assert str(template_class({'content': 'content', 'subject': 'subject'}, **extra_args))
     assert mock_field_init.call_args_list == expected_field_calls
+
+
+@pytest.mark.parametrize('template_class, extra_args, expected_comma_replacement_calls', [
+    (PlainTextEmailTemplate, {}, [
+        mock.call('content'),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (HTMLEmailTemplate, {}, [
+        mock.call('content'),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (EmailPreviewTemplate, {}, [
+        mock.call('content'),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (SMSMessageTemplate, {}, [
+        mock.call('content'),
+    ]),
+    (SMSPreviewTemplate, {}, [
+        mock.call('content'),
+    ]),
+    (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+        mock.call(Markup('subject')),
+        mock.call(Markup('content')),
+        mock.call((
+            "<span class='placeholder-no-brackets'>address line 1</span>\n"
+            "<span class='placeholder-no-brackets'>address line 2</span>\n"
+            "<span class='placeholder-no-brackets'>address line 3</span>\n"
+            "<span class='placeholder-no-brackets'>address line 4</span>\n"
+            "<span class='placeholder-no-brackets'>address line 5</span>\n"
+            "<span class='placeholder-no-brackets'>address line 6</span>\n"
+            "<span class='placeholder-no-brackets'>postcode</span>"
+        )),
+        mock.call(Markup('www.gov.uk')),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (LetterDVLATemplate, {'notification_reference': "1", 'contact_block': 'www.gov.uk  '}, [
+        mock.call(Markup('www.gov.uk')),
+        mock.call(
+            "<span class='placeholder'>((address line 1))</span>\n\n"
+            "<span class='placeholder'>((address line 2))</span>\n\n\n\n\n"
+            "<span class='placeholder'>((postcode))</span>"
+        ),
+        mock.call(Markup('subject')),
+        mock.call(Markup('content')),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+])
+@mock.patch('notifications_utils.template.remove_whitespace_before_commas', side_effect=lambda x: x)
+def test_templates_handle_html_and_redacting(
+    mock_remove_commas,
+    template_class,
+    extra_args,
+    expected_comma_replacement_calls,
+):
+    template = template_class({'content': 'content', 'subject': 'subject'}, **extra_args)
+
+    assert str(template)
+
+    if hasattr(template, 'subject'):
+        assert template.subject
+
+    assert mock_remove_commas.call_args_list == expected_comma_replacement_calls
 
 
 def test_basic_templates_return_markup():
