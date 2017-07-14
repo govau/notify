@@ -8,6 +8,27 @@ from notifications_utils import gsm
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
 mistune.BlockGrammar.block_quote = re.compile(r'^( *\^[^\n]+(\n[^\n]+)*\n*)+')
+mistune.BlockGrammar.list_block = re.compile(
+    r'^( *)([*+-]|\d+\.)[\s\S]+?'
+    r'(?:'
+    r'\n+(?=\1?(?:[-*_] *){3,}(?:\n+|$))'  # hrule
+    r'|\n+(?=%s)'  # def links
+    r'|\n+(?=%s)'  # def footnotes
+    r'|\n{2,}'
+    r'(?! )'
+    r'(?!\1(?:[*+-]|\d+\.) )\n*'
+    r'|'
+    r'\s*$)' % (
+        mistune._pure_pattern(mistune.BlockGrammar.def_links),
+        mistune._pure_pattern(mistune.BlockGrammar.def_footnotes),
+    )
+)
+mistune.BlockGrammar.list_item = re.compile(
+    r'^(( *)(?:[*+-]|\d+\.)[^\n]*'
+    r'(?:\n(?!\2(?:[*+-]|\d+\.))[^\n]*)*)',
+    flags=re.M
+)
+mistune.BlockGrammar.list_bullet = re.compile(r'^ *(?:[*+-]|\d+\.)')
 
 govuk_not_a_link = re.compile(
     r'(?<!\.|\/)(GOV)\.(UK)(?!\/|\?)',
@@ -173,6 +194,9 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
     def newline(self):
         return "<br/>"
 
+    def list_item(self, text):
+        return '<li>{}</li>\n'.format(text.strip())
+
     def link(self, link, title, content):
         return '{}: {}'.format(content, self.autolink(link))
 
@@ -225,7 +249,7 @@ class NotifyLetterMarkdownDVLARenderer(NotifyLetterMarkdownPreviewRenderer):
         )
 
     def list_item(self, text):
-        return '{}\n'.format(text)
+        return '{}\n'.format(text.strip())
 
     def link(self, link, title, content):
         return '{}: {}'.format(content, self.autolink(link))
@@ -272,7 +296,7 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
             '{}'
             '</li>'
         ).format(
-            text
+            text.strip()
         )
 
     def paragraph(self, text):
