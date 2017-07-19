@@ -1374,12 +1374,15 @@ def test_message_too_long(template_class):
     assert template.is_message_too_long() is True
 
 
-@pytest.mark.parametrize('template_class', [
-    EmailPreviewTemplate,
-    HTMLEmailTemplate,
-    PlainTextEmailTemplate
+@pytest.mark.parametrize('template_class, kwargs', [
+    (EmailPreviewTemplate, {}),
+    (HTMLEmailTemplate, {}),
+    (PlainTextEmailTemplate, {}),
+    (LetterPreviewTemplate, {}),
+    (LetterImageTemplate, {'image_url': 'foo', 'page_count': 1}),
+    (LetterDVLATemplate, {'notification_reference': 'foo'})
 ])
-def test_non_sms_ignores_message_too_long(template_class):
+def test_non_sms_ignores_message_too_long(template_class, kwargs):
     body = 'a' * 1000
-    template = template_class({'content': body, 'subject': 'foo'})
+    template = template_class({'content': body, 'subject': 'foo'}, **kwargs)
     assert template.is_message_too_long() is False

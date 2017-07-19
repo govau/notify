@@ -1,1 +1,1 @@
-pass
+SMS_CHAR_COUNT_LIMIT = 459  # 153 * 3

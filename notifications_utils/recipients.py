@@ -47,9 +47,6 @@ hostname_part = re.compile(r'^(xn-|[a-z0-9]+)(-[a-z0-9]+)*$', re.IGNORECASE)
 tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECASE)
 
 
-SMS_CHAR_COUNT_LIMIT = 459  # 153 * 3
-
-
 class RecipientCSV():
 
     missing_field_error = 'Missing'
@@ -70,7 +67,6 @@ class RecipientCSV():
     ):
         self.file_data = file_data.strip(', \n\r\t')
         self.template_type = template_type
-        self.character_limit = SMS_CHAR_COUNT_LIMIT if self.template_type == 'sms' else sys.maxsize
         self.placeholders = placeholders
         self.max_errors_shown = max_errors_shown
         self.max_initial_rows_shown = max_initial_rows_shown

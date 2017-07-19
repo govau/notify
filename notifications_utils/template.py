@@ -5,6 +5,7 @@ from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 from flask import Markup
 
+from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.columns import Columns
 from notifications_utils.field import Field
 from notifications_utils.formatters import (
@@ -110,8 +111,6 @@ class Template():
 
 class SMSMessageTemplate(Template):
 
-    char_count_limit = 459  # 153 * 3
-
     def __init__(
         self,
         template,
@@ -156,7 +155,7 @@ class SMSMessageTemplate(Template):
         return get_sms_fragment_count(self.content_count)
 
     def is_message_too_long(self):
-        return self.content_count > self.char_count_limit
+        return self.content_count > SMS_CHAR_COUNT_LIMIT
 
 
 class SMSPreviewTemplate(SMSMessageTemplate):
