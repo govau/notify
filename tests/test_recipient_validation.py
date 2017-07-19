@@ -134,6 +134,7 @@ invalid_email_addresses = (
     'spaces in local@domain.com',
     'spaces-in-domain@dom ain.com',
     'underscores-in-domain@dom_ain.com',
+    'pipe-in-domain@example.com|gov.uk',
 )
 
 
