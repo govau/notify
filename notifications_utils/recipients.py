@@ -547,6 +547,8 @@ def validate_recipient(recipient, template_type, column=None, international_sms=
 
 @lru_cache(maxsize=32, typed=False)
 def format_recipient(recipient):
+    if not isinstance(recipient, str):
+        return ''
     with suppress(InvalidPhoneError):
         return validate_and_format_phone_number(recipient)
     with suppress(InvalidEmailError):
