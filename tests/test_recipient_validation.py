@@ -18,6 +18,7 @@ from notifications_utils.recipients import (
     international_phone_info,
     get_international_phone_info,
     format_phone_number_human_readable,
+    format_recipient,
 )
 
 
@@ -392,3 +393,18 @@ def test_validates_against_whitelist_of_email_addresses(email_address):
 ])
 def test_get_international_info(phone_number, expected_formatted):
     assert format_phone_number_human_readable(phone_number) == expected_formatted
+
+
+@pytest.mark.parametrize("recipient, expected_formatted", [
+    (True, ''),
+    (False, ''),
+    (0, ''),
+    (0.1, ''),
+    (None, ''),
+    ('foo', 'foo'),
+    ('TeSt@ExAmPl3.com', 'test@exampl3.com'),
+    ('+4407900 900 123', '447900900123'),
+    ('+1 800 555 5555', '+1 800 555 5555'),
+])
+def test_format_recipient(recipient, expected_formatted):
+    assert format_recipient(recipient) == expected_formatted
