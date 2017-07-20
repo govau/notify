@@ -5,7 +5,7 @@ from boto3 import resource
 from flask import current_app
 
 
-def s3upload(filedata, region, bucket_name, file_location):
+def s3upload(filedata, region, bucket_name, file_location, content_type='binary/octet-stream'):
     _s3 = resource('s3')
     contents = filedata
 
@@ -27,4 +27,4 @@ def s3upload(filedata, region, bucket_name, file_location):
 
     upload_file_name = file_location
     key = _s3.Object(bucket_name, upload_file_name)
-    key.put(Body=contents, ServerSideEncryption='AES256')
+    key.put(Body=contents, ServerSideEncryption='AES256', ContentType=content_type)

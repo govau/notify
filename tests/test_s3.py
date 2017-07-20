@@ -7,6 +7,7 @@ contents = 'some file data'
 region = 'eu-west-1'
 bucket = 'some_bucket'
 location = 'some_file_location'
+content_type = 'binary/octet-stream'
 
 
 def test_s3upload_save_file_to_bucket(mocker):
@@ -16,7 +17,19 @@ def test_s3upload_save_file_to_bucket(mocker):
              bucket_name=bucket,
              file_location=location)
     mocked_put = mocked.return_value.Object.return_value.put
-    mocked_put.assert_called_once_with(Body=contents, ServerSideEncryption='AES256')
+    mocked_put.assert_called_once_with(Body=contents, ServerSideEncryption='AES256', ContentType=content_type)
+
+
+def test_s3upload_save_file_to_bucket_with_contenttype(mocker):
+    content_type = 'image/png'
+    mocked = mocker.patch('notifications_utils.s3.resource')
+    s3upload(filedata=contents,
+             region=region,
+             bucket_name=bucket,
+             file_location=location,
+             content_type=content_type)
+    mocked_put = mocked.return_value.Object.return_value.put
+    mocked_put.assert_called_once_with(Body=contents, ServerSideEncryption='AES256', ContentType=content_type)
 
 
 def test_s3upload_creates_bucket_if_bucket_does_not_exist(mocker):
