@@ -357,6 +357,11 @@ def test_ordered_list(markdown_function, expected):
         '2. two\n'
         '3. three\n'
     ) == expected
+    assert markdown_function(
+        '1.one\n'
+        '2.two\n'
+        '3.three\n'
+    ) == expected
 
 
 @pytest.mark.parametrize('markdown_function, expected', (
@@ -399,6 +404,11 @@ def test_unordered_list(markdown_function, expected):
         '* one\n'
         '* two\n'
         '* three\n'
+    ) == expected
+    assert markdown_function(
+        '*one\n'
+        '*two\n'
+        '*three\n'
     ) == expected
 
 
