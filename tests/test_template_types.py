@@ -1362,3 +1362,27 @@ def test_lists_in_combination_with_other_elements_in_letters(markdown, expected)
         {},
         notification_reference="1234567",
     )).split('|')[33] == '1 January 2001<cr><cr><h1>Hello<normal><cr><cr>' + expected
+
+
+@pytest.mark.parametrize('template_class', [
+        SMSMessageTemplate,
+        SMSPreviewTemplate,
+])
+def test_message_too_long(template_class):
+    body = ('b' * 200) + '((foo))'
+    template = template_class({'content': body}, prefix='a' * 100, values={'foo': 'c'*200})
+    assert template.is_message_too_long() is True
+
+
+@pytest.mark.parametrize('template_class, kwargs', [
+    (EmailPreviewTemplate, {}),
+    (HTMLEmailTemplate, {}),
+    (PlainTextEmailTemplate, {}),
+    (LetterPreviewTemplate, {}),
+    (LetterImageTemplate, {'image_url': 'foo', 'page_count': 1}),
+    (LetterDVLATemplate, {'notification_reference': 'foo'})
+])
+def test_non_sms_ignores_message_too_long(template_class, kwargs):
+    body = 'a' * 1000
+    template = template_class({'content': body, 'subject': 'foo'}, **kwargs)
+    assert template.is_message_too_long() is False
