@@ -11,7 +11,7 @@ from notifications_utils.formatters import (
     strip_dvla_markup,
     strip_pipes,
     escape_html,
-    remove_whitespace_before_commas,
+    remove_whitespace_before_punctuation,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -704,7 +704,7 @@ def test_bleach_doesnt_try_to_make_valid_html_before_cleaning():
     ),
 ])
 def test_removing_whitespace_before_commas(dirty, clean):
-    assert remove_whitespace_before_commas(dirty) == clean
+    assert remove_whitespace_before_punctuation(dirty) == clean
 
 
 @pytest.mark.parametrize('dirty, clean', [
@@ -722,4 +722,4 @@ def test_removing_whitespace_before_commas(dirty, clean):
     ),
 ])
 def test_removing_whitespace_before_full_stops(dirty, clean):
-    assert remove_whitespace_before_commas(dirty) == clean
+    assert remove_whitespace_before_punctuation(dirty) == clean

@@ -623,7 +623,7 @@ def test_templates_handle_html_and_redacting(
         mock.call(Markup('subject')),
     ]),
 ])
-@mock.patch('notifications_utils.template.remove_whitespace_before_commas', side_effect=lambda x: x)
+@mock.patch('notifications_utils.template.remove_whitespace_before_punctuation', side_effect=lambda x: x)
 def test_templates_handle_html_and_redacting(
     mock_remove_commas,
     template_class,

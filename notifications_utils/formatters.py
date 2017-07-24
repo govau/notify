@@ -42,7 +42,7 @@ dvla_markup_tags = re.compile(
     re.IGNORECASE
 )
 
-whitespace_before_commas = re.compile(r'\s+([,|\.])')
+whitespace_before_punctuation = re.compile(r'\s+([,|\.])')
 
 
 def unlink_govuk_escaped(message):
@@ -149,9 +149,9 @@ def strip_pipes(value):
     return value.replace('|', '')
 
 
-def remove_whitespace_before_commas(value):
+def remove_whitespace_before_punctuation(value):
     return re.sub(
-        whitespace_before_commas,
+        whitespace_before_punctuation,
         lambda match: match.group(1),
         value
     )
