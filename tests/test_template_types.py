@@ -1178,7 +1178,7 @@ def test_letter_output_pipe_delimiting():
     )
 
     assert len(str(template).split('|')) == len(dvla_file_spec)
-    assert 'Pipes  pipes  everywhere' in str(template)
+    assert 'Pipes pipes everywhere' in str(template)
 
 
 @pytest.mark.parametrize('id, expected_exception', [

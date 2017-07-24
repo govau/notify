@@ -705,3 +705,21 @@ def test_bleach_doesnt_try_to_make_valid_html_before_cleaning():
 ])
 def test_removing_whitespace_before_commas(dirty, clean):
     assert remove_whitespace_before_commas(dirty) == clean
+
+
+@pytest.mark.parametrize('dirty, clean', [
+    (
+        'Hello ((name)) .\n\nThis is a message',
+        'Hello ((name)).\n\nThis is a message'
+    ),
+    (
+        'Hello Jo .\n\nThis is a message',
+        'Hello Jo.\n\nThis is a message'
+    ),
+    (
+        '\n   \t    . word',
+        '. word',
+    ),
+])
+def test_removing_whitespace_before_full_stops(dirty, clean):
+    assert remove_whitespace_before_commas(dirty) == clean
