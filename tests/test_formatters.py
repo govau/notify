@@ -13,6 +13,7 @@ from notifications_utils.formatters import (
     escape_html,
     remove_whitespace_before_punctuation,
     make_quotes_smart,
+    replace_dashes_with_en_dashes,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -744,3 +745,50 @@ def test_removing_whitespace_before_full_stops(dirty, clean):
 ])
 def test_smart_quotes(dumb, smart):
     assert make_quotes_smart(dumb) == smart
+
+
+@pytest.mark.parametrize('nasty, nice', [
+    (
+        (
+            'The en dash - always with spaces in running text when, as '
+            'discussed in this section, indicating a parenthesis or '
+            'pause - and the spaced em dash both have a certain '
+            'technical advantage over the unspaced em dash. '
+        ),
+        (
+            'The en dash\u00A0\u2013 always with spaces in running text when, as '
+            'discussed in this section, indicating a parenthesis or '
+            'pause\u00A0\u2013 and the spaced em dash both have a certain '
+            'technical advantage over the unspaced em dash. '
+        ),
+    ),
+    (
+        'double -- dash',
+        'double\u00A0\u2013 dash',
+    ),
+    (
+        'em — dash',
+        'em – dash',
+    ),
+    (
+        'already\u0020–\u0020correct',  # \u0020 is a normal space character
+        'already\u00A0–\u0020correct',
+    ),
+    (
+        '2004-2008',
+        '2004-2008',  # no replacement
+    ),
+])
+def test_en_dashes(nasty, nice):
+    assert replace_dashes_with_en_dashes(nasty) == nice
+
+
+def test_unicode_dash_lookup():
+    en_dash_replacement_sequence = '\u00A0\u2013'
+    hyphen = '-'
+    en_dash = '–'
+    space = ' '
+    non_breaking_space = ' '
+    assert en_dash_replacement_sequence == non_breaking_space + en_dash
+    assert space not in en_dash_replacement_sequence
+    assert hyphen not in en_dash_replacement_sequence

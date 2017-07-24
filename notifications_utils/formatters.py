@@ -47,6 +47,8 @@ smartypants.tags_to_skip = smartypants.tags_to_skip + ['a']
 
 whitespace_before_punctuation = re.compile(r'\s+([,|\.])')
 
+hyphens_surrounded_by_spaces = re.compile(r'\s+[-|–|—]+\s+')
+
 
 def unlink_govuk_escaped(message):
     return re.sub(
@@ -164,6 +166,18 @@ def make_quotes_smart(value):
     return smartypants.smartypants(
         value,
         smartypants.Attr.q | smartypants.Attr.u
+    )
+
+
+def replace_dashes_with_en_dashes(value):
+    return re.sub(
+        hyphens_surrounded_by_spaces,
+        (
+            '\u00A0'  # non breaking space
+            '\u2013'  # en dash
+            ' '       # space
+        ),
+        value,
     )
 
 
