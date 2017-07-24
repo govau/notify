@@ -22,6 +22,7 @@ from notifications_utils.formatters import (
     strip_dvla_markup,
     strip_pipes,
     remove_whitespace_before_punctuation,
+    make_quotes_smart,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -218,7 +219,7 @@ class WithSubjectTemplate(Template):
             html='escape',
             redact_missing_personalisation=self.redact_missing_personalisation,
         ).then(
-            remove_whitespace_before_punctuation
+            do_nice_typography
         ).as_string)
 
     @subject.setter
@@ -238,7 +239,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
         ).then(
             unlink_govuk_escaped
         ).then(
-            remove_whitespace_before_punctuation
+            do_nice_typography
         ).as_string
 
     @property
@@ -249,7 +250,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
             html='passthrough',
             redact_missing_personalisation=self.redact_missing_personalisation
         ).then(
-            remove_whitespace_before_punctuation
+            do_nice_typography
         ).as_string)
 
 
@@ -329,7 +330,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
             html='escape',
             redact_missing_personalisation=self.redact_missing_personalisation
         ).then(
-            remove_whitespace_before_punctuation
+            do_nice_typography
         ).as_string
 
 
@@ -375,9 +376,9 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 strip_pipes
             ).then(
-                remove_whitespace_before_punctuation
-            ).then(
                 notify_letter_preview_markdown
+            ).then(
+                do_nice_typography
             ).as_string,
             'address': Take.as_field(
                 self.address_block,
@@ -426,7 +427,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             redact_missing_personalisation=self.redact_missing_personalisation,
             html='escape',
         ).then(
-            remove_whitespace_before_punctuation
+            do_nice_typography
         ).then(
             strip_pipes
         ).then(
@@ -525,7 +526,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             self.values,
             html='strip_dvla_markup'
         ).then(
-            remove_whitespace_before_punctuation
+            do_nice_typography
         ).as_string
 
     def __str__(self):
@@ -587,11 +588,11 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             Take.as_field(
                 self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
             ).then(
-                remove_whitespace_before_punctuation
-            ).then(
                 notify_letter_dvla_markdown
             ).then(
                 fix_extra_newlines_in_dvla_lists
+            ).then(
+                do_nice_typography
             ).as_string
         )
 
@@ -658,7 +659,17 @@ def get_html_email_body(template_content, template_values, redact_missing_person
     ).then(
         unlink_govuk_escaped
     ).then(
+        notify_email_markdown
+    ).then(
+        do_nice_typography
+    ).as_string
+
+
+def do_nice_typography(value):
+    return Take(
+        value
+    ).then(
         remove_whitespace_before_punctuation
     ).then(
-        notify_email_markdown
+        make_quotes_smart
     ).as_string

@@ -10,3 +10,4 @@ Flask-Redis==0.3.0
 boto3==1.4.4
 pyyaml==3.12
 phonenumbers==8.7.0
+smartypants==2.0.0

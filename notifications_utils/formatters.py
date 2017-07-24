@@ -5,6 +5,7 @@ import mistune
 import bleach
 from flask import Markup
 from notifications_utils import gsm
+import smartypants
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
 mistune.BlockGrammar.block_quote = re.compile(r'^( *\^[^\n]+(\n[^\n]+)*\n*)+')
@@ -41,6 +42,8 @@ dvla_markup_tags = re.compile(
     })),
     re.IGNORECASE
 )
+
+smartypants.tags_to_skip = smartypants.tags_to_skip + ['a']
 
 whitespace_before_punctuation = re.compile(r'\s+([,|\.])')
 
@@ -154,6 +157,13 @@ def remove_whitespace_before_punctuation(value):
         whitespace_before_punctuation,
         lambda match: match.group(1),
         value
+    )
+
+
+def make_quotes_smart(value):
+    return smartypants.smartypants(
+        value,
+        smartypants.Attr.q | smartypants.Attr.u
     )
 
 

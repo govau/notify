@@ -12,6 +12,7 @@ from notifications_utils.formatters import (
     strip_pipes,
     escape_html,
     remove_whitespace_before_punctuation,
+    make_quotes_smart,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -101,24 +102,26 @@ def test_handles_placeholders_in_urls():
 
 
 @pytest.mark.parametrize(
-    "url, expected_html", [
+    "url, expected_html, expected_html_in_template", [
         (
             """https://example.com"onclick="alert('hi')""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>')"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>')""",  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>‘)""",  # noqa
         ),
         (
             """https://example.com"style='text-decoration:blink'""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>'"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>'""",  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>’""",  # noqa
         ),
     ]
 )
-def test_URLs_get_escaped(url, expected_html):
+def test_URLs_get_escaped(url, expected_html, expected_html_in_template):
     assert notify_email_markdown(url) == (
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         '{}'
         '</p>'
     ).format(expected_html)
-    assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
+    assert expected_html_in_template in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -723,3 +726,21 @@ def test_removing_whitespace_before_commas(dirty, clean):
 ])
 def test_removing_whitespace_before_full_stops(dirty, clean):
     assert remove_whitespace_before_punctuation(dirty) == clean
+
+
+@pytest.mark.parametrize('dumb, smart', [
+    (
+        """And I said, "what about breakfast at Tiffany's"?""",
+        """And I said, “what about breakfast at Tiffany’s”?""",
+    ),
+    (
+        """
+            <a href="http://example.com?q='foo'">http://example.com?q='foo'</a>
+        """,
+        """
+            <a href="http://example.com?q='foo'">http://example.com?q='foo'</a>
+        """,
+    ),
+])
+def test_smart_quotes(dumb, smart):
+    assert make_quotes_smart(dumb) == smart
