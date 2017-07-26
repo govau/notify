@@ -169,7 +169,7 @@ def make_quotes_smart(value):
     )
 
 
-def replace_dashes_with_en_dashes(value):
+def replace_hyphens_with_en_dashes(value):
     return re.sub(
         hyphens_surrounded_by_spaces,
         (

@@ -23,7 +23,7 @@ from notifications_utils.formatters import (
     strip_pipes,
     remove_whitespace_before_punctuation,
     make_quotes_smart,
-    replace_dashes_with_en_dashes,
+    replace_hyphens_with_en_dashes,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -674,5 +674,5 @@ def do_nice_typography(value):
     ).then(
         make_quotes_smart
     ).then(
-        replace_dashes_with_en_dashes
+        replace_hyphens_with_en_dashes
     ).as_string

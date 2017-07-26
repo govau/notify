@@ -13,7 +13,7 @@ from notifications_utils.formatters import (
     escape_html,
     remove_whitespace_before_punctuation,
     make_quotes_smart,
-    replace_dashes_with_en_dashes,
+    replace_hyphens_with_en_dashes,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -780,7 +780,7 @@ def test_smart_quotes(dumb, smart):
     ),
 ])
 def test_en_dashes(nasty, nice):
-    assert replace_dashes_with_en_dashes(nasty) == nice
+    assert replace_hyphens_with_en_dashes(nasty) == nice
 
 
 def test_unicode_dash_lookup():
