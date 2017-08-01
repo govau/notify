@@ -21,7 +21,9 @@ from notifications_utils.formatters import (
     fix_extra_newlines_in_dvla_lists,
     strip_dvla_markup,
     strip_pipes,
-    remove_whitespace_before_commas,
+    remove_whitespace_before_punctuation,
+    make_quotes_smart,
+    replace_hyphens_with_en_dashes,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -130,7 +132,7 @@ class SMSMessageTemplate(Template):
         ).then(
             gsm_encode
         ).then(
-            remove_whitespace_before_commas
+            remove_whitespace_before_punctuation
         ).as_string.strip()
 
     @property
@@ -192,7 +194,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
             ).then(
                 gsm_encode if self.downgrade_non_gsm_characters else str
             ).then(
-                remove_whitespace_before_commas
+                remove_whitespace_before_punctuation
             ).then(
                 nl2br
             ).as_string
@@ -218,7 +220,7 @@ class WithSubjectTemplate(Template):
             html='escape',
             redact_missing_personalisation=self.redact_missing_personalisation,
         ).then(
-            remove_whitespace_before_commas
+            do_nice_typography
         ).as_string)
 
     @subject.setter
@@ -238,7 +240,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
         ).then(
             unlink_govuk_escaped
         ).then(
-            remove_whitespace_before_commas
+            do_nice_typography
         ).as_string
 
     @property
@@ -249,7 +251,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
             html='passthrough',
             redact_missing_personalisation=self.redact_missing_personalisation
         ).then(
-            remove_whitespace_before_commas
+            do_nice_typography
         ).as_string)
 
 
@@ -329,7 +331,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
             html='escape',
             redact_missing_personalisation=self.redact_missing_personalisation
         ).then(
-            remove_whitespace_before_commas
+            do_nice_typography
         ).as_string
 
 
@@ -375,9 +377,9 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 strip_pipes
             ).then(
-                remove_whitespace_before_commas
-            ).then(
                 notify_letter_preview_markdown
+            ).then(
+                do_nice_typography
             ).as_string,
             'address': Take.as_field(
                 self.address_block,
@@ -396,7 +398,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 remove_empty_lines
             ).then(
-                remove_whitespace_before_commas
+                remove_whitespace_before_punctuation
             ).then(
                 nl2br
             ).as_string,
@@ -409,7 +411,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 redact_missing_personalisation=self.redact_missing_personalisation,
                 html='escape',
             ).then(
-                remove_whitespace_before_commas
+                remove_whitespace_before_punctuation
             ).then(
                 nl2br
             ).then(
@@ -426,7 +428,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             redact_missing_personalisation=self.redact_missing_personalisation,
             html='escape',
         ).then(
-            remove_whitespace_before_commas
+            do_nice_typography
         ).then(
             strip_pipes
         ).then(
@@ -525,7 +527,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             self.values,
             html='strip_dvla_markup'
         ).then(
-            remove_whitespace_before_commas
+            do_nice_typography
         ).as_string
 
     def __str__(self):
@@ -554,7 +556,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
                     self.values,
                     html='strip_dvla_markup'
                 ).then(
-                    remove_whitespace_before_commas
+                    remove_whitespace_before_punctuation
                 ).as_string.split('\n') + ([''] * 10)
             ][:10]
         TO_NAME_1,\
@@ -567,7 +569,7 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             TO_POST_CODE, = Take.as_field(
                 self.address_block,
                 self.values_with_default_optional_address_lines,
-            ).then(remove_whitespace_before_commas).as_string.split('\n')
+            ).then(remove_whitespace_before_punctuation).as_string.split('\n')
         TO_NAME_2 = ''
         RETURN_NAME = ''
         RETURN_ADDRESS_LINE_1 = ''
@@ -587,11 +589,11 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             Take.as_field(
                 self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
             ).then(
-                remove_whitespace_before_commas
-            ).then(
                 notify_letter_dvla_markdown
             ).then(
                 fix_extra_newlines_in_dvla_lists
+            ).then(
+                do_nice_typography
             ).as_string
         )
 
@@ -658,7 +660,19 @@ def get_html_email_body(template_content, template_values, redact_missing_person
     ).then(
         unlink_govuk_escaped
     ).then(
-        remove_whitespace_before_commas
-    ).then(
         notify_email_markdown
+    ).then(
+        do_nice_typography
+    ).as_string
+
+
+def do_nice_typography(value):
+    return Take(
+        value
+    ).then(
+        remove_whitespace_before_punctuation
+    ).then(
+        make_quotes_smart
+    ).then(
+        replace_hyphens_with_en_dashes
     ).as_string

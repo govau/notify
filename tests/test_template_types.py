@@ -571,19 +571,27 @@ def test_templates_handle_html_and_redacting(
     assert mock_field_init.call_args_list == expected_field_calls
 
 
-@pytest.mark.parametrize('template_class, extra_args, expected_comma_replacement_calls', [
+@pytest.mark.parametrize('template_class, extra_args, expected_remove_whitespace_calls', [
     (PlainTextEmailTemplate, {}, [
         mock.call('content'),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
     (HTMLEmailTemplate, {}, [
-        mock.call('content'),
+        mock.call(
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            'content'
+            '</p>'
+        ),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
     (EmailPreviewTemplate, {}, [
-        mock.call('content'),
+        mock.call(
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            'content'
+            '</p>'
+        ),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
@@ -596,7 +604,7 @@ def test_templates_handle_html_and_redacting(
     ]),
     (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
         mock.call(Markup('subject')),
-        mock.call(Markup('content')),
+        mock.call(Markup('<p>content</p>')),
         mock.call((
             "<span class='placeholder-no-brackets'>address line 1</span>\n"
             "<span class='placeholder-no-brackets'>address line 2</span>\n"
@@ -618,17 +626,17 @@ def test_templates_handle_html_and_redacting(
             "<span class='placeholder'>((postcode))</span>"
         ),
         mock.call(Markup('subject')),
-        mock.call(Markup('content')),
+        mock.call(Markup('content<cr><cr>')),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
 ])
-@mock.patch('notifications_utils.template.remove_whitespace_before_commas', side_effect=lambda x: x)
-def test_templates_handle_html_and_redacting(
-    mock_remove_commas,
+@mock.patch('notifications_utils.template.remove_whitespace_before_punctuation', side_effect=lambda x: x)
+def test_templates_remove_whitespace_before_punctuation(
+    mock_remove_whitespace,
     template_class,
     extra_args,
-    expected_comma_replacement_calls,
+    expected_remove_whitespace_calls,
 ):
     template = template_class({'content': 'content', 'subject': 'subject'}, **extra_args)
 
@@ -637,7 +645,69 @@ def test_templates_handle_html_and_redacting(
     if hasattr(template, 'subject'):
         assert template.subject
 
-    assert mock_remove_commas.call_args_list == expected_comma_replacement_calls
+    assert mock_remove_whitespace.call_args_list == expected_remove_whitespace_calls
+
+
+@pytest.mark.parametrize('template_class, extra_args, expected_calls', [
+    (PlainTextEmailTemplate, {}, [
+        mock.call('content'),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (HTMLEmailTemplate, {}, [
+        mock.call(
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            'content'
+            '</p>'
+        ),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (EmailPreviewTemplate, {}, [
+        mock.call(
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
+            'content'
+            '</p>'
+        ),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (SMSMessageTemplate, {}, [
+    ]),
+    (SMSPreviewTemplate, {}, [
+    ]),
+    (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+        mock.call(Markup('subject')),
+        mock.call(Markup('<p>content</p>')),
+        mock.call(Markup('subject')),
+        mock.call(Markup('subject')),
+    ]),
+    (LetterDVLATemplate, {'notification_reference': "1", 'contact_block': 'www.gov.uk  '}, [
+        mock.call('subject'),
+        mock.call('content<cr><cr>'),
+        mock.call('subject'),
+        mock.call('subject'),
+    ]),
+])
+@mock.patch('notifications_utils.template.make_quotes_smart', side_effect=lambda x: x)
+@mock.patch('notifications_utils.template.replace_hyphens_with_en_dashes', side_effect=lambda x: x)
+def test_templates_make_quotes_smart_and_dashes_en(
+    mock_en_dash_replacement,
+    mock_smart_quotes,
+    template_class,
+    extra_args,
+    expected_calls,
+):
+    template = template_class({'content': 'content', 'subject': 'subject'}, **extra_args)
+
+    assert str(template)
+
+    if hasattr(template, 'subject'):
+        assert template.subject
+
+    assert mock_smart_quotes.call_args_list == expected_calls
+    assert mock_en_dash_replacement.call_args_list == expected_calls
 
 
 def test_basic_templates_return_markup():
@@ -1178,7 +1248,7 @@ def test_letter_output_pipe_delimiting():
     )
 
     assert len(str(template).split('|')) == len(dvla_file_spec)
-    assert 'Pipes  pipes  everywhere' in str(template)
+    assert 'Pipes pipes everywhere' in str(template)
 
 
 @pytest.mark.parametrize('id, expected_exception', [
