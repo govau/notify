@@ -14,6 +14,8 @@ from notifications_utils.formatters import (
     remove_whitespace_before_punctuation,
     make_quotes_smart,
     replace_hyphens_with_en_dashes,
+    make_markdown_take_notice_of_multiple_newlines,
+    strip_characters_inserted_to_force_newlines,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -792,3 +794,21 @@ def test_unicode_dash_lookup():
     assert en_dash_replacement_sequence == non_breaking_space + en_dash
     assert space not in en_dash_replacement_sequence
     assert hyphen not in en_dash_replacement_sequence
+
+
+@pytest.mark.parametrize('raw, expected_output', [
+    ('a', 'a'),
+    ('a\n\n\nb', 'a\n\n🇬🇧🐦✉️\nb'),
+    ('a\n\n\n\n\nb', 'a\n\n🇬🇧🐦✉️\n🇬🇧🐦✉️\n🇬🇧🐦✉️\nb'),
+])
+def test_replacing_multiple_newlines(raw, expected_output):
+    assert make_markdown_take_notice_of_multiple_newlines(raw) == expected_output
+
+
+@pytest.mark.parametrize('raw, expected_output', [
+    ('a', 'a'),
+    ('a<br><br>🇬🇧🐦✉️<br>b', 'a<br><br><br>b'),
+    ('a<br><br>🇬🇧🐦✉️<br>🇬🇧🐦✉️<br>🇬🇧🐦✉️<br>b', 'a<br><br><br><br><br>b'),
+])
+def test_removing_sequence_used_to_force_newlines(raw, expected_output):
+    assert strip_characters_inserted_to_force_newlines(raw) == expected_output

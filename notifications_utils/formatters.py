@@ -49,6 +49,12 @@ whitespace_before_punctuation = re.compile(r'\s+([,|\.])')
 
 hyphens_surrounded_by_spaces = re.compile(r'\s+[-|–|—]+\s+')
 
+multiple_newlines = re.compile(r'((\n)\2{2,})')
+
+MAGIC_SEQUENCE = "🇬🇧🐦✉️"
+
+magic_sequence_regex = re.compile(MAGIC_SEQUENCE)
+
 
 def unlink_govuk_escaped(message):
     return re.sub(
@@ -178,6 +184,24 @@ def replace_hyphens_with_en_dashes(value):
             ' '       # space
         ),
         value,
+    )
+
+
+def make_markdown_take_notice_of_multiple_newlines(value):
+    return re.sub(
+        multiple_newlines,
+        lambda match: '\n\n{}'.format(
+            (MAGIC_SEQUENCE + '\n') * (len(match.group(1)) - 2)
+        ),
+        value
+    )
+
+
+def strip_characters_inserted_to_force_newlines(value):
+    return re.sub(
+        magic_sequence_regex,
+        '',
+        value
     )
 
 
