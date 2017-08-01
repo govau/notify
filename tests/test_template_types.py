@@ -1456,3 +1456,65 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
     body = 'a' * 1000
     template = template_class({'content': body, 'subject': 'foo'}, **kwargs)
     assert template.is_message_too_long() is False
+
+
+@pytest.mark.parametrize(
+    (
+        'content,'
+        'expected_preview_markup,'
+        'expected_dvla_markup'
+    ), [
+        (
+            'a\n\n\nb',
+            '<p>a</p><p><br/>b</p>',
+            'a<cr><cr><cr>b',
+        ),
+        (
+            (
+                'a\n'
+                '\n'
+                '* one\n'
+                '* two\n'
+                '* three\n'
+                'and a half\n'
+                '\n'
+                '\n'
+                '\n'
+                '\n'
+                'foo'
+            ),
+            (
+                '<p>a</p><ul>\n'
+                '<li>one</li>\n'
+                '<li>two</li>\n'
+                '<li>three<br/>and a half</li>\n'
+                '</ul>\n'
+                '<p><br/><br/><br/>foo</p>'
+            ),
+            (
+                'a<cr>'
+                '<op><bul><tab>one'
+                '<op><bul><tab>two'
+                '<op><bul><tab>three<cr>'
+                'and a half<p>'
+                '<cr>'
+                '<cr>'
+                '<cr>'
+                '<cr>'
+                'foo<cr>'
+                '<cr>'
+            ),
+        ),
+    ]
+)
+def test_multiple_newlines_in_letters(
+    content,
+    expected_preview_markup,
+    expected_dvla_markup
+):
+    assert expected_preview_markup in str(LetterPreviewTemplate(
+        {'content': content, 'subject': 'foo'}
+    ))
+    assert expected_dvla_markup in str(LetterDVLATemplate(
+        {'content': content, 'subject': 'foo'}, notification_reference=1
+    ))

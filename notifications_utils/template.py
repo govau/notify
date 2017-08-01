@@ -24,6 +24,8 @@ from notifications_utils.formatters import (
     remove_whitespace_before_punctuation,
     make_quotes_smart,
     replace_hyphens_with_en_dashes,
+    make_markdown_take_notice_of_multiple_newlines,
+    strip_characters_inserted_to_force_newlines,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -377,7 +379,11 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 strip_pipes
             ).then(
+                make_markdown_take_notice_of_multiple_newlines
+            ).then(
                 notify_letter_preview_markdown
+            ).then(
+                strip_characters_inserted_to_force_newlines
             ).then(
                 do_nice_typography
             ).as_string,
@@ -589,7 +595,11 @@ class LetterDVLATemplate(LetterPreviewTemplate):
             Take.as_field(
                 self.content, self.values, markdown_lists=True, html='strip_dvla_markup'
             ).then(
+                make_markdown_take_notice_of_multiple_newlines
+            ).then(
                 notify_letter_dvla_markdown
+            ).then(
+                strip_characters_inserted_to_force_newlines
             ).then(
                 fix_extra_newlines_in_dvla_lists
             ).then(
