@@ -9,6 +9,7 @@ from pythonjsonlogger.jsonlogger import JsonFormatter as BaseJSONFormatter
 from time import monotonic
 
 import logging
+import logging.handlers
 
 LOG_FORMAT = '%(asctime)s %(app_name)s %(name)s %(levelname)s ' \
              '%(request_id)s "%(message)s" [in %(pathname)s:%(lineno)d]'
@@ -105,7 +106,7 @@ def get_handlers(app):
 
     if not app.debug:
         # machine readable json to file
-        handler = logging.TimedRotatingFileHandler(
+        handler = logging.handlers.TimedRotatingFileHandler(
             filename=app.config['NOTIFY_LOG_PATH'] + '.json',
             when='midnight'
         )
