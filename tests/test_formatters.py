@@ -11,7 +11,11 @@ from notifications_utils.formatters import (
     strip_dvla_markup,
     strip_pipes,
     escape_html,
-    remove_whitespace_before_commas,
+    remove_whitespace_before_punctuation,
+    make_quotes_smart,
+    replace_hyphens_with_en_dashes,
+    make_markdown_take_notice_of_multiple_newlines,
+    strip_characters_inserted_to_force_newlines,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -101,24 +105,26 @@ def test_handles_placeholders_in_urls():
 
 
 @pytest.mark.parametrize(
-    "url, expected_html", [
+    "url, expected_html, expected_html_in_template", [
         (
             """https://example.com"onclick="alert('hi')""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>')"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>')""",  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22onclick=%22alert%28%27hi">https://example.com"onclick="alert('hi</a>‘)""",  # noqa
         ),
         (
             """https://example.com"style='text-decoration:blink'""",
-            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>'"""  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>'""",  # noqa
+            """<a style="word-wrap: break-word;" href="https://example.com%22style=%27text-decoration:blink">https://example.com"style='text-decoration:blink</a>’""",  # noqa
         ),
     ]
 )
-def test_URLs_get_escaped(url, expected_html):
+def test_URLs_get_escaped(url, expected_html, expected_html_in_template):
     assert notify_email_markdown(url) == (
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         '{}'
         '</p>'
     ).format(expected_html)
-    assert expected_html in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
+    assert expected_html_in_template in str(HTMLEmailTemplate({'content': url, 'subject': ''}))
 
 
 def test_HTML_template_has_URLs_replaced_with_links():
@@ -704,4 +710,105 @@ def test_bleach_doesnt_try_to_make_valid_html_before_cleaning():
     ),
 ])
 def test_removing_whitespace_before_commas(dirty, clean):
-    assert remove_whitespace_before_commas(dirty) == clean
+    assert remove_whitespace_before_punctuation(dirty) == clean
+
+
+@pytest.mark.parametrize('dirty, clean', [
+    (
+        'Hello ((name)) .\n\nThis is a message',
+        'Hello ((name)).\n\nThis is a message'
+    ),
+    (
+        'Hello Jo .\n\nThis is a message',
+        'Hello Jo.\n\nThis is a message'
+    ),
+    (
+        '\n   \t    . word',
+        '. word',
+    ),
+])
+def test_removing_whitespace_before_full_stops(dirty, clean):
+    assert remove_whitespace_before_punctuation(dirty) == clean
+
+
+@pytest.mark.parametrize('dumb, smart', [
+    (
+        """And I said, "what about breakfast at Tiffany's"?""",
+        """And I said, “what about breakfast at Tiffany’s”?""",
+    ),
+    (
+        """
+            <a href="http://example.com?q='foo'">http://example.com?q='foo'</a>
+        """,
+        """
+            <a href="http://example.com?q='foo'">http://example.com?q='foo'</a>
+        """,
+    ),
+])
+def test_smart_quotes(dumb, smart):
+    assert make_quotes_smart(dumb) == smart
+
+
+@pytest.mark.parametrize('nasty, nice', [
+    (
+        (
+            'The en dash - always with spaces in running text when, as '
+            'discussed in this section, indicating a parenthesis or '
+            'pause - and the spaced em dash both have a certain '
+            'technical advantage over the unspaced em dash. '
+        ),
+        (
+            'The en dash\u00A0\u2013 always with spaces in running text when, as '
+            'discussed in this section, indicating a parenthesis or '
+            'pause\u00A0\u2013 and the spaced em dash both have a certain '
+            'technical advantage over the unspaced em dash. '
+        ),
+    ),
+    (
+        'double -- dash',
+        'double\u00A0\u2013 dash',
+    ),
+    (
+        'em — dash',
+        'em – dash',
+    ),
+    (
+        'already\u0020–\u0020correct',  # \u0020 is a normal space character
+        'already\u00A0–\u0020correct',
+    ),
+    (
+        '2004-2008',
+        '2004-2008',  # no replacement
+    ),
+])
+def test_en_dashes(nasty, nice):
+    assert replace_hyphens_with_en_dashes(nasty) == nice
+
+
+def test_unicode_dash_lookup():
+    en_dash_replacement_sequence = '\u00A0\u2013'
+    hyphen = '-'
+    en_dash = '–'
+    space = ' '
+    non_breaking_space = ' '
+    assert en_dash_replacement_sequence == non_breaking_space + en_dash
+    assert space not in en_dash_replacement_sequence
+    assert hyphen not in en_dash_replacement_sequence
+
+
+@pytest.mark.parametrize('raw, expected_output', [
+    ('a', 'a'),
+    ('a\n\n\nb', 'a\n\n🇬🇧🐦✉️\nb'),
+    ('a\n\n\n\n\nb', 'a\n\n🇬🇧🐦✉️\n🇬🇧🐦✉️\n🇬🇧🐦✉️\nb'),
+])
+def test_replacing_multiple_newlines(raw, expected_output):
+    assert make_markdown_take_notice_of_multiple_newlines(raw) == expected_output
+
+
+@pytest.mark.parametrize('raw, expected_output', [
+    ('a', 'a'),
+    ('a<br><br>🇬🇧🐦✉️<br>b', 'a<br><br><br>b'),
+    ('a<br><br>🇬🇧🐦✉️<br>🇬🇧🐦✉️<br>🇬🇧🐦✉️<br>b', 'a<br><br><br><br><br>b'),
+])
+def test_removing_sequence_used_to_force_newlines(raw, expected_output):
+    assert strip_characters_inserted_to_force_newlines(raw) == expected_output

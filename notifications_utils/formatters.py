@@ -5,6 +5,7 @@ import mistune
 import bleach
 from flask import Markup
 from notifications_utils import gsm
+import smartypants
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
 mistune.BlockGrammar.block_quote = re.compile(r'^( *\^[^\n]+(\n[^\n]+)*\n*)+')
@@ -42,7 +43,17 @@ dvla_markup_tags = re.compile(
     re.IGNORECASE
 )
 
-whitespace_before_commas = re.compile(r'\s+,')
+smartypants.tags_to_skip = smartypants.tags_to_skip + ['a']
+
+whitespace_before_punctuation = re.compile(r'\s+([,|\.])')
+
+hyphens_surrounded_by_spaces = re.compile(r'\s+[-|–|—]+\s+')
+
+multiple_newlines = re.compile(r'((\n)\2{2,})')
+
+MAGIC_SEQUENCE = "🇬🇧🐦✉️"
+
+magic_sequence_regex = re.compile(MAGIC_SEQUENCE)
 
 
 def unlink_govuk_escaped(message):
@@ -149,8 +160,49 @@ def strip_pipes(value):
     return value.replace('|', '')
 
 
-def remove_whitespace_before_commas(value):
-    return re.sub(whitespace_before_commas, ',', value)
+def remove_whitespace_before_punctuation(value):
+    return re.sub(
+        whitespace_before_punctuation,
+        lambda match: match.group(1),
+        value
+    )
+
+
+def make_quotes_smart(value):
+    return smartypants.smartypants(
+        value,
+        smartypants.Attr.q | smartypants.Attr.u
+    )
+
+
+def replace_hyphens_with_en_dashes(value):
+    return re.sub(
+        hyphens_surrounded_by_spaces,
+        (
+            '\u00A0'  # non breaking space
+            '\u2013'  # en dash
+            ' '       # space
+        ),
+        value,
+    )
+
+
+def make_markdown_take_notice_of_multiple_newlines(value):
+    return re.sub(
+        multiple_newlines,
+        lambda match: '\n\n{}'.format(
+            (MAGIC_SEQUENCE + '\n') * (len(match.group(1)) - 2)
+        ),
+        value
+    )
+
+
+def strip_characters_inserted_to_force_newlines(value):
+    return re.sub(
+        magic_sequence_regex,
+        '',
+        value
+    )
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
