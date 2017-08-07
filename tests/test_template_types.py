@@ -648,7 +648,7 @@ def test_templates_remove_whitespace_before_punctuation(
     assert mock_remove_whitespace.call_args_list == expected_remove_whitespace_calls
 
 
-@pytest.mark.parametrize('template_class, extra_args, expected_calls', [
+@pytest.mark.parametrize('template_class, extra_args, expected_smart_quotes_calls', [
     (PlainTextEmailTemplate, {}, [
         mock.call('content'),
         mock.call(Markup('subject')),
@@ -691,13 +691,11 @@ def test_templates_remove_whitespace_before_punctuation(
     ]),
 ])
 @mock.patch('notifications_utils.template.make_quotes_smart', side_effect=lambda x: x)
-@mock.patch('notifications_utils.template.replace_hyphens_with_en_dashes', side_effect=lambda x: x)
 def test_templates_make_quotes_smart_and_dashes_en(
-    mock_en_dash_replacement,
     mock_smart_quotes,
     template_class,
     extra_args,
-    expected_calls,
+    expected_smart_quotes_calls,
 ):
     template = template_class({'content': 'content', 'subject': 'subject'}, **extra_args)
 
@@ -706,8 +704,7 @@ def test_templates_make_quotes_smart_and_dashes_en(
     if hasattr(template, 'subject'):
         assert template.subject
 
-    assert mock_smart_quotes.call_args_list == expected_calls
-    assert mock_en_dash_replacement.call_args_list == expected_calls
+    assert mock_smart_quotes.call_args_list == expected_smart_quotes_calls
 
 
 def test_basic_templates_return_markup():

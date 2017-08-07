@@ -1,6 +1,6 @@
 bleach==2.0.0
 mistune==0.7.4
-requests==2.18.2
+requests==2.18.3
 python-json-logger==0.1.7
 Flask>=0.10
 orderedset==2.0
@@ -9,5 +9,5 @@ statsd==3.2.1
 Flask-Redis==0.3.0
 boto3==1.4.5
 pyyaml==3.12
-phonenumbers==8.7.0
+phonenumbers==8.7.1
 smartypants==2.0.0
