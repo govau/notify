@@ -1,4 +1,5 @@
 import logging as builtin_logging
+import logging.handlers as builtin_logging_handlers
 import uuid
 from pathlib import Path
 
@@ -95,21 +96,14 @@ def test_should_build_statsd_line_without_service_id_or_time_taken():
     assert "method.endpoint.200" == logging.build_statsd_line(extra_fields)
 
 
-@pytest.mark.parametrize('debug_mode, stdout_json, formatter', [
-    (True, True, logging.CustomLogFormatter),
-    (True, False, logging.CustomLogFormatter),
-    (False, True, logging.JSONFormatter),
-    # false false is tested separately
-])
-def test_get_handlers_sets_up_logging_appropriately(debug_mode, stdout_json, formatter):
+def test_get_handlers_sets_up_logging_appropriately_with_debug(tmpdir):
     class App:
         config = {
-            'NOTIFY_LOG_PATH': 'foo',
+            'NOTIFY_LOG_PATH': str(tmpdir / 'foo'),
             'NOTIFY_APP_NAME': 'bar',
-            'NOTIFY_LOG_LEVEL': 'ERROR',
-            'LOGGING_STDOUT_JSON': stdout_json
+            'NOTIFY_LOG_LEVEL': 'ERROR'
         }
-        debug = debug_mode
+        debug = True
 
     app = App()
 
@@ -117,17 +111,17 @@ def test_get_handlers_sets_up_logging_appropriately(debug_mode, stdout_json, for
 
     assert len(handlers) == 1
     assert type(handlers[0]) == builtin_logging.StreamHandler
-    assert type(handlers[0].formatter) == formatter
+    assert type(handlers[0].formatter) == logging.CustomLogFormatter
+    assert not (tmpdir / 'foo').exists()
 
 
-def test_get_handlers_sets_up_logging_appropriately_on_live(tmpdir):
+def test_get_handlers_sets_up_logging_appropriately_without_debug(tmpdir):
     class App:
         config = {
             # make a tempfile called foo
             'NOTIFY_LOG_PATH': str(tmpdir / 'foo'),
             'NOTIFY_APP_NAME': 'bar',
-            'NOTIFY_LOG_LEVEL': 'ERROR',
-            'LOGGING_STDOUT_JSON': False
+            'NOTIFY_LOG_LEVEL': 'ERROR'
         }
         debug = False
 
@@ -136,11 +130,11 @@ def test_get_handlers_sets_up_logging_appropriately_on_live(tmpdir):
     handlers = logging.get_handlers(app)
 
     assert len(handlers) == 2
-    assert type(handlers[0]) == builtin_logging.FileHandler
+    assert type(handlers[0]) == builtin_logging.StreamHandler
     assert type(handlers[0].formatter) == logging.CustomLogFormatter
 
-    assert type(handlers[1]) == builtin_logging.FileHandler
+    assert type(handlers[1]) == builtin_logging_handlers.TimedRotatingFileHandler
     assert type(handlers[1].formatter) == logging.JSONFormatter
 
-    assert (tmpdir / 'foo').isfile()
+    assert not (tmpdir / 'foo').isfile()
     assert (tmpdir / 'foo.json').isfile()
