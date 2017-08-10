@@ -173,13 +173,21 @@ def make_quotes_smart(value):
     )
 
 
+def normalise_newlines(value):
+    return re.sub(
+        r'\r\n',
+        '\n',
+        value
+    )
+
+
 def make_markdown_take_notice_of_multiple_newlines(value):
     return re.sub(
         multiple_newlines,
         lambda match: '\n\n{}'.format(
             (MAGIC_SEQUENCE + '\n') * (len(match.group(1)) - 2)
         ),
-        value
+        normalise_newlines(value)
     )
 
 
