@@ -752,6 +752,7 @@ def test_smart_quotes(dumb, smart):
     ('a', 'a'),
     ('a\n\n\nb', 'a\n\n🇬🇧🐦✉️\nb'),
     ('a\n\n\n\n\nb', 'a\n\n🇬🇧🐦✉️\n🇬🇧🐦✉️\n🇬🇧🐦✉️\nb'),
+    ('a\r\n\r\n\r\n\r\n\r\nb', 'a\n\n🇬🇧🐦✉️\n🇬🇧🐦✉️\n🇬🇧🐦✉️\nb'),
 ])
 def test_replacing_multiple_newlines(raw, expected_output):
     assert make_markdown_take_notice_of_multiple_newlines(raw) == expected_output
