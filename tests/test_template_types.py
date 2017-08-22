@@ -652,7 +652,6 @@ def test_templates_remove_whitespace_before_punctuation(
     (PlainTextEmailTemplate, {}, [
         mock.call('content'),
         mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
     ]),
     (HTMLEmailTemplate, {}, [
         mock.call(
@@ -660,7 +659,6 @@ def test_templates_remove_whitespace_before_punctuation(
             'content'
             '</p>'
         ),
-        mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
     (EmailPreviewTemplate, {}, [
@@ -670,8 +668,6 @@ def test_templates_remove_whitespace_before_punctuation(
             '</p>'
         ),
         mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
     ]),
     (SMSMessageTemplate, {}, [
     ]),
@@ -680,14 +676,10 @@ def test_templates_remove_whitespace_before_punctuation(
     (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
         mock.call(Markup('subject')),
         mock.call(Markup('<p>content</p>')),
-        mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
     ]),
     (LetterDVLATemplate, {'notification_reference': "1", 'contact_block': 'www.gov.uk  '}, [
         mock.call('subject'),
         mock.call('content<cr><cr>'),
-        mock.call('subject'),
-        mock.call('subject'),
     ]),
 ])
 @mock.patch('notifications_utils.template.make_quotes_smart', side_effect=lambda x: x)
@@ -704,7 +696,7 @@ def test_templates_make_quotes_smart_and_dashes_en(
     if hasattr(template, 'subject'):
         assert template.subject
 
-    assert mock_smart_quotes.call_args_list == expected_smart_quotes_calls
+    mock_smart_quotes.assert_has_calls(expected_smart_quotes_calls)
 
 
 def test_basic_templates_return_markup():
