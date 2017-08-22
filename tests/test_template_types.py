@@ -648,10 +648,9 @@ def test_templates_remove_whitespace_before_punctuation(
     assert mock_remove_whitespace.call_args_list == expected_remove_whitespace_calls
 
 
-@pytest.mark.parametrize('template_class, extra_args, expected_smart_quotes_calls', [
+@pytest.mark.parametrize('template_class, extra_args, expected_calls', [
     (PlainTextEmailTemplate, {}, [
         mock.call('content'),
-        mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
     (HTMLEmailTemplate, {}, [
@@ -661,7 +660,6 @@ def test_templates_remove_whitespace_before_punctuation(
             '</p>'
         ),
         mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
     ]),
     (EmailPreviewTemplate, {}, [
         mock.call(
@@ -669,8 +667,6 @@ def test_templates_remove_whitespace_before_punctuation(
             'content'
             '</p>'
         ),
-        mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
     (SMSMessageTemplate, {}, [
@@ -680,22 +676,20 @@ def test_templates_remove_whitespace_before_punctuation(
     (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
         mock.call(Markup('subject')),
         mock.call(Markup('<p>content</p>')),
-        mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
     ]),
     (LetterDVLATemplate, {'notification_reference': "1", 'contact_block': 'www.gov.uk  '}, [
         mock.call('subject'),
         mock.call('content<cr><cr>'),
-        mock.call('subject'),
-        mock.call('subject'),
     ]),
 ])
 @mock.patch('notifications_utils.template.make_quotes_smart', side_effect=lambda x: x)
+@mock.patch('notifications_utils.template.replace_hyphens_with_en_dashes', side_effect=lambda x: x)
 def test_templates_make_quotes_smart_and_dashes_en(
+    mock_en_dash_replacement,
     mock_smart_quotes,
     template_class,
     extra_args,
-    expected_smart_quotes_calls,
+    expected_calls,
 ):
     template = template_class({'content': 'content', 'subject': 'subject'}, **extra_args)
 
@@ -704,7 +698,8 @@ def test_templates_make_quotes_smart_and_dashes_en(
     if hasattr(template, 'subject'):
         assert template.subject
 
-    assert mock_smart_quotes.call_args_list == expected_smart_quotes_calls
+    mock_smart_quotes.assert_has_calls(expected_calls)
+    mock_en_dash_replacement.assert_has_calls(expected_calls)
 
 
 def test_basic_templates_return_markup():

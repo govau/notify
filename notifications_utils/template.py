@@ -23,6 +23,7 @@ from notifications_utils.formatters import (
     strip_pipes,
     remove_whitespace_before_punctuation,
     make_quotes_smart,
+    replace_hyphens_with_en_dashes,
     make_markdown_take_notice_of_multiple_newlines,
     strip_characters_inserted_to_force_newlines,
 )
@@ -682,4 +683,6 @@ def do_nice_typography(value):
         remove_whitespace_before_punctuation
     ).then(
         make_quotes_smart
+    ).then(
+        replace_hyphens_with_en_dashes
     ).as_string
