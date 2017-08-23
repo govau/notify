@@ -1,4 +1,4 @@
-from flask.ext.redis import FlaskRedis
+from flask_redis import FlaskRedis
 from flask import current_app
 from time import time
 
