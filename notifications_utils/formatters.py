@@ -220,6 +220,10 @@ def strip_characters_inserted_to_force_newlines(value):
     )
 
 
+def tweak_dvla_list_markup(value):
+    return value.replace('<cr><cr><np>', '<cr><np>').replace('<p><cr><p><cr>', '<p><cr>')
+
+
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):
