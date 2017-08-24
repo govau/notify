@@ -26,6 +26,7 @@ from notifications_utils.formatters import (
     replace_hyphens_with_en_dashes,
     make_markdown_take_notice_of_multiple_newlines,
     strip_characters_inserted_to_force_newlines,
+    replace_hyphens_with_non_breaking_hyphens,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -382,6 +383,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 strip_characters_inserted_to_force_newlines
             ).then(
                 do_nice_typography
+            ).then(
+                replace_hyphens_with_non_breaking_hyphens
             ).as_string,
             'address': Take.as_field(
                 self.address_block,

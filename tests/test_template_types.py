@@ -1535,3 +1535,12 @@ def test_whitespace_in_subjects(template_class, subject, extra_args):
         **extra_args
     )
     assert template_instance.subject == 'no break'
+
+
+def test_letter_preview_uses_non_breaking_hyphens():
+    assert 'non\u2011breaking' in str(LetterPreviewTemplate(
+        {'content': 'non-breaking', 'subject': 'foo'}
+    ))
+    assert '\u2011' not in str(LetterPreviewTemplate(
+        {'content': 'en dash - not hyphen - when set with spaces', 'subject': 'foo'}
+    ))

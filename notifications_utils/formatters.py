@@ -187,6 +187,13 @@ def replace_hyphens_with_en_dashes(value):
     )
 
 
+def replace_hyphens_with_non_breaking_hyphens(value):
+    return value.replace(
+        '-',
+        '\u2011',  # non-breaking hyphen
+    )
+
+
 def normalise_newlines(value):
     return re.sub(
         r'\r\n',
