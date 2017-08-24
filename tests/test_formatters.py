@@ -758,23 +758,23 @@ def test_smart_quotes(dumb, smart):
             'technical advantage over the unspaced em dash. '
         ),
         (
-            'The en dash\u00A0\u2013 always with spaces in running text when, as '
+            'The en dash \u2013 always with spaces in running text when, as '
             'discussed in this section, indicating a parenthesis or '
-            'pause\u00A0\u2013 and the spaced em dash both have a certain '
+            'pause \u2013 and the spaced em dash both have a certain '
             'technical advantage over the unspaced em dash. '
         ),
     ),
     (
         'double -- dash',
-        'double\u00A0\u2013 dash',
+        'double \u2013 dash',
     ),
     (
         'em — dash',
-        'em – dash',
+        'em – dash',
     ),
     (
         'already\u0020–\u0020correct',  # \u0020 is a normal space character
-        'already\u00A0–\u0020correct',
+        'already\u0020–\u0020correct',
     ),
     (
         '2004-2008',
@@ -786,13 +786,13 @@ def test_en_dashes(nasty, nice):
 
 
 def test_unicode_dash_lookup():
-    en_dash_replacement_sequence = '\u00A0\u2013'
+    en_dash_replacement_sequence = '\u0020\u2013'
     hyphen = '-'
     en_dash = '–'
     space = ' '
     non_breaking_space = ' '
-    assert en_dash_replacement_sequence == non_breaking_space + en_dash
-    assert space not in en_dash_replacement_sequence
+    assert en_dash_replacement_sequence == space + en_dash
+    assert non_breaking_space not in en_dash_replacement_sequence
     assert hyphen not in en_dash_replacement_sequence
 
 
