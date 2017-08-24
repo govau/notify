@@ -1510,3 +1510,28 @@ def test_multiple_newlines_in_letters(
     assert expected_dvla_markup in str(LetterDVLATemplate(
         {'content': content, 'subject': 'foo'}, notification_reference=1
     ))
+
+
+@pytest.mark.parametrize('subject', [
+    ' no break ',
+    ' no\tbreak ',
+    '\tno break\t',
+    'no \r\nbreak',
+    'no \nbreak',
+    'no \rbreak',
+    '\rno break\n',
+])
+@pytest.mark.parametrize('template_class, extra_args', [
+    (PlainTextEmailTemplate, {}),
+    (HTMLEmailTemplate, {}),
+    (EmailPreviewTemplate, {}),
+    (LetterPreviewTemplate, {}),
+    (LetterDVLATemplate, {'notification_reference': 1}),
+])
+def test_whitespace_in_subjects(template_class, subject, extra_args):
+
+    template_instance = template_class(
+        {'content': 'foo', 'subject': subject},
+        **extra_args
+    )
+    assert template_instance.subject == 'no break'
