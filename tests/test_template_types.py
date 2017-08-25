@@ -1409,8 +1409,7 @@ def test_letter_address_format(address, expected):
             '3. three\n'
         ),
         (
-            'Here’s an ordered list:'
-            '<cr><cr>'
+            'Here’s an ordered list:<cr>'
             '<np>one'
             '<np>two'
             '<np>three'
@@ -1510,3 +1509,70 @@ def test_multiple_newlines_in_letters(
     assert expected_dvla_markup in str(LetterDVLATemplate(
         {'content': content, 'subject': 'foo'}, notification_reference=1
     ))
+
+
+@pytest.mark.parametrize('subject', [
+    ' no break ',
+    ' no\tbreak ',
+    '\tno break\t',
+    'no \r\nbreak',
+    'no \nbreak',
+    'no \rbreak',
+    '\rno break\n',
+])
+@pytest.mark.parametrize('template_class, extra_args', [
+    (PlainTextEmailTemplate, {}),
+    (HTMLEmailTemplate, {}),
+    (EmailPreviewTemplate, {}),
+    (LetterPreviewTemplate, {}),
+    (LetterDVLATemplate, {'notification_reference': 1}),
+])
+def test_whitespace_in_subjects(template_class, subject, extra_args):
+
+    template_instance = template_class(
+        {'content': 'foo', 'subject': subject},
+        **extra_args
+    )
+    assert template_instance.subject == 'no break'
+
+
+def test_letter_preview_uses_non_breaking_hyphens():
+    assert 'non\u2011breaking' in str(LetterPreviewTemplate(
+        {'content': 'non-breaking', 'subject': 'foo'}
+    ))
+    assert '\u2011' not in str(LetterPreviewTemplate(
+        {'content': 'en dash - not hyphen - when set with spaces', 'subject': 'foo'}
+    ))
+
+
+@freeze_time("2001-01-01 12:00:00.000000")
+def test_nested_lists_in_dvla_markup():
+
+    template_content = str(LetterDVLATemplate({
+        'content': (
+            'nested list:\n'
+            '\n'
+            '1. one\n'
+            '2. two\n'
+            '3. three\n'
+            '  - three one\n'
+            '  - three two\n'
+            '  - three three\n'
+        ),
+        'subject': 'foo',
+    }, notification_reference=1))
+
+    assert (
+        '1 January 2001<cr>'
+        '<cr>'
+        '<h1>foo<normal><cr>'
+        '<cr>'
+        'nested list:<cr>'
+        '<np>one'
+        '<np>two'
+        '<np>three<cr>'
+        '<op><bul><tab>three one'
+        '<op><bul><tab>three two'
+        '<op><bul><tab>three three'
+        '<p><cr>'
+    ) == template_content.split('|')[33]
