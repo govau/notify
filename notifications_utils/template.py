@@ -211,7 +211,7 @@ class WithSubjectTemplate(Template):
         values=None,
         redact_missing_personalisation=False,
     ):
-        self._subject = template['subject']
+        self._subject = template['subject'].replace('\r', '').replace('\n', '').replace('\t', ' ').strip()
         super().__init__(template, values, redact_missing_personalisation=redact_missing_personalisation)
 
     @property
@@ -224,10 +224,6 @@ class WithSubjectTemplate(Template):
         ).then(
             do_nice_typography
         ).as_string)
-
-    @subject.setter
-    def subject(self, value):
-        self._subject = value
 
     @property
     def placeholders(self):
