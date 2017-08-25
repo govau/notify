@@ -16,6 +16,7 @@ from notifications_utils.formatters import (
     replace_hyphens_with_en_dashes,
     make_markdown_take_notice_of_multiple_newlines,
     strip_characters_inserted_to_force_newlines,
+    tweak_dvla_list_markup,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -813,3 +814,25 @@ def test_replacing_multiple_newlines(raw, expected_output):
 ])
 def test_removing_sequence_used_to_force_newlines(raw, expected_output):
     assert strip_characters_inserted_to_force_newlines(raw) == expected_output
+
+
+@pytest.mark.parametrize('markup, expected_fixed', [
+    (
+        'a',
+        'a',
+    ),
+    (
+        'before<p><cr><p><cr>after',
+        'before<p><cr>after',
+    ),
+    (
+        'before<cr><cr><np>after',
+        'before<cr><np>after',
+    ),
+    (
+        'before{}<np>after'.format('<cr>' * 4),
+        'before{}<np>after'.format('<cr>' * 3),
+    ),
+])
+def test_tweaking_dvla_list_markup(markup, expected_fixed):
+    assert tweak_dvla_list_markup(markup) == expected_fixed
