@@ -266,10 +266,10 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
         return ""
 
     def linebreak(self):
-        return "<br/>"
+        return "<div>&nbsp;</div>"
 
     def newline(self):
-        return "<br/>"
+        return self.linebreak()
 
     def list_item(self, text):
         return '<li>{}</li>\n'.format(text.strip())
@@ -350,6 +350,9 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
                 text
             )
         return self.paragraph(text)
+
+    def linebreak(self):
+        return "<br/>"
 
     def list(self, body, ordered=True):
         return (
