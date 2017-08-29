@@ -1,3 +1,5 @@
+{% set line_height = '16.0pt' %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,7 +20,7 @@
         letter-spacing: 0.01em;
         word-spacing: -0.04em;
         margin: 0;
-        padding: 90mm 50mm 0 0;
+        padding: 88.4mm 50mm 0 0;
       }
       #logo {
         height: 18mm;
@@ -81,27 +83,30 @@
         font-size: 20pt;
         line-height: 23.4pt;
         font-weight: bold;
-        margin: 18.16pt 0 8.35pt 0;
+        margin: 18.16pt 0 7.68pt 0;
       }
       h2 {
         font-size: 14pt;
         line-height: 17.4pt;
         font-weight: bold;
-        margin: 15.9pt 0 0 0;
+        margin: {{ line_height }} 0 0 0;
       }
       h1 + h2 {
         margin-top: 8.35pt;
       }
+      h1 + p {
+        margin-top: 7.68pt;
+      }
       p {
         font-size: 12.5pt;
-        line-height: 15.9pt;
-        margin: 15.9pt 0 0 0;
+        line-height: {{ line_height }};
+        margin: {{ line_height }} 0 0 0;
       }
       ul,
       ol {
         font-size: 12.5pt;
-        line-height: 15.9pt;
-        margin: 15.9pt 0 0 0;
+        line-height: {{ line_height }};
+        margin: {{ line_height }} 0 0 0;
         padding: 0 0 0 0.8em;
       }
       ol {

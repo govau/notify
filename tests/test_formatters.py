@@ -424,7 +424,7 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p>line one<br/>'
+            '<p>line one<div>&nbsp;</div>'
             'line two</p>'
             '<p>new paragraph</p>'
         )
