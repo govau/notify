@@ -125,6 +125,17 @@
         margin-left: -0.6em;
       }
 
+      .linebreak {
+        display: inline-block;
+        width: 0.01em;
+        overflow: hidden;
+      }
+
+      .linebreak + .linebreak {
+        display: block;
+        margin: 0 0 3.5pt 0;  // line height - font size
+      }
+
       .placeholder {
         display: inline;
         background-color: #FFBF47;

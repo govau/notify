@@ -1457,7 +1457,7 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
     ), [
         (
             'a\n\n\nb',
-            '<p>a</p><p><div>&nbsp;</div>b</p>',
+            '<p>a</p><p><div class=\'linebreak\'>&nbsp;</div>b</p>',
             'a<cr><cr><cr>b',
         ),
         (
@@ -1478,9 +1478,14 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
                 '<p>a</p><ul>\n'
                 '<li>one</li>\n'
                 '<li>two</li>\n'
-                '<li>three<div>&nbsp;</div>and a half</li>\n'
+                '<li>three<div class=\'linebreak\'>&nbsp;</div>and a half</li>\n'
                 '</ul>\n'
-                '<p><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>foo</p>'
+                '<p>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                'foo'
+                '</p>'
             ),
             (
                 'a<cr>'
@@ -1503,6 +1508,9 @@ def test_multiple_newlines_in_letters(
     expected_preview_markup,
     expected_dvla_markup
 ):
+    print(str(LetterPreviewTemplate(
+        {'content': content, 'subject': 'foo'}
+    )))
     assert expected_preview_markup in str(LetterPreviewTemplate(
         {'content': content, 'subject': 'foo'}
     ))

@@ -266,7 +266,7 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
         return ""
 
     def linebreak(self):
-        return "<div>&nbsp;</div>"
+        return "<div class='linebreak'>&nbsp;</div>"
 
     def newline(self):
         return self.linebreak()
