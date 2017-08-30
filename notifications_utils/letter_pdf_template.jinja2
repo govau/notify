@@ -17,10 +17,12 @@
       }
       body {
         font-family: 'Nimbus Sans L';
+        font-size: 12.5pt;
+        line-height: {{ line_height }};
         letter-spacing: 0.01em;
         word-spacing: -0.04em;
         margin: 0;
-        padding: 88.4mm 50mm 0 0;
+        padding: 94mm 50mm 0 0;
       }
       #logo {
         height: 18mm;
@@ -89,24 +91,21 @@
         font-size: 14pt;
         line-height: 17.4pt;
         font-weight: bold;
-        margin: {{ line_height }} 0 0 0;
+        margin: 0 0 {{ line_height }} 0;
       }
       h1 + h2 {
         margin-top: 8.35pt;
       }
-      h1 + p {
-        margin-top: 7.68pt;
-      }
       p {
         font-size: 12.5pt;
         line-height: {{ line_height }};
-        margin: {{ line_height }} 0 0 0;
+        margin: 0 0 {{ line_height }} 0;
       }
       ul,
       ol {
         font-size: 12.5pt;
         line-height: {{ line_height }};
-        margin: {{ line_height }} 0 0 0;
+        margin: 0 0 {{ line_height }} 0;
         padding: 0 0 0 0.8em;
       }
       ol {
@@ -118,11 +117,28 @@
       }
       ol ul,
       ul ul {
+        margin: {{ line_height }} 0 0 0;
         padding-left: 0;
         list-style-type: disc;
       }
       ol ul {
         margin-left: -0.6em;
+      }
+
+      .linebreak {
+        display: block;
+        width: 0.01em;
+        height: 0.01em;
+        overflow: hidden;
+      }
+
+      .linebreak + .linebreak,
+      .block-linebreak {
+        display: block;
+        overflow: hidden;
+        margin: 0;
+        width: 0.01em;
+        height: {{ line_height }};
       }
 
       .placeholder {

@@ -242,7 +242,7 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def paragraph(self, text):
         if text.strip():
-            return '<p>{}</p>'.format(text)
+            return '{}{}'.format(text, self.block_linebreak())
         return ''
 
     def table(self, header, body):
@@ -265,8 +265,11 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
     def image(self, src, title, alt_text):
         return ""
 
+    def block_linebreak(self):
+        return "<div class='linebreak-block'>&nbsp;</div>"
+
     def linebreak(self):
-        return "<div>&nbsp;</div>"
+        return "<div class='linebreak'>&nbsp;</div>"
 
     def newline(self):
         return self.linebreak()
