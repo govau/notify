@@ -17,6 +17,8 @@
       }
       body {
         font-family: 'Nimbus Sans L';
+        font-size: 12.5pt;
+        line-height: {{ line_height }};
         letter-spacing: 0.01em;
         word-spacing: -0.04em;
         margin: 0;
@@ -94,9 +96,6 @@
       h1 + h2 {
         margin-top: 8.35pt;
       }
-      h1 + p {
-        margin-top: 7.68pt;
-      }
       p {
         font-size: 12.5pt;
         line-height: {{ line_height }};
@@ -118,6 +117,7 @@
       }
       ol ul,
       ul ul {
+        margin: {{ line_height }} 0 0 0;
         padding-left: 0;
         list-style-type: disc;
       }
@@ -126,14 +126,19 @@
       }
 
       .linebreak {
-        display: inline-block;
+        display: block;
         width: 0.01em;
+        height: 0.01em;
         overflow: hidden;
       }
 
-      .linebreak + .linebreak {
+      .linebreak + .linebreak,
+      .block-linebreak {
         display: block;
-        margin: 0 0 3.5pt 0;  // line height - font size
+        overflow: hidden;
+        margin: 0;
+        width: 0.01em;
+        height: {{ line_height }};
       }
 
       .placeholder {
