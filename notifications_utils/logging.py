@@ -106,9 +106,8 @@ def get_handlers(app):
 
     if not app.debug:
         # machine readable json to file
-        handler = logging.handlers.TimedRotatingFileHandler(
-            filename='{}-{}.json'.format(app.config['NOTIFY_LOG_PATH'], os.getpid()),
-            when='midnight'
+        handler = logging.handlers.WatchedFileHandler(
+            filename='{}-{}.json'.format(app.config['NOTIFY_LOG_PATH'], os.getpid())
         )
         handlers.append(configure_handler(handler, app, json_formatter))
 

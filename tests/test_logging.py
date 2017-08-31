@@ -131,7 +131,7 @@ def test_get_handlers_sets_up_logging_appropriately_without_debug(tmpdir):
     assert type(handlers[0]) == builtin_logging.StreamHandler
     assert type(handlers[0].formatter) == logging.CustomLogFormatter
 
-    assert type(handlers[1]) == builtin_logging_handlers.TimedRotatingFileHandler
+    assert type(handlers[1]) == builtin_logging_handlers.WatchedFileHandler
     assert type(handlers[1].formatter) == logging.JSONFormatter
 
     dir_contents = tmpdir.listdir()
