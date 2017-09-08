@@ -136,4 +136,4 @@ def test_get_handlers_sets_up_logging_appropriately_without_debug(tmpdir):
 
     dir_contents = tmpdir.listdir()
     assert len(dir_contents) == 1
-    assert dir_contents[0].basename == 'foo-{}.json'.format(os.getpid())
+    assert dir_contents[0].basename == 'foo.json'

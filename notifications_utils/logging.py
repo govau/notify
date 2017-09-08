@@ -107,7 +107,7 @@ def get_handlers(app):
     if not app.debug:
         # machine readable json to file
         handler = logging.handlers.WatchedFileHandler(
-            filename='{}-{}.json'.format(app.config['NOTIFY_LOG_PATH'], os.getpid())
+            filename='{}.json'.format(app.config['NOTIFY_LOG_PATH'])
         )
         handlers.append(configure_handler(handler, app, json_formatter))
 
