@@ -1,4 +1,5 @@
 import pytest
+import pytz
 
 from freezegun import freeze_time
 from notifications_utils.letter_timings import get_letter_timings
@@ -132,7 +133,15 @@ def test_get_estimated_delivery_date_for_letter(
     expected_latest,
 ):
     timings = get_letter_timings(upload_time)
-    assert timings.printed_by.strftime('%A %H:%M') == expected_print_time
-    assert timings.is_printed == is_printed
-    assert timings.earliest_delivery.strftime('%A %Y-%m-%d %H:%M') == expected_earliest
-    assert timings.latest_delivery.strftime('%A %Y-%m-%d %H:%M') == expected_latest
+    assert (
+        timings.printed_by.astimezone(pytz.timezone('Europe/London')).strftime('%A %H:%M')
+    ) == expected_print_time
+    assert (
+        timings.is_printed
+    ) == is_printed
+    assert (
+        timings.earliest_delivery.astimezone(pytz.timezone('Europe/London')).strftime('%A %Y-%m-%d %H:%M')
+    ) == expected_earliest
+    assert (
+        timings.latest_delivery.astimezone(pytz.timezone('Europe/London')).strftime('%A %Y-%m-%d %H:%M')
+    ) == expected_latest
