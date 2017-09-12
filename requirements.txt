@@ -11,3 +11,4 @@ boto3==1.4.6
 pyyaml==3.12
 phonenumbers==8.8.1
 smartypants==2.0.0
+pytz==2017.2
