@@ -54,6 +54,47 @@ def test_govuk_banner(show_banner):
         assert "GOV.UK" not in str(email)
 
 
+def test_brand_banner_shows():
+    email = str(HTMLEmailTemplate(
+        {'content': 'hello world', 'subject': ''},
+        brand_banner=True,
+        govuk_banner=False
+        ))
+    assert (
+        '<td width="10" height="10" valign="middle"></td>'
+        ) not in email
+    assert (
+        'role="presentation" width="100%" style="min-width: 100%;width: 100% !important;"'
+        ) in email
+
+
+@pytest.mark.parametrize(
+    "brand_logo, brand_name, brand_colour",
+    [
+        ('http://example.com/image.png', 'Example', '#f00'),
+        ('http://example.com/image.png', 'Example', ''),
+        ('http://example.com/image.png', '', '#f00'),
+        ('', 'Example', '#f00')
+    ]
+)
+def test_brand_data_shows(brand_logo, brand_name, brand_colour):
+    email = str(HTMLEmailTemplate(
+        {'content': 'hello world', 'subject': ''},
+        brand_banner=True,
+        govuk_banner=False,
+        brand_logo=brand_logo,
+        brand_name=brand_name,
+        brand_colour=brand_colour
+        ))
+
+    if brand_logo:
+        assert brand_logo in email
+    if brand_name:
+        assert brand_name in email
+    if brand_colour:
+        assert brand_colour in email
+
+
 @pytest.mark.parametrize(
     "complete_html", (True, False)
 )

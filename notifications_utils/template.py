@@ -267,7 +267,8 @@ class HTMLEmailTemplate(WithSubjectTemplate):
         complete_html=True,
         brand_logo=None,
         brand_name=None,
-        brand_colour=None
+        brand_colour=None,
+        brand_banner=False
     ):
         super().__init__(template, values)
         self.govuk_banner = govuk_banner
@@ -275,6 +276,7 @@ class HTMLEmailTemplate(WithSubjectTemplate):
         self.brand_logo = brand_logo
         self.brand_name = brand_name
         self.brand_colour = brand_colour and brand_colour.replace('#', '')
+        self.brand_banner = brand_banner
 
     def __str__(self):
 
@@ -286,7 +288,8 @@ class HTMLEmailTemplate(WithSubjectTemplate):
             'complete_html': self.complete_html,
             'brand_logo': self.brand_logo,
             'brand_name': self.brand_name,
-            'brand_colour': self.brand_colour
+            'brand_colour': self.brand_colour,
+            'brand_banner': self.brand_banner
         })
 
 

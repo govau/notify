@@ -104,7 +104,54 @@
     </tr>
   </table>
 {% endif %}
-{% if brand_logo %}
+{% if brand_banner %}
+  {% set brand_colour = brand_colour if brand_colour else '#0b0c0c' %}
+  <table role="presentation" width="100%" style="min-width: 100%;width: 100% !important;" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td width="100%" height="53" bgcolor="#{{brand_colour}}">
+          <!--[if (gte mso 9)|(IE)]>
+            <table role="presentation" width="580" align="center" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+          <![endif]-->
+          <table role="presentation" width="100%" style="max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
+            <tr>
+              {% if brand_logo %}
+                <td width="70" bgcolor="#{{brand_colour}}" valign="middle">
+                  <img src="{{ brand_logo }}" alt="" height="32" border="0" style="margin-top: 4px; margin-left: 10px;">
+                </td>
+              {% endif %}
+              {% if brand_name %}
+                <td width="100%" bgcolor="#{{brand_colour}}" valign="middle" align="left">
+                  <span style="
+                    display: block;
+                    padding-left: 5px;
+                    font-family: Helvetica, Arial, sans-serif;
+                    font-weight: 700;
+                    font-size: 19px;
+                    color: #ffffff;
+                    line-height: 25px;
+                    margin: 14px 0;
+                    {% if brand_logo %}
+                      margin-left: 5px;
+                    {% endif %}
+                    ">
+                      {{ brand_name }}
+                  </span>
+                </td>
+              {% endif %}
+            </tr>
+          </table>
+          <!--[if (gte mso 9)|(IE)]>
+                </td>
+              </tr>
+            </table>
+          <![endif]-->
+        </td>
+      </tr>
+    </table>
+{% endif %}
+{% if brand_logo and not brand_banner %}
   <table
       role="presentation"
       class="content"
