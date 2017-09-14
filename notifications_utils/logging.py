@@ -77,7 +77,6 @@ def init_app(app, statsd_client=None):
             if 'time_taken' in extra_fields:
                 statsd_client.timing(stat, time_taken)
 
-        current_app.logger.info(build_log_line(extra_fields))
         return response
 
     logging.getLogger().addHandler(logging.NullHandler())
