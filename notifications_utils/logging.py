@@ -77,7 +77,6 @@ def init_app(app, statsd_client=None):
             if 'time_taken' in extra_fields:
                 statsd_client.timing(stat, time_taken)
 
-        current_app.logger.info(build_log_line(extra_fields))
         return response
 
     logging.getLogger().addHandler(logging.NullHandler())
@@ -106,9 +105,8 @@ def get_handlers(app):
 
     if not app.debug:
         # machine readable json to file
-        handler = logging.handlers.TimedRotatingFileHandler(
-            filename='{}-{}.json'.format(app.config['NOTIFY_LOG_PATH'], os.getpid()),
-            when='midnight'
+        handler = logging.handlers.WatchedFileHandler(
+            filename='{}.json'.format(app.config['NOTIFY_LOG_PATH'])
         )
         handlers.append(configure_handler(handler, app, json_formatter))
 

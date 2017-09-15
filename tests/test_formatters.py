@@ -226,9 +226,8 @@ def test_block_code(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p>'
             'inset text'
-            '</p>'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
         )
     ],
     [
@@ -282,7 +281,7 @@ def test_level_1_header(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p>inset text</p>'
+        'inset text<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_letter_dvla_markdown,
@@ -301,8 +300,8 @@ def test_level_2_header(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p>a</p>'
-            '<p>b</p>'
+            'a<div class=\'linebreak-block\'>&nbsp;</div>'
+            'b<div class=\'linebreak-block\'>&nbsp;</div>'
         )
     ],
     [
@@ -424,9 +423,11 @@ def test_unordered_list(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         (
-            '<p>line one<div>&nbsp;</div>'
-            'line two</p>'
-            '<p>new paragraph</p>'
+            'line one<div class=\'linebreak\'>&nbsp;</div>'
+            'line two'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
+            'new paragraph'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
         )
     ],
     [
@@ -458,7 +459,12 @@ def test_paragraphs(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p>before</p><p>after</p>'
+        (
+            'before'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
+            'after'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
+        )
     ],
     [
         notify_letter_dvla_markdown,
@@ -495,7 +501,8 @@ def test_table(markdown_function):
     [
         notify_letter_preview_markdown,
         'http://example.com',
-        '<p><strong>example.com</strong></p>'
+        '<strong>example.com</strong>'
+        '<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_letter_dvla_markdown,
@@ -530,7 +537,7 @@ def test_autolink(markdown_function, link, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p>variable called thing</p>'
+        'variable called thing<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_letter_dvla_markdown,
@@ -550,7 +557,7 @@ def test_codespan(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p>something important</p>'
+        'something important<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_letter_dvla_markdown,
@@ -570,7 +577,7 @@ def test_double_emphasis(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p>something important</p>'
+        'something important<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_letter_dvla_markdown,
@@ -602,7 +609,8 @@ def test_image(markdown_function):
     [
         notify_letter_preview_markdown,
         (
-            '<p>Example: <strong>example.com</strong></p>'
+            'Example: <strong>example.com</strong>'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
         )
     ],
     [
@@ -630,7 +638,7 @@ def test_link(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        '<p>Strike</p>'
+        'Strike<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_letter_dvla_markdown,

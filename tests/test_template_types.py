@@ -604,7 +604,7 @@ def test_templates_handle_html_and_redacting(
     ]),
     (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
         mock.call(Markup('subject')),
-        mock.call(Markup('<p>content</p>')),
+        mock.call(Markup('content<div class=\'linebreak-block\'>&nbsp;</div>')),
         mock.call((
             "<span class='placeholder-no-brackets'>address line 1</span>\n"
             "<span class='placeholder-no-brackets'>address line 2</span>\n"
@@ -675,7 +675,7 @@ def test_templates_remove_whitespace_before_punctuation(
     ]),
     (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
         mock.call(Markup('subject')),
-        mock.call(Markup('<p>content</p>')),
+        mock.call(Markup('content<div class=\'linebreak-block\'>&nbsp;</div>')),
     ]),
     (LetterDVLATemplate, {'notification_reference': "1", 'contact_block': 'www.gov.uk  '}, [
         mock.call('subject'),
@@ -1457,7 +1457,13 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
     ), [
         (
             'a\n\n\nb',
-            '<p>a</p><p><div>&nbsp;</div>b</p>',
+            (
+                'a'
+                '<div class=\'linebreak‑block\'>&nbsp;</div>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                'b'
+                '<div class=\'linebreak‑block\'>&nbsp;</div>'
+            ),
             'a<cr><cr><cr>b',
         ),
         (
@@ -1475,12 +1481,16 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
                 'foo'
             ),
             (
-                '<p>a</p><ul>\n'
+                'a<div class=\'linebreak‑block\'>&nbsp;</div><ul>\n'
                 '<li>one</li>\n'
                 '<li>two</li>\n'
-                '<li>three<div>&nbsp;</div>and a half</li>\n'
+                '<li>three<div class=\'linebreak\'>&nbsp;</div>and a half</li>\n'
                 '</ul>\n'
-                '<p><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>foo</p>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                '<div class=\'linebreak\'>&nbsp;</div>'
+                'foo'
+                '<div class=\'linebreak‑block\'>&nbsp;</div>'
             ),
             (
                 'a<cr>'
@@ -1503,6 +1513,10 @@ def test_multiple_newlines_in_letters(
     expected_preview_markup,
     expected_dvla_markup
 ):
+    print(str(LetterPreviewTemplate(
+        {'content': content, 'subject': 'foo'}
+    )))
+    print(expected_preview_markup)
     assert expected_preview_markup in str(LetterPreviewTemplate(
         {'content': content, 'subject': 'foo'}
     ))
@@ -1540,7 +1554,7 @@ def test_letter_preview_uses_non_breaking_hyphens():
     assert 'non\u2011breaking' in str(LetterPreviewTemplate(
         {'content': 'non-breaking', 'subject': 'foo'}
     ))
-    assert '\u2011' not in str(LetterPreviewTemplate(
+    assert '–' in str(LetterPreviewTemplate(
         {'content': 'en dash - not hyphen - when set with spaces', 'subject': 'foo'}
     ))
 
