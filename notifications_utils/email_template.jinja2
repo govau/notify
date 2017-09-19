@@ -108,7 +108,7 @@
   {% set brand_colour = brand_colour if brand_colour else '#0b0c0c' %}
   <table role="presentation" width="100%" style="min-width: 100%;width: 100% !important;" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td width="100%" height="53" bgcolor="#{{brand_colour}}">
+        <td width="100%" height="53" bgcolor="{{brand_colour}}">
           <!--[if (gte mso 9)|(IE)]>
             <table role="presentation" width="580" align="center" cellpadding="0" cellspacing="0" border="0">
               <tr>
@@ -117,12 +117,12 @@
           <table role="presentation" width="100%" style="max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
             <tr>
               {% if brand_logo %}
-                <td width="70" bgcolor="#{{brand_colour}}" valign="middle">
+                <td width="70" bgcolor="{{brand_colour}}" valign="middle">
                   <img src="{{ brand_logo }}" alt="" height="32" border="0" style="margin-top: 4px; margin-left: 10px;">
                 </td>
               {% endif %}
               {% if brand_name %}
-                <td width="100%" bgcolor="#{{brand_colour}}" valign="middle" align="left">
+                <td width="100%" bgcolor="{{brand_colour}}" valign="middle" align="left">
                   <span style="
                     display: block;
                     padding-left: 5px;
@@ -182,7 +182,7 @@
                   </tr>
                   <tr>
                     {% if brand_colour %}
-                    <td bgcolor="#{{ brand_colour }}" width="2">{{ spacer(2) }}</td>
+                    <td bgcolor="{{ brand_colour }}" width="2">{{ spacer(2) }}</td>
                     <td width="7">{{ spacer(7) }}</td>
                     {% endif %}
                     <td><img src="{{ brand_logo }}" style="display: block; border: 0;" height="{% if brand_name -%} 27 {%- else -%} 54 {%- endif %}" alt="" /></td>
