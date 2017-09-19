@@ -41,7 +41,9 @@ valid_international_phone_numbers = [
     '+12025550104',  # USA
     '0012025550104',  # USA
     '+0012025550104',  # USA
-    '23051234567',  # Mauritius
+    '23051234567',  # Mauritius,
+    '+3312345678',
+    '003312345678'
 ]
 
 
@@ -231,7 +233,7 @@ def test_phone_number_accepts_valid_values(validator, phone_number):
         pytest.fail('Unexpected InvalidPhoneError')
 
 
-@pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
+@pytest.mark.parametrize("phone_number", valid_phone_numbers)
 @pytest.mark.parametrize("validator", [
     partial(validate_recipient, template_type='sms', international_sms=True),
     partial(validate_phone_number, international=True),
