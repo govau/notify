@@ -71,10 +71,11 @@ def test_brand_banner_shows():
 @pytest.mark.parametrize(
     "brand_logo, brand_name, brand_colour",
     [
+        ('http://example.com/image.png', 'Example', 'red'),
         ('http://example.com/image.png', 'Example', '#f00'),
-        ('http://example.com/image.png', 'Example', ''),
+        ('http://example.com/image.png', 'Example', None),
         ('http://example.com/image.png', '', '#f00'),
-        ('', 'Example', '#f00')
+        (None, 'Example', '#f00')
     ]
 )
 def test_brand_data_shows(brand_logo, brand_name, brand_colour):
@@ -87,12 +88,13 @@ def test_brand_data_shows(brand_logo, brand_name, brand_colour):
         brand_colour=brand_colour
         ))
 
+    assert 'GOV.UK' not in email
     if brand_logo:
         assert brand_logo in email
     if brand_name:
         assert brand_name in email
     if brand_colour:
-        assert brand_colour in email
+        assert 'bgcolor="{}"'.format(brand_colour) in email
 
 
 @pytest.mark.parametrize(

@@ -275,7 +275,7 @@ class HTMLEmailTemplate(WithSubjectTemplate):
         self.complete_html = complete_html
         self.brand_logo = brand_logo
         self.brand_name = brand_name
-        self.brand_colour = brand_colour and brand_colour.replace('#', '')
+        self.brand_colour = brand_colour
         self.brand_banner = brand_banner
 
     def __str__(self):
