@@ -21,11 +21,7 @@
         <tr>
           <th>To</th>
           <td>
-            {% if recipient is not none %}
-              {{ recipient }}
-            {% else %}
-              <span class="placeholder-no-brackets">email address</span>
-            {% endif %}
+            {{ recipient }}
           </td>
         </tr>
       {% endif %}

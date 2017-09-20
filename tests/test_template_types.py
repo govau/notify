@@ -867,6 +867,27 @@ def test_email_preview_shows_reply_to_address(extra_args):
     assert 'test@example.com' in str(template)
 
 
+@pytest.mark.parametrize('template_values, expected_content', [
+    (
+        {},
+        '<span class=\'placeholder-no-brackets\'>email address</span>'
+    ),
+    (
+        {'email address': 'test@example.com'},
+        'test@example.com'
+    ),
+])
+def test_email_preview_shows_recipient_address(
+    template_values,
+    expected_content,
+):
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        template_values,
+    )
+    assert expected_content in str(template)
+
+
 @mock.patch('notifications_utils.template.strip_dvla_markup', return_value='FOOBARBAZ')
 def test_letter_preview_strips_dvla_markup(mock_strip_dvla_markup):
     assert 'FOOBARBAZ' in str(LetterPreviewTemplate(
