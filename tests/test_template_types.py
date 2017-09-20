@@ -820,6 +820,27 @@ def test_templates_extract_placeholders(
     assert template_instance.placeholders == set(expected_placeholders)
 
 
+@pytest.mark.parametrize('extra_args', [
+    {
+        'from_name': 'Example service'
+    },
+    {
+        'from_name': 'Example service',
+        'from_address': 'test@example.com',
+    },
+    pytest.mark.xfail({
+    }),
+])
+def test_email_preview_shows_from_name(extra_args):
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        **extra_args
+    )
+    assert '<th>From</th>' in str(template)
+    assert 'Example service' in str(template)
+    assert 'test@example.com' not in str(template)
+
+
 def test_email_preview_escapes_html_in_from_name():
     template = EmailPreviewTemplate(
         {'content': 'content', 'subject': 'subject'},

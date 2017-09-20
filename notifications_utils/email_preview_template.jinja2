@@ -2,11 +2,11 @@
   <table class="email-message-meta">
     <tbody>
       {% if show_recipient %}
-        {% if from_name and from_address %}
+        {% if from_name %}
           <tr>
             <th>From</th>
             <td>
-              {{ from_name }} &lt;{{ from_address }}&gt;
+              {{ from_name }}
             </td>
           </tr>
         {% endif %}
