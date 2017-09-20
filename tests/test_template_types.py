@@ -851,6 +851,22 @@ def test_email_preview_escapes_html_in_from_name():
     assert '&lt;script&gt;alert("")&lt;/script&gt;' in str(template)
 
 
+@pytest.mark.parametrize('extra_args', [
+    {
+        'reply_to': 'test@example.com'
+    },
+    pytest.mark.xfail({
+    }),
+])
+def test_email_preview_shows_reply_to_address(extra_args):
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        **extra_args
+    )
+    assert '<th>Reply&nbsp;to</th>' in str(template)
+    assert 'test@example.com' in str(template)
+
+
 @mock.patch('notifications_utils.template.strip_dvla_markup', return_value='FOOBARBAZ')
 def test_letter_preview_strips_dvla_markup(mock_strip_dvla_markup):
     assert 'FOOBARBAZ' in str(LetterPreviewTemplate(
