@@ -175,10 +175,12 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         prefix=None,
         sender=None,
         show_recipient=False,
+        show_sender=False,
         downgrade_non_gsm_characters=True,
         redact_missing_personalisation=False,
     ):
         self.show_recipient = show_recipient
+        self.show_sender = show_sender
         self.downgrade_non_gsm_characters = downgrade_non_gsm_characters
         super().__init__(template, values, prefix, sender)
         self.redact_missing_personalisation = redact_missing_personalisation
@@ -186,6 +188,8 @@ class SMSPreviewTemplate(SMSMessageTemplate):
     def __str__(self):
 
         return Markup(self.jinja_template.render({
+            'sender': self.sender,
+            'show_sender': self.show_sender,
             'recipient': Field('((phone number))', self.values, with_brackets=False, html='escape'),
             'show_recipient': self.show_recipient,
             'body': Take.as_field(

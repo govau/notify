@@ -286,6 +286,28 @@ def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body,
     add_prefix.assert_called_once_with(*expected_call)
 
 
+@pytest.mark.parametrize('content_to_look_for', [
+    'GOVUK', 'sms-message-sender'
+])
+@pytest.mark.parametrize("show_sender", [
+    True,
+    pytest.mark.xfail(False),
+])
+def test_sms_message_preview_shows_sender(
+    show_sender,
+    content_to_look_for,
+):
+    assert content_to_look_for in str(SMSPreviewTemplate(
+        {'content': 'foo'},
+        sender='GOVUK',
+        show_sender=show_sender,
+    ))
+
+
+def test_sms_message_preview_hides_sender_by_default():
+    assert SMSPreviewTemplate({'content': 'foo'}).show_sender is False
+
+
 @mock.patch('notifications_utils.template.gsm_encode', return_value='downgraded')
 @pytest.mark.parametrize(
     'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
