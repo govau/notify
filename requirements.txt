@@ -1,4 +1,4 @@
-bleach==2.1
+bleach==2.1.1
 mistune==0.7.4
 requests==2.18.4
 python-json-logger==0.1.8
