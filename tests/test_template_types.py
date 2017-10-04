@@ -286,6 +286,28 @@ def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body,
     add_prefix.assert_called_once_with(*expected_call)
 
 
+@pytest.mark.parametrize('content_to_look_for', [
+    'GOVUK', 'sms-message-sender'
+])
+@pytest.mark.parametrize("show_sender", [
+    True,
+    pytest.mark.xfail(False),
+])
+def test_sms_message_preview_shows_sender(
+    show_sender,
+    content_to_look_for,
+):
+    assert content_to_look_for in str(SMSPreviewTemplate(
+        {'content': 'foo'},
+        sender='GOVUK',
+        show_sender=show_sender,
+    ))
+
+
+def test_sms_message_preview_hides_sender_by_default():
+    assert SMSPreviewTemplate({'content': 'foo'}).show_sender is False
+
+
 @mock.patch('notifications_utils.template.gsm_encode', return_value='downgraded')
 @pytest.mark.parametrize(
     'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
@@ -820,6 +842,27 @@ def test_templates_extract_placeholders(
     assert template_instance.placeholders == set(expected_placeholders)
 
 
+@pytest.mark.parametrize('extra_args', [
+    {
+        'from_name': 'Example service'
+    },
+    {
+        'from_name': 'Example service',
+        'from_address': 'test@example.com',
+    },
+    pytest.mark.xfail({
+    }),
+])
+def test_email_preview_shows_from_name(extra_args):
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        **extra_args
+    )
+    assert '<th>From</th>' in str(template)
+    assert 'Example service' in str(template)
+    assert 'test@example.com' not in str(template)
+
+
 def test_email_preview_escapes_html_in_from_name():
     template = EmailPreviewTemplate(
         {'content': 'content', 'subject': 'subject'},
@@ -828,6 +871,43 @@ def test_email_preview_escapes_html_in_from_name():
     )
     assert '<script>' not in str(template)
     assert '&lt;script&gt;alert("")&lt;/script&gt;' in str(template)
+
+
+@pytest.mark.parametrize('extra_args', [
+    {
+        'reply_to': 'test@example.com'
+    },
+    pytest.mark.xfail({
+    }),
+])
+def test_email_preview_shows_reply_to_address(extra_args):
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        **extra_args
+    )
+    assert '<th>Reply&nbsp;to</th>' in str(template)
+    assert 'test@example.com' in str(template)
+
+
+@pytest.mark.parametrize('template_values, expected_content', [
+    (
+        {},
+        '<span class=\'placeholder-no-brackets\'>email address</span>'
+    ),
+    (
+        {'email address': 'test@example.com'},
+        'test@example.com'
+    ),
+])
+def test_email_preview_shows_recipient_address(
+    template_values,
+    expected_content,
+):
+    template = EmailPreviewTemplate(
+        {'content': 'content', 'subject': 'subject'},
+        template_values,
+    )
+    assert expected_content in str(template)
 
 
 @mock.patch('notifications_utils.template.strip_dvla_markup', return_value='FOOBARBAZ')

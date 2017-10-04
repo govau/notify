@@ -2,22 +2,26 @@
   <table class="email-message-meta">
     <tbody>
       {% if show_recipient %}
-        {% if from_name and from_address %}
+        {% if from_name %}
           <tr>
             <th>From</th>
             <td>
-              {{ from_name }} &lt;{{ from_address }}&gt;
+              {{ from_name }}
+            </td>
+          </tr>
+        {% endif %}
+        {% if reply_to %}
+          <tr>
+            <th>Reply&nbsp;to</th>
+            <td>
+              {{ reply_to }}
             </td>
           </tr>
         {% endif %}
         <tr>
           <th>To</th>
           <td>
-            {% if recipient is not none %}
-              {{ recipient }}
-            {% else %}
-              <span class="placeholder-no-brackets">email address</span>
-            {% endif %}
+            {{ recipient }}
           </td>
         </tr>
       {% endif %}

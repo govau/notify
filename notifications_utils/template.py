@@ -175,10 +175,12 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         prefix=None,
         sender=None,
         show_recipient=False,
+        show_sender=False,
         downgrade_non_gsm_characters=True,
         redact_missing_personalisation=False,
     ):
         self.show_recipient = show_recipient
+        self.show_sender = show_sender
         self.downgrade_non_gsm_characters = downgrade_non_gsm_characters
         super().__init__(template, values, prefix, sender)
         self.redact_missing_personalisation = redact_missing_personalisation
@@ -186,6 +188,8 @@ class SMSPreviewTemplate(SMSMessageTemplate):
     def __str__(self):
 
         return Markup(self.jinja_template.render({
+            'sender': self.sender,
+            'show_sender': self.show_sender,
             'recipient': Field('((phone number))', self.values, with_brackets=False, html='escape'),
             'show_recipient': self.show_recipient,
             'body': Take.as_field(
@@ -303,6 +307,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
         values=None,
         from_name=None,
         from_address=None,
+        reply_to=None,
         expanded=False,
         show_recipient=True,
         redact_missing_personalisation=False,
@@ -310,6 +315,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
         super().__init__(template, values, redact_missing_personalisation=redact_missing_personalisation)
         self.from_name = from_name
         self.from_address = from_address
+        self.reply_to = reply_to
         self.expanded = expanded
         self.show_recipient = show_recipient
 
@@ -321,6 +327,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
             'subject': self.subject,
             'from_name': escape_html(self.from_name),
             'from_address': self.from_address,
+            'reply_to': self.reply_to,
             'recipient': Field("((email address))", self.values, with_brackets=False),
             'expanded': self.expanded,
             'show_recipient': self.show_recipient
