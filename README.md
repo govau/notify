@@ -32,7 +32,7 @@ This will
 
 #### Tests
 
-The `./scripts/run_tests.py` script will run all the tests. [py.test](http://pytest.org/latest/) is used for testing.
+The `./scripts/run_tests.sh` script will run all the tests. [py.test](http://pytest.org/latest/) is used for testing.
 
 Running tests will also apply syntax checking, using [pycodestyle](https://pypi.python.org/pypi/pycodestyle).
 
