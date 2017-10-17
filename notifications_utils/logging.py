@@ -99,16 +99,17 @@ def get_handlers(app):
     standard_formatter = CustomLogFormatter(LOG_FORMAT, TIME_FORMAT)
     json_formatter = JSONFormatter(LOG_FORMAT, TIME_FORMAT)
 
-    # human readable stdout logs
-    handler = logging.StreamHandler(sys.stdout)
-    handlers.append(configure_handler(handler, app, standard_formatter))
-
+    stream_handler = logging.StreamHandler(sys.stdout)
     if not app.debug:
-        # machine readable json to file
-        handler = logging.handlers.WatchedFileHandler(
+        # machine readable json to both file and stdout
+        file_handler = logging.handlers.WatchedFileHandler(
             filename='{}.json'.format(app.config['NOTIFY_LOG_PATH'])
         )
-        handlers.append(configure_handler(handler, app, json_formatter))
+        handlers.append(configure_handler(stream_handler, app, json_formatter))
+        handlers.append(configure_handler(file_handler, app, json_formatter))
+    else:
+        # human readable stdout logs
+        handlers.append(configure_handler(stream_handler, app, standard_formatter))
 
     return handlers
 
