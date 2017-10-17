@@ -138,6 +138,8 @@ invalid_email_addresses = (
     'spaces-in-domain@dom ain.com',
     'underscores-in-domain@dom_ain.com',
     'pipe-in-domain@example.com|gov.uk',
+    'comma,in-local@gov.uk',
+    'comma-in-domain@domain,gov.uk',
 )
 
 
