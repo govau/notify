@@ -18,11 +18,11 @@ class Field():
         '\(\('            # opening ((
         '([^\(\)\?]+)'    # 1. name of placeholder, eg ‘registration number’
         '(\?\?)?'         # 2. optional ??
-        '([^\)\(]*)'      # 3. optional text to display if the placeholder’s value is True
+        '([^\)\(]*)'      # 3. conditional text to display if the placeholder’s value is True
         '\)\)'            # closing ))
     )
     placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
-    optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
+    conditional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
     placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
     placeholder_tag_redacted = "<span class='placeholder-redacted'>hidden</span>"
 
@@ -76,7 +76,7 @@ class Field():
                 self.sanitizer(match.group(3)) or ''
             )
         if match.group(2) and match.group(3):
-            return self.optional_placeholder_tag.format(
+            return self.conditional_placeholder_tag.format(
                 self.sanitizer(match.group(1)),
                 self.sanitizer(match.group(3))
             )

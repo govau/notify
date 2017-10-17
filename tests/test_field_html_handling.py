@@ -25,27 +25,27 @@ from notifications_utils.field import Field
         'string <em>without</em> html',
     ),
     (
-        'string ((<em>optional</em>??<em>placeholder</em>)) html',
+        'string ((<em>conditional</em>??<em>placeholder</em>)) html',
         {},
-        'string <span class=\'placeholder-conditional\'>((optional??</span>placeholder)) html',
+        'string <span class=\'placeholder-conditional\'>((conditional??</span>placeholder)) html',
         (
             'string '
             '<span class=\'placeholder-conditional\'>'
-            '((&lt;em&gt;optional&lt;/em&gt;??</span>'
+            '((&lt;em&gt;conditional&lt;/em&gt;??</span>'
             '&lt;em&gt;placeholder&lt;/em&gt;)) '
             'html'
         ),
         (
             'string '
             '<span class=\'placeholder-conditional\'>'
-            '((<em>optional</em>??</span>'
+            '((<em>conditional</em>??</span>'
             '<em>placeholder</em>)) '
             'html'
         ),
     ),
     (
-        'string ((optional??<em>placeholder</em>)) html',
-        {'optional': True},
+        'string ((conditional??<em>placeholder</em>)) html',
+        {'conditional': True},
         'string placeholder html',
         'string &lt;em&gt;placeholder&lt;/em&gt; html',
         'string <em>placeholder</em> html',
