@@ -1,6 +1,5 @@
 import dateutil
 import pytz
-from dateutil import parser
 
 
 def utc_string_to_aware_gmt_datetime(date):

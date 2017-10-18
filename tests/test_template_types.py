@@ -59,13 +59,13 @@ def test_brand_banner_shows():
         {'content': 'hello world', 'subject': ''},
         brand_banner=True,
         govuk_banner=False
-        ))
+    ))
     assert (
         '<td width="10" height="10" valign="middle"></td>'
-        ) not in email
+    ) not in email
     assert (
         'role="presentation" width="100%" style="min-width: 100%;width: 100% !important;"'
-        ) in email
+    ) in email
 
 
 @pytest.mark.parametrize(
@@ -86,7 +86,7 @@ def test_brand_data_shows(brand_logo, brand_name, brand_colour):
         brand_logo=brand_logo,
         brand_name=brand_name,
         brand_colour=brand_colour
-        ))
+    ))
 
     assert 'GOV.UK' not in email
     if brand_logo:
@@ -319,7 +319,7 @@ def test_sms_messages_downgrade_non_gsm(mock_gsm_encode, template_class):
 
 
 @mock.patch('notifications_utils.template.gsm_encode', return_value='downgraded')
-def test_sms_messages_downgrade_non_gsm(mock_gsm_encode):
+def test_sms_messages_dont_downgrade_non_gsm_if_setting_is_false(mock_gsm_encode):
     template = str(SMSPreviewTemplate(
         {'content': '😎'},
         prefix='👉',
@@ -500,7 +500,7 @@ def test_letter_image_renderer_pagination(page_image_url):
     ),
 ])
 def test_letter_image_renderer_requires_arguments(partial_call, expected_exception):
-    with pytest.raises(expected_exception) as error:
+    with pytest.raises(expected_exception):
         partial_call({'content': '', 'subject': ''})
 
 
@@ -1549,12 +1549,12 @@ def test_lists_in_combination_with_other_elements_in_letters(markdown, expected)
 
 
 @pytest.mark.parametrize('template_class', [
-        SMSMessageTemplate,
-        SMSPreviewTemplate,
+    SMSMessageTemplate,
+    SMSPreviewTemplate,
 ])
 def test_message_too_long(template_class):
     body = ('b' * 200) + '((foo))'
-    template = template_class({'content': body}, prefix='a' * 100, values={'foo': 'c'*200})
+    template = template_class({'content': body}, prefix='a' * 100, values={'foo': 'c' * 200})
     assert template.is_message_too_long() is True
 
 

@@ -1,4 +1,3 @@
-import os
 import logging as builtin_logging
 import logging.handlers as builtin_logging_handlers
 import uuid
