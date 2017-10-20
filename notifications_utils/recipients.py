@@ -7,8 +7,6 @@ from functools import lru_cache, partial
 from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
 
-from flask import Markup
-
 from notifications_utils.formatters import formatted_list
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns

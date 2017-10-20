@@ -1,11 +1,10 @@
 import pytest
 from unittest import mock
 import itertools
-from flask import Markup
 from functools import partial
 
-from notifications_utils.recipients import RecipientCSV, Columns
-from notifications_utils.template import Template, SMSMessageTemplate
+from notifications_utils.recipients import RecipientCSV
+from notifications_utils.template import SMSMessageTemplate
 
 
 @pytest.mark.parametrize(
@@ -249,7 +248,6 @@ def test_big_list_validates_right_through(template_type, row_count, header, fill
         max_errors_shown=100,
         max_initial_rows_shown=3
     )
-    auto_generated_row_count = RecipientCSV.max_rows / 10
     assert len(list(big_csv.annotated_rows)) == row_count
     assert big_csv.rows_with_bad_recipients == {row_count - 1}  # 0 indexed
     assert big_csv.rows_with_errors == {row_count - 1}
