@@ -1,15 +1,10 @@
 import pytest
 from unittest.mock import PropertyMock
 from unittest.mock import patch
-from flask import Markup
 from notifications_utils.template import (
     Template,
-    HTMLEmailTemplate,
     SMSMessageTemplate,
     SMSPreviewTemplate,
-    LetterPreviewTemplate,
-    NeededByTemplateError,
-    NoPlaceholderForDataError,
     WithSubjectTemplate
 )
 
@@ -179,5 +174,5 @@ def test_compare_template():
     ) as mocked:
         old_template = Template({'content': 'faked', 'template_type': 'sms'})
         new_template = Template({'content': 'faked', 'template_type': 'sms'})
-        template_changes = old_template.compare_to(new_template)
+        old_template.compare_to(new_template)
         mocked.assert_called_once_with(old_template, new_template)

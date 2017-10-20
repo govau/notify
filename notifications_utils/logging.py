@@ -1,9 +1,8 @@
 from itertools import product
 import re
-import os
 import sys
 
-from flask import request, current_app, g
+from flask import request, g
 from flask.ctx import has_request_context
 from pythonjsonlogger.jsonlogger import JsonFormatter as BaseJSONFormatter
 from time import monotonic

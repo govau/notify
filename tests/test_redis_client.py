@@ -167,12 +167,12 @@ def test_should_allow_request_if_not_over_limit(mocked_redis_client, mocked_redi
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
-def test_should_allow_request_if_not_over_limit(mocked_redis_client, mocked_redis_pipeline):
+def test_rate_limit_not_exceeded(mocked_redis_client, mocked_redis_pipeline):
     mocked_redis_pipeline.execute.return_value = [True, True, 80, True]
     assert not mocked_redis_client.exceeded_rate_limit("key", 90, 100)
 
 
-def test_should_not_call_set_if_not_enabled(mocked_redis_client, mocked_redis_pipeline):
+def test_should_not_call_rate_limit_if_not_enabled(mocked_redis_client, mocked_redis_pipeline):
     mocked_redis_client.active = False
 
     assert not mocked_redis_client.exceeded_rate_limit('key', 100, 100)

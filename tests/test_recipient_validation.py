@@ -1,4 +1,3 @@
-import re
 import pytest
 
 from functools import partial
@@ -12,7 +11,6 @@ from notifications_utils.recipients import (
     allowed_to_send_to,
     InvalidAddressError,
     validate_recipient,
-    validate_phone_number,
     is_uk_phone_number,
     normalise_phone_number,
     international_phone_info,
@@ -149,7 +147,7 @@ def test_detect_international_phone_numbers(phone_number):
 
 
 @pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
-def test_detect_international_phone_numbers(phone_number):
+def test_detect_uk_phone_numbers(phone_number):
     assert is_uk_phone_number(phone_number) is True
 
 
@@ -205,7 +203,7 @@ def test_get_international_info(phone_number, expected_info):
     pytest.mark.xfail('(1)2345'),
 ])
 def test_normalise_phone_number_raises_if_unparseable_characters(phone_number):
-    with pytest.raises(InvalidPhoneError) as e:
+    with pytest.raises(InvalidPhoneError):
         normalise_phone_number(phone_number)
 
 
@@ -395,7 +393,7 @@ def test_validates_against_whitelist_of_email_addresses(email_address):
     ('33(0)1 12345678', '+33 1 12 34 56 78'),  # Paris (France)
     ('33(0)1 12 34 56 78 90 12 34', '+33 112345678901234'),  # Long, not real, number
 ])
-def test_get_international_info(phone_number, expected_formatted):
+def test_format_uk_and_international_phone_numbers(phone_number, expected_formatted):
     assert format_phone_number_human_readable(phone_number) == expected_formatted
 
 
