@@ -218,7 +218,7 @@ def test_handling_of_missing_values(content, values, expected):
         ['true'], {'True': True}, (True, 'true', 1)
     ]
 )
-def test_what_will_not_trigger_optional_placeholder(value):
+def test_what_will_not_trigger_conditional_placeholder(value):
     assert str2bool(value) is False
 
 
@@ -235,7 +235,7 @@ def test_what_will_not_trigger_optional_placeholder(value):
         'show'
     ]
 )
-def test_what_will_trigger_optional_placeholder(value):
+def test_what_will_trigger_conditional_placeholder(value):
     assert str2bool(value) is True
 
 

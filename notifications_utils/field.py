@@ -12,18 +12,51 @@ from notifications_utils.formatters import (
 )
 
 
-class Field():
+class Placeholder:
+    def __init__(self, body):
+        # body should not include the (( and )).
+        self.body = body.lstrip('((').rstrip('))')
 
+    @classmethod
+    def from_match(cls, match):
+        return cls(match.group(0))
+
+    def is_conditional(self):
+        return '??' in self.body
+
+    @property
+    def name(self):
+        # for non conditionals, name equals body
+        return self.body.split('??')[0]
+
+    @property
+    def conditional_text(self):
+        if self.is_conditional():
+            # ((a?? b??c)) returns " b??c"
+            return '??'.join(self.body.split('??')[1:])
+        else:
+            raise ValueError('{} not conditional'.format(self))
+
+    def get_conditional_body(self, show_conditional):
+        # note: unsanitised/converted
+        if self.is_conditional():
+            return self.conditional_text if str2bool(show_conditional) else ''
+        else:
+            raise ValueError('{} not conditional'.format(self))
+
+    def __repr__(self):
+        return 'Placeholder({})'.format(self.body)
+
+
+class Field:
     placeholder_pattern = re.compile(
-        '\(\('            # opening ((
-        '([^\(\)\?]+)'    # 1. name of placeholder, eg ‘registration number’
-        '(\?\?)?'         # 2. optional ??
-        '([^\)\(]*)'      # 3. optional text to display if the placeholder’s value is True
-        '\)\)'            # closing ))
+        r'\({2}'        # opening ((
+        r'([^()]+)'     # body of placeholder - potentially standard or conditional.
+        r'\){2}'        # closing ))
     )
-    placeholder_tag = "<span class='placeholder'>(({}{}))</span>"
-    optional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
-    placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}{}</span>"
+    placeholder_tag = "<span class='placeholder'>(({}))</span>"
+    conditional_placeholder_tag = "<span class='placeholder-conditional'>(({}??</span>{}))"
+    placeholder_tag_no_brackets = "<span class='placeholder-no-brackets'>{}</span>"
     placeholder_tag_redacted = "<span class='placeholder-redacted'>hidden</span>"
 
     def __init__(
@@ -64,60 +97,54 @@ class Field():
     def values(self, value):
         self._values = Columns(value) if value else {}
 
-    def get_match(self, match):
-        if match[1] and match[2]:
-            return match[0]
-        return match[0] + match[2]
-
     def format_match(self, match):
+        placeholder = Placeholder.from_match(match)
+
         if self.redact_missing_personalisation:
-            return self.placeholder_tag_redacted.format(
-                self.sanitizer(match.group(1)),
-                self.sanitizer(match.group(3)) or ''
+            return self.placeholder_tag_redacted
+
+        if placeholder.is_conditional():
+            return self.conditional_placeholder_tag.format(
+                self.sanitizer(placeholder.name),
+                self.sanitizer(placeholder.conditional_text)
             )
-        if match.group(2) and match.group(3):
-            return self.optional_placeholder_tag.format(
-                self.sanitizer(match.group(1)),
-                self.sanitizer(match.group(3))
-            )
+
         return self.placeholder_tag.format(
-            self.sanitizer(match.group(1)), self.sanitizer(match.group(3))
+            self.sanitizer(placeholder.name)
         )
 
     def replace_match(self, match):
-        if match.group(2) and match.group(3) and self.values.get(match.group(1)) is not None:
-            return match.group(3) if str2bool(self.values.get(match.group(1))) else ''
-        if self.get_replacement(match) is not None:
-            return self.get_replacement(match)
+        placeholder = Placeholder.from_match(match)
+        replacement = self.values.get(placeholder.name)
+
+        if placeholder.is_conditional() and replacement is not None:
+            return placeholder.get_conditional_body(replacement)
+
+        replaced_value = self.get_replacement(placeholder)
+        if replaced_value is not None:
+            return self.get_replacement(placeholder)
+
         return self.format_match(match)
 
-    def get_replacement(self, match):
-
-        replacement = self.values.get(match.group(1) + match.group(3))
+    def get_replacement(self, placeholder):
+        replacement = self.values.get(placeholder.name)
+        if replacement is None:
+            return None
 
         if isinstance(replacement, list):
-            return self.get_replacement_as_list(list(filter(None, replacement)))
+            vals = list(filter(None, replacement))
+            if not vals:
+                return None
+            return self.sanitizer(self.get_replacement_as_list(vals))
 
-        if (
-            isinstance(replacement, bool) or
-            replacement == 0 or
-            replacement == ''
-        ):
-            return str(replacement)
-
-        if replacement:
-            return self.sanitizer(str(replacement)) or ''
-
-        return None
+        return self.sanitizer(str(replacement))
 
     def get_replacement_as_list(self, replacement):
-        if not replacement:
-            return None
         if self.markdown_lists:
-            return self.sanitizer('\n\n' + '\n'.join(
+            return '\n\n' + '\n'.join(
                 '* {}'.format(item) for item in replacement
-            ))
-        return self.sanitizer(unescaped_formatted_list(replacement, before_each='', after_each=''))
+            )
+        return unescaped_formatted_list(replacement, before_each='', after_each='')
 
     @property
     def _raw_formatted(self):
@@ -132,7 +159,7 @@ class Field():
     @property
     def placeholders(self):
         return OrderedSet(
-            self.get_match(match) for match in re.findall(
+            Placeholder(body).name for body in re.findall(
                 self.placeholder_pattern, self.content
             )
         )
