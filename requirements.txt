@@ -1,5 +1,5 @@
 bleach==2.1.1
-mistune==0.7.4
+mistune==0.8
 requests==2.18.4
 python-json-logger==0.1.8
 Flask>=0.12.2
