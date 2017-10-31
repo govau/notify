@@ -715,7 +715,7 @@ def test_bleach_doesnt_try_to_make_valid_html_before_cleaning():
     ),
     (
         '\n   \t    , word',
-        ', word',
+        '\n, word',
     ),
 ])
 def test_removing_whitespace_before_commas(dirty, clean):
@@ -733,7 +733,7 @@ def test_removing_whitespace_before_commas(dirty, clean):
     ),
     (
         '\n   \t    . word',
-        '. word',
+        '\n. word',
     ),
 ])
 def test_removing_whitespace_before_full_stops(dirty, clean):

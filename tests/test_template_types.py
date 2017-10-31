@@ -1475,13 +1475,32 @@ def test_letter_output_notification_reference(extra_args, expected_field):
             "postcode": "N1 4W2",
         },
     ),
+    (
+        {
+            "addressline1": "line 1",
+            "addressline2": "\t     ,",
+            "postcode": "N1 4W2",
+        },
+        {
+            "addressline1": "line 1",
+            "addressline2": "\t     ,",
+            "addressline3": "",
+            "addressline4": "",
+            "addressline5": "",
+            "addressline6": "",
+            "postcode": "N1 4W2",
+        },
+    ),
 ])
 def test_letter_address_format(address, expected):
-    assert LetterDVLATemplate(
+    template = LetterDVLATemplate(
         {'content': '', 'subject': ''},
         address,
         notification_reference="1234567",
-    ).values_with_default_optional_address_lines == expected
+    )
+    assert template.values_with_default_optional_address_lines == expected
+    # check that we can actually build a valid letter from this data
+    assert str(template)
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
