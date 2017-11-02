@@ -34,7 +34,10 @@ from notifications_utils.template_change import TemplateChange
 
 
 template_env = Environment(loader=FileSystemLoader(
-    path.dirname(path.abspath(__file__))
+    path.join(
+        path.dirname(path.abspath(__file__)),
+        'jinja_templates',
+    )
 ))
 
 
