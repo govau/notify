@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from functools import partial
@@ -1737,4 +1738,5 @@ def test_nested_lists_in_dvla_markup():
 
 def test_that_print_template_is_the_same_as_preview():
     assert dir(LetterPreviewTemplate) == dir(LetterPrintTemplate)
-    assert LetterPreviewTemplate.jinja_template == LetterPrintTemplate.jinja_template
+    assert os.path.basename(LetterPreviewTemplate.jinja_template.filename) == 'preview.jinja2'
+    assert os.path.basename(LetterPrintTemplate.jinja_template.filename) == 'print.jinja2'

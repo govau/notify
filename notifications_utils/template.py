@@ -478,7 +478,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
 
 
 class LetterPrintTemplate(LetterPreviewTemplate):
-    pass
+
+    jinja_template = template_env.get_template('letter_pdf/print.jinja2')
 
 
 class LetterImageTemplate(LetterPreviewTemplate):
