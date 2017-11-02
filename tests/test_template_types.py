@@ -17,6 +17,7 @@ from notifications_utils.template import (
     SMSPreviewTemplate,
     WithSubjectTemplate,
     EmailPreviewTemplate,
+    LetterPrintTemplate,
 )
 
 
@@ -1732,3 +1733,8 @@ def test_nested_lists_in_dvla_markup():
         '<op><bul><tab>three three'
         '<p><cr>'
     ) == template_content.split('|')[33]
+
+
+def test_that_print_template_is_the_same_as_preview():
+    assert dir(LetterPreviewTemplate) == dir(LetterPrintTemplate)
+    assert LetterPreviewTemplate.jinja_template == LetterPrintTemplate.jinja_template
