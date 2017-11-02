@@ -350,7 +350,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
 
 class LetterPreviewTemplate(WithSubjectTemplate):
 
-    jinja_template = template_env.get_template('letter_pdf_template.jinja2')
+    jinja_template = template_env.get_template('letter_pdf/preview.jinja2')
 
     address_block = '\n'.join([
         '((address line 1))',
