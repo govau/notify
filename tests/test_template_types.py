@@ -276,14 +276,27 @@ def test_sms_message_adds_prefix(add_prefix, template_class, prefix, body, expec
     'template_class', [SMSMessageTemplate, SMSPreviewTemplate]
 )
 @pytest.mark.parametrize(
-    "prefix, body, sender, expected_call", [
-        ("a", "b", "c", (Markup("b"), None)),
-        ("a", "b", None, (Markup("b"), "a")),
-        ("a", "b", False, (Markup("b"), "a")),
+    "show_prefix, prefix, body, sender, expected_call", [
+        (False, "a", "b", "c", (Markup("b"), None)),
+        (True, "a", "b", None, (Markup("b"), "a")),
+        (True, "a", "b", False, (Markup("b"), "a")),
     ]
 )
-def test_sms_message_adds_prefix_only_if_no_sender_set(add_prefix, prefix, body, sender, expected_call, template_class):
-    template = template_class({'content': body}, prefix=prefix, sender=sender)
+def test_sms_message_adds_prefix_only_if_asked_to(
+    add_prefix,
+    show_prefix,
+    prefix,
+    body,
+    sender,
+    expected_call,
+    template_class,
+):
+    template = template_class(
+        {'content': body},
+        prefix=prefix,
+        show_prefix=show_prefix,
+        sender=sender,
+    )
     str(template)
     add_prefix.assert_called_once_with(*expected_call)
 
