@@ -4,7 +4,7 @@ requests==2.18.4
 python-json-logger==0.1.8
 Flask>=0.12.2
 orderedset==2.0
-Jinja2==2.9.6
+Jinja2==2.10
 statsd==3.2.1
 Flask-Redis==0.3.0
 boto3==1.4.7
