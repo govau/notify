@@ -68,4 +68,4 @@ def check_proxy_header_secret(request, secrets, header='X-Custom-Forwarder'):
     if key_used is None:
         return False, "Header didn't match any keys"
 
-    return True, key_used
+    return True, "Key used: {}".format(key_used)

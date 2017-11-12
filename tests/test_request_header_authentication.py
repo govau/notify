@@ -10,7 +10,7 @@ def test_request_header_contains_correct_secret():
     request = CustomRequest(builder.get_environ())
 
     res = check_proxy_header_secret(request, ['123-456-789', '987-654-321'])
-    assert res == (True, 1)
+    assert res == (True, "Key used: 1")
 
 
 def test_request_header_contains_correct_secret_single_key():
@@ -19,7 +19,7 @@ def test_request_header_contains_correct_secret_single_key():
     request = CustomRequest(builder.get_environ())
 
     res = check_proxy_header_secret(request, ['123-456-789'])
-    assert res == (True, 1)
+    assert res == (True, "Key used: 1")
 
 
 def test_request_header_contains_correct_secret_second_key_empty():
@@ -28,7 +28,7 @@ def test_request_header_contains_correct_secret_second_key_empty():
     request = CustomRequest(builder.get_environ())
 
     res = check_proxy_header_secret(request, ['123-456-789', ''])
-    assert res == (True, 1)
+    assert res == (True, "Key used: 1")
 
 
 def test_request_header_contains_correct_secret_custom_header_name():
@@ -37,7 +37,7 @@ def test_request_header_contains_correct_secret_custom_header_name():
     request = CustomRequest(builder.get_environ())
 
     res = check_proxy_header_secret(request, ['123-456-789', ''], 'My-Custom-Header')
-    assert res == (True, 1)
+    assert res == (True, "Key used: 1")
 
 
 def test_request_header_contains_correct_secret_first_key_empty():
@@ -46,7 +46,7 @@ def test_request_header_contains_correct_secret_first_key_empty():
     request = CustomRequest(builder.get_environ())
 
     res = check_proxy_header_secret(request, ['', '123-456-789'])
-    assert res == (True, 2)
+    assert res == (True, "Key used: 2")
 
 
 def test_request_header_contains_correct_secret_more_than_two_secrets():
@@ -55,7 +55,7 @@ def test_request_header_contains_correct_secret_more_than_two_secrets():
     request = CustomRequest(builder.get_environ())
 
     res = check_proxy_header_secret(request, ['', '345-678-910', '123-456-789'])
-    assert res == (True, 3)
+    assert res == (True, "Key used: 3")
 
 
 def test_request_header_missing():
