@@ -79,13 +79,8 @@ def _check_proxy_header_secret(request, secrets, header='X-Custom-Forwarder'):
     if not any(secrets):
         return False, "Secrets are not configured"
 
-    key_used = None
     for i, secret in enumerate(secrets):
         if header_secret == secret:
-            key_used = i + 1  # add 1 to make it human-compatible
-            break
+            return True, "Key used: {}".format(i + 1)  # add 1 to make it human-compatible
 
-    if key_used is None:
-        return False, "Header didn't match any keys"
-
-    return True, "Key used: {}".format(key_used)
+    return False, "Header didn't match any keys"
