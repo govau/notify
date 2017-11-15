@@ -6,26 +6,32 @@ from werkzeug.test import EnvironBuilder
 from notifications_utils.request_helper import CustomRequest, _check_proxy_header_secret
 
 
-@pytest.mark.parametrize('test_input,expected', [
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['right_key', 'old_key']}, (True, 'Key used: 1')),  # noqa
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['right_key']}, (True, 'Key used: 1')),  # noqa
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['right_key', '']}, (True, 'Key used: 1')),  # noqa
-    ({'header_name': 'My-New-Header', 'header_value': 'right_key', 'secrets': ['right_key', '']}, (True, 'Key used: 1')),  # noqa
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['', 'right_key']}, (True, 'Key used: 2')),  # noqa
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['', 'old_key', 'right_key']}, (True, 'Key used: 3')),  # noqa
-    ({'secrets': ['old_key', 'right_key']}, (False, 'Header missing')),
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': '', 'secrets': ['right_key', 'old_key']}, (False, 'Header exists but is empty')),  # noqa
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['', None]}, (False, 'Secrets are not configured')),  # noqa
-    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'wrong_key', 'secrets': ['right_key', 'old_key']}, (False, "Header didn't match any keys")),  # noqa
+@pytest.mark.parametrize('header,secrets,expected', [
+    ({'X-Custom-Forwarder': 'right_key'}, ['right_key', 'old_key'], (True, 'Key used: 1')),
+    ({'X-Custom-Forwarder': 'right_key'}, ['right_key'], (True, 'Key used: 1')),
+    ({'X-Custom-Forwarder': 'right_key'}, ['right_key', ''], (True, 'Key used: 1')),
+    ({'My-New-Header': 'right_key'}, ['right_key', ''], (True, 'Key used: 1')),
+    ({'X-Custom-Forwarder': 'right_key'}, ['', 'right_key'], (True, 'Key used: 2')),
+    ({'X-Custom-Forwarder': 'right_key'}, ['', 'old_key', 'right_key'], (True, 'Key used: 3')),
+    ({'X-Custom-Forwarder': ''}, ['right_key', 'old_key'], (False, 'Header exists but is empty')),
+    ({'X-Custom-Forwarder': 'right_key'}, ['', None], (False, 'Secrets are not configured')),
+    ({'X-Custom-Forwarder': 'wrong_key'}, ['right_key', 'old_key'], (False, "Header didn't match any keys")),
 ])
-def test_request_header_authorization(test_input, expected):
+def test_request_header_authorization(header, secrets, expected):
     builder = EnvironBuilder()
-    if 'header_name' in test_input:
-        builder.headers[test_input['header_name']] = test_input['header_value']
+    builder.headers.extend(header)
     request = CustomRequest(builder.get_environ())
 
-    if test_input.get('header_name'):
-        res = _check_proxy_header_secret(request, test_input['secrets'], test_input.get('header_name'))
-    else:
-        res = _check_proxy_header_secret(request, test_input['secrets'])
+    res = _check_proxy_header_secret(request, secrets, list(header.keys())[0])
+    assert res == expected
+
+
+@pytest.mark.parametrize('secrets,expected', [
+    (['old_key', 'right_key'], (False, 'Header missing')),
+])
+def test_request_header_authorization_missing_header(secrets, expected):
+    builder = EnvironBuilder()
+    request = CustomRequest(builder.get_environ())
+
+    res = _check_proxy_header_secret(request, secrets)
     assert res == expected
