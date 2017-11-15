@@ -1,8 +1,8 @@
 from unittest import mock
 from werkzeug.test import EnvironBuilder
 
-from notifications_utils import request_id
-from notifications_utils.request_id import CustomRequest
+from notifications_utils import request_helper
+from notifications_utils.request_helper import CustomRequest
 
 
 def test_get_request_id_from_request_id_header():
@@ -28,7 +28,7 @@ def test_get_request_id_from_downstream_header():
     assert request_id == 'from-downstream'
 
 
-@mock.patch('notifications_utils.request_id.uuid.uuid4')
+@mock.patch('notifications_utils.request_helper.uuid.uuid4')
 def test_get_request_id_with_no_downstream_header_configured(uuid4_mock):
     builder = EnvironBuilder()
     builder.headers[''] = 'from-downstream'
@@ -41,7 +41,7 @@ def test_get_request_id_with_no_downstream_header_configured(uuid4_mock):
     assert request_id == 'generated'
 
 
-@mock.patch('notifications_utils.request_id.uuid.uuid4')
+@mock.patch('notifications_utils.request_helper.uuid.uuid4')
 def test_get_request_id_generates_id(uuid4_mock):
     builder = EnvironBuilder()
     request = CustomRequest(builder.get_environ())
@@ -55,7 +55,7 @@ def test_get_request_id_generates_id(uuid4_mock):
 
 
 def test_request_id_is_set_on_response(app):
-    request_id.init_app(app)
+    request_helper.init_app(app)
     client = app.test_client()
 
     with app.app_context():
@@ -64,7 +64,7 @@ def test_request_id_is_set_on_response(app):
 
 
 def test_request_id_is_set_on_error_response(app):
-    request_id.init_app(app)
+    request_helper.init_app(app)
     client = app.test_client()
 
     @app.route('/')

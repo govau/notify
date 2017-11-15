@@ -1,6 +1,6 @@
 import uuid
 
-from flask import request
+from flask import request, current_app, abort
 from flask.wrappers import Request
 
 
@@ -45,3 +45,42 @@ class ResponseHeaderMiddleware(object):
 def init_app(app):
     app.request_class = CustomRequest
     app.wsgi_app = ResponseHeaderMiddleware(app.wsgi_app, 'NotifyRequestID')
+
+
+def check_proxy_header_before_request():
+    if current_app.config['DEBUG']:
+        return None
+
+    keys = [
+        current_app.config.get('ROUTE_SECRET_KEY_1'),
+        current_app.config.get('ROUTE_SECRET_KEY_2'),
+    ]
+    result, msg = _check_proxy_header_secret(request, keys)
+
+    if not result:
+        current_app.logger.warning(msg)
+        abort(403)
+
+    # We need to return None to continue processing the request
+    # http://flask.pocoo.org/docs/0.12/api/#flask.Flask.before_request
+    current_app.logger.info(msg)
+    return None
+
+
+def _check_proxy_header_secret(request, secrets, header='X-Custom-Forwarder'):
+    if header not in request.headers:
+        return False, "Header missing"
+
+    header_secret = request.headers.get(header)
+    if not header_secret:
+        return False, "Header exists but is empty"
+
+    # if there isn't any non-empty secret configured we fail closed
+    if not any(secrets):
+        return False, "Secrets are not configured"
+
+    for i, secret in enumerate(secrets):
+        if header_secret == secret:
+            return True, "Key used: {}".format(i + 1)  # add 1 to make it human-compatible
+
+    return False, "Header didn't match any keys"
