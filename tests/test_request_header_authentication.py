@@ -1,93 +1,31 @@
 from unittest import mock  # noqa
+
+import pytest
 from werkzeug.test import EnvironBuilder
 
 from notifications_utils.request_helper import CustomRequest, _check_proxy_header_secret
 
 
-def test_request_header_contains_correct_secret():
+@pytest.mark.parametrize('test_input,expected', [
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['right_key', 'old_key']}, (True, 'Key used: 1')),  # noqa
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['right_key']}, (True, 'Key used: 1')),  # noqa
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['right_key', '']}, (True, 'Key used: 1')),  # noqa
+    ({'header_name': 'My-New-Header', 'header_value': 'right_key', 'secrets': ['right_key', '']}, (True, 'Key used: 1')),  # noqa
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['', 'right_key']}, (True, 'Key used: 2')),  # noqa
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['', 'old_key', 'right_key']}, (True, 'Key used: 3')),  # noqa
+    ({'secrets': ['old_key', 'right_key']}, (False, 'Header missing')),
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': '', 'secrets': ['right_key', 'old_key']}, (False, 'Header exists but is empty')),  # noqa
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'right_key', 'secrets': ['', None]}, (False, 'Secrets are not configured')),  # noqa
+    ({'header_name': 'X-Custom-Forwarder', 'header_value': 'wrong_key', 'secrets': ['right_key', 'old_key']}, (False, "Header didn't match any keys")),  # noqa
+])
+def test_request_header_authorization(test_input, expected):
     builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '123-456-789'
+    if 'header_name' in test_input:
+        builder.headers[test_input['header_name']] = test_input['header_value']
     request = CustomRequest(builder.get_environ())
 
-    res = _check_proxy_header_secret(request, ['123-456-789', '987-654-321'])
-    assert res == (True, "Key used: 1")
-
-
-def test_request_header_contains_correct_secret_single_key():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '123-456-789'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['123-456-789'])
-    assert res == (True, "Key used: 1")
-
-
-def test_request_header_contains_correct_secret_second_key_empty():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '123-456-789'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['123-456-789', ''])
-    assert res == (True, "Key used: 1")
-
-
-def test_request_header_contains_correct_secret_custom_header_name():
-    builder = EnvironBuilder()
-    builder.headers['My-Custom-Header'] = '123-456-789'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['123-456-789', ''], 'My-Custom-Header')
-    assert res == (True, "Key used: 1")
-
-
-def test_request_header_contains_correct_secret_first_key_empty():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '123-456-789'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['', '123-456-789'])
-    assert res == (True, "Key used: 2")
-
-
-def test_request_header_contains_correct_secret_more_than_two_secrets():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '123-456-789'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['', '345-678-910', '123-456-789'])
-    assert res == (True, "Key used: 3")
-
-
-def test_request_header_missing():
-    builder = EnvironBuilder()
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['123-456-789', '987-654-321'])
-    assert res == (False, "Header missing")
-
-
-def test_request_header_missing_value():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = ''
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['123-456-789', '987-654-321'])
-    assert res == (False, "Header exists but is empty")
-
-
-def test_request_header_missing_secrets():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '123-456-789'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['', None])
-    assert res == (False, "Secrets are not configured")
-
-
-def test_request_header_wrong_secret():
-    builder = EnvironBuilder()
-    builder.headers['X-Custom-Forwarder'] = '133-433-733'
-    request = CustomRequest(builder.get_environ())
-
-    res = _check_proxy_header_secret(request, ['123-456-789', '987-654-321'])
-    assert res == (False, "Header didn't match any keys")
+    if test_input.get('header_name'):
+        res = _check_proxy_header_secret(request, test_input['secrets'], test_input.get('header_name'))
+    else:
+        res = _check_proxy_header_secret(request, test_input['secrets'])
+    assert res == expected
