@@ -48,9 +48,6 @@ def init_app(app):
 
 
 def check_proxy_header_before_request():
-    if current_app.config['DEBUG']:
-        return None
-
     keys = [
         current_app.config.get('ROUTE_SECRET_KEY_1'),
         current_app.config.get('ROUTE_SECRET_KEY_2'),
