@@ -48,9 +48,6 @@ def init_app(app):
 
 
 def check_proxy_header_before_request():
-    if current_app.config['DEBUG']:
-        return None
-
     keys = [
         current_app.config.get('ROUTE_SECRET_KEY_1'),
         current_app.config.get('ROUTE_SECRET_KEY_2'),
@@ -59,11 +56,13 @@ def check_proxy_header_before_request():
 
     if not result:
         current_app.logger.warning(msg)
-        abort(403)
+        if current_app.config.get('CHECK_PROXY_HEADER', False):
+            abort(403)
+    else:
+        current_app.logger.info(msg)
 
     # We need to return None to continue processing the request
     # http://flask.pocoo.org/docs/0.12/api/#flask.Flask.before_request
-    current_app.logger.info(msg)
     return None
 
 
