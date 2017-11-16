@@ -125,9 +125,11 @@ class SMSMessageTemplate(Template):
         template,
         values=None,
         prefix=None,
-        sender=None
+        show_prefix=True,
+        sender=None,
     ):
         self.prefix = prefix
+        self.show_prefix = show_prefix
         self.sender = sender
         super().__init__(template, values)
 
@@ -144,7 +146,7 @@ class SMSMessageTemplate(Template):
 
     @property
     def prefix(self):
-        return self._prefix if not self.sender else None
+        return self._prefix if self.show_prefix else None
 
     @prefix.setter
     def prefix(self, value):
@@ -176,6 +178,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         template,
         values=None,
         prefix=None,
+        show_prefix=True,
         sender=None,
         show_recipient=False,
         show_sender=False,
@@ -185,7 +188,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
         self.show_recipient = show_recipient
         self.show_sender = show_sender
         self.downgrade_non_gsm_characters = downgrade_non_gsm_characters
-        super().__init__(template, values, prefix, sender)
+        super().__init__(template, values, prefix, show_prefix, sender)
         self.redact_missing_personalisation = redact_missing_personalisation
 
     def __str__(self):
@@ -201,7 +204,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
                 html='escape',
                 redact_missing_personalisation=self.redact_missing_personalisation,
             ).then(
-                add_prefix, (escape_html(self.prefix) or None) if not self.sender else None
+                add_prefix, (escape_html(self.prefix) or None) if self.show_prefix else None
             ).then(
                 gsm_encode if self.downgrade_non_gsm_characters else str
             ).then(
