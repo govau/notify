@@ -51,8 +51,6 @@ def check_proxy_header_before_request():
     if current_app.config['DEBUG']:
         return None
 
-    check_proxy_header = current_app.config.get('CHECK_PROXY_HEADER', False)
-
     keys = [
         current_app.config.get('ROUTE_SECRET_KEY_1'),
         current_app.config.get('ROUTE_SECRET_KEY_2'),
@@ -61,7 +59,7 @@ def check_proxy_header_before_request():
 
     if not result:
         current_app.logger.warning(msg)
-        if check_proxy_header:
+        if current_app.config.get('CHECK_PROXY_HEADER', False):
             abort(403)
     else:
         current_app.logger.info(msg)
