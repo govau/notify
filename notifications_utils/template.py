@@ -34,7 +34,10 @@ from notifications_utils.template_change import TemplateChange
 
 
 template_env = Environment(loader=FileSystemLoader(
-    path.dirname(path.abspath(__file__))
+    path.join(
+        path.dirname(path.abspath(__file__)),
+        'jinja_templates',
+    )
 ))
 
 
@@ -347,7 +350,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
 
 class LetterPreviewTemplate(WithSubjectTemplate):
 
-    jinja_template = template_env.get_template('letter_pdf_template.jinja2')
+    jinja_template = template_env.get_template('letter_pdf/preview.jinja2')
 
     address_block = '\n'.join([
         '((address line 1))',
@@ -472,6 +475,11 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             key: Columns(self.values).get(key) or ''
             for key in keys
         }
+
+
+class LetterPrintTemplate(LetterPreviewTemplate):
+
+    jinja_template = template_env.get_template('letter_pdf/print.jinja2')
 
 
 class LetterImageTemplate(LetterPreviewTemplate):
