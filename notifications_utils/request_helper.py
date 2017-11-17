@@ -58,8 +58,6 @@ def check_proxy_header_before_request():
         current_app.logger.warning(msg)
         if current_app.config.get('CHECK_PROXY_HEADER', False):
             abort(403)
-    else:
-        current_app.logger.info(msg)
 
     # We need to return None to continue processing the request
     # http://flask.pocoo.org/docs/0.12/api/#flask.Flask.before_request
