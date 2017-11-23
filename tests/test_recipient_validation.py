@@ -414,6 +414,9 @@ def test_format_recipient(recipient, expected_formatted):
     assert format_recipient(recipient) == expected_formatted
 
 
-@pytest.mark.parametrize("invalid_num", ['ABCDEF', '+1-202-555-0104', '', None, 12345])
-def test_try_format_recipient_doesnt_throw(invalid_num):
-    assert try_validate_and_format_phone_number(invalid_num) == invalid_num
+def test_try_format_recipient_doesnt_throw():
+    assert try_validate_and_format_phone_number('ALPHANUM3R1C') == 'ALPHANUM3R1C'
+
+
+def test_format_phone_number_human_readable_doenst_throw():
+    assert format_phone_number_human_readable('ALPHANUM3R1C') == 'ALPHANUM3R1C'

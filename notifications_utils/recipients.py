@@ -481,10 +481,10 @@ def try_validate_and_format_phone_number(number, column=None, international=None
     something in
     """
     try:
-        return validate_phone_number(number, column, international)
-    except Exception as exc:
+        return validate_and_format_phone_number(number, column, international)
+    except InvalidPhoneError as exc:
         if log_msg:
-            current_app.logger.warning(log_msg)
+            current_app.logger.warning('{}: {}'.format(log_msg, exc))
         return number
 
 
@@ -568,8 +568,11 @@ def format_recipient(recipient):
 
 
 def format_phone_number_human_readable(phone_number):
-
-    phone_number = validate_phone_number(phone_number, international=True)
+    try:
+        phone_number = validate_phone_number(phone_number, international=True)
+    except InvalidPhoneError:
+        # if there was a validation error, we want to shortcut out here, but still display the number on the front end
+        return phone_number
     international_phone_info = get_international_phone_info(phone_number)
 
     return phonenumbers.format_number(
