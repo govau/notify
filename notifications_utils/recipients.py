@@ -7,6 +7,8 @@ from functools import lru_cache, partial
 from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
 
+from flask import current_app
+
 from notifications_utils.formatters import formatted_list
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns
@@ -471,6 +473,19 @@ def validate_phone_number(number, column=None, international=False):
 
 
 validate_and_format_phone_number = validate_phone_number
+
+
+def try_validate_and_format_phone_number(number, column=None, international=None, log_msg=None):
+    """
+    For use in places where you shouldn't error if the phone number is invalid - for example if firetext pass us
+    something in
+    """
+    try:
+        return validate_phone_number(number, column, international)
+    except Exception as exc:
+        if log_msg:
+            current_app.logger.warning(log_msg)
+        return number
 
 
 def validate_email_address(email_address, column=None):

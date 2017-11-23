@@ -17,6 +17,7 @@ from notifications_utils.recipients import (
     get_international_phone_info,
     format_phone_number_human_readable,
     format_recipient,
+    try_validate_and_format_phone_number
 )
 
 
@@ -80,6 +81,7 @@ invalid_uk_phone_numbers = sum([
             '07123☟☜⬇⬆☞☝',
             '07";DROP TABLE;"',
             '+44 07ab cde fgh',
+            'ALPHANUM3R1C',
         ))
     ]
 ], [])
@@ -410,3 +412,8 @@ def test_format_uk_and_international_phone_numbers(phone_number, expected_format
 ])
 def test_format_recipient(recipient, expected_formatted):
     assert format_recipient(recipient) == expected_formatted
+
+
+@pytest.mark.parametrize("invalid_num", ['ABCDEF', '+1-202-555-0104', '', None, 12345])
+def test_try_format_recipient_doesnt_throw(invalid_num):
+    assert try_validate_and_format_phone_number(invalid_num) == invalid_num
