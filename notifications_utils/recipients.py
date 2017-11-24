@@ -7,6 +7,8 @@ from functools import lru_cache, partial
 from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
 
+from flask import current_app
+
 from notifications_utils.formatters import formatted_list
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns
@@ -473,6 +475,19 @@ def validate_phone_number(number, column=None, international=False):
 validate_and_format_phone_number = validate_phone_number
 
 
+def try_validate_and_format_phone_number(number, column=None, international=None, log_msg=None):
+    """
+    For use in places where you shouldn't error if the phone number is invalid - for example if firetext pass us
+    something in
+    """
+    try:
+        return validate_and_format_phone_number(number, column, international)
+    except InvalidPhoneError as exc:
+        if log_msg:
+            current_app.logger.warning('{}: {}'.format(log_msg, exc))
+        return number
+
+
 def validate_email_address(email_address, column=None):
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
@@ -553,8 +568,11 @@ def format_recipient(recipient):
 
 
 def format_phone_number_human_readable(phone_number):
-
-    phone_number = validate_phone_number(phone_number, international=True)
+    try:
+        phone_number = validate_phone_number(phone_number, international=True)
+    except InvalidPhoneError:
+        # if there was a validation error, we want to shortcut out here, but still display the number on the front end
+        return phone_number
     international_phone_info = get_international_phone_info(phone_number)
 
     return phonenumbers.format_number(
