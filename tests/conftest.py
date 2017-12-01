@@ -6,7 +6,7 @@ class FakeService():
     id = "1234"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def app():
     flask_app = Flask(__name__)
     ctx = flask_app.app_context()
