@@ -66,6 +66,8 @@ def test_request_id_is_set_on_response(app):
 def test_request_id_is_set_on_error_response(app):
     request_helper.init_app(app)
     client = app.test_client()
+    # turn off DEBUG so that the flask default error handler gets triggered
+    app.config['DEBUG'] = False
 
     @app.route('/')
     def error_route():
