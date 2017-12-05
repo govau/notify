@@ -731,3 +731,49 @@ def test_dont_error_if_too_many_recipients_not_specified():
     )
     assert not recipients.has_errors
     assert not recipients.more_rows_than_can_send
+
+
+@pytest.mark.parametrize('index, expected_row', [
+    (
+        0,
+        {
+            'phone number': '07700 90000 1',
+            'colour': 'red',
+        },
+    ),
+    (
+        1,
+        {
+            'phone_number': '07700 90000 2',
+            'COLOUR': 'green',
+        },
+    ),
+    (
+        2,
+        {
+            'p h o n e  n u m b e r': '07700 90000 3',
+            '   colour   ': 'blue'
+        },
+    ),
+    pytest.mark.xfail((
+        3,
+        {'phone number': 'foo'},
+    ), raises=IndexError),
+    pytest.mark.xfail((
+        -1,
+        {'phone number': 'foo'},
+    ), raises=IndexError),
+])
+def test_recipients_can_be_accessed_by_index(index, expected_row):
+    recipients = RecipientCSV(
+        """
+            phone number, colour
+            07700 90000 1, red
+            07700 90000 2, green
+            07700 90000 3, blue
+        """,
+        placeholders=['phone_number'],
+        template_type='sms'
+    )
+    for key, value in expected_row.items():
+        assert recipients[index][key] == value
