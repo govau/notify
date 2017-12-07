@@ -1,4 +1,5 @@
 bleach==2.1.1
+html5lib==1.0b10 # pyup: <= 1.0b10
 mistune==0.8.1
 requests==2.18.4
 python-json-logger==0.1.8
