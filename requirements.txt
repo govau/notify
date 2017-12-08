@@ -10,7 +10,7 @@ statsd==3.2.1
 Flask-Redis==0.3.0
 boto3==1.4.7
 pyyaml==3.12
-phonenumbers==8.8.7
+phonenumbers==8.8.8
 pytz==2017.3
 # fork of smartypants with improved regex performance
 regex==2017.11.9
