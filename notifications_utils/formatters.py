@@ -354,6 +354,11 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
             )
         return self.paragraph(text)
 
+    def hrule(self):
+        return (
+            '<hr style="border: 0; height: 1px; background: #BFC1C3; Margin: 30px 0 30px 0;">'
+        )
+
     def linebreak(self):
         return "<br/>"
 
