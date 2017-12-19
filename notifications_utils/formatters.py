@@ -364,22 +364,34 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
 
     def list(self, body, ordered=True):
         return (
-            '<ol style="Margin: 0 0 20px 0; padding: 0; list-style-type: decimal;">'
+            '<table role="presentation" style="padding: 0 0 20px 0;">'
+            '<tr>'
+            '<td style="font-family: Helvetica, Arial, sans-serif;">'
+            '<ol style="Margin: 0 0 0 20px; padding: 0; list-style-type: decimal;">'
             '{}'
             '</ol>'
+            '</td>'
+            '</tr>'
+            '</table>'
         ).format(
             body
         ) if ordered else (
-            '<ul style="Margin: 0 0 20px 0; padding: 0; list-style-type: disc;">'
+            '<table role="presentation" style="padding: 0 0 20px 0;">'
+            '<tr>'
+            '<td style="font-family: Helvetica, Arial, sans-serif;">'
+            '<ul style="Margin: 0 0 0 20px; padding: 0; list-style-type: disc;">'
             '{}'
             '</ul>'
+            '</td>'
+            '</tr>'
+            '</table>'
         ).format(
             body
         )
 
     def list_item(self, text):
         return (
-            '<li style="Margin: 5px 0 5px 20px; padding: 0; display: list-item; font-size: 19px; '
+            '<li style="Margin: 5px 0 5px; padding: 0 0 0 5px; font-size: 19px;'
             'line-height: 25px; color: #0B0C0C;">'
             '{}'
             '</li>'
