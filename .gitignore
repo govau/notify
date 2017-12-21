@@ -60,3 +60,6 @@ target/
 
 /cache
 /venv
+
+# Linux and Mac Dev Environment
+.DS_Store
