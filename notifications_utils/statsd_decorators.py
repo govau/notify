@@ -4,7 +4,7 @@ from flask import current_app
 from monotonic import monotonic
 
 
-def statsd(statsd_client, namespace):
+def statsd(namespace):
     def time_function(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -12,10 +12,10 @@ def statsd(statsd_client, namespace):
             try:
                 res = func(*args, **kwargs)
                 elapsed_time = monotonic() - start_time
-                statsd_client.incr('{namespace}.{func}'.format(
+                current_app.statsd_client.incr('{namespace}.{func}'.format(
                     namespace=namespace, func=func.__name__)
                 )
-                statsd_client.timing('{namespace}.{func}'.format(
+                current_app.statsd_client.timing('{namespace}.{func}'.format(
                     namespace=namespace, func=func.__name__), elapsed_time
                 )
 

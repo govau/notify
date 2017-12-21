@@ -6,6 +6,7 @@ class StatsdClient():
         self.statsd_client = None
 
     def init_app(self, app, *args, **kwargs):
+        app.statsd_client = self
         self.active = app.config.get('STATSD_ENABLED')
         self.namespace = "{}.notifications.{}.".format(
             app.config.get('NOTIFY_ENVIRONMENT'),
