@@ -409,7 +409,13 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
         )
 
     def link(self, link, title, content):
-        return '{}: <a style="word-wrap: break-word;" href="{}">{}</a>'.format(content, link, link)
+        return (
+            '<a style="word-wrap: break-word;"{}{}>{}</a>'
+        ).format(
+            ' href="{}"'.format(link),
+            ' title="{}"'.format(title) if title else "",
+            content,
+        )
 
     def autolink(self, link, is_email=False):
         if is_email:
