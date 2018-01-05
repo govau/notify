@@ -1670,10 +1670,6 @@ def test_multiple_newlines_in_letters(
     expected_preview_markup,
     expected_dvla_markup
 ):
-    print(str(LetterPreviewTemplate(
-        {'content': content, 'subject': 'foo'}
-    )))
-    print(expected_preview_markup)
     assert expected_preview_markup in str(LetterPreviewTemplate(
         {'content': content, 'subject': 'foo'}
     ))

@@ -625,7 +625,7 @@ def test_image(markdown_function):
         (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
             'color: #0B0C0C;">'
-            'Example: <a style="word-wrap: break-word;" href="http://example.com">http://example.com</a>'
+            '<a style="word-wrap: break-word;" href="http://example.com">Example</a>'
             '</p>'
         )
     ]
@@ -633,6 +633,36 @@ def test_image(markdown_function):
 def test_link(markdown_function, expected):
     assert markdown_function(
         '[Example](http://example.com)'
+    ) == expected
+
+
+@pytest.mark.parametrize('markdown_function, expected', (
+    [
+        notify_letter_preview_markdown,
+        (
+            'Example: <strong>example.com</strong>'
+            '<div class=\'linebreak-block\'>&nbsp;</div>'
+        )
+    ],
+    [
+        notify_letter_dvla_markdown,
+        (
+            'Example: <b>example.com<normal><cr><cr>'
+        )
+    ],
+    [
+        notify_email_markdown,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
+            'color: #0B0C0C;">'
+            '<a style="word-wrap: break-word;" href="http://example.com" title="An example URL">Example</a>'
+            '</p>'
+        )
+    ]
+))
+def test_link_with_title(markdown_function, expected):
+    assert markdown_function(
+        '[Example](http://example.com "An example URL")'
     ) == expected
 
 
