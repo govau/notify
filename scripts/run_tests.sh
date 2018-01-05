@@ -26,7 +26,7 @@ if [ -d venv ]; then
   source ./venv/bin/activate
 fi
 
-flake8 .
+flake8 --enable=T .
 display_result $? 1 "Code style check"
 
 ## Code coverage
