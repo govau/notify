@@ -6,12 +6,21 @@
     display: none;
   }
 
-  @bottom-right {
-    content: "Page " counter(page) " of " counter(pages);
-    font-family: 'Nimbus Sans L';
-    font-size: 10pt;
-    text-align: right;
-    vertical-align: top;
+  @page :first {
+    @top-left-corner {
+        content: 'NOTIFY:';
+        color: white;
+        font-family: 'arial';
+        font-size: 6pt;
+    }
   }
-
+  @page {
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: 'Nimbus Sans L';
+      font-size: 10pt;
+      text-align: right;
+      vertical-align: top;
+    }
+  }
 </style>
