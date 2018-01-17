@@ -34,7 +34,7 @@ class DeskproClient():
             'label': ticket_type,
             'department_id': self.department_id,
             'agent_team_id': self.agent_team_id,
-            'person_email': self.default_person_email if user_email is None else user_email,
+            'person_email': user_email or self.default_person_email,
             'person_name': user_name,
             'urgency': urgency,
         }
