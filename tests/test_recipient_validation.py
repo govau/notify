@@ -41,6 +41,7 @@ valid_international_phone_numbers = [
     '0012025550104',  # USA
     '+0012025550104',  # USA
     '23051234567',  # Mauritius,
+    '+682 12345',  # Cook islands
     '+3312345678',
     '003312345678'
 ]
@@ -94,7 +95,8 @@ invalid_phone_numbers = list(filter(
     invalid_uk_phone_numbers
 )) + [
     ('800000000000', 'Not a valid country prefix'),
-    ('1234', 'Not enough digits'),
+    ('1234567', 'Not enough digits'),
+    ('+682 1234', 'Not enough digits'),  # Cook Islands phone numbers can be 5 digits
 ]
 
 
@@ -391,7 +393,6 @@ def test_validates_against_whitelist_of_email_addresses(email_address):
     ('7 499 1231212', '+7 499 123-12-12'),  # Moscow (Russia)
     ('1-202-555-0104', '+1 202-555-0104'),  # Washington DC (USA)
     ('+23051234567', '+230 5123 4567'),  # Mauritius
-    ('1-40604', '+1 40604'),  # USA shortcode
     ('33(0)1 12345678', '+33 1 12 34 56 78'),  # Paris (France)
     ('33(0)1 12 34 56 78 90 12 34', '+33 112345678901234'),  # Long, not real, number
 ])
