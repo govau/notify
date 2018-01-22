@@ -469,7 +469,7 @@ def validate_phone_number(number, column=None, international=False):
 
     number = normalise_phone_number(number)
 
-    if len(number) < 5:
+    if len(number) < 8:
         raise InvalidPhoneError('Not enough digits')
 
     if get_international_prefix(number) is None:
