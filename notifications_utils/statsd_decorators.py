@@ -27,7 +27,7 @@ def statsd(namespace):
                 )
                 raise e
             else:
-                current_app.logger.info(
+                current_app.logger.debug(
                     "{namespace} call {func} took {time}".format(
                         namespace=namespace, func=func.__name__, time="{0:.4f}".format(elapsed_time)
                     )
