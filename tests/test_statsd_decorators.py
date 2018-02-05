@@ -15,7 +15,7 @@ def test_should_call_statsd(app, mocker):
     app.config['STATSD_PREFIX'] = "prefix"
     app.statsd_client = Mock()
 
-    mock_logger = mocker.patch.object(app.logger, 'info')
+    mock_logger = mocker.patch.object(app.logger, 'debug')
 
     @statsd(namespace="test")
     def test_function():
