@@ -28,6 +28,7 @@ from notifications_utils.formatters import (
     strip_characters_inserted_to_force_newlines,
     replace_hyphens_with_non_breaking_hyphens,
     tweak_dvla_list_markup,
+    remove_trailing_linebreak,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -404,6 +405,8 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 replace_hyphens_with_non_breaking_hyphens
             ).then(
                 tweak_dvla_list_markup
+            ).then(
+                remove_trailing_linebreak
             ).as_string,
             'address': Take.as_field(
                 self.address_block,
