@@ -17,6 +17,7 @@ from notifications_utils.formatters import (
     make_markdown_take_notice_of_multiple_newlines,
     strip_characters_inserted_to_force_newlines,
     tweak_dvla_list_markup,
+    remove_trailing_linebreak,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -887,3 +888,17 @@ def test_removing_sequence_used_to_force_newlines(raw, expected_output):
 ])
 def test_tweaking_dvla_list_markup(markup, expected_fixed):
     assert tweak_dvla_list_markup(markup) == expected_fixed
+
+
+@pytest.mark.parametrize('content', [
+    'foo bar baz',
+    'foo bar baz<div class=\'linebreak-block\'>&nbsp;</div>',
+    'foo bar baz<div class=\'linebreak-block\'>&nbsp;</div><div class=\'linebreak-block\'>&nbsp;</div>',
+    'foo bar baz <div class=\'linebreak-block\'>&nbsp;</div> <div class=\'linebreak-block\'>&nbsp;</div>',
+])
+def test_remove_trailing_linebreak(content):
+    assert remove_trailing_linebreak(
+        content
+    ) == (
+        'foo bar baz'
+    )

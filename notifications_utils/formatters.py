@@ -224,6 +224,20 @@ def tweak_dvla_list_markup(value):
     return value.replace('<cr><cr><np>', '<cr><np>').replace('<p><cr><p><cr>', '<p><cr>')
 
 
+def remove_trailing_linebreak(value):
+
+    block_linebreak = NotifyLetterMarkdownPreviewRenderer.block_linebreak(None)
+
+    if value.endswith(block_linebreak):
+        return remove_trailing_linebreak(
+            value[:(
+                -1 * len(block_linebreak)
+            )].rstrip()
+        )
+    else:
+        return value
+
+
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
 
     def block_code(self, code, language=None):
