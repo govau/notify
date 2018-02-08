@@ -402,11 +402,11 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 do_nice_typography
             ).then(
+                remove_trailing_linebreak
+            ).then(
                 replace_hyphens_with_non_breaking_hyphens
             ).then(
                 tweak_dvla_list_markup
-            ).then(
-                remove_trailing_linebreak
             ).as_string,
             'address': Take.as_field(
                 self.address_block,

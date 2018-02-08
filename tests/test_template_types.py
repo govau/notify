@@ -468,6 +468,27 @@ def test_letter_preview_renderer(
     ]
 
 
+@freeze_time("2001-01-01 12:00:00.000000")
+@mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
+def test_letter_preview_renderer_without_mocks(jinja_template):
+
+    str(LetterPreviewTemplate(
+        {'content': 'Foo', 'subject': 'Subject'},
+        {'addressline1': 'name', 'addressline2': 'street', 'postcode': 'SW1 1AA'},
+        contact_block='',
+    ))
+
+    jinja_template_locals = jinja_template.call_args_list[0][0][0]
+
+    assert jinja_template_locals['address'] == 'name<br>street<br>SW1 1AA'
+    assert jinja_template_locals['subject'] == 'Subject'
+    assert jinja_template_locals['message'] == "Foo"
+    assert jinja_template_locals['date'] == '1 January 2001'
+    assert jinja_template_locals['contact_block'] == ''
+    assert jinja_template_locals['admin_base_url'] == 'http://localhost:6012'
+    assert jinja_template_locals['logo_file_name'] == 'hm-government.svg'
+
+
 @mock.patch('notifications_utils.template.LetterImageTemplate.jinja_template.render')
 def test_letter_image_renderer(jinja_template):
     str(LetterImageTemplate(
@@ -1619,7 +1640,6 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
                 '<div class=\'linebreak‑block\'>&nbsp;</div>'
                 '<div class=\'linebreak\'>&nbsp;</div>'
                 'b'
-                '<div class=\'linebreak‑block\'>&nbsp;</div>'
             ),
             'a<cr><cr><cr>b',
         ),
@@ -1647,7 +1667,6 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
                 '<div class=\'linebreak\'>&nbsp;</div>'
                 '<div class=\'linebreak\'>&nbsp;</div>'
                 'foo'
-                '<div class=\'linebreak‑block\'>&nbsp;</div>'
             ),
             (
                 'a<cr>'
