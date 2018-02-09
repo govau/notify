@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs
+
 import botocore
 import pytest
 
@@ -17,7 +19,12 @@ def test_s3upload_save_file_to_bucket(mocker):
              bucket_name=bucket,
              file_location=location)
     mocked_put = mocked.return_value.Object.return_value.put
-    mocked_put.assert_called_once_with(Body=contents, ServerSideEncryption='AES256', ContentType=content_type)
+    mocked_put.assert_called_once_with(
+        Body=contents,
+        ServerSideEncryption='AES256',
+        ContentType=content_type,
+        Tagging=None
+    )
 
 
 def test_s3upload_save_file_to_bucket_with_contenttype(mocker):
@@ -29,7 +36,12 @@ def test_s3upload_save_file_to_bucket_with_contenttype(mocker):
              file_location=location,
              content_type=content_type)
     mocked_put = mocked.return_value.Object.return_value.put
-    mocked_put.assert_called_once_with(Body=contents, ServerSideEncryption='AES256', ContentType=content_type)
+    mocked_put.assert_called_once_with(
+        Body=contents,
+        ServerSideEncryption='AES256',
+        ContentType=content_type,
+        Tagging=None
+    )
 
 
 def test_s3upload_creates_bucket_if_bucket_does_not_exist(mocker):
@@ -56,3 +68,19 @@ def test_s3upload_raises_exception(app, mocker):
                  region=region,
                  bucket_name=bucket,
                  file_location="location")
+
+
+def test_s3upload_save_file_to_bucket_with_urlencoded_tags(mocker):
+    mocked = mocker.patch('notifications_utils.s3.resource')
+    s3upload(
+        filedata=contents,
+        region=region,
+        bucket_name=bucket,
+        file_location=location,
+        tags={'a': '1/2', 'b': 'x y'},
+    )
+    mocked_put = mocked.return_value.Object.return_value.put
+
+    # make sure tags were a urlencoded query string
+    encoded_tags = mocked_put.call_args[1]['Tagging']
+    assert parse_qs(encoded_tags) == {'a': ['1/2'], 'b': ['x y']}
