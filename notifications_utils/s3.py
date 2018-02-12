@@ -27,7 +27,15 @@ def s3upload(filedata, region, bucket_name, file_location, content_type='binary/
 
     upload_file_name = file_location
     key = _s3.Object(bucket_name, upload_file_name)
+
+    put_args = {
+        'Body': contents,
+        'ServerSideEncryption': 'AES256',
+        'ContentType': content_type
+    }
+
     if tags:
         tags = urllib.parse.urlencode(tags)
+        put_args['Tagging'] = tags
 
-    key.put(Body=contents, ServerSideEncryption='AES256', ContentType=content_type, Tagging=tags)
+    key.put(**put_args)

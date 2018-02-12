@@ -23,7 +23,6 @@ def test_s3upload_save_file_to_bucket(mocker):
         Body=contents,
         ServerSideEncryption='AES256',
         ContentType=content_type,
-        Tagging=None
     )
 
 
@@ -40,7 +39,6 @@ def test_s3upload_save_file_to_bucket_with_contenttype(mocker):
         Body=contents,
         ServerSideEncryption='AES256',
         ContentType=content_type,
-        Tagging=None
     )
 
 
