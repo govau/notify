@@ -9,7 +9,7 @@ statsd==3.2.2
 Flask-Redis==0.3.0
 boto3==1.5.12
 pyyaml==3.12
-phonenumbers==8.8.10
+phonenumbers==8.8.11
 pytz==2017.3
 smartypants==2.0.1
 monotonic==1.4
