@@ -497,7 +497,7 @@ def try_validate_and_format_phone_number(number, column=None, international=None
         return number
 
 
-def validate_email_address(email_address, column=None):
+def validate_email_address(email_address, column=None):  # noqa (C901 too complex)
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
     # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
@@ -515,7 +515,12 @@ def validate_email_address(email_address, column=None):
 
     # idna = "Internationalized domain name" - this encode/decode cycle converts unicode into its accurate ascii
     # representation as the web uses. '例え.テスト'.encode('idna') == b'xn--r8jz45g.xn--zckzah'
-    hostname = hostname.encode('idna').decode('ascii')
+    try:
+        hostname = hostname.encode('idna').decode('ascii')
+    except UnicodeError:
+        current_app.logger.error('Invalid hostname {}'.format(hostname))
+        raise InvalidEmailError
+
     parts = hostname.split('.')
 
     if len(hostname) > 253 or len(parts) < 2:
