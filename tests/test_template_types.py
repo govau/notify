@@ -450,7 +450,7 @@ def test_letter_preview_renderer(
     ))
     remove_empty_lines.assert_called_once_with(expected_address)
     jinja_template.assert_called_once_with({
-        'address': '123 Street',
+        'address': '<ul><li>123 Street</li></ul>',
         'subject': 'Subject',
         'message': 'Bar',
         'date': '1 January 2001',
@@ -480,7 +480,13 @@ def test_letter_preview_renderer_without_mocks(jinja_template):
 
     jinja_template_locals = jinja_template.call_args_list[0][0][0]
 
-    assert jinja_template_locals['address'] == 'name<br>street<br>SW1 1AA'
+    assert jinja_template_locals['address'] == (
+        '<ul>'
+        '<li>name</li>'
+        '<li>street</li>'
+        '<li>SW1 1AA</li>'
+        '</ul>'
+    )
     assert jinja_template_locals['subject'] == 'Subject'
     assert jinja_template_locals['message'] == "Foo"
     assert jinja_template_locals['date'] == '1 January 2001'
