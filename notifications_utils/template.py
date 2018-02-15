@@ -11,6 +11,7 @@ from notifications_utils.field import Field
 from notifications_utils.formatters import (
     unlink_govuk_escaped,
     nl2br,
+    nl2li,
     add_prefix,
     notify_email_markdown,
     notify_letter_preview_markdown,
@@ -427,7 +428,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             ).then(
                 remove_whitespace_before_punctuation
             ).then(
-                nl2br
+                nl2li
             ).as_string,
             'contact_block': Take.as_field(
                 '\n'.join(
