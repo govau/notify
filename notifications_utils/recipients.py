@@ -86,10 +86,7 @@ class RecipientCSV():
         return self._len
 
     def __getitem__(self, requested_index):
-        for row_index, row in enumerate(self.rows):
-            if row_index == requested_index:
-                return row
-        raise IndexError
+        return self.rows[requested_index]
 
     @property
     def whitelist(self):
