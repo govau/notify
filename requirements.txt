@@ -13,3 +13,4 @@ phonenumbers==8.8.11
 pytz==2018.3
 smartypants==2.0.1
 monotonic==1.4
+pypdf==1.26.0
