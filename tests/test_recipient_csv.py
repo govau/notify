@@ -759,10 +759,13 @@ def test_dont_error_if_too_many_recipients_not_specified():
         3,
         {'phone number': 'foo'},
     ), raises=IndexError),
-    pytest.mark.xfail((
+    (
         -1,
-        {'phone number': 'foo'},
-    ), raises=IndexError),
+        {
+            'p h o n e  n u m b e r': '07700 90000 3',
+            '   colour   ': 'blue'
+        },
+    ),
 ])
 def test_recipients_can_be_accessed_by_index(index, expected_row):
     recipients = RecipientCSV(

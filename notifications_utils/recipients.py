@@ -76,6 +76,7 @@ class RecipientCSV():
         self.whitelist = whitelist
         self.template = template if isinstance(template, Template) else None
         self.international_sms = international_sms
+        self.rows = list(self.get_rows())
         self.annotated_rows = list(self.get_annotated_rows())
         self.remaining_messages = remaining_messages
 
@@ -85,10 +86,7 @@ class RecipientCSV():
         return self._len
 
     def __getitem__(self, requested_index):
-        for row_index, row in enumerate(self.rows):
-            if row_index == requested_index:
-                return row
-        raise IndexError
+        return self.rows[requested_index]
 
     @property
     def whitelist(self):
@@ -160,8 +158,7 @@ class RecipientCSV():
             skipinitialspace=True,
         )
 
-    @property
-    def rows(self):
+    def get_rows(self):
 
         column_headers = self._raw_column_headers  # this is for caching
         length_of_column_headers = len(column_headers)
