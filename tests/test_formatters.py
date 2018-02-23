@@ -5,7 +5,6 @@ from notifications_utils.formatters import (
     unlink_govuk_escaped,
     notify_email_markdown,
     notify_letter_preview_markdown,
-    notify_letter_dvla_markdown,
     gsm_encode,
     formatted_list,
     strip_dvla_markup,
@@ -211,10 +210,6 @@ def test_sms_preview_adds_newlines():
             'print("hello")'
         ],
         [
-            notify_letter_dvla_markdown,
-            'print("hello")'
-        ],
-        [
             notify_email_markdown,
             'print("hello")'
         ]
@@ -230,12 +225,6 @@ def test_block_code(markdown_function, expected):
         (
             'inset text'
             '<div class=\'linebreak-block\'>&nbsp;</div>'
-        )
-    ],
-    [
-        notify_letter_dvla_markdown,
-        (
-            'inset text<cr><cr>'
         )
     ],
     [
@@ -262,10 +251,6 @@ def test_block_quote(markdown_function, expected):
             '<h2>heading</h2>\n'
         ],
         [
-            notify_letter_dvla_markdown,
-            '<h2>heading<normal><cr><cr>'
-        ],
-        [
             notify_email_markdown,
             (
                 '<h2 style="Margin: 0 0 20px 0; padding: 0; font-size: 27px; '
@@ -286,10 +271,6 @@ def test_level_1_header(markdown_function, expected):
         'inset text<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
-        notify_letter_dvla_markdown,
-        'inset text<cr><cr>'
-    ],
-    [
         notify_email_markdown,
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">inset text</p>'
     ]
@@ -304,13 +285,6 @@ def test_level_2_header(markdown_function, expected):
         (
             'a<div class=\'linebreak-block\'>&nbsp;</div>'
             'b<div class=\'linebreak-block\'>&nbsp;</div>'
-        )
-    ],
-    [
-        notify_letter_dvla_markdown,
-        (
-            'a<cr><cr>'
-            'b<cr><cr>'
         )
     ],
     [
@@ -336,15 +310,6 @@ def test_hrule(markdown_function, expected):
             '<li>two</li>\n'
             '<li>three</li>\n'
             '</ol>\n'
-        )
-    ],
-    [
-        notify_letter_dvla_markdown,
-        (
-            '<np>one'
-            '<np>two'
-            '<np>three'
-            '<p><cr>'
         )
     ],
     [
@@ -392,16 +357,6 @@ def test_ordered_list(markdown_function, expected):
         )
     ],
     [
-        notify_letter_dvla_markdown,
-        (
-            '<cr>'
-            '<op><bul><tab>one'
-            '<op><bul><tab>two'
-            '<op><bul><tab>three'
-            '<p><cr>'
-        )
-    ],
-    [
         notify_email_markdown,
         (
             '<table role="presentation" style="padding: 0 0 20px 0;">'
@@ -446,14 +401,6 @@ def test_unordered_list(markdown_function, expected):
         )
     ],
     [
-        notify_letter_dvla_markdown,
-        (
-            'line one<cr>'
-            'line two<cr><cr>'
-            'new paragraph<cr><cr>'
-        )
-    ],
-    [
         notify_email_markdown,
         (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">line one<br/>'
@@ -482,10 +429,6 @@ def test_paragraphs(markdown_function, expected):
         )
     ],
     [
-        notify_letter_dvla_markdown,
-        'before<cr><cr>after<cr><cr>'
-    ],
-    [
         notify_email_markdown,
         (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">before</p>'
@@ -500,7 +443,7 @@ def test_multiple_newlines_get_truncated(markdown_function, expected):
 
 
 @pytest.mark.parametrize('markdown_function', (
-    notify_letter_preview_markdown, notify_letter_dvla_markdown, notify_email_markdown
+    notify_letter_preview_markdown, notify_email_markdown
 ))
 def test_table(markdown_function):
     assert markdown_function(
@@ -518,11 +461,6 @@ def test_table(markdown_function):
         'http://example.com',
         '<strong>example.com</strong>'
         '<div class=\'linebreak-block\'>&nbsp;</div>'
-    ],
-    [
-        notify_letter_dvla_markdown,
-        'http://example.com',
-        '<b>example.com<normal><cr><cr>'
     ],
     [
         notify_email_markdown,
@@ -555,10 +493,6 @@ def test_autolink(markdown_function, link, expected):
         'variable called thing<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
-        notify_letter_dvla_markdown,
-        'variable called thing<cr><cr>'
-    ],
-    [
         notify_email_markdown,
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">variable called thing</p>'
     ]
@@ -573,10 +507,6 @@ def test_codespan(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         'something important<div class=\'linebreak-block\'>&nbsp;</div>'
-    ],
-    [
-        notify_letter_dvla_markdown,
-        'something important<cr><cr>'
     ],
     [
         notify_email_markdown,
@@ -595,10 +525,6 @@ def test_double_emphasis(markdown_function, expected):
         'something important<div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
-        notify_letter_dvla_markdown,
-        'something important<cr><cr>'
-    ],
-    [
         notify_email_markdown,
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something important</p>'
     ]
@@ -610,7 +536,7 @@ def test_emphasis(markdown_function, expected):
 
 
 @pytest.mark.parametrize('markdown_function', (
-    notify_letter_preview_markdown, notify_letter_dvla_markdown, notify_email_markdown
+    notify_letter_preview_markdown, notify_email_markdown
 ))
 def test_image(markdown_function):
     assert markdown_function(
@@ -626,12 +552,6 @@ def test_image(markdown_function):
         (
             'Example: <strong>example.com</strong>'
             '<div class=\'linebreak-block\'>&nbsp;</div>'
-        )
-    ],
-    [
-        notify_letter_dvla_markdown,
-        (
-            'Example: <b>example.com<normal><cr><cr>'
         )
     ],
     [
@@ -659,12 +579,6 @@ def test_link(markdown_function, expected):
         )
     ],
     [
-        notify_letter_dvla_markdown,
-        (
-            'Example: <b>example.com<normal><cr><cr>'
-        )
-    ],
-    [
         notify_email_markdown,
         (
             '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; '
@@ -684,10 +598,6 @@ def test_link_with_title(markdown_function, expected):
     [
         notify_letter_preview_markdown,
         'Strike<div class=\'linebreak-block\'>&nbsp;</div>'
-    ],
-    [
-        notify_letter_dvla_markdown,
-        'Strike<cr><cr>'
     ],
     [
         notify_email_markdown,

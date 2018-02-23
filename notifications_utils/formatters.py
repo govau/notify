@@ -313,53 +313,6 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
         return text
 
 
-class NotifyLetterMarkdownDVLARenderer(NotifyLetterMarkdownPreviewRenderer):
-
-    def header(self, text, level, raw=None):
-        if level == 1:
-            return '<h2>{}<normal><cr><cr>'.format(text)
-        return self.paragraph(text)
-
-    def paragraph(self, text):
-        if text.strip():
-            return '{}<cr><cr>'.format(text)
-        return ''
-
-    def linebreak(self):
-        return "<cr>"
-
-    def newline(self):
-        return "<cr>"
-
-    def list(self, body, ordered=True):
-        return (
-            '{}'
-            '{}'
-            '<p>'
-            '<cr>'
-        ).format(
-            '' if ordered else '<cr>',
-            ''.join(
-                '{}{}'.format(
-                    '<np>' if ordered else '<op><bul><tab>',
-                    line
-                )
-                for line in filter(None, body.split('\n'))
-            ),
-        )
-
-    def list_item(self, text):
-        return '{}\n'.format(text.strip())
-
-    def link(self, link, title, content):
-        return '{}: {}'.format(content, self.autolink(link))
-
-    def autolink(self, link, is_email=False):
-        return '<b>{}<normal>'.format(
-            link.replace('http://', '').replace('https://', '')
-        )
-
-
 class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
 
     def header(self, text, level, raw=None):
@@ -468,11 +421,6 @@ notify_email_markdown = mistune.Markdown(
 )
 notify_letter_preview_markdown = mistune.Markdown(
     renderer=NotifyLetterMarkdownPreviewRenderer(),
-    hard_wrap=True,
-    use_xhtml=False,
-)
-notify_letter_dvla_markdown = mistune.Markdown(
-    renderer=NotifyLetterMarkdownDVLARenderer(),
     hard_wrap=True,
     use_xhtml=False,
 )
