@@ -7,6 +7,15 @@
   @page :first {
     margin-top: 10mm;
   }
+  @page {
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: 'Nimbus Sans L';
+      font-size: 10pt;
+      text-align: right;
+      vertical-align: top;
+    }
+  }
   body {
     font-family: 'Nimbus Sans L';
     font-size: 12.5pt;
@@ -23,7 +32,7 @@
     top: 0;
     left: 0;
     background: url({{admin_base_url}}/static/images/letter-template/{{logo_file_name}});
-    background-size: auto 18mm;
+    background-size: contain;
     background-repeat: no-repeat;
   }
   #to,
@@ -35,10 +44,19 @@
     max-height: 26.7mm;
     left: 9.6mm;
     bottom: 215.8mm;
-    overflow: hidden;
     font-size: 8pt;
     line-height: 8.5pt;
     text-transform: uppercase;
+  }
+  #to ul {
+    margin: 0;
+    padding: 0;
+  }
+  #to li {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
   }
   #from {
     bottom: 199.8mm;
@@ -93,27 +111,27 @@
     line-height: {{ line_height }};
     margin: 0 0 {{ line_height }} 0;
   }
-  ul,
-  ol {
+  #content ul,
+  #content ol {
     font-size: 12.5pt;
     line-height: {{ line_height }};
     margin: 0 0 {{ line_height }} 0;
     padding: 0 0 0 0.8em;
   }
-  ol {
+  #content ol {
     padding-left: 1.4em;
   }
-  li {
+  #content li {
     margin: 0;
     padding: 0;
   }
-  ol ul,
-  ul ul {
+  #content ol ul,
+  #content ul ul {
     margin: {{ line_height }} 0 0 0;
     padding-left: 0;
     list-style-type: disc;
   }
-  ol ul {
+  #content ol ul {
     margin-left: -0.6em;
   }
 

@@ -18,6 +18,7 @@ from notifications_utils.formatters import (
     strip_characters_inserted_to_force_newlines,
     tweak_dvla_list_markup,
     remove_trailing_linebreak,
+    nl2li,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -901,4 +902,18 @@ def test_remove_trailing_linebreak(content):
         content
     ) == (
         'foo bar baz'
+    )
+
+
+def test_make_list_from_linebreaks():
+    assert nl2li(
+        'a\n'
+        'b\n'
+        'c\n'
+    ) == (
+        '<ul>'
+        '<li>a</li>'
+        '<li>b</li>'
+        '<li>c</li>'
+        '</ul>'
     )
