@@ -15,5 +15,5 @@ monotonic==1.4
 pypdf2==1.26.0
 
 # required by both api and admin
-awscli==1.14.45
+awscli==1.14.47
 boto3==1.5.35
