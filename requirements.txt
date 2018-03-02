@@ -16,4 +16,4 @@ pypdf2==1.26.0
 
 # required by both api and admin
 awscli==1.14.48
-boto3==1.6.1
+boto3==1.6.3
