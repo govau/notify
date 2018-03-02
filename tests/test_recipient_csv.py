@@ -2,6 +2,7 @@ import pytest
 from unittest import mock
 import itertools
 from functools import partial
+from orderedset import OrderedSet
 
 from notifications_utils.recipients import RecipientCSV
 from notifications_utils.template import SMSMessageTemplate
@@ -780,3 +781,66 @@ def test_recipients_can_be_accessed_by_index(index, expected_row):
     )
     for key, value in expected_row.items():
         assert recipients[index][key] == value
+
+
+@pytest.mark.parametrize('international_sms', (True, False))
+def test_multiple_sms_recipient_columns(international_sms):
+    recipients = RecipientCSV(
+        """
+            phone number, phone number, phone_number, foo
+            07900 900111, 07900 900222, 07900 900333, bar
+        """,
+        template_type='sms',
+        international_sms=international_sms,
+    )
+    assert recipients.column_headers == ['phone number', 'phone_number', 'foo']
+    assert recipients.column_headers_as_column_keys == dict(phonenumber='', foo='').keys()
+    assert recipients.annotated_rows[0]['columns'].get('phone number')['data'] == (
+        '07900 900333'
+    )
+    assert recipients.annotated_rows[0]['columns'].get('phone_number')['data'] == (
+        '07900 900333'
+    )
+    assert recipients.annotated_rows[0]['columns'].get('phone number')['error'] is None
+    assert recipients.duplicate_recipient_column_headers == OrderedSet([
+        'phone number', 'phone_number'
+    ])
+    assert recipients.has_errors
+
+
+def test_multiple_email_recipient_columns():
+    recipients = RecipientCSV(
+        """
+            EMAILADDRESS, email_address, foo
+            one@two.com,  two@three.com, bar
+        """,
+        template_type='email',
+    )
+    assert recipients.annotated_rows[0]['columns'].get('email address')['data'] == (
+        'two@three.com'
+    )
+    assert recipients.annotated_rows[0]['columns'].get('email address')['error'] is None
+    assert recipients.has_errors
+    assert recipients.duplicate_recipient_column_headers == OrderedSet([
+        'EMAILADDRESS', 'email_address'
+    ])
+    assert recipients.has_errors
+
+
+def test_multiple_letter_recipient_columns():
+    recipients = RecipientCSV(
+        """
+            address line 1, Address Line 2, address line 1, address_line_2
+            1,2,3,4
+        """,
+        template_type='letter',
+    )
+    assert recipients.annotated_rows[0]['columns'].get('addressline1')['data'] == (
+        '3'
+    )
+    assert recipients.annotated_rows[0]['columns'].get('addressline1')['error'] is None
+    assert recipients.has_errors
+    assert recipients.duplicate_recipient_column_headers == OrderedSet([
+        'address line 1', 'Address Line 2', 'address line 1', 'address_line_2'
+    ])
+    assert recipients.has_errors

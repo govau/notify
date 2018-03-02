@@ -131,6 +131,7 @@ class RecipientCSV():
     def has_errors(self):
         return bool(
             self.missing_column_headers or
+            self.duplicate_recipient_column_headers or
             self.more_rows_than_can_send or
             self.too_many_rows or
             (not self.allowed_to_send_to) or
@@ -172,7 +173,10 @@ class RecipientCSV():
             output_dict = OrderedDict()
 
             for column_name, column_value in zip(column_headers, row):
-                insert_or_append_to_dict(output_dict, column_name, column_value or None)
+                if Columns.make_key(column_name) in self.recipient_column_headers_as_column_keys:
+                    output_dict[column_name] = column_value or None
+                else:
+                    insert_or_append_to_dict(output_dict, column_name, column_value or None)
 
             length_of_row = len(row)
 
@@ -310,6 +314,21 @@ class RecipientCSV():
                 not self.is_optional_address_column(key)
             )
         )
+
+    @property
+    def duplicate_recipient_column_headers(self):
+
+        raw_recipient_column_headers = [
+            Columns.make_key(column_header)
+            for column_header in self._raw_column_headers
+            if Columns.make_key(column_header) in self.recipient_column_headers_as_column_keys
+        ]
+
+        return OrderedSet((
+            column_header
+            for column_header in self._raw_column_headers
+            if raw_recipient_column_headers.count(Columns.make_key(column_header)) > 1
+        ))
 
     def is_optional_address_column(self, key):
         return (
