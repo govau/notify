@@ -4,6 +4,7 @@ import csv
 import phonenumbers
 from contextlib import suppress
 from functools import lru_cache, partial
+from itertools import islice
 from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
 
@@ -219,21 +220,15 @@ class RecipientCSV():
 
     @property
     def initial_rows(self):
-        for row in self.rows:
-            if row.index < self.max_initial_rows_shown:
-                yield row
+        return islice(self.rows, self.max_initial_rows_shown)
 
     @property
     def rows_with_errors(self):
-        for row in self.rows:
-            if row.has_error:
-                yield row
+        return filter(lambda row: row.has_error, self.rows)
 
     @property
     def initial_rows_with_errors(self):
-        for row_index, row in enumerate(self.rows_with_errors):
-            if row_index < self.max_errors_shown:
-                yield row
+        return islice(self.rows_with_errors, self.max_errors_shown)
 
     @property
     def recipients(self):
