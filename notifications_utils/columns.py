@@ -48,11 +48,13 @@ class Row(Columns):
         row_dict,
         index,
         error_fn,
+        recipient_column_headers,
         placeholders,
         template,
     ):
 
         self.index = index
+        self.recipient_column_headers = recipient_column_headers
 
         if template:
             template.values = row_dict
@@ -66,8 +68,30 @@ class Row(Columns):
     def get(self, key):
         return super().get(key) or Cell()
 
+    @property
+    def has_error(self):
+        return self.message_too_long or any(
+            cell.error for cell in self.values()
+        )
+
+    @property
+    def has_bad_recipient(self):
+        return any(
+            self.get(recipient_column).recipient_error
+            for recipient_column in self.recipient_column_headers
+        )
+
+    @property
+    def has_missing_data(self):
+        return any(
+            cell.error == Cell.missing_field_error
+            for cell in self.values()
+        )
+
 
 class Cell():
+
+    missing_field_error = 'Missing'
 
     def __init__(
         self,
@@ -79,3 +103,7 @@ class Cell():
         self.data = value
         self.error = error_fn(key, value) if error_fn else None
         self.ignore = Columns.make_key(key) not in (placeholders or [])
+
+    @property
+    def recipient_error(self):
+        return self.error not in {None, self.missing_field_error}

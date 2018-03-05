@@ -11,7 +11,7 @@ from flask import current_app
 
 from notifications_utils.formatters import formatted_list
 from notifications_utils.template import Template
-from notifications_utils.columns import Columns, Row
+from notifications_utils.columns import Columns, Row, Cell
 from notifications_utils.international_billing_rates import (
     COUNTRY_PREFIXES,
     INTERNATIONAL_BILLING_RATES,
@@ -51,8 +51,6 @@ tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECA
 
 
 class RecipientCSV():
-
-    missing_field_error = 'Missing'
 
     max_rows = 50000
 
@@ -190,31 +188,29 @@ class RecipientCSV():
 
     @property
     def rows_with_errors(self):
-        return self.rows_with_missing_data | self.rows_with_bad_recipients | self.rows_with_message_too_long
+        return set(
+            row.index for row in self.annotated_rows_with_errors
+        )
 
     @property
     def rows_with_missing_data(self):
         return set(
-            row.index for row in self.annotated_rows if any(
-                cell.error == self.missing_field_error
-                for cell in row.values()
-            )
+            row.index for row in self.annotated_rows
+            if row.has_missing_data
         )
 
     @property
     def rows_with_bad_recipients(self):
         return set(
-            row.index for row in self.annotated_rows if any(
-                row.get(recipient_column).error
-                not in [None, self.missing_field_error]
-                for recipient_column in self.recipient_column_headers
-            )
+            row.index for row in self.annotated_rows
+            if row.has_bad_recipient
         )
 
     @property
     def rows_with_message_too_long(self):
         return set(
-            row.index for row in self.annotated_rows if row.message_too_long
+            row.index for row in self.annotated_rows
+            if row.message_too_long
         )
 
     @property
@@ -233,6 +229,7 @@ class RecipientCSV():
                 row_dict=row,
                 index=row_index,
                 error_fn=self._get_error_for_field,
+                recipient_column_headers=self.recipient_column_headers,
                 placeholders=self.placeholders_as_column_keys,
                 template=self.template,
             )
@@ -246,7 +243,7 @@ class RecipientCSV():
     @property
     def annotated_rows_with_errors(self):
         for row in self.annotated_rows:
-            if RecipientCSV.row_has_error(row):
+            if row.has_error:
                 yield row
 
     @property
@@ -342,7 +339,7 @@ class RecipientCSV():
 
         if key in self.recipient_column_headers_as_column_keys:
             if value in [None, '']:
-                return self.missing_field_error
+                return Cell.missing_field_error
             try:
                 validate_recipient(
                     value,
@@ -357,7 +354,7 @@ class RecipientCSV():
             return
 
         if value in [None, '']:
-            return self.missing_field_error
+            return Cell.missing_field_error
 
     def _get_recipient_from_row(self, row):
         if len(self.recipient_column_headers) == 1:
@@ -373,12 +370,6 @@ class RecipientCSV():
         return Columns({
             key: value for key, value in row.items() if key in self.placeholders_as_column_keys
         })
-
-    @staticmethod
-    def row_has_error(row):
-        return any(
-            key != 'index' and value.error for key, value in row.items()
-        )
 
 
 class InvalidEmailError(Exception):
