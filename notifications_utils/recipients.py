@@ -80,7 +80,7 @@ class RecipientCSV():
 
     def __len__(self):
         if not hasattr(self, '_len'):
-            self._len = len(list(self.rows))
+            self._len = len(self.rows)
         return self._len
 
     def __getitem__(self, requested_index):
