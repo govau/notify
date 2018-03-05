@@ -143,8 +143,8 @@ class RecipientCSV():
         if not self.whitelist:
             return True
         return all(
-            allowed_to_send_to(recipient, self.whitelist)
-            for recipient in self.recipients
+            allowed_to_send_to(row.recipient, self.whitelist)
+            for row in self.rows
         )
 
     @property
@@ -229,30 +229,6 @@ class RecipientCSV():
     @property
     def initial_rows_with_errors(self):
         return islice(self.rows_with_errors, self.max_errors_shown)
-
-    @property
-    def recipients(self):
-        for row in self.rows:
-            yield row.recipient
-
-    @property
-    def personalisation(self):
-        for row in self.rows:
-            yield row.personalisation
-
-    @property
-    def enumerated_recipients_and_personalisation(self):
-        for row_index, row in enumerate(self.rows):
-            yield (
-                row_index,
-                self._get_recipient_from_row(row),
-                self._get_personalisation_from_row(row)
-            )
-
-    @property
-    def recipients_and_personalisation(self):
-        for row in self.rows:
-            yield row.recipient, row.personalisation
 
     @property
     def _raw_column_headers(self):

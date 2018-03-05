@@ -313,17 +313,13 @@ def test_big_list():
     ]
 )
 def test_get_recipient(file_contents, template_type, placeholders, expected_recipients, expected_personalisation):
-    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders)
 
-    recipients_recipients = list(recipients.recipients)
-    recipients_and_personalisation = list(recipients.recipients_and_personalisation)
-    personalisation = list(recipients.personalisation)
+    recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders)
 
     for index, row in enumerate(expected_personalisation):
         for key, value in row.items():
-            assert recipients_recipients[index] == expected_recipients[index]
-            assert personalisation[index].get(key) == value
-            assert recipients_and_personalisation[index][1].get(key) == value
+            assert recipients[index].recipient == expected_recipients[index]
+            assert recipients[index].personalisation.get(key) == value
 
 
 @pytest.mark.parametrize(
@@ -331,14 +327,20 @@ def test_get_recipient(file_contents, template_type, placeholders, expected_reci
     [
         (
             """
-                email address
+                email address,test
                 test@example.com,test1,red
                 testatexampledotcom,test2,blue
             """,
             'email',
-            [],
-            [(1, 'test@example.com'), (2, 'testatexampledotcom')],
-            []
+            ['test'],
+            [
+                (0, 'test@example.com'),
+                (1, 'testatexampledotcom')
+            ],
+            [
+                {'emailaddress': 'test@example.com', 'test': 'test1'},
+                {'emailaddress': 'testatexampledotcom', 'test': 'test2'},
+            ],
         )
     ]
 )
@@ -349,9 +351,16 @@ def test_get_recipient_respects_order(file_contents,
                                       expected_personalisation):
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=placeholders)
 
-    recipients_gen = recipients.enumerated_recipients_and_personalisation
-    for row, email in expected_personalisation:
-        assert next(recipients_gen) == (row, email, [])
+    for row, email in expected_recipients:
+        assert (
+            recipients[row].index,
+            recipients[row].recipient,
+            recipients[row].personalisation,
+        ) == (
+            row,
+            email,
+            expected_personalisation[row],
+        )
 
 
 @pytest.mark.parametrize(
@@ -699,11 +708,10 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
         placeholders=['phone_number', 'First Name', 'lastname'],
         template_type='sms'
     )
-    first_row = list(recipients.rows)[0]
+    first_row = recipients[0]
     assert first_row.get(key).data == expected
     assert first_row[key].data == expected
-    assert list(recipients.personalisation)[0][key] == expected
-    assert list(recipients.recipients) == ['07700900460']
+    assert first_row.recipient == '07700900460'
     assert len(first_row.items()) == 3
     assert not recipients.has_errors
 
