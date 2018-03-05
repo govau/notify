@@ -11,7 +11,7 @@ from flask import current_app
 
 from notifications_utils.formatters import formatted_list
 from notifications_utils.template import Template
-from notifications_utils.columns import Columns
+from notifications_utils.columns import Columns, Row
 from notifications_utils.international_billing_rates import (
     COUNTRY_PREFIXES,
     INTERNATIONAL_BILLING_RATES,
@@ -195,17 +195,17 @@ class RecipientCSV():
     @property
     def rows_with_missing_data(self):
         return set(
-            row['index'] for row in self.annotated_rows if any(
-                value.get('error') == self.missing_field_error
-                for key, value in row['columns'].items()
+            row.index for row in self.annotated_rows if any(
+                cell.error == self.missing_field_error
+                for cell in row.values()
             )
         )
 
     @property
     def rows_with_bad_recipients(self):
         return set(
-            row['index'] for row in self.annotated_rows if any(
-                row['columns'].get(recipient_column, {}).get('error')
+            row.index for row in self.annotated_rows if any(
+                row.get(recipient_column).error
                 not in [None, self.missing_field_error]
                 for recipient_column in self.recipient_column_headers
             )
@@ -214,7 +214,7 @@ class RecipientCSV():
     @property
     def rows_with_message_too_long(self):
         return set(
-            row['index'] for row in self.annotated_rows if row['message_too_long']
+            row.index for row in self.annotated_rows if row.message_too_long
         )
 
     @property
@@ -231,25 +231,18 @@ class RecipientCSV():
         for row_index, row in enumerate(self.rows):
             if self.template:
                 self.template.values = dict(row.items())
-            yield dict(
-                columns=Columns({key: {
-                    'data': value,
-                    'error': self._get_error_for_field(key, value),
-                    'ignore': (
-                        key not in self.placeholders_as_column_keys
-                    )
-                } for key, value in row.items()}),
+            yield Row(
+                row_dict=row,
                 index=row_index,
-                message_too_long=bool(
-                    self.template and
-                    self.template.is_message_too_long()
-                )
+                error_fn=self._get_error_for_field,
+                placeholders=self.placeholders_as_column_keys,
+                template=self.template,
             )
 
     @property
     def initial_annotated_rows(self):
         for row in self.annotated_rows:
-            if row['index'] < self.max_initial_rows_shown:
+            if row.index < self.max_initial_rows_shown:
                 yield row
 
     @property
@@ -386,7 +379,7 @@ class RecipientCSV():
     @staticmethod
     def row_has_error(row):
         return any(
-            key != 'index' and value.get('error') for key, value in row['columns'].items()
+            key != 'index' and value.error for key, value in row.items()
         )
 
 

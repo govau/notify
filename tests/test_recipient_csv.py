@@ -210,8 +210,12 @@ def test_get_annotated_rows(file_contents, template_type, expected):
         placeholders=['name'],
         max_initial_rows_shown=1
     )
-    assert list(recipients.annotated_rows) == expected
-    assert len(list(recipients.annotated_rows)) == 2
+
+    for index, expected_row in enumerate(expected):
+        annotated_row = list(recipients.annotated_rows)[index]
+        assert annotated_row.index == expected_row['index']
+        assert annotated_row.message_too_long == expected_row['message_too_long']
+    assert len(list(recipients.rows)) == 2
     assert len(list(recipients.initial_annotated_rows)) == 1
     assert not recipients.has_errors
 
@@ -700,11 +704,11 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
         template_type='sms'
     )
     first_row = list(recipients.annotated_rows)[0]
-    assert first_row['columns'].get(key)['data'] == expected
-    assert first_row['columns'][key]['data'] == expected
+    assert first_row.get(key).data == expected
+    assert first_row[key].data == expected
     assert list(recipients.personalisation)[0][key] == expected
     assert list(recipients.recipients) == ['07700900460']
-    assert len(first_row['columns'].items()) == 3
+    assert len(first_row.items()) == 3
     assert not recipients.has_errors
 
     assert recipients.missing_column_headers == set()
@@ -795,13 +799,13 @@ def test_multiple_sms_recipient_columns(international_sms):
     )
     assert recipients.column_headers == ['phone number', 'phone_number', 'foo']
     assert recipients.column_headers_as_column_keys == dict(phonenumber='', foo='').keys()
-    assert recipients.annotated_rows[0]['columns'].get('phone number')['data'] == (
+    assert recipients.annotated_rows[0].get('phone number').data == (
         '07900 900333'
     )
-    assert recipients.annotated_rows[0]['columns'].get('phone_number')['data'] == (
+    assert recipients.annotated_rows[0].get('phone_number').data == (
         '07900 900333'
     )
-    assert recipients.annotated_rows[0]['columns'].get('phone number')['error'] is None
+    assert recipients.annotated_rows[0].get('phone number').error is None
     assert recipients.duplicate_recipient_column_headers == OrderedSet([
         'phone number', 'phone_number'
     ])
@@ -816,10 +820,10 @@ def test_multiple_email_recipient_columns():
         """,
         template_type='email',
     )
-    assert recipients.annotated_rows[0]['columns'].get('email address')['data'] == (
+    assert recipients.annotated_rows[0].get('email address').data == (
         'two@three.com'
     )
-    assert recipients.annotated_rows[0]['columns'].get('email address')['error'] is None
+    assert recipients.annotated_rows[0].get('email address').error is None
     assert recipients.has_errors
     assert recipients.duplicate_recipient_column_headers == OrderedSet([
         'EMAILADDRESS', 'email_address'
@@ -835,10 +839,10 @@ def test_multiple_letter_recipient_columns():
         """,
         template_type='letter',
     )
-    assert recipients.annotated_rows[0]['columns'].get('addressline1')['data'] == (
+    assert recipients.annotated_rows[0].get('addressline1').data == (
         '3'
     )
-    assert recipients.annotated_rows[0]['columns'].get('addressline1')['error'] is None
+    assert recipients.annotated_rows[0].get('addressline1').error is None
     assert recipients.has_errors
     assert recipients.duplicate_recipient_column_headers == OrderedSet([
         'address line 1', 'Address Line 2', 'address line 1', 'address_line_2'
