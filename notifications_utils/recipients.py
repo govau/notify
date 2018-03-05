@@ -75,7 +75,6 @@ class RecipientCSV():
         self.template = template if isinstance(template, Template) else None
         self.international_sms = international_sms
         self.rows = list(self.get_rows())
-        self.annotated_rows = list(self.get_annotated_rows())
         self.remaining_messages = remaining_messages
 
     def __len__(self):
@@ -133,10 +132,8 @@ class RecipientCSV():
             self.more_rows_than_can_send or
             self.too_many_rows or
             (not self.allowed_to_send_to) or
-            self.rows_with_missing_data or
-            self.rows_with_bad_recipients or
-            self.rows_with_message_too_long
-        )  # This is 3x faster than using `any()`
+            any(self.rows_with_errors)
+        )  # `or` is 3x faster than using `any()` here
 
     @property
     def allowed_to_send_to(self):
@@ -166,7 +163,7 @@ class RecipientCSV():
 
         next(rows_as_lists_of_columns)  # skip the header row
 
-        for row in rows_as_lists_of_columns:
+        for index, row in enumerate(rows_as_lists_of_columns):
 
             output_dict = OrderedDict()
 
@@ -184,34 +181,33 @@ class RecipientCSV():
                 for key in column_headers[length_of_row:]:
                     insert_or_append_to_dict(output_dict, key, None)
 
-            yield Columns(output_dict)
+            if index < self.max_rows:
+                yield Row(
+                    output_dict,
+                    index=index,
+                    error_fn=self._get_error_for_field,
+                    recipient_column_headers=self.recipient_column_headers,
+                    placeholders=self.placeholders_as_column_keys,
+                    template=self.template,
+                )
+            else:
+                yield None
 
     @property
-    def rows_with_errors(self):
-        return set(
-            row.index for row in self.annotated_rows_with_errors
-        )
+    def indicies_of_rows_with_errors(self):
+        return set(row.index for row in self.rows_with_errors)
 
     @property
-    def rows_with_missing_data(self):
-        return set(
-            row.index for row in self.annotated_rows
-            if row.has_missing_data
-        )
+    def indicies_of_rows_with_missing_data(self):
+        return set(row.index for row in self.rows if row.has_missing_data)
 
     @property
-    def rows_with_bad_recipients(self):
-        return set(
-            row.index for row in self.annotated_rows
-            if row.has_bad_recipient
-        )
+    def indicies_of_rows_with_bad_recipients(self):
+        return set(row.index for row in self.rows if row.has_bad_recipient)
 
     @property
-    def rows_with_message_too_long(self):
-        return set(
-            row.index for row in self.annotated_rows
-            if row.message_too_long
-        )
+    def indicies_of_rows_with_message_too_long(self):
+        return set(row.index for row in self.rows if row.message_too_long)
 
     @property
     def more_rows_than_can_send(self):
@@ -221,34 +217,21 @@ class RecipientCSV():
     def too_many_rows(self):
         return len(self) > self.max_rows
 
-    def get_annotated_rows(self):
-        if self.too_many_rows:
-            return []
-        for row_index, row in enumerate(self.rows):
-            yield Row(
-                row_dict=row,
-                index=row_index,
-                error_fn=self._get_error_for_field,
-                recipient_column_headers=self.recipient_column_headers,
-                placeholders=self.placeholders_as_column_keys,
-                template=self.template,
-            )
-
     @property
-    def initial_annotated_rows(self):
-        for row in self.annotated_rows:
+    def initial_rows(self):
+        for row in self.rows:
             if row.index < self.max_initial_rows_shown:
                 yield row
 
     @property
-    def annotated_rows_with_errors(self):
-        for row in self.annotated_rows:
+    def rows_with_errors(self):
+        for row in self.rows:
             if row.has_error:
                 yield row
 
     @property
-    def initial_annotated_rows_with_errors(self):
-        for row_index, row in enumerate(self.annotated_rows_with_errors):
+    def initial_rows_with_errors(self):
+        for row_index, row in enumerate(self.rows_with_errors):
             if row_index < self.max_errors_shown:
                 yield row
 
@@ -337,7 +320,7 @@ class RecipientCSV():
         if self.is_optional_address_column(key):
             return
 
-        if key in self.recipient_column_headers_as_column_keys:
+        if Columns.make_key(key) in self.recipient_column_headers_as_column_keys:
             if value in [None, '']:
                 return Cell.missing_field_error
             try:
@@ -350,7 +333,7 @@ class RecipientCSV():
             except (InvalidEmailError, InvalidPhoneError, InvalidAddressError) as error:
                 return str(error)
 
-        if key not in self.placeholders_as_column_keys:
+        if Columns.make_key(key) not in self.placeholders_as_column_keys:
             return
 
         if value in [None, '']:
@@ -360,15 +343,16 @@ class RecipientCSV():
         if len(self.recipient_column_headers) == 1:
             return row[
                 self.recipient_column_headers[0]
-            ]
+            ].data
         else:
             return [
-                row[column] for column in self.recipient_column_headers
+                row[column].data for column in self.recipient_column_headers
             ]
 
     def _get_personalisation_from_row(self, row):
         return Columns({
-            key: value for key, value in row.items() if key in self.placeholders_as_column_keys
+            key: cell.data for key, cell in row.items()
+            if key in self.placeholders_as_column_keys
         })
 
 

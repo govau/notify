@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from functools import lru_cache
 
 
@@ -60,10 +61,10 @@ class Row(Columns):
             template.values = row_dict
             self.message_too_long = template.is_message_too_long()
 
-        super().__init__({
-            key: Cell(key, value, error_fn, placeholders)
+        super().__init__(OrderedDict(
+            (key, Cell(key, value, error_fn, placeholders))
             for key, value in row_dict.items()
-        })
+        ))
 
     def get(self, key):
         return super().get(key) or Cell()

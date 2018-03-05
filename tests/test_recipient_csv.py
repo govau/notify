@@ -153,7 +153,7 @@ def test_get_rows(file_contents, template_type, expected):
     for index, row in enumerate(expected):
         assert len(rows[index].items()) == len(row)
         for key, value in row:
-            assert rows[index].get(key) == value
+            assert rows[index].get(key).data == value
 
 
 @pytest.mark.parametrize(
@@ -206,15 +206,15 @@ def test_get_annotated_rows(file_contents, template_type, expected):
         max_initial_rows_shown=1
     )
     for index, expected_row in enumerate(expected):
-        annotated_row = list(recipients.annotated_rows)[index]
+        annotated_row = list(recipients.rows)[index]
         assert annotated_row.index == expected_row['index']
         assert annotated_row.message_too_long == expected_row['message_too_long']
-    assert len(list(recipients.annotated_rows)) == 2
-    assert len(list(recipients.initial_annotated_rows)) == 1
+    assert len(list(recipients.rows)) == 2
+    assert len(list(recipients.initial_rows)) == 1
     assert not recipients.has_errors
 
 
-def test_get_annotated_rows_with_errors():
+def test_get_rows_with_errors():
     recipients = RecipientCSV(
         """
             email address, name
@@ -231,8 +231,8 @@ def test_get_annotated_rows_with_errors():
         placeholders=['name'],
         max_errors_shown=3
     )
-    assert len(list(recipients.annotated_rows_with_errors)) == 6
-    assert len(list(recipients.initial_annotated_rows_with_errors)) == 3
+    assert len(list(recipients.rows_with_errors)) == 6
+    assert len(list(recipients.initial_rows_with_errors)) == 3
     assert recipients.has_errors
 
 
@@ -247,10 +247,10 @@ def test_big_list_validates_right_through(template_type, row_count, header, fill
         max_errors_shown=100,
         max_initial_rows_shown=3
     )
-    assert len(list(big_csv.annotated_rows)) == row_count
-    assert big_csv.rows_with_bad_recipients == {row_count - 1}  # 0 indexed
-    assert big_csv.rows_with_errors == {row_count - 1}
-    assert len(list(big_csv.initial_annotated_rows_with_errors)) == 1
+    assert len(list(big_csv.rows)) == row_count
+    assert big_csv.indicies_of_rows_with_bad_recipients == {row_count - 1}  # 0 indexed
+    assert big_csv.indicies_of_rows_with_errors == {row_count - 1}
+    assert len(list(big_csv.initial_rows_with_errors)) == 1
     assert big_csv.has_errors
 
 
@@ -263,8 +263,8 @@ def test_big_list():
         max_initial_rows_shown=3,
         whitelist=["a@b.com"]
     )
-    assert len(list(big_csv.initial_annotated_rows)) == 3
-    assert len(list(big_csv.initial_annotated_rows_with_errors)) == 100
+    assert len(list(big_csv.initial_rows)) == 3
+    assert len(list(big_csv.initial_rows_with_errors)) == 100
     assert len(list(big_csv.rows)) == RecipientCSV.max_rows
     assert big_csv.has_errors
 
@@ -527,8 +527,8 @@ def test_bad_or_missing_data(
     file_contents, template_type, rows_with_bad_recipients, rows_with_missing_data, partial_instance
 ):
     recipients = partial_instance(file_contents, template_type=template_type, placeholders=['date'])
-    assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
-    assert recipients.rows_with_missing_data == rows_with_missing_data
+    assert recipients.indicies_of_rows_with_bad_recipients == rows_with_bad_recipients
+    assert recipients.indicies_of_rows_with_missing_data == rows_with_missing_data
     if rows_with_bad_recipients or rows_with_missing_data:
         assert recipients.has_errors is True
 
@@ -555,7 +555,7 @@ def test_bad_or_missing_data(
 ])
 def test_international_recipients(file_contents, rows_with_bad_recipients):
     recipients = RecipientCSV(file_contents, template_type='sms', international_sms=True)
-    assert recipients.rows_with_bad_recipients == rows_with_bad_recipients
+    assert recipients.indicies_of_rows_with_bad_recipients == rows_with_bad_recipients
 
 
 def test_errors_when_too_many_rows():
@@ -566,7 +566,9 @@ def test_errors_when_too_many_rows():
     assert RecipientCSV.max_rows == 50000
     assert recipients.too_many_rows is True
     assert recipients.has_errors is True
-    assert recipients.annotated_rows == []
+    assert recipients.rows[49000]['email_address'].data == 'a@b.com'
+    # We stop processing subsequent rows
+    assert recipients.rows[50000] is None
 
 
 @pytest.mark.parametrize(
@@ -655,8 +657,8 @@ def test_detects_rows_which_result_in_overly_long_messages():
         template_type=template.template_type,
         template=template
     )
-    assert recipients.rows_with_errors == {3}
-    assert recipients.rows_with_message_too_long == {3}
+    assert recipients.indicies_of_rows_with_errors == {3}
+    assert recipients.indicies_of_rows_with_message_too_long == {3}
     assert recipients.has_errors
 
 
@@ -697,7 +699,7 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
         placeholders=['phone_number', 'First Name', 'lastname'],
         template_type='sms'
     )
-    first_row = list(recipients.annotated_rows)[0]
+    first_row = list(recipients.rows)[0]
     assert first_row.get(key).data == expected
     assert first_row[key].data == expected
     assert list(recipients.personalisation)[0][key] == expected
@@ -778,7 +780,7 @@ def test_recipients_can_be_accessed_by_index(index, expected_row):
         template_type='sms'
     )
     for key, value in expected_row.items():
-        assert recipients[index][key] == value
+        assert recipients[index][key].data == value
 
 
 @pytest.mark.parametrize('international_sms', (True, False))
@@ -793,13 +795,13 @@ def test_multiple_sms_recipient_columns(international_sms):
     )
     assert recipients.column_headers == ['phone number', 'phone_number', 'foo']
     assert recipients.column_headers_as_column_keys == dict(phonenumber='', foo='').keys()
-    assert recipients.annotated_rows[0].get('phone number').data == (
+    assert recipients.rows[0].get('phone number').data == (
         '07900 900333'
     )
-    assert recipients.annotated_rows[0].get('phone_number').data == (
+    assert recipients.rows[0].get('phone_number').data == (
         '07900 900333'
     )
-    assert recipients.annotated_rows[0].get('phone number').error is None
+    assert recipients.rows[0].get('phone number').error is None
     assert recipients.duplicate_recipient_column_headers == OrderedSet([
         'phone number', 'phone_number'
     ])
@@ -814,10 +816,10 @@ def test_multiple_email_recipient_columns():
         """,
         template_type='email',
     )
-    assert recipients.annotated_rows[0].get('email address').data == (
+    assert recipients.rows[0].get('email address').data == (
         'two@three.com'
     )
-    assert recipients.annotated_rows[0].get('email address').error is None
+    assert recipients.rows[0].get('email address').error is None
     assert recipients.has_errors
     assert recipients.duplicate_recipient_column_headers == OrderedSet([
         'EMAILADDRESS', 'email_address'
@@ -833,10 +835,10 @@ def test_multiple_letter_recipient_columns():
         """,
         template_type='letter',
     )
-    assert recipients.annotated_rows[0].get('addressline1').data == (
+    assert recipients.rows[0].get('addressline1').data == (
         '3'
     )
-    assert recipients.annotated_rows[0].get('addressline1').error is None
+    assert recipients.rows[0].get('addressline1').error is None
     assert recipients.has_errors
     assert recipients.duplicate_recipient_column_headers == OrderedSet([
         'address line 1', 'Address Line 2', 'address line 1', 'address_line_2'
