@@ -206,6 +206,12 @@ class RecipientCSV():
     def initial_rows(self):
         return islice(self.rows, self.max_initial_rows_shown)
 
+    @property
+    def displayed_rows(self):
+        if any(self.rows_with_errors) and not self.missing_column_headers:
+            return self.initial_rows_with_errors
+        return self.initial_rows
+
     def _filter_rows(self, attr):
         return filter(lambda row: getattr(row, attr), self.rows)
 
