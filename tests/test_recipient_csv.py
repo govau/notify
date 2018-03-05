@@ -7,6 +7,10 @@ from notifications_utils.recipients import RecipientCSV
 from notifications_utils.template import SMSMessageTemplate
 
 
+def _index_rows(rows):
+    return set(row.index for row in rows)
+
+
 @pytest.mark.parametrize(
     "file_contents,template_type,expected",
     [
@@ -248,8 +252,8 @@ def test_big_list_validates_right_through(template_type, row_count, header, fill
         max_initial_rows_shown=3
     )
     assert len(list(big_csv.rows)) == row_count
-    assert big_csv.indicies_of_rows_with_bad_recipients == {row_count - 1}  # 0 indexed
-    assert big_csv.indicies_of_rows_with_errors == {row_count - 1}
+    assert _index_rows(big_csv.rows_with_bad_recipients) == {row_count - 1}  # 0 indexed
+    assert _index_rows(big_csv.rows_with_errors) == {row_count - 1}
     assert len(list(big_csv.initial_rows_with_errors)) == 1
     assert big_csv.has_errors
 
@@ -536,8 +540,8 @@ def test_bad_or_missing_data(
     file_contents, template_type, rows_with_bad_recipients, rows_with_missing_data, partial_instance
 ):
     recipients = partial_instance(file_contents, template_type=template_type, placeholders=['date'])
-    assert recipients.indicies_of_rows_with_bad_recipients == rows_with_bad_recipients
-    assert recipients.indicies_of_rows_with_missing_data == rows_with_missing_data
+    assert _index_rows(recipients.rows_with_bad_recipients) == rows_with_bad_recipients
+    assert _index_rows(recipients.rows_with_missing_data) == rows_with_missing_data
     if rows_with_bad_recipients or rows_with_missing_data:
         assert recipients.has_errors is True
 
@@ -564,7 +568,7 @@ def test_bad_or_missing_data(
 ])
 def test_international_recipients(file_contents, rows_with_bad_recipients):
     recipients = RecipientCSV(file_contents, template_type='sms', international_sms=True)
-    assert recipients.indicies_of_rows_with_bad_recipients == rows_with_bad_recipients
+    assert _index_rows(recipients.rows_with_bad_recipients) == rows_with_bad_recipients
 
 
 def test_errors_when_too_many_rows():
@@ -666,8 +670,8 @@ def test_detects_rows_which_result_in_overly_long_messages():
         template_type=template.template_type,
         template=template
     )
-    assert recipients.indicies_of_rows_with_errors == {3}
-    assert recipients.indicies_of_rows_with_message_too_long == {3}
+    assert _index_rows(recipients.rows_with_errors) == {3}
+    assert _index_rows(recipients.rows_with_message_too_long) == {3}
     assert recipients.has_errors
 
 

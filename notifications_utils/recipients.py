@@ -195,22 +195,6 @@ class RecipientCSV():
                 yield None
 
     @property
-    def indicies_of_rows_with_errors(self):
-        return set(row.index for row in self.rows_with_errors)
-
-    @property
-    def indicies_of_rows_with_missing_data(self):
-        return set(row.index for row in self.rows if row.has_missing_data)
-
-    @property
-    def indicies_of_rows_with_bad_recipients(self):
-        return set(row.index for row in self.rows if row.has_bad_recipient)
-
-    @property
-    def indicies_of_rows_with_message_too_long(self):
-        return set(row.index for row in self.rows if row.message_too_long)
-
-    @property
     def more_rows_than_can_send(self):
         return len(self) > self.remaining_messages
 
@@ -222,9 +206,24 @@ class RecipientCSV():
     def initial_rows(self):
         return islice(self.rows, self.max_initial_rows_shown)
 
+    def _filter_rows(self, attr):
+        return filter(lambda row: getattr(row, attr), self.rows)
+
     @property
     def rows_with_errors(self):
-        return filter(lambda row: row.has_error, self.rows)
+        return self._filter_rows('has_error')
+
+    @property
+    def rows_with_bad_recipients(self):
+        return self._filter_rows('has_bad_recipient')
+
+    @property
+    def rows_with_missing_data(self):
+        return self._filter_rows('has_missing_data')
+
+    @property
+    def rows_with_message_too_long(self):
+        return self._filter_rows('message_too_long')
 
     @property
     def initial_rows_with_errors(self):
