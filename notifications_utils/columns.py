@@ -56,13 +56,14 @@ class Row(Columns):
 
         self.index = index
         self.recipient_column_headers = recipient_column_headers
+        self.placeholders = placeholders
 
         if template:
             template.values = row_dict
             self.message_too_long = template.is_message_too_long()
 
         super().__init__(OrderedDict(
-            (key, Cell(key, value, error_fn, placeholders))
+            (key, Cell(key, value, error_fn, self.placeholders))
             for key, value in row_dict.items()
         ))
 
@@ -88,6 +89,24 @@ class Row(Columns):
             cell.error == Cell.missing_field_error
             for cell in self.values()
         )
+
+    @property
+    def recipient(self):
+        if len(self.recipient_column_headers) == 1:
+            return self[
+                self.recipient_column_headers[0]
+            ].data
+        else:
+            return [
+                self[column].data for column in self.recipient_column_headers
+            ]
+
+    @property
+    def personalisation(self):
+        return Columns({
+            key: cell.data for key, cell in self.items()
+            if key in self.placeholders
+        })
 
 
 class Cell():

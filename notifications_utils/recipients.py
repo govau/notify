@@ -238,12 +238,12 @@ class RecipientCSV():
     @property
     def recipients(self):
         for row in self.rows:
-            yield self._get_recipient_from_row(row)
+            yield row.recipient
 
     @property
     def personalisation(self):
         for row in self.rows:
-            yield self._get_personalisation_from_row(row)
+            yield row.personalisation
 
     @property
     def enumerated_recipients_and_personalisation(self):
@@ -257,10 +257,7 @@ class RecipientCSV():
     @property
     def recipients_and_personalisation(self):
         for row in self.rows:
-            yield (
-                self._get_recipient_from_row(row),
-                self._get_personalisation_from_row(row)
-            )
+            yield row.recipient, row.personalisation
 
     @property
     def _raw_column_headers(self):
@@ -338,22 +335,6 @@ class RecipientCSV():
 
         if value in [None, '']:
             return Cell.missing_field_error
-
-    def _get_recipient_from_row(self, row):
-        if len(self.recipient_column_headers) == 1:
-            return row[
-                self.recipient_column_headers[0]
-            ].data
-        else:
-            return [
-                row[column].data for column in self.recipient_column_headers
-            ]
-
-    def _get_personalisation_from_row(self, row):
-        return Columns({
-            key: cell.data for key, cell in row.items()
-            if key in self.placeholders_as_column_keys
-        })
 
 
 class InvalidEmailError(Exception):
