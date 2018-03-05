@@ -92,20 +92,22 @@ class Row(Columns):
 
     @property
     def recipient(self):
-        if len(self.recipient_column_headers) == 1:
-            return self[
-                self.recipient_column_headers[0]
-            ].data
-        else:
-            return [
-                self[column].data for column in self.recipient_column_headers
-            ]
+        columns = [
+            self.get(column).data for column in self.recipient_column_headers
+        ]
+        return columns[0] if len(columns) == 1 else columns
 
     @property
     def personalisation(self):
         return Columns({
             key: cell.data for key, cell in self.items()
             if key in self.placeholders
+        })
+
+    @property
+    def recipient_and_personalisation(self):
+        return Columns({
+            key: cell.data for key, cell in self.items()
         })
 
 
