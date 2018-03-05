@@ -229,8 +229,6 @@ class RecipientCSV():
         if self.too_many_rows:
             return []
         for row_index, row in enumerate(self.rows):
-            if self.template:
-                self.template.values = dict(row.items())
             yield Row(
                 row_dict=row,
                 index=row_index,

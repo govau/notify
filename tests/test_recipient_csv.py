@@ -1,5 +1,4 @@
 import pytest
-from unittest import mock
 import itertools
 from functools import partial
 from orderedset import OrderedSet
@@ -170,12 +169,10 @@ def test_get_rows(file_contents, template_type, expected):
             'sms',
             [
                 {
-                    'columns': mock.ANY,
                     'index': 0,
                     'message_too_long': False
                 },
                 {
-                    'columns': mock.ANY,
                     'index': 1,
                     'message_too_long': False
                 },
@@ -190,12 +187,10 @@ def test_get_rows(file_contents, template_type, expected):
             'email',
             [
                 {
-                    'columns': mock.ANY,
                     'index': 0,
                     'message_too_long': False
                 },
                 {
-                    'columns': mock.ANY,
                     'index': 1,
                     'message_too_long': False
                 },
@@ -210,12 +205,11 @@ def test_get_annotated_rows(file_contents, template_type, expected):
         placeholders=['name'],
         max_initial_rows_shown=1
     )
-
     for index, expected_row in enumerate(expected):
         annotated_row = list(recipients.annotated_rows)[index]
         assert annotated_row.index == expected_row['index']
         assert annotated_row.message_too_long == expected_row['message_too_long']
-    assert len(list(recipients.rows)) == 2
+    assert len(list(recipients.annotated_rows)) == 2
     assert len(list(recipients.initial_annotated_rows)) == 1
     assert not recipients.has_errors
 

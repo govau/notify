@@ -1,40 +1,28 @@
 from functools import lru_cache
 
 
-class Columns():
+class Columns(dict):
 
     def __init__(self, row_dict):
-        self._dict = {
+        super().__init__({
             Columns.make_key(key): value for key, value in row_dict.items()
-        }
+        })
 
     @classmethod
     def from_keys(cls, keys):
         return cls({key: key for key in keys})
 
     def __getitem__(self, key):
-        return self.get(key)
-
-    def __dict__(self):
-        return self._dict
+        return super().get(Columns.make_key(key))
 
     def get(self, key, default=None):
-        return self._dict.get(Columns.make_key(key), default)
-
-    def items(self):
-        return self._dict.items()
-
-    def pop(self, key):
-        return self._dict.pop(key)
+        try:
+            return self[key]
+        except IndexError:
+            return default
 
     def copy(self):
-        return Columns(self._dict.copy())
-
-    def keys(self):
-        return self._dict.keys()
-
-    def values(self):
-        return self._dict.values()
+        return Columns(super().copy())
 
     def as_dict_with_keys(self, keys):
         return {
@@ -76,7 +64,7 @@ class Row(Columns):
         })
 
     def get(self, key):
-        return self._dict.get(Columns.make_key(key), Cell())
+        return super().get(key) or Cell()
 
 
 class Cell():
