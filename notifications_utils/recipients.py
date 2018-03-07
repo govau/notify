@@ -213,7 +213,7 @@ class RecipientCSV():
         return self.initial_rows
 
     def _filter_rows(self, attr):
-        return filter(lambda row: getattr(row, attr), self.rows)
+        return (row for row in self.rows if getattr(row, attr))
 
     @property
     def rows_with_errors(self):
