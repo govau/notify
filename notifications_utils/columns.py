@@ -17,10 +17,7 @@ class Columns(dict):
         return super().get(Columns.make_key(key))
 
     def get(self, key, default=None):
-        try:
-            return self[key]
-        except IndexError:
-            return default
+        return self[key] if self[key] is not None else default
 
     def copy(self):
         return Columns(super().copy())
@@ -67,8 +64,13 @@ class Row(Columns):
             for key, value in row_dict.items()
         ))
 
-    def get(self, key):
-        return super().get(key) or Cell()
+    def __getitem__(self, key):
+        return super().__getitem__(key) or Cell()
+
+    def get(self, key, default=None):
+        if self[key] == Cell() and default is not None:
+            return default
+        return self[key]
 
     @property
     def has_error(self):
@@ -125,6 +127,15 @@ class Cell():
         self.data = value
         self.error = error_fn(key, value) if error_fn else None
         self.ignore = Columns.make_key(key) not in (placeholders or [])
+
+    def __eq__(self, other):
+        if not other.__class__ == self.__class__:
+            return False
+        return all((
+            self.data == other.data,
+            self.error == other.error,
+            self.ignore == other.ignore,
+        ))
 
     @property
     def recipient_error(self):
