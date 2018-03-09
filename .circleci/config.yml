@@ -1,0 +1,15 @@
+version: 2
+
+jobs:
+  dummy:
+    docker:
+      - image: circleci/python:latest
+    steps:
+      - checkout
+      - run: echo "dummy"
+
+workflows:
+  version: 2
+  all:
+    jobs:
+      - dummy
