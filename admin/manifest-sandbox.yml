@@ -1,0 +1,6 @@
+---
+
+inherit: manifest-base.yml
+
+routes:
+  - route: notify-admin-sandbox.cloudapps.digital

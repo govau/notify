@@ -1,0 +1,32 @@
+{% extends "withnav_template.html" %}
+{% from "components/radios.html" import radios %}
+{% from "components/page-footer.html" import page_footer %}
+
+{% block service_page_title %}
+  International text messages
+{% endblock %}
+
+{% block maincolumn_content %}
+
+  <div class="grid-row">
+    <div class="column-five-sixths">
+      <h1 class="heading-large">International text messages</h1>
+      <p>
+        Messages to international mobile numbers are charged at 1, 2, or
+        3 times the cost of messages to UK mobile numbers.</p>
+      <p>
+        See <a href="{{ url_for(".pricing") }}">pricing</a> for the list
+        of rates.
+      </p>
+      <form method="post">
+        {{ radios(form.enabled) }}
+        {{ page_footer(
+          button_text="Save",
+          back_link=url_for('.service_settings', service_id=current_service.id),
+          back_link_text='Back to settings'
+        ) }}
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

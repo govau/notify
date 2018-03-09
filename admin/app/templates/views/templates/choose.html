@@ -1,0 +1,73 @@
+{% from "components/pill.html" import pill %}
+{% from "components/message-count-label.html" import message_count_label %}
+{% from "components/textbox.html" import textbox %}
+
+{% extends "withnav_template.html" %}
+
+{% block service_page_title %}
+  Templates
+{% endblock %}
+
+{% block maincolumn_content %}
+
+  {% if not templates %}
+
+    <h1 class="heading-large">Templates</h1>
+
+    {% if current_user.has_permissions('manage_templates') %}
+       <p class="bottom-gutter">
+         You need a template before you can send
+         {% if 'letter' in current_service.permissions %}
+           emails, text messages or letters
+         {%- else -%}
+           emails or text messages
+         {%- endif %}.
+       </p>
+      <a href="{{ url_for('.add_template_by_type', service_id=current_service.id) }}" class="button">Add a new template</a>
+    {% else %}
+      <p>
+        You need to ask your service manager to add templates before you can send
+        {% if 'letter' in current_service.permissions %}
+          emails, text messages or letters
+        {%- else -%}
+          emails or text messages
+        {%- endif %}.
+      </p>
+    {% endif %}
+
+  {% else %}
+
+    <div class="grid-row bottom-gutter-2-3">
+      <div class="column-two-thirds">
+        <h1 class="heading-large">Templates</h1>
+      </div>
+      {% if current_user.has_permissions('manage_templates') %}
+        <div class="column-one-third">
+          <a href="{{ url_for('.add_template_by_type', service_id=current_service.id) }}" class="button align-with-heading">Add new template</a>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if show_template_nav %}
+      <div class="bottom-gutter-2-3">
+        {{ pill(template_nav_items, current_value=template_type, show_count=False) }}
+      </div>
+    {% endif %}
+
+    {% include "views/templates/_search-box.html" %}
+
+    <nav class="grid-row" id=template-list>
+      {% for template in templates %}
+        <div class="column-whole">
+          <h2 class="message-name">
+            <a href="{{ url_for('.view_template', service_id=current_service.id, template_id=template.id) }}">{{ template.name }}</a>
+          </h2>
+          <p class="message-type">
+            {{ message_count_label(1, template.template_type, suffix='')|capitalize }} template
+          </p>
+        </div>
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+{% endblock %}

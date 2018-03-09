@@ -1,0 +1,14 @@
+{% from "components/previous-next-navigation.html" import previous_next_navigation %}
+{% extends "withnav_template.html" %}
+
+{% block service_page_title %}
+  Uploaded files
+{% endblock %}
+
+{% block maincolumn_content %}
+    <h1 class="heading-large">Uploaded files</h1>
+    <div class="dashboard">
+      {% include 'views/dashboard/_jobs.html' %}
+      {{ previous_next_navigation(prev_page, next_page) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+---
+
+inherit: manifest-base.yml
+
+routes:
+  - route: notify-admin-staging.cloudapps.digital
+  - route: www.staging-notify.works
+
+instances: 2
+memory: 1G

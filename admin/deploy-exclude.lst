@@ -1,0 +1,11 @@
+*__pycache__*
+.git/*
+app/assets/*
+bower_components/*
+cache/*
+.cache/*
+node_modules/*
+target/*
+venv/*
+.envrc
+.cf/*

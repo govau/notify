@@ -1,0 +1,34 @@
+{% from "components/page-footer.html" import page_footer %}
+{% from "components/previous-next-navigation.html" import previous_next_navigation %}
+{% from "components/table.html" import list_table, field, text_field, link_field, right_aligned_field_heading, hidden_field_heading, row_heading, notification_status_field %}
+
+<div class="ajax-block-container" id='pill-selected-item'>
+
+  {% if notifications %}
+    <div class='dashboard-table'>
+  {% endif %}
+    {% call(item, row_number) list_table(
+      notifications,
+      caption="Recent activity",
+      caption_visible=False,
+      empty_message='No messages found',
+      field_headings=['Recipient', 'Status'],
+      field_headings_visible=False
+    ) %}
+      {% call row_heading() %}
+        <a class="file-list-filename" href="{{ url_for('.view_notification', service_id=current_service.id, notification_id=item.id) }}">{{ item.to }}</a>
+        <p class="file-list-hint">
+          {{ item.preview_of_content }}
+        </p>
+      {% endcall %}
+
+      {{ notification_status_field(item) }}
+
+    {% endcall %}
+  {% if notifications %}
+    </div>
+  {% endif %}
+
+  {{ previous_next_navigation(prev_page, next_page) }}
+
+</div>

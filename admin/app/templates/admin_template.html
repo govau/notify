@@ -1,0 +1,136 @@
+{% extends "govuk_template.html" %}
+{% from "components/banner.html" import banner %}
+
+{% block head %}
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" media="screen" href="{{ asset_url('stylesheets/main.css') }}" />
+  <!--<![endif]-->
+  <style>
+      #global-header-bar { background-color: {{header_colour}} }
+  </style>
+  <!--[if IE 6]>
+  <link rel="stylesheet" media="screen" href="{{ asset_url('stylesheets/main-ie6.css') }}" />
+  <![endif]-->
+  <!--[if IE 7]>
+  <link rel="stylesheet" media="screen" href="{{ asset_url('stylesheets/main-ie7.css') }}" />
+  <![endif]-->
+  <!--[if IE 8]>
+  <link rel="stylesheet" media="screen" href="{{ asset_url('stylesheets/main-ie8.css') }}" />
+  <![endif]-->
+  <meta name="google-site-verification" content="niWnSqImOWz6mVQTYqNb5tFK8HaKSB4b3ED4Z9gtUQ0" />
+  {% block meta %}
+  {% endblock %}
+{% endblock %}
+
+{% block page_title %}
+   {% block per_page_title %}{% endblock %} – GOV.UK Notify
+{% endblock %}
+
+{% block cookie_message %}
+  <p>
+    GOV.UK Notify uses cookies to make the site simpler.
+    <a href="{{ url_for("main.cookies") }}">Find out more about cookies</a>
+  </p>
+{% endblock %}
+
+{% block header_class %}with-proposition{% endblock %}
+{% block proposition_header %}
+  <div class="header-proposition">
+    <div class="content">
+      <a href="#proposition-links" class="js-header-toggle menu">Menu</a>
+      <nav id="proposition-menu">
+        <ul id="proposition-links">
+          <li><a href="{{ url_for('main.support') }}">Support</a></li>
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('main.documentation') }}">Documentation</a></li>
+            <li><a href="{{ url_for('main.user_profile') }}">{{ current_user.name }}</a></li>
+            {% if current_user.platform_admin %}
+              <li><a href="{{ url_for('main.platform_admin') }}">Platform admin</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('main.sign_out')}}">Sign out</a></li>
+          {% else %}
+            <li><a href="{{ url_for('main.features') }}">Features</a></li>
+            <li><a href="{{ url_for('main.pricing' )}}">Pricing</a></li>
+            <li><a href="{{ url_for('main.documentation') }}">Documentation</a></li>
+            <li><a href="{{ url_for('main.sign_in' )}}">Sign in</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% set global_header_text = "GOV.UK <span id='product-name'>Notify</span>"|safe %}
+
+{% set homepage_url = url_for('main.show_all_services_or_dashboard') %}
+
+{% block content %}
+  {% block fullwidth_content %}{% endblock %}
+{% endblock %}
+
+{% block footer_top %}
+  <div class="footer-categories">
+    <div class="footer-categories-wrapper">
+      <div class="grid-row">
+        <div class="column-one-quarter">
+          <ul>
+            <li><a href="{{ url_for('main.support') }}">Support</a></li>
+            <li><a href="https://status.notifications.service.gov.uk">System status</a></li>
+            <li><a href="https://www.gov.uk/performance/govuk-notify">Performance</a></li>
+            <li><a href="https://ukgovernmentdigital.slack.com/messages/govuk-notify">Slack channel</a></li>
+            <li><a href="https://governmentasaplatform.blog.gov.uk/category/gov-uk-notify/">Blog</a></li>
+          </ul>
+        </div>
+        <div class="column-one-quarter">
+          <ul>
+            <li><a href="{{ url_for("main.features") }}">Features</a></li>
+            <li><a href="{{ url_for("main.roadmap") }}">Roadmap</a></li>
+            <li><a href="{{ url_for("main.security") }}">Security</a></li>
+            <li><a href="{{ url_for("main.terms") }}">Terms of use</a></li>
+            <li><a href="{{ url_for("main.using_notify") }}">Using Notify</a></li>
+          </ul>
+        </div>
+        <div class="column-one-quarter">
+          <ul>
+            <li><a href="{{ url_for("main.pricing") }}">Pricing</a></li>
+          </ul>
+        </div>
+        <div class="column-one-quarter">
+          <ul>
+            <li><a href="{{ url_for("main.documentation") }}">Documentation</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer_support_links %}
+  <nav class="footer-nav">
+    Built by the <a href="https://www.gov.uk/government/organisations/government-digital-service">Government Digital Service</a>
+    <a href="{{ url_for("main.cookies") }}">Cookies</a>
+    {% if current_service.research_mode %}
+    <span id="research-mode" class="research-mode">research mode</span>
+    {% endif %}
+  </nav>
+{% endblock %}
+
+{% block body_end %}
+  <script type="text/javascript" src="{{ asset_url('javascripts/all.js') }}"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-75215134-1', 'auto');
+    ga('set', 'anonymizeIp', true);
+    ga('set', 'displayFeaturesTask', null);
+    ga('set', 'transport', 'beacon');
+    // strip UUIDs
+    page = (window.location.pathname + window.location.search).replace(
+      /[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}/g, '…'
+    )
+    ga('send', 'pageview', page);
+  </script>
+{% endblock %}
