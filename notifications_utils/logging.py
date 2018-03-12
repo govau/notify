@@ -100,13 +100,7 @@ def ensure_log_path_exists(path):
     This function assumes you're passing a path to a file and attempts to create
     the path leading to that file.
     """
-    path = Path(path)
-
-    # file next to the running script
-    if len(path.parts) == 1:
-        return
-
-    Path(path.parent).mkdir(mode=755, parents=True, exist_ok=True)
+    Path(path).parent.mkdir(mode=755, parents=True, exist_ok=True)
 
 
 def get_handlers(app):
