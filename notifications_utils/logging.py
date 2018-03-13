@@ -1,4 +1,5 @@
 from itertools import product
+from pathlib import Path
 import re
 import sys
 
@@ -82,6 +83,7 @@ def init_app(app, statsd_client=None):
 
     del app.logger.handlers[:]
 
+    ensure_log_path_exists(app.config['NOTIFY_LOG_PATH'])
     handlers = get_handlers(app)
     loglevel = logging.getLevelName(app.config['NOTIFY_LOG_LEVEL'])
     loggers = [app.logger, logging.getLogger('utils')]
@@ -91,6 +93,14 @@ def init_app(app, statsd_client=None):
     logging.getLogger('boto3').setLevel(logging.WARNING)
     logging.getLogger('s3transfer').setLevel(logging.WARNING)
     app.logger.info("Logging configured")
+
+
+def ensure_log_path_exists(path):
+    """
+    This function assumes you're passing a path to a file and attempts to create
+    the path leading to that file.
+    """
+    Path(path).parent.mkdir(mode=755, parents=True, exist_ok=True)
 
 
 def get_handlers(app):
