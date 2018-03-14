@@ -3,6 +3,7 @@ import urllib
 
 import mistune
 import bleach
+from itertools import count
 from flask import Markup
 from notifications_utils import gsm
 import smartypants
@@ -420,10 +421,82 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
         return '*{}*'.format(text)
 
 
+class NotifyPlainTextEmailMarkdownRenderer(NotifyEmailMarkdownRenderer):
+
+    COLUMN_WIDTH = 65
+
+    def header(self, text, level, raw=None):
+        if level == 1:
+            return ''.join((
+                self.linebreak() * 3,
+                text,
+                self.linebreak(),
+                '-' * self.COLUMN_WIDTH,
+            ))
+        return self.paragraph(text)
+
+    def hrule(self):
+        return self.paragraph(
+            '=' * self.COLUMN_WIDTH
+        )
+
+    def linebreak(self):
+        return '\n'
+
+    def list(self, body, ordered=True):
+
+        def _get_list_marker():
+            decimal = count(1)
+            return lambda _: '{}.'.format(next(decimal)) if ordered else '•'
+
+        return ''.join((
+            self.linebreak(),
+            re.sub(
+                magic_sequence_regex,
+                _get_list_marker(),
+                body,
+            ),
+        ))
+
+    def list_item(self, text):
+        return ''.join((
+            self.linebreak(),
+            MAGIC_SEQUENCE,
+            ' ',
+            text.strip(),
+        ))
+
+    def paragraph(self, text):
+        if text.strip():
+            return ''.join((
+                self.linebreak() * 2,
+                text,
+            ))
+        return ""
+
+    def block_quote(self, text):
+        return text
+
+    def link(self, link, title, content):
+        return ''.join((
+            content,
+            ' ({})'.format(title) if title else '',
+            ': ',
+            link,
+        ))
+
+    def autolink(self, link, is_email=False):
+        return link
+
+
 notify_email_markdown = mistune.Markdown(
     renderer=NotifyEmailMarkdownRenderer(),
     hard_wrap=True,
     use_xhtml=False,
+)
+notify_plain_text_email_markdown = mistune.Markdown(
+    renderer=NotifyPlainTextEmailMarkdownRenderer(),
+    hard_wrap=True,
 )
 notify_letter_preview_markdown = mistune.Markdown(
     renderer=NotifyLetterMarkdownPreviewRenderer(),
