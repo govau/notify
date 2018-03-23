@@ -44,10 +44,12 @@ def test_should_not_raise_exception_if_raise_set_to_false(app):
     redis_client.redis_store.set = Mock(side_effect=Exception())
     redis_client.redis_store.incr = Mock(side_effect=Exception())
     redis_client.redis_store.pipeline = Mock(side_effect=Exception())
+    redis_client.redis_store.expire = Mock(side_effect=Exception())
     assert redis_client.get('test') is None
     assert redis_client.set('test', 'test') is None
     assert redis_client.incr('test') is None
     assert redis_client.exceeded_rate_limit('test', 100, 100) is False
+    assert redis_client.expire('test', 100) is None
 
 
 def test_should_raise_exception_if_raise_set_to_true(app):
@@ -177,3 +179,9 @@ def test_should_not_call_rate_limit_if_not_enabled(mocked_redis_client, mocked_r
 
     assert not mocked_redis_client.exceeded_rate_limit('key', 100, 100)
     assert not mocked_redis_client.redis_store.pipeline.called
+
+
+def test_expire(mocked_redis_client):
+    key = 'hash-key'
+    mocked_redis_client.expire(key, 1)
+    mocked_redis_client.redis_store.expire.assert_called_with(key, 1)

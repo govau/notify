@@ -111,3 +111,10 @@ class RedisClient:
         current_app.logger.exception("{} \n {}".format(message, e))
         if raise_exception:
             raise e
+
+    def expire(self, key, expire_in_seconds, raise_exception=False):
+        if self.active:
+            try:
+                self.redis_store.expire(key, expire_in_seconds)
+            except Exception as e:
+                self.__handle_exception(e, raise_exception)
