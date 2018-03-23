@@ -128,8 +128,19 @@
           <table role="presentation" width="100%" style="max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
             <tr>
               {% if brand_logo %}
-                <td width="70" bgcolor="{{brand_colour}}" valign="middle">
-                  <img src="{{ brand_logo }}" alt="" height="32" border="0" style="margin-top: 4px; margin-left: 10px;">
+                <td
+                  width="70"
+                  height="{% if brand_name -%} 49 {%- else -%} 76 {%- endif %}"
+                  bgcolor="{{brand_colour}}"
+                  valign="middle"
+                >
+                  <img
+                    src="{{ brand_logo }}"
+                    border="0"
+                    style="display: block; border: 0; Margin-top: 10px; Margin-bottom: 12px; Margin-left: 10px;"
+                    height="{% if brand_name -%} 27 {%- else -%} 54 {%- endif %}"
+                    alt=""
+                  />
                 </td>
               {% endif %}
               {% if brand_name %}
