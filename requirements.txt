@@ -8,12 +8,12 @@ Jinja2==2.10
 statsd==3.2.2
 Flask-Redis==0.3.0
 pyyaml==3.12
-phonenumbers==8.9.1
+phonenumbers==8.9.2
 pytz==2018.3
 smartypants==2.0.1
 monotonic==1.4
 pypdf2==1.26.0
 
 # required by both api and admin
-awscli==1.14.51
+awscli==1.14.62
 boto3==1.6.15
