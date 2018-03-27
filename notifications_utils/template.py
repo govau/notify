@@ -4,6 +4,7 @@ from datetime import datetime
 
 from jinja2 import Environment, FileSystemLoader
 from flask import Markup
+from html import unescape
 
 from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.columns import Columns
@@ -251,6 +252,8 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
             unlink_govuk_escaped
         ).then(
             do_nice_typography
+        ).then(
+            unescape
         ).as_string
 
     @property

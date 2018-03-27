@@ -1550,6 +1550,29 @@ def test_whitespace_in_subjects(template_class, subject, extra_args):
     assert template_instance.subject == 'no break'
 
 
+@pytest.mark.parametrize('template_class, expected_output', [
+    (
+        PlainTextEmailTemplate,
+        'paragraph one\n\n\xa0\n\nparagraph two',
+    ),
+    (
+        HTMLEmailTemplate,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">paragraph one</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">&nbsp;</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">paragraph two</p>'
+        ),
+    ),
+])
+def test_govuk_email_whitespace_hack(template_class, expected_output):
+
+    template_instance = template_class({
+        'content': 'paragraph one\n\n&nbsp;\n\nparagraph two',
+        'subject': 'foo'
+    })
+    assert expected_output in str(template_instance)
+
+
 def test_letter_preview_uses_non_breaking_hyphens():
     assert 'non\u2011breaking' in str(LetterPreviewTemplate(
         {'content': 'non-breaking', 'subject': 'foo'}
