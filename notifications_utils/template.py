@@ -143,7 +143,7 @@ class SMSMessageTemplate(Template):
             gsm_encode
         ).then(
             remove_whitespace_before_punctuation
-        ).as_string.strip()
+        ).strip()
 
     @property
     def prefix(self):
@@ -212,7 +212,7 @@ class SMSPreviewTemplate(SMSMessageTemplate):
                 remove_whitespace_before_punctuation
             ).then(
                 nl2br
-            ).as_string
+            )
         }))
 
 
@@ -236,7 +236,7 @@ class WithSubjectTemplate(Template):
             redact_missing_personalisation=self.redact_missing_personalisation,
         ).then(
             do_nice_typography
-        ).as_string)
+        ))
 
     @property
     def placeholders(self):
@@ -254,7 +254,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
             do_nice_typography
         ).then(
             unescape
-        ).as_string
+        )
 
     @property
     def subject(self):
@@ -265,7 +265,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
             redact_missing_personalisation=self.redact_missing_personalisation
         ).then(
             do_nice_typography
-        ).as_string)
+        ))
 
 
 class HTMLEmailTemplate(WithSubjectTemplate):
@@ -351,7 +351,7 @@ class EmailPreviewTemplate(WithSubjectTemplate):
             redact_missing_personalisation=self.redact_missing_personalisation
         ).then(
             do_nice_typography
-        ).as_string
+        )
 
 
 class LetterPreviewTemplate(WithSubjectTemplate):
@@ -409,7 +409,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 replace_hyphens_with_non_breaking_hyphens
             ).then(
                 tweak_dvla_list_markup
-            ).as_string,
+            ),
             'address': Take.as_field(
                 self.address_block,
                 (
@@ -430,7 +430,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 remove_whitespace_before_punctuation
             ).then(
                 nl2li
-            ).as_string,
+            ),
             'contact_block': Take.as_field(
                 '\n'.join(
                     line.strip()
@@ -445,7 +445,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
                 nl2br
             ).then(
                 strip_pipes
-            ).as_string,
+            ),
             'date': datetime.utcnow().strftime('%-d %B %Y')
         }))
 
@@ -462,7 +462,7 @@ class LetterPreviewTemplate(WithSubjectTemplate):
             strip_pipes
         ).then(
             strip_dvla_markup
-        ).as_string
+        )
 
     @property
     def placeholders(self):
@@ -545,7 +545,7 @@ def get_html_email_body(template_content, template_values, redact_missing_person
         notify_email_markdown
     ).then(
         do_nice_typography
-    ).as_string
+    )
 
 
 def do_nice_typography(value):
@@ -557,4 +557,4 @@ def do_nice_typography(value):
         make_quotes_smart
     ).then(
         replace_hyphens_with_en_dashes
-    ).as_string
+    )
