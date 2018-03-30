@@ -142,8 +142,8 @@ def test_HTML_template_has_URLs_replaced_with_links():
     ), 'subject': ''}))
 
 
-def test_preserves_whitespace_when_making_links():
-    assert (
+@pytest.mark.parametrize('markdown_function, expected_output', [
+    (notify_email_markdown, (
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         '<a style="word-wrap: break-word;" href="https://example.com">'
         'https://example.com'
@@ -152,11 +152,16 @@ def test_preserves_whitespace_when_making_links():
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         'Next paragraph'
         '</p>'
-    ) == notify_email_markdown(
+    ))
+])
+def test_preserves_whitespace_when_making_links(
+    markdown_function, expected_output
+):
+    assert markdown_function(
         'https://example.com\n'
         '\n'
         'Next paragraph'
-    )
+    ) == expected_output
 
 
 @pytest.mark.parametrize(
