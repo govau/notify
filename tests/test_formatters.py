@@ -185,7 +185,7 @@ def test_preserves_whitespace_when_making_links(
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert str(PlainTextEmailTemplate({'content': template_content, 'subject': ''})) == expected
+    assert expected in str(PlainTextEmailTemplate({'content': template_content, 'subject': ''}))
     assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
 

@@ -227,6 +227,14 @@ def strip_characters_inserted_to_force_newlines(value):
     )
 
 
+def strip_leading_whitespace(value):
+    return value.lstrip()
+
+
+def add_trailing_newline(value):
+    return '{}\n'.format(value)
+
+
 def tweak_dvla_list_markup(value):
     return value.replace('<cr><cr><np>', '<cr><np>').replace('<p><cr><p><cr>', '<p><cr>')
 
