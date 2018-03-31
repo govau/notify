@@ -750,6 +750,14 @@ def test_smart_quotes(dumb, smart):
         'double \u2013 dash',
     ),
     (
+        'triple --- dash',
+        'triple \u2013 dash',
+    ),
+    (
+        'quadruple ---- dash',
+        'quadruple ---- dash',
+    ),
+    (
         'em — dash',
         'em – dash',
     ),
