@@ -413,6 +413,12 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
             link
         )
 
+    def double_emphasis(self, text):
+        return '**{}**'.format(text)
+
+    def emphasis(self, text):
+        return '*{}*'.format(text)
+
 
 notify_email_markdown = mistune.Markdown(
     renderer=NotifyEmailMarkdownRenderer(),
