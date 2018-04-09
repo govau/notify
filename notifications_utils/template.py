@@ -15,6 +15,7 @@ from notifications_utils.formatters import (
     nl2li,
     add_prefix,
     notify_email_markdown,
+    notify_plain_text_email_markdown,
     notify_letter_preview_markdown,
     remove_empty_lines,
     gsm_encode,
@@ -29,6 +30,8 @@ from notifications_utils.formatters import (
     replace_hyphens_with_non_breaking_hyphens,
     tweak_dvla_list_markup,
     remove_trailing_linebreak,
+    strip_leading_whitespace,
+    add_trailing_newline,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -251,9 +254,15 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
         )).then(
             unlink_govuk_escaped
         ).then(
+            notify_plain_text_email_markdown
+        ).then(
             do_nice_typography
         ).then(
             unescape
+        ).then(
+            strip_leading_whitespace
+        ).then(
+            add_trailing_newline
         )
 
     @property

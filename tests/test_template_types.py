@@ -237,7 +237,7 @@ def test_HTML_template_has_URLs_replaced_with_links():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert str(PlainTextEmailTemplate({'content': template_content, 'subject': ''})) == expected
+    assert expected in str(PlainTextEmailTemplate({'content': template_content, 'subject': ''}))
     assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
 
@@ -648,7 +648,7 @@ def test_templates_handle_html_and_redacting(
 
 @pytest.mark.parametrize('template_class, extra_args, expected_remove_whitespace_calls', [
     (PlainTextEmailTemplate, {}, [
-        mock.call('content'),
+        mock.call('\n\ncontent'),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
@@ -713,7 +713,7 @@ def test_templates_remove_whitespace_before_punctuation(
 
 @pytest.mark.parametrize('template_class, extra_args, expected_calls', [
     (PlainTextEmailTemplate, {}, [
-        mock.call('content'),
+        mock.call('\n\ncontent'),
         mock.call(Markup('subject')),
     ]),
     (HTMLEmailTemplate, {}, [
@@ -1626,3 +1626,49 @@ def test_that_print_template_is_the_same_as_preview():
     assert dir(LetterPreviewTemplate) == dir(LetterPrintTemplate)
     assert os.path.basename(LetterPreviewTemplate.jinja_template.filename) == 'preview.jinja2'
     assert os.path.basename(LetterPrintTemplate.jinja_template.filename) == 'print.jinja2'
+
+
+def test_plain_text_email_whitespace():
+    email = PlainTextEmailTemplate({'subject': 'foo', 'content': (
+        '# Heading\n'
+        '\n'
+        '1. one\n'
+        '2. two\n'
+        '3. three\n'
+        '\n'
+        '***\n'
+        '\n'
+        '# Heading\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        '^ callout\n'
+        '\n'
+        '1. one not four\n'
+        '1. two not five'
+    )})
+    assert str(email) == (
+        'Heading\n'
+        '-----------------------------------------------------------------\n'
+        '\n'
+        '1. one\n'
+        '2. two\n'
+        '3. three\n'
+        '\n'
+        '=================================================================\n'
+        '\n'
+        '\n'
+        'Heading\n'
+        '-----------------------------------------------------------------\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        'callout\n'
+        '\n'
+        '1. one not four\n'
+        '2. two not five\n'
+    )
