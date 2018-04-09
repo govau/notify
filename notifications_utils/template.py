@@ -230,6 +230,15 @@ class WithSubjectTemplate(Template):
         self._subject = template['subject'].replace('\r', '').replace('\n', '').replace('\t', ' ').strip()
         super().__init__(template, values, redact_missing_personalisation=redact_missing_personalisation)
 
+    def __str__(self):
+        return str(Field(
+            self.content,
+            self.values,
+            html='passthrough',
+            redact_missing_personalisation=self.redact_missing_personalisation,
+            markdown_lists=True,
+        ))
+
     @property
     def subject(self):
         return Markup(Take(Field(
