@@ -31,6 +31,7 @@ def build_redis_client(app, mocked_redis_pipeline, mocker):
                         return_value={b'template-1111': b'8', b'template-2222': b'8'})
     mocker.patch.object(redis_client.redis_store, 'hmset')
     mocker.patch.object(redis_client.redis_store, 'expire')
+    mocker.patch.object(redis_client.redis_store, 'delete')
     mocker.patch.object(redis_client.redis_store, 'pipeline', return_value=mocked_redis_pipeline)
 
     return redis_client
