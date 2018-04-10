@@ -457,7 +457,6 @@ def validate_email_address(email_address, column=None):  # noqa (C901 too comple
     try:
         hostname = hostname.encode('idna').decode('ascii')
     except UnicodeError:
-        current_app.logger.error('Invalid hostname {}'.format(hostname))
         raise InvalidEmailError
 
     parts = hostname.split('.')
