@@ -1,0 +1,32 @@
+{% extends "withnav_template.html" %}
+{% from "components/radios.html" import radios %}
+{% from "components/page-footer.html" import page_footer %}
+
+{% block service_page_title %}
+  Send letters
+{% endblock %}
+
+{% block maincolumn_content %}
+
+  <div class="grid-row">
+    <div class="column-five-sixths">
+      <h1 class="heading-large">Send letters</h1>
+      <p>
+        It costs between 30p and 45p to send a letter using Notify.
+      </p>
+      <p>
+        See <a href="{{ url_for(".pricing", _anchor="letters") }}">pricing</a> for the list
+        of rates.
+      </p>
+      <form method="post">
+        {{ radios(form.enabled) }}
+        {{ page_footer(
+          'Save',
+          back_link=url_for('.service_settings', service_id=current_service.id),
+          back_link_text='Back to settings'
+        ) }}
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

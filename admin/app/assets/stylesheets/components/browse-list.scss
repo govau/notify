@@ -1,0 +1,38 @@
+.browse-list {
+
+  margin-bottom: $gutter;
+
+  &-item {
+    list-style: none;
+    margin-bottom: $gutter-two-thirds;
+  }
+
+  &-link {
+
+    @include bold-24;
+
+    &-destructive {
+
+      @include bold-24;
+      color: $error-colour;
+
+      &:visited,
+      &:link {
+        @include bold-24;
+        color: $error-colour;
+      }
+
+      &:hover {
+        color: $mellow-red;
+      }
+
+    }
+
+  }
+
+  &-hint {
+    @include core-19;
+    margin-top: 5px;
+  }
+
+}

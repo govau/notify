@@ -1,0 +1,117 @@
+[![Requirements Status](https://requires.io/github/alphagov/notifications-api/requirements.svg?branch=master)](https://requires.io/github/alphagov/notifications-api/requirements/?branch=master)
+[![Coverage Status](https://coveralls.io/repos/alphagov/notifications-api/badge.svg?branch=master&service=github)](https://coveralls.io/github/alphagov/notifications-api?branch=master)
+
+# notifications-api
+Notifications api
+Application for the notification api.
+
+Read and write notifications/status queue.
+Get and update notification status.
+
+## Setting Up
+
+### AWS credentials
+
+To run the API you will need appropriate AWS credentials. You should receive these from whoever administrates your AWS account. Make sure you've got both an access key id and a secret access key.
+
+Your aws credentials should be stored in a folder located at `~/.aws`. Follow [Amazon's instructions](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) for storing them correctly.
+
+### Virtualenv
+
+```
+mkvirtualenv -p /usr/local/bin/python3 notifications-api
+```
+
+### `environment.sh`
+
+Creating the environment.sh file. Replace [unique-to-environment] with your something unique to the environment. Your AWS credentials should be set up for notify-tools (the development/CI AWS account).
+
+Create a local environment.sh file containing the following:
+
+```
+echo "
+export NOTIFY_ENVIRONMENT='development'
+
+export MMG_API_KEY='MMG_API_KEY'
+export LOADTESTING_API_KEY='FIRETEXT_SIMULATION_KEY'
+export FIRETEXT_API_KEY='FIRETEXT_ACTUAL_KEY'
+export NOTIFICATION_QUEUE_PREFIX='YOUR_OWN_PREFIX'
+
+export FLASK_APP=application.py
+export FLASK_DEBUG=1
+export WERKZEUG_DEBUG_PIN=off
+"> environment.sh
+```
+
+NOTES:
+
+ * Replace the placeholder key and prefix values as appropriate
+ * The SECRET_KEY and DANGEROUS_SALT should match those in the [notifications-admin](https://github.com/alphagov/notifications-admin) app.
+ * The  unique prefix for the queue names prevents clashing with others' queues in shared amazon environment and enables filtering by queue name in the SQS interface.
+
+### Postgres
+
+Install [Postgres.app](http://postgresapp.com/). You will need admin on your machine to do this.
+
+### Redis
+
+To switch redis on you'll need to install it locally. On a OSX we've used brew for this. To use redis caching you need to switch it on by changing the config for development:
+
+        REDIS_ENABLED = True
+
+
+##  To run the application
+
+First, run `scripts/bootstrap.sh` to install dependencies and create the databases.
+
+You need to run the api application and a local celery instance.
+
+There are two run scripts for running all the necessary parts.
+
+```
+scripts/run_app.sh
+```
+
+```
+scripts/run_celery.sh
+```
+
+Optionally you can also run this script to run the scheduled tasks:
+
+```
+scripts/run_celery_beat.sh
+```
+
+
+##  To test the application
+
+First, ensure that `scripts/bootstrap.sh` has been run, as it creates the test database.
+
+Then simply run
+
+```
+make test
+```
+
+That will run flake8 for code analysis and our unit test suite. If you wish to run our functional tests, instructions can be found in the
+[notifications-functional-tests](https://github.com/alphagov/notifications-functional-tests) repository.
+
+
+
+## To run one off tasks
+
+Tasks are run through the `flask` command - run `flask --help` for more information. There are two sections we need to
+care about: `flask db` contains alembic migration commands, and `flask command` contains all of our custom commands. For
+example, to purge all dynamically generated functional test data, do the following:
+
+Locally
+```
+flask command purge_functional_test_data -u <functional tests user name prefix>
+```
+
+On the server
+```
+cf run-task notify-api "flask command purge_functional_test_data -u <functional tests user name prefix>"
+```
+
+All commands and command options have a --help command if you need more information.

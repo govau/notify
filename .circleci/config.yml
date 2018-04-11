@@ -3,7 +3,7 @@ version: 2
 jobs:
   dummy:
     docker:
-      - image: circleci/python:latest
+      - image: circleci/python:3.5.4
     steps:
       - checkout
       - run: echo "dummy"
