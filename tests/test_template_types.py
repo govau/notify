@@ -340,6 +340,41 @@ def test_sms_preview_adds_newlines(nl2br):
     nl2br.assert_called_once_with(content)
 
 
+@pytest.mark.parametrize('content', [
+    (  # Unix-style
+        'one newline\n'
+        'two newlines\n'
+        '\n'
+        'end'
+    ),
+    (  # Windows-style
+        'one newline\r\n'
+        'two newlines\r\n'
+        '\r\n'
+        'end'
+    ),
+    (  # Mac Classic style
+        'one newline\r'
+        'two newlines\r'
+        '\r'
+        'end'
+    ),
+    (  # A mess
+        '\t\t\n\r one newline\n'
+        'two newlines\r'
+        '\r\n'
+        'end\n\n  \r \n \t '
+    ),
+])
+def test_sms_message_normalises_newlines(content):
+    assert repr(str(SMSMessageTemplate({'content': content}))) == repr(
+        'one newline\n'
+        'two newlines\n'
+        '\n'
+        'end'
+    )
+
+
 @freeze_time("2001-01-01 12:00:00.000000")
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
