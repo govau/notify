@@ -32,6 +32,7 @@ from notifications_utils.formatters import (
     remove_trailing_linebreak,
     strip_leading_whitespace,
     add_trailing_newline,
+    normalise_newlines,
 )
 from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
@@ -146,7 +147,11 @@ class SMSMessageTemplate(Template):
             gsm_encode
         ).then(
             remove_whitespace_before_punctuation
-        ).strip()
+        ).then(
+            normalise_newlines
+        ).then(
+            str.strip
+        )
 
     @property
     def prefix(self):

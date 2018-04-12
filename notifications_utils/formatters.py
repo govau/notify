@@ -202,11 +202,7 @@ def replace_hyphens_with_non_breaking_hyphens(value):
 
 
 def normalise_newlines(value):
-    return re.sub(
-        r'\r\n',
-        '\n',
-        value
-    )
+    return '\n'.join(value.splitlines())
 
 
 def make_markdown_take_notice_of_multiple_newlines(value):
