@@ -20,6 +20,7 @@ from notifications_utils.international_billing_rates import (
 
 
 uk_prefix = '44'
+au_prefix = '61'
 
 first_column_headings = {
     'email': ['email address'],
@@ -350,13 +351,16 @@ def is_uk_phone_number(number):
     number = normalise_phone_number(number)
 
     if (
-        number.startswith(uk_prefix) or
+        number.startswith(au_prefix) or
         (number.startswith('7') and len(number) < 11)
     ):
         return True
 
     return False
 
+
+def is_au_phone_number(number):
+    return True
 
 international_phone_info = namedtuple('PhoneNumber', [
     'international',
@@ -371,7 +375,7 @@ def get_international_phone_info(number):
     prefix = get_international_prefix(number)
 
     return international_phone_info(
-        international=(prefix != uk_prefix),
+        international=(prefix != au_prefix),
         country_prefix=prefix,
         billable_units=get_billable_units_for_prefix(prefix)
     )
@@ -390,23 +394,23 @@ def get_billable_units_for_prefix(prefix):
 
 def validate_uk_phone_number(number, column=None):
 
-    number = normalise_phone_number(number).lstrip(uk_prefix).lstrip('0')
+    number = normalise_phone_number(number).lstrip(au_prefix).lstrip('0')
 
-    if not number.startswith('7'):
-        raise InvalidPhoneError('Not a UK mobile number')
+    if not number.startswith('4'):
+        raise InvalidPhoneError('Not an AU mobile number')
 
-    if len(number) > 10:
+    if len(number) > 9:
         raise InvalidPhoneError('Too many digits')
 
-    if len(number) < 10:
+    if len(number) < 9:
         raise InvalidPhoneError('Not enough digits')
 
-    return '{}{}'.format(uk_prefix, number)
+    return '{}{}'.format(au_prefix, number)
 
 
 def validate_phone_number(number, column=None, international=False):
 
-    if (not international) or is_uk_phone_number(number):
+    if (not international) or is_au_phone_number(number):
         return validate_uk_phone_number(number)
 
     number = normalise_phone_number(number)
