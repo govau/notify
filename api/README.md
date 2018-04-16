@@ -16,30 +16,41 @@ To run the API you will need appropriate AWS credentials. You should receive the
 
 Your aws credentials should be stored in a folder located at `~/.aws`. Follow [Amazon's instructions](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) for storing them correctly.
 
-### Virtualenv
+### Pipenv
+
+install pipenv according to your platform. it can be installed through
+homebrew, apt, or most easily-- pip.
 
 ```
-mkvirtualenv -p /usr/local/bin/python3 notifications-api
+pip3 install --user pipenv
 ```
 
-### `environment.sh`
+### `.env`
 
-Creating the environment.sh file. Replace [unique-to-environment] with your something unique to the environment. Your AWS credentials should be set up for notify-tools (the development/CI AWS account).
+Creating the .env file. Replace [unique-to-environment] with your something unique to the environment.
 
-Create a local environment.sh file containing the following:
+Create a local .env file containing the following:
 
 ```
 echo "
-export NOTIFY_ENVIRONMENT='development'
+NOTIFY_ENVIRONMENT='development'
 
-export MMG_API_KEY='MMG_API_KEY'
-export LOADTESTING_API_KEY='FIRETEXT_SIMULATION_KEY'
-export FIRETEXT_API_KEY='FIRETEXT_ACTUAL_KEY'
-export NOTIFICATION_QUEUE_PREFIX='YOUR_OWN_PREFIX'
+MMG_API_KEY='MMG_API_KEY'
+LOADTESTING_API_KEY='FIRETEXT_SIMULATION_KEY'
+FIRETEXT_API_KEY='FIRETEXT_ACTUAL_KEY'
+NOTIFICATION_QUEUE_PREFIX='YOUR_OWN_PREFIX'
 
-export FLASK_APP=application.py
-export FLASK_DEBUG=1
-export WERKZEUG_DEBUG_PIN=off
+FLASK_APP=application.py
+FLASK_DEBUG=1
+WERKZEUG_DEBUG_PIN=off
+
+SMTP_ADDR=
+SMTP_USER=
+SMTP_PASSWORD=
+
+SMS_ADDR=
+SMS_USER=
+SMS_PASSWORD=
 "> environment.sh
 ```
 
@@ -62,18 +73,22 @@ To switch redis on you'll need to install it locally. On a OSX we've used brew f
 
 ##  To run the application
 
-First, run `scripts/bootstrap.sh` to install dependencies and create the databases.
+First, create a postgres database with the command `createdb notification_api`.
+
+Then, run `make setup` to install dependencies, set up your environment, and
+initialise the database.
+
+You can run make setup whenever you need to update your database in response
+to migrations.
 
 You need to run the api application and a local celery instance.
 
-There are two run scripts for running all the necessary parts.
-
 ```
-scripts/run_app.sh
+make run
 ```
 
 ```
-scripts/run_celery.sh
+make run-celery
 ```
 
 Optionally you can also run this script to run the scheduled tasks:
@@ -85,7 +100,7 @@ scripts/run_celery_beat.sh
 
 ##  To test the application
 
-First, ensure that `scripts/bootstrap.sh` has been run, as it creates the test database.
+First, ensure that `make setup` has been run, as it updates the test database
 
 Then simply run
 

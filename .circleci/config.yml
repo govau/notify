@@ -1,15 +1,28 @@
 version: 2
 
-jobs:
-  dummy:
-    docker:
-      - image: circleci/python:3.5.4
-    steps:
-      - checkout
-      - run: echo "dummy"
+references:
+  cf_install: &cf_install
+    run:
+      command: |
+        curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+        mkdir -p `pwd`/bin
+        chmod +x ./cf
+        mv ./cf bin/
+        echo export PATH="$PWD/bin:\$PATH" >> $BASH_ENV
+        source $BASH_ENV
+        cf install-plugin -f https://github.com/contraband/autopilot/releases/download/0.0.6/autopilot-linux
 
-workflows:
-  version: 2
-  all:
-    jobs:
-      - dummy
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - checkout
+        - *cf_install
+        - run: make setup
+        - run:
+            command: |
+              CF_USERNAME="${CF_Y_USER}" \
+              CF_PASSWORD="${CF_Y_PASSWORD}" \
+                make cf-login
+        - run: make deploy

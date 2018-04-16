@@ -1,3 +1,11 @@
+GUNICORN ?= gunicorn
+PIPENV ?= pipenv
+RUNNER ?= $(PIPENV) run
+PORT   ?= 6011
+WORKERS?= 4
+
+
+
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 DATE = $(shell date +%Y-%m-%d:%H:%M:%S)
@@ -88,10 +96,6 @@ upload-paas-artifact:
 	$(if ${DEPLOY_BUILD_NUMBER},,$(error Must specify DEPLOY_BUILD_NUMBER))
 	$(if ${JENKINS_S3_BUCKET},,$(error Must specify JENKINS_S3_BUCKET))
 	aws s3 cp --region eu-west-1 --sse AES256 target/notifications-api.zip s3://${JENKINS_S3_BUCKET}/build/notifications-api/${DEPLOY_BUILD_NUMBER}.zip
-
-.PHONY: test
-test: venv generate-version-file ## Run tests
-	./scripts/run_tests.sh
 
 .PHONY: coverage
 coverage: venv ## Create coverage report
@@ -247,3 +251,53 @@ cf-push:
 .PHONY: check-if-migrations-to-run
 check-if-migrations-to-run:
 	@echo $(shell python3 scripts/check_if_new_migration.py)
+
+
+
+
+# --- DTA additions ---
+# ---------------------
+
+${APP_VERSION_FILE}:
+	@echo -e "__travis_commit__ = \"${GIT_COMMIT}\"\n__time__ = \"${DATE}\"\n__travis_job_number__ = \"${BUILD_NUMBER}\"\n__travis_job_url__ = \"${BUILD_URL}\"" > $@
+
+version-file: ${APP_VERSION_FILE}
+
+Pipfile Pipfile.lock:
+	$(PIPENV) install
+
+setup:
+	$(PIPENV) install
+
+setup-db: version-file
+	$(RUNNER) flask db upgrade
+
+test: version-file
+	$(RUNNER) flake8 .
+	$(RUNNER) py.test --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 -v --maxfail=10
+
+run: version-file
+	$(RUNNER) flask run -p $(PORT)
+
+run-gunicorn: version-file
+	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
+
+run-celery: version-file
+	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO 
+
+pipenv-requirements.txt: Pipfile.lock
+	$(PIPENV) lock -r > $@
+
+vendor: pipenv-requirements.txt
+	$(RUNNER) pip download -d $@ -r $<
+
+requirements.txt: pipenv-requirements.txt
+	cat $< | $(RUNNER) python fixup-requirements.py > $@
+
+run-production: setup-db
+	$(MAKE) run-gunicorn
+
+deploy: vendor requirements.txt
+	cf push
+
+.PHONY: ttest setup setup-db run run-celery deploy run-production

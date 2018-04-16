@@ -13,7 +13,6 @@ if os.environ.get('VCAP_SERVICES'):
     # on cloudfoundry, config is a json blob in VCAP_SERVICES - unpack it, and populate
     # standard environment variables from it
     from app.cloudfoundry_config import extract_cloudfoundry_config
-
     extract_cloudfoundry_config()
 
 
@@ -119,6 +118,7 @@ class Config(object):
     ###########################
 
     NOTIFY_ENVIRONMENT = 'development'
+    NOTIFY_EMAIL_DOMAIN = 'digital.gov.au'
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
     AWS_REGION = 'eu-west-1'
     INVITATION_EXPIRATION_DAYS = 2
@@ -352,7 +352,6 @@ class Development(Config):
     NOTIFY_ENVIRONMENT = 'development'
     NOTIFY_LOG_PATH = 'application.log'
     NOTIFICATION_QUEUE_PREFIX = 'development'
-    NOTIFY_EMAIL_DOMAIN = "notify.tools"
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/notification_api'
     REDIS_URL = 'redis://localhost:6379/0'
@@ -373,7 +372,6 @@ class Development(Config):
 
 
 class Test(Development):
-    NOTIFY_EMAIL_DOMAIN = 'test.notify.com'
     FROM_NUMBER = 'testing'
     NOTIFY_ENVIRONMENT = 'test'
     TESTING = True
@@ -406,7 +404,6 @@ class Test(Development):
 
 
 class Preview(Config):
-    NOTIFY_EMAIL_DOMAIN = 'notify.works'
     NOTIFY_ENVIRONMENT = 'preview'
     CSV_UPLOAD_BUCKET_NAME = 'preview-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'preview-letters-pdf'
@@ -420,7 +417,6 @@ class Preview(Config):
 
 
 class Staging(Config):
-    NOTIFY_EMAIL_DOMAIN = 'staging-notify.works'
     NOTIFY_ENVIRONMENT = 'staging'
     CSV_UPLOAD_BUCKET_NAME = 'staging-notify-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'staging-letters-pdf'
@@ -436,7 +432,6 @@ class Staging(Config):
 
 
 class Live(Config):
-    NOTIFY_EMAIL_DOMAIN = 'notifications.service.gov.uk'
     NOTIFY_ENVIRONMENT = 'live'
     CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
@@ -459,7 +454,6 @@ class CloudFoundryConfig(Config):
 
 # CloudFoundry sandbox
 class Sandbox(CloudFoundryConfig):
-    NOTIFY_EMAIL_DOMAIN = 'notify.works'
     NOTIFY_ENVIRONMENT = 'sandbox'
     CSV_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'cf-sandbox-letters-pdf'

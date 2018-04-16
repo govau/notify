@@ -14,13 +14,13 @@ pyexcel-io = "==0.5.6"
 pyexcel-xls = "==0.5.6"
 pyexcel-xlsx = "==0.5.6"
 "pyexcel-ods3" = "==0.5.2"
-pytz = "==2018.3"
+pytz = "==2018.4"
 gunicorn = "==19.7.1"
 whitenoise = "==3.3.1"
 eventlet = "==0.22.1"
 notifications-python-client = "==4.8.1"
 awscli-cwlogs = "<1.5,>=1.4"
-"1b87f57" = {path = "./../notifications-utils", editable = true}
+notifications-utils = {path = "file:./../utils#egg=notifications-utils", editable = true}
 
 [dev-packages]
 isort = "==4.3.4"
