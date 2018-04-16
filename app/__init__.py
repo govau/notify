@@ -16,10 +16,8 @@ from werkzeug.local import LocalProxy
 
 from app.celery.celery import NotifyCelery
 from app.clients import Clients
-from app.clients.email.aws_ses import AwsSesClient
-from app.clients.sms.firetext import FiretextClient
-from app.clients.sms.loadtesting import LoadtestingClient
-from app.clients.sms.mmg import MMGClient
+from app.clients.email.smtp import SMTPClient
+from app.clients.sms.identity import IdentitySMSClient
 from app.clients.performance_platform.performance_platform_client import PerformancePlatformClient
 from app.encryption import Encryption
 
@@ -30,10 +28,16 @@ db = SQLAlchemy()
 migrate = Migrate()
 ma = Marshmallow()
 notify_celery = NotifyCelery()
-firetext_client = FiretextClient()
-loadtest_client = LoadtestingClient()
-mmg_client = MMGClient()
-aws_ses_client = AwsSesClient()
+identity_sms_client = IdentitySMSClient(
+    addr=os.getenv('SMS_ADDR'),
+    user=os.getenv('SMS_USER'),
+    password=os.getenv('SMS_PASSWORD'),
+)
+smtp_client = SMTPClient(
+    addr=os.getenv('SMTP_ADDR'),
+    user=os.getenv('SMTP_USER'),
+    password=os.getenv('SMTP_PASSWORD'),
+)
 encryption = Encryption()
 deskpro_client = DeskproClient()
 statsd_client = StatsdClient()
@@ -63,15 +67,16 @@ def create_app(application):
     deskpro_client.init_app(application)
     statsd_client.init_app(application)
     logging.init_app(application, statsd_client)
-    firetext_client.init_app(application, statsd_client=statsd_client)
-    loadtest_client.init_app(application, statsd_client=statsd_client)
-    mmg_client.init_app(application, statsd_client=statsd_client)
-    aws_ses_client.init_app(application.config['AWS_REGION'], statsd_client=statsd_client)
+    identity_sms_client.init_app(application)
+    smtp_client.init_app(application, statsd_client=statsd_client)
     notify_celery.init_app(application)
     encryption.init_app(application)
     redis_store.init_app(application)
     performance_platform_client.init_app(application)
-    clients.init_app(sms_clients=[firetext_client, mmg_client, loadtest_client], email_clients=[aws_ses_client])
+    clients.init_app(
+        sms_clients=[identity_sms_client],
+        email_clients=[smtp_client]
+    )
 
     register_blueprint(application)
     register_v2_blueprints(application)

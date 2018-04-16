@@ -153,6 +153,9 @@ class Config(object):
     SERVICE_NOW_LIVE_TEMPLATE_ID = '618185c6-3636-49cd-b7d2-6f6f5eb3bdde'
     ORGANISATION_INVITATION_EMAIL_TEMPLATE_ID = '203566f0-d835-47c5-aa06-932439c86573'
 
+    BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
+    
+    """
     BROKER_URL = 'sqs://'
     BROKER_TRANSPORT_OPTIONS = {
         'region': AWS_REGION,
@@ -160,6 +163,9 @@ class Config(object):
         'visibility_timeout': 310,
         'queue_name_prefix': NOTIFICATION_QUEUE_PREFIX
     }
+    CELERY_ALWAYS_EAGER = True
+    """
+
     CELERY_ENABLE_UTC = True
     CELERY_TIMEZONE = 'Europe/London'
     CELERY_ACCEPT_CONTENT = ['json']
@@ -350,6 +356,7 @@ class Development(Config):
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/notification_api'
     REDIS_URL = 'redis://localhost:6379/0'
+    BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
 
     STATSD_ENABLED = False
     STATSD_HOST = "localhost"

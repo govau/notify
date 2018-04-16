@@ -136,6 +136,10 @@ def send_email_to_provider(notification):
             notification.reference = reference
             update_notification(notification, provider)
 
+        current_app.logger.debug("SENT_MAIL: {} -- {}".format(
+            validate_and_format_email_address(notification.to),
+            str(plain_text_email))
+        )
         current_app.logger.debug(
             "Email {} sent to provider at {}".format(notification.id, notification.sent_at)
         )

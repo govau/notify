@@ -29,7 +29,7 @@ class Clients(object):
             self.email_clients[client.name] = client
 
     def get_sms_client(self, name):
-        return self.sms_clients.get(name)
+        return next(iter(self.sms_clients.values()), None)
 
     def get_email_client(self, name):
         return self.email_clients.get(name)
