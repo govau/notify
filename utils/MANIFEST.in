@@ -1,0 +1,2 @@
+recursive-include notifications_utils *.jinja2
+include notifications_utils/international_billing_rates.yml
