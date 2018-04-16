@@ -1,0 +1,91 @@
+.pill {
+
+  display: flex;
+
+  li {
+    width: 25%;
+    flex-grow: 1;
+    text-align: left;
+  }
+
+  a,
+  &-selected-item {
+    display: block;
+    float: left;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+  }
+
+  a {
+    $background: $link-colour;
+    background: $background;
+    color: $white;
+    border: 2px solid $background;
+    position: relative;
+    text-decoration: none;
+    cursor: pointer;
+
+    .pill-label {
+      text-decoration: underline;
+    }
+
+    &:link,
+    &:visited {
+      color: $white;
+    }
+
+    &:hover {
+      color: $light-blue-25;
+    }
+
+    &:active,
+    &:focus {
+      z-index: 10;
+    }
+  }
+
+  &-selected-item {
+    border: 2px solid $black;
+    outline: 1px solid rgba($white, 0.1);
+    position: relative;
+    z-index: 1000;
+    color: $text-colour;
+
+    &:focus {
+      z-index: 10;
+      outline: 3px solid $yellow;
+    }
+
+  }
+
+  &-centered-item {
+    text-align: center;
+  }
+
+}
+
+.pill-separate {
+
+  &-item {
+
+    display: block;
+    text-align: left;
+    padding: 10px $gutter-half;
+
+    &:link,
+    &:visited {
+      background: $link-colour;
+      color: $white;
+      text-decoration: underline;
+    }
+
+    &:hover,
+    &:focus,
+    &:link:focus {
+      color: $light-blue-25;
+    }
+
+  }
+
+}

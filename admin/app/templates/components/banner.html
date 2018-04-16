@@ -1,0 +1,24 @@
+{% macro banner(body, type=None, with_tick=False, delete_button=None, subhead=None) %}
+  <div
+    class='banner{% if type %}-{{ type }}{% endif %}{% if with_tick %}-with-tick{% endif %}'
+    {% if type == 'dangerous' %}
+    role='group'
+    tabindex='-1'
+    {% endif %}
+  >
+    {% if subhead -%}
+      <h1 class="banner-title">{{ subhead }}</h1>
+    {%- endif -%}
+    {{ body }}
+    {% if delete_button %}
+      <form method='post'>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit" class="button" name="delete">{{ delete_button }}</button>
+      </form>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro banner_wrapper(type=None, with_tick=False, delete_button=None, subhead=None) %}
+  {{ banner(caller()|safe, type=type, with_tick=with_tick, delete_button=delete_button, subhead=subhead) }}
+{% endmacro %}

@@ -1,0 +1,35 @@
+{% from "components/checkbox.html" import checkbox %}
+{% from "components/radios.html" import radios %}
+
+<fieldset class="form-group">
+  <legend class="form-label">
+    Permissions
+  </legend>
+  {{ checkbox(form.send_messages) }}
+  {{ checkbox(form.manage_templates) }}
+  {{ checkbox(form.manage_service) }}
+  {{ checkbox(form.manage_api_keys) }}
+</fieldset>
+
+<div class="bottom-gutter">
+  <p class="form-label">
+    All team members can see
+  </p>
+  <ul class="list list-bullet">
+    <li>templates</li>
+    <li>history of sent messages</li>
+    <li>who the other team members are</li>
+  </ul>
+</div>
+
+{% if service_has_email_auth %}
+  {% if user_has_no_mobile_number %}
+    {{ radios(
+      form.login_authentication,
+      disable=['sms_auth'],
+      option_hints={'sms_auth': 'Not available because this team member hasn’t added a phone&nbsp;number to their profile'|safe}
+    ) }}
+  {% else %}
+    {{ radios(form.login_authentication) }}
+  {% endif %}
+{% endif %}

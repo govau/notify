@@ -1,0 +1,243 @@
+// Extra CSS overlaying elements
+
+#global-header-bar {
+  background-color: $govuk-blue;
+}
+
+#global-header,
+#global-header.with-proposition {
+
+  #logo {
+
+    white-space: nowrap;
+
+    #product-name {
+      font-size: 24px;
+      font-weight: 400;
+      padding-left: 5px;
+    }
+
+  }
+
+  .header-wrapper {
+    .header-global {
+      .header-logo {
+
+        @include media(desktop) {
+          width: auto;
+        }
+
+        &:after {
+          display: none;
+        }
+
+      }
+    }
+  }
+
+  .header-proposition {
+    #proposition-links {
+      li {
+        padding: 0 0 0 15px;
+      }
+    }
+  }
+
+}
+
+@include media(desktop) {
+  #proposition-menu {
+    float: right;
+  }
+}
+
+a {
+  &:visited {
+    color: $link-colour;
+  }
+}
+
+.form-control-1-1 {
+  width: 100%;
+}
+
+.form-control-5em {
+
+  width: 100%;
+
+  @include media(tablet) {
+    width: 5em;
+  }
+
+}
+
+.column-main {
+
+  .heading-large,
+  > .heading-medium {
+    margin: 10px 0 15px 0;
+    word-wrap: break-word;
+  }
+
+  > .grid-row:first-child  {
+
+    .heading-large,
+    .heading-medium {
+      margin: 10px 0 15px 0;
+      word-wrap: break-word;
+    }
+
+  }
+
+}
+
+.highlight {
+  font-family: monospace;
+  overflow-x: scroll;
+  padding: 10px 0 10px 10px;
+}
+
+.inline {
+
+  .block-label {
+
+    @include media(tablet) {
+      float: none;
+      display: inline-block;
+    }
+
+  }
+
+}
+
+td {
+  vertical-align: top;
+}
+
+.heading-xlarge {
+  margin-bottom: 20px;
+}
+
+.heading-medium {
+  margin-top: $gutter;
+}
+
+.form-label {
+  margin-bottom: 5px;
+}
+
+.hint {
+  color: $secondary-text-colour;
+}
+
+.list-bullet {
+
+  .list-bullet {
+    list-style: circle;
+  }
+
+}
+
+details summary {
+  text-decoration: underline;
+  margin-bottom: $gutter-half;
+}
+
+.spreadsheet {
+
+  margin-bottom: -$gutter;
+
+  th,
+  .table-field-index {
+    background: $grey-4;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  th, td {
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 1px solid $border-colour;
+  }
+
+  td {
+    border-top: 0;
+  }
+
+}
+
+.body-copy-table {
+
+  table {
+
+    th,
+    td {
+      @include core-19;
+      word-wrap: break-word;
+    }
+
+    thead {
+      th {
+        @include bold-19;
+      }
+    }
+
+  }
+
+}
+
+.tabular-numbers {
+  @include core-19($tabular-numbers: true);
+}
+
+summary::-moz-details-marker {
+  display: none;
+}
+summary::-ms-details-marker {
+  display: none;
+}
+summary::-o-details-marker {
+  display: none;
+}
+
+summary::details-marker {
+  display: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+details .arrow {
+  font-size: 16px;
+}
+
+.block-label-hint {
+  @include core-16;
+  margin-top: 5px;
+}
+
+#content.override-elements-content {
+  padding-bottom: 0;
+}
+
+.multiple-choice input:disabled+label {
+  opacity: 1;
+  color: $secondary-text-colour;
+  cursor: default;
+}
+
+.heading-inline {
+  display: inline-block;
+}
+
+.branding-radio {
+
+  img {
+    background: linear-gradient(45deg, $black 25%, transparent 25%, transparent 75%, $black 75%, $black 0), linear-gradient(45deg, $black 25%, transparent 25%, transparent 75%, $black 75%, $black 0), $white;
+    background-repeat: repeat, repeat;
+    background-position: 0px 0, 5px 5px;
+    background-size: 2px 2px, 2px 2px;
+  }
+
+}

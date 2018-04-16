@@ -1,0 +1,78 @@
+{% extends "withoutnav_template.html" %}
+{% from "components/table.html" import mapping_table, row, text_field, edit_field, field with context %}
+{% from "components/sub-navigation.html" import sub_navigation %}
+
+{% block per_page_title %}
+  Features
+{% endblock %}
+
+{% block maincolumn_content %}
+
+<div class="grid-row">
+  <div class="column-one-third">
+    {{ sub_navigation(navigation_links) }}
+  </div>
+  <div class="column-two-thirds">
+
+    <h1 class="heading-large">Features</h1>
+    <p>With GOV.UK Notify, you can:</p>
+    <ul class="list list-bullet">
+      <li>send emails</li>
+      <li>send and receive text messages (UK and internationally)</li>
+      <li>send letters</li>
+    </ul>
+    <p>You don’t need any technical knowledge to use Notify.</p>
+    <p><a href="{{ url_for('main.register') }}">Create an account</a> for free and try it yourself.</p>
+
+    <h2 class="heading-medium">Create messages quickly and easily</h2>
+    <p>Without any technical knowledge, you can:</p>
+    <ul class="list list-bullet">
+      <li>create your own message templates</li>
+      <li>change how messages are formatted</li>
+      <li>preview messages before you send them</li>
+    </ul>
+
+    <h2 class="heading-medium">Customise your branding</h2>
+    <p>You control how your messages look when you send them through Notify. You can:</p>
+    <ul class="list list-bullet">
+      <li>use your organisation’s own branding</li>
+      <li>choose the name that emails and text messages come from</li>
+      <li>choose the email address that users reply to</li>
+      <li>get a unique phone number for text message replies</li>
+    </ul>
+    
+    <h2 class="heading-medium">Send messages in bulk or individually</h2>
+    <p>With Notify, you can:</p>
+    <ul class="list list-bullet">
+      <li>send bulk messages to lots of users</li>
+      <li>send personalised messages to individual users</li>
+      <li>schedule messages to be sent at a particular time</li>
+      <li>send messages automatically <a href="/documentation">through our API</a></li>
+    </ul>
+    
+    <h2 class="heading-medium">Track your activity</h2>
+    <p>Through the Notify dashboard, you can:</p>
+    <ul class="list list-bullet">
+      <li>check the delivery status of any emails and text messages</li>
+      <li>see a real-time dashboard of your activity</li>
+      <li>view your usage and reports</li>
+    </ul>
+    
+    <h2 class="heading-medium">Manage your team</h2>
+    <p>Through the Notify dashboard, you can:</p>
+    <ul class="list list-bullet">
+      <li>set permission levels for different team members</li>
+      <li>invite new users (including people without a government email address)</li>
+    </ul>
+    
+    <h2 class="heading-medium">Send messages reliably</h2>
+    <p>Notify commits to:</p>
+    <ul class="list list-bullet">
+      <li>sending 95% of emails and text messages within 10 seconds</li>
+      <li>sending letters by 3pm the next working day (if you submit it through Notify before 5pm)</li>
+    </ul>
+
+    <p>Notify sends messages through multiple providers. If one provider fails, Notify automatically switches to another so that your messages aren’t affected.</p>
+    
+    <p>You can <a href="https://www.gov.uk/performance/govuk-notify">check how Notify is performing</a>.</p>
+{% endblock %}

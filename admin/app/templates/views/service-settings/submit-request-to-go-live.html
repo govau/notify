@@ -1,0 +1,40 @@
+{% extends "withnav_template.html" %}
+{% from "components/checkbox.html" import checkbox_group %}
+{% from "components/textbox.html" import textbox %}
+{% from "components/radios.html" import radios %}
+{% from "components/page-footer.html" import page_footer %}
+{% from "components/banner.html" import banner_wrapper %}
+
+{% block service_page_title %}
+  How do you plan to use Notify?
+{% endblock %}
+
+{% block maincolumn_content %}
+
+      <h1 class="heading-large">How do you plan to use Notify?</h1>
+
+      <form method="post" class="top-gutter">
+        {{ checkbox_group('What kind of messages will you be sending?', [
+          form.channel_email,
+          form.channel_sms,
+          form.channel_letter
+        ]) }}
+        <div class="form-group">
+          {{ textbox(form.start_date, width='1-1') }}
+          {{ textbox(form.start_volume, width='1-1', hint='For example, ‘1,000 per month’.') }}
+          {{ textbox(form.peak_volume, width='1-1', hint='For example, ‘Messages will increase to 20,000 per month in January’.') }}
+        </div>
+        {{ checkbox_group('How are you going to send messages?', [
+          form.method_one_off,
+          form.method_upload,
+          form.method_api
+        ]) }}
+        <p class="bottom-gutter">
+          By requesting to go live you’re agreeing to our <a href="{{ url_for('.terms') }}">terms of use</a>.
+        </p>
+
+        {{ page_footer('Request to go live') }}
+      </form>
+
+
+{% endblock %}

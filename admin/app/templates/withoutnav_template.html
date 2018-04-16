@@ -1,0 +1,15 @@
+{% extends "admin_template.html" %}
+
+{% block fullwidth_content %}
+  <div id="content">
+    {% if current_service %}
+    <div class="navigation-service">
+      <a href="{{ url_for('main.show_accounts_or_dashboard') }}">Back to {{ current_service.name }}</a>
+    </div>
+    {% endif %}
+    <main role="main">
+      {% include 'flash_messages.html' %}
+      {% block maincolumn_content %}{% endblock %}
+    </main>
+  </div>
+{% endblock %}
