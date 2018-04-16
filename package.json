@@ -2,9 +2,6 @@
   "name": "notifications-admin",
   "version": "0.0.1",
   "description": "Admin front end for GOV.UK Notify",
-  "engines": {
-    "node": "5.0.0"
-  },
   "scripts": {
     "test": "gulp lint",
     "build": "gulp",
