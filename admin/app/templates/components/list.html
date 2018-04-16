@@ -1,7 +1,0 @@
-{% macro list_of_placeholders(placeholders) %}
-  {{ placeholders | formatted_list(
-    before_each="<span class='placeholder'>((",
-    after_each='))</span>',
-    separator=' '
-  ) }}
-{%- endmacro %}
