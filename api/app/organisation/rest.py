@@ -20,7 +20,6 @@ from app.organisation.organisation_schema import (
     post_link_service_to_organisation_schema,
 )
 from app.schema_validation import validate
-from app.schemas import user_schema
 
 organisation_blueprint = Blueprint('organisation', __name__)
 register_errors(organisation_blueprint)
@@ -98,12 +97,33 @@ def get_organisation_services(organisation_id):
 @organisation_blueprint.route('/<uuid:organisation_id>/users/<uuid:user_id>', methods=['POST'])
 def add_user_to_organisation(organisation_id, user_id):
     new_org_user = dao_add_user_to_organisation(organisation_id, user_id)
-    return jsonify(data=user_schema.dump(new_org_user).data), 200
+    return jsonify(data=new_org_user.serialize())
 
 
 @organisation_blueprint.route('/<uuid:organisation_id>/users', methods=['GET'])
 def get_organisation_users(organisation_id):
     org_users = dao_get_users_for_organisation(organisation_id)
+    return jsonify(data=[x.serialize() for x in org_users])
 
-    result = user_schema.dump(org_users, many=True)
-    return jsonify(data=result.data)
+
+@organisation_blueprint.route('/unique', methods=["GET"])
+def is_organisation_name_unique():
+    organisation_id, name = check_request_args(request)
+
+    name_exists = Organisation.query.filter(Organisation.name.ilike(name)).first()
+
+    result = (not name_exists) or str(name_exists.id) == organisation_id
+    return jsonify(result=result), 200
+
+
+def check_request_args(request):
+    org_id = request.args.get('org_id')
+    name = request.args.get('name', None)
+    errors = []
+    if not org_id:
+        errors.append({'org_id': ["Can't be empty"]})
+    if not name:
+        errors.append({'name': ["Can't be empty"]})
+    if errors:
+        raise InvalidRequest(errors, status_code=400)
+    return org_id, name

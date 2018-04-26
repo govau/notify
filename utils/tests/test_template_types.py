@@ -237,7 +237,7 @@ def test_HTML_template_has_URLs_replaced_with_links():
 )
 def test_escaping_govuk_in_email_templates(template_content, expected):
     assert unlink_govuk_escaped(template_content) == expected
-    assert str(PlainTextEmailTemplate({'content': template_content, 'subject': ''})) == expected
+    assert expected in str(PlainTextEmailTemplate({'content': template_content, 'subject': ''}))
     assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
 
@@ -338,6 +338,41 @@ def test_sms_preview_adds_newlines(nl2br):
     content = "the\nquick\n\nbrown fox"
     str(SMSPreviewTemplate({'content': content}))
     nl2br.assert_called_once_with(content)
+
+
+@pytest.mark.parametrize('content', [
+    (  # Unix-style
+        'one newline\n'
+        'two newlines\n'
+        '\n'
+        'end'
+    ),
+    (  # Windows-style
+        'one newline\r\n'
+        'two newlines\r\n'
+        '\r\n'
+        'end'
+    ),
+    (  # Mac Classic style
+        'one newline\r'
+        'two newlines\r'
+        '\r'
+        'end'
+    ),
+    (  # A mess
+        '\t\t\n\r one newline\n'
+        'two newlines\r'
+        '\r\n'
+        'end\n\n  \r \n \t '
+    ),
+])
+def test_sms_message_normalises_newlines(content):
+    assert repr(str(SMSMessageTemplate({'content': content}))) == repr(
+        'one newline\n'
+        'two newlines\n'
+        '\n'
+        'end'
+    )
 
 
 @freeze_time("2001-01-01 12:00:00.000000")
@@ -567,7 +602,7 @@ def test_subject_line_gets_replaced():
         mock.call('content', {}, html='escape', redact_missing_personalisation=False),
     ]),
     (WithSubjectTemplate, {}, [
-        mock.call('content', {}, html='escape', redact_missing_personalisation=False),
+        mock.call('content', {}, html='passthrough', redact_missing_personalisation=False, markdown_lists=True),
     ]),
     (PlainTextEmailTemplate, {}, [
         mock.call('content', {}, html='passthrough', markdown_lists=True)
@@ -607,7 +642,7 @@ def test_subject_line_gets_replaced():
         mock.call('content', {}, html='escape', redact_missing_personalisation=True),
     ]),
     (WithSubjectTemplate, {'redact_missing_personalisation': True}, [
-        mock.call('content', {}, html='escape', redact_missing_personalisation=True),
+        mock.call('content', {}, html='passthrough', redact_missing_personalisation=True, markdown_lists=True),
     ]),
     (EmailPreviewTemplate, {'redact_missing_personalisation': True}, [
         mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=True),
@@ -648,7 +683,7 @@ def test_templates_handle_html_and_redacting(
 
 @pytest.mark.parametrize('template_class, extra_args, expected_remove_whitespace_calls', [
     (PlainTextEmailTemplate, {}, [
-        mock.call('content'),
+        mock.call('\n\ncontent'),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
@@ -713,7 +748,7 @@ def test_templates_remove_whitespace_before_punctuation(
 
 @pytest.mark.parametrize('template_class, extra_args, expected_calls', [
     (PlainTextEmailTemplate, {}, [
-        mock.call('content'),
+        mock.call('\n\ncontent'),
         mock.call(Markup('subject')),
     ]),
     (HTMLEmailTemplate, {}, [
@@ -1550,6 +1585,29 @@ def test_whitespace_in_subjects(template_class, subject, extra_args):
     assert template_instance.subject == 'no break'
 
 
+@pytest.mark.parametrize('template_class, expected_output', [
+    (
+        PlainTextEmailTemplate,
+        'paragraph one\n\n\xa0\n\nparagraph two',
+    ),
+    (
+        HTMLEmailTemplate,
+        (
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">paragraph one</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">&nbsp;</p>'
+            '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">paragraph two</p>'
+        ),
+    ),
+])
+def test_govuk_email_whitespace_hack(template_class, expected_output):
+
+    template_instance = template_class({
+        'content': 'paragraph one\n\n&nbsp;\n\nparagraph two',
+        'subject': 'foo'
+    })
+    assert expected_output in str(template_instance)
+
+
 def test_letter_preview_uses_non_breaking_hyphens():
     assert 'non\u2011breaking' in str(LetterPreviewTemplate(
         {'content': 'non-breaking', 'subject': 'foo'}
@@ -1603,3 +1661,49 @@ def test_that_print_template_is_the_same_as_preview():
     assert dir(LetterPreviewTemplate) == dir(LetterPrintTemplate)
     assert os.path.basename(LetterPreviewTemplate.jinja_template.filename) == 'preview.jinja2'
     assert os.path.basename(LetterPrintTemplate.jinja_template.filename) == 'print.jinja2'
+
+
+def test_plain_text_email_whitespace():
+    email = PlainTextEmailTemplate({'subject': 'foo', 'content': (
+        '# Heading\n'
+        '\n'
+        '1. one\n'
+        '2. two\n'
+        '3. three\n'
+        '\n'
+        '***\n'
+        '\n'
+        '# Heading\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        '^ callout\n'
+        '\n'
+        '1. one not four\n'
+        '1. two not five'
+    )})
+    assert str(email) == (
+        'Heading\n'
+        '-----------------------------------------------------------------\n'
+        '\n'
+        '1. one\n'
+        '2. two\n'
+        '3. three\n'
+        '\n'
+        '=================================================================\n'
+        '\n'
+        '\n'
+        'Heading\n'
+        '-----------------------------------------------------------------\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        'Paragraph\n'
+        '\n'
+        'callout\n'
+        '\n'
+        '1. one not four\n'
+        '2. two not five\n'
+    )

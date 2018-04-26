@@ -16,6 +16,7 @@ from app.dao.services_dao import (
     dao_fetch_monthly_historical_stats_by_template
 )
 from app.dao.stats_template_usage_by_month_dao import insert_or_update_stats_for_template
+from app.exceptions import NotificationTechnicalFailureException
 from app.performance_platform import total_sent_notifications, processing_time
 from app import performance_platform_client, deskpro_client
 from app.dao.date_util import get_month_start_and_end_date_in_utc
@@ -38,30 +39,39 @@ from app.dao.notifications_dao import (
     dao_get_count_of_letters_to_process_for_date,
     dao_get_scheduled_notifications,
     set_scheduled_notification_to_processed,
+    notifications_not_yet_sent
 )
-from app.dao.statistics_dao import dao_timeout_job_statistics
 from app.dao.provider_details_dao import (
     get_current_provider,
     dao_toggle_sms_provider
 )
 from app.dao.users_dao import delete_codes_older_created_more_than_a_day_ago
+from app.dao.jobs_dao import dao_update_job
 from app.models import (
     Job,
     Notification,
     NOTIFICATION_SENDING,
     LETTER_TYPE,
     JOB_STATUS_IN_PROGRESS,
-    JOB_STATUS_READY_TO_SEND
+    JOB_STATUS_READY_TO_SEND,
+    JOB_STATUS_ERROR,
+    SMS_TYPE,
+    EMAIL_TYPE
 )
 from app.notifications.process_notifications import send_notification_to_queue
 from app.celery.tasks import (
     process_job
 )
 from app.config import QueueNames, TaskNames
-from app.utils import convert_utc_to_bst
+from app.utils import (
+    convert_utc_to_bst
+)
 from app.v2.errors import JobIncompleteError
 from app.dao.service_callback_api_dao import get_service_callback_api_for_service
-from app.celery.service_callback_tasks import send_delivery_status_to_service
+from app.celery.service_callback_tasks import (
+    send_delivery_status_to_service,
+    create_encrypted_callback_data,
+)
 import pytz
 
 
@@ -195,18 +205,25 @@ def delete_invitations():
 @notify_celery.task(name='timeout-sending-notifications')
 @statsd(namespace="tasks")
 def timeout_notifications():
-    notifications = dao_timeout_notifications(current_app.config.get('SENDING_NOTIFICATIONS_TIMEOUT_PERIOD'))
+    technical_failure_notifications, temporary_failure_notifications = \
+        dao_timeout_notifications(current_app.config.get('SENDING_NOTIFICATIONS_TIMEOUT_PERIOD'))
 
-    if notifications:
-        for notification in notifications:
-            # queue callback task only if the service_callback_api exists
-            service_callback_api = get_service_callback_api_for_service(service_id=notification.service_id)
+    notifications = technical_failure_notifications + temporary_failure_notifications
+    for notification in notifications:
+        # queue callback task only if the service_callback_api exists
+        service_callback_api = get_service_callback_api_for_service(service_id=notification.service_id)
+        if service_callback_api:
+            encrypted_notification = create_encrypted_callback_data(notification, service_callback_api)
+            send_delivery_status_to_service.apply_async([str(notification.id), encrypted_notification],
+                                                        queue=QueueNames.CALLBACKS)
 
-            if service_callback_api:
-                send_delivery_status_to_service.apply_async([str(id)], queue=QueueNames.CALLBACKS)
-
-        current_app.logger.info(
-            "Timeout period reached for {} notifications, status has been updated.".format(len(notifications)))
+    current_app.logger.info(
+        "Timeout period reached for {} notifications, status has been updated.".format(len(notifications)))
+    if technical_failure_notifications:
+        message = "{} notifications have been updated to technical-failure because they " \
+                  "have timed out and are still in created.Notification ids: {}".format(
+                      len(technical_failure_notifications), [str(x.id) for x in technical_failure_notifications])
+        raise NotificationTechnicalFailureException(message)
 
 
 @notify_celery.task(name='send-daily-performance-platform-stats')
@@ -278,15 +295,6 @@ def switch_current_sms_provider_on_slow_delivery():
             )
 
             dao_toggle_sms_provider(current_provider.identifier)
-
-
-@notify_celery.task(name='timeout-job-statistics')
-@statsd(namespace="tasks")
-def timeout_job_statistics():
-    updated = dao_timeout_job_statistics(current_app.config.get('SENDING_NOTIFICATIONS_TIMEOUT_PERIOD'))
-    if updated:
-        current_app.logger.info(
-            "Timeout period reached for {} job statistics, failure count has been updated.".format(updated))
 
 
 @notify_celery.task(name="delete-inbound-sms")
@@ -442,7 +450,14 @@ def check_job_status():
         and_(thirty_five_minutes_ago < Job.processing_started, Job.processing_started < thirty_minutes_ago)
     ).order_by(Job.processing_started).all()
 
-    job_ids = [str(x.id) for x in jobs_not_complete_after_30_minutes]
+    # temporarily mark them as ERROR so that they don't get picked up by future check_job_status tasks
+    # if they haven't been re-processed in time.
+    job_ids = []
+    for job in jobs_not_complete_after_30_minutes:
+        job.job_status = JOB_STATUS_ERROR
+        dao_update_job(job)
+        job_ids.append(str(job.id))
+
     if job_ids:
         notify_celery.send_task(
             name=TaskNames.PROCESS_INCOMPLETE_JOBS,
@@ -523,3 +538,22 @@ def letter_raise_alert_if_no_ack_file_for_zip():
         current_app.logger.info(
             "letter ack contains zip that is not for today: {}".format(ack_content_set - zip_file_set)
         )
+
+
+@notify_celery.task(name='replay-created-notifications')
+@statsd(namespace="tasks")
+def replay_created_notifications():
+    # if the notification has not be send after 4 hours + 15 minutes, then try to resend.
+    resend_created_notifications_older_than = (60 * 60 * 4) + (60 * 15)
+    for notification_type in (EMAIL_TYPE, SMS_TYPE):
+        notifications_to_resend = notifications_not_yet_sent(
+            resend_created_notifications_older_than,
+            notification_type
+        )
+
+        current_app.logger.info("Sending {} {} notifications "
+                                "to the delivery queue because the notification "
+                                "status was created.".format(len(notifications_to_resend), notification_type))
+
+        for n in notifications_to_resend:
+            send_notification_to_queue(notification=n, research_mode=n.service.research_mode)

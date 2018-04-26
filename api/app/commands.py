@@ -1,29 +1,41 @@
+import sys
+import functools
 import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
-import functools
 
-import flask
-from flask import current_app
 import click
+import flask
 from click_datetime import Datetime as click_dt
+from flask import current_app
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import func
+from notifications_utils.statsd_decorators import statsd
 
-from app import db
+from app import db, DATETIME_FORMAT, encryption, redis_store
+from app.celery.scheduled_tasks import send_total_sent_notifications_to_performance_platform
+from app.celery.service_callback_tasks import send_delivery_status_to_service
+from app.celery.letters_pdf_tasks import create_letters_pdf
+from app.config import QueueNames
 from app.dao.monthly_billing_dao import (
     create_or_update_monthly_billing,
     get_monthly_billing_by_notification_type,
     get_service_ids_that_need_billing_populated
 )
-from app.models import PROVIDERS, User, SMS_TYPE, EMAIL_TYPE
+from app.dao.provider_rates_dao import create_provider_rates as dao_create_provider_rates
+from app.dao.service_callback_api_dao import get_service_callback_api_for_service
 from app.dao.services_dao import (
     delete_service_and_all_associated_db_objects,
     dao_fetch_all_services_by_user
 )
-from app.dao.provider_rates_dao import create_provider_rates as dao_create_provider_rates
 from app.dao.users_dao import (delete_model_user, delete_user_verify_codes)
-from app.utils import get_midnight_for_day_before, get_london_midnight_in_utc
+from app.models import PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
 from app.performance_platform.processing_time import (send_processing_time_for_start_and_end)
-from app.celery.scheduled_tasks import send_total_sent_notifications_to_performance_platform
+from app.utils import (
+    cache_key_for_service_template_usage_per_day,
+    get_london_midnight_in_utc,
+    get_midnight_for_day_before,
+)
 
 
 @click.group(name='command', help='Additional commands')
@@ -311,5 +323,219 @@ def insert_inbound_numbers_from_file(file_name):
     file.close()
 
 
+@notify_command(name='replay-create-pdf-letters')
+@click.option('-n', '--notification_id', type=click.UUID, required=True,
+              help="Notification id of the letter that needs the create_letters_pdf task replayed")
+def replay_create_pdf_letters(notification_id):
+    print("Create task to create_letters_pdf for notification: {}".format(notification_id))
+    create_letters_pdf.apply_async([str(notification_id)], queue=QueueNames.CREATE_LETTERS_PDF)
+
+
+@notify_command(name='replay-service-callbacks')
+@click.option('-f', '--file_name', required=True,
+              help="""Full path of the file to upload, file is a contains client references of
+              notifications that need the status to be sent to the service.""")
+@click.option('-s', '--service_id', required=True,
+              help="""The service that the callbacks are for""")
+def replay_service_callbacks(file_name, service_id):
+    print("Start send service callbacks for service: ", service_id)
+    callback_api = get_service_callback_api_for_service(service_id=service_id)
+    if not callback_api:
+        print("Callback api was not found for service: {}".format(service_id))
+        return
+
+    errors = []
+    notifications = []
+    file = open(file_name)
+
+    for ref in file:
+        try:
+            notification = Notification.query.filter_by(client_reference=ref.strip()).one()
+            notifications.append(notification)
+        except NoResultFound as e:
+            errors.append("Reference: {} was not found in notifications.".format(ref))
+
+    for e in errors:
+        print(e)
+    if errors:
+        raise Exception("Some notifications for the given references were not found")
+
+    for n in notifications:
+        data = {
+            "notification_id": str(n.id),
+            "notification_client_reference": n.client_reference,
+            "notification_to": n.to,
+            "notification_status": n.status,
+            "notification_created_at": n.created_at.strftime(DATETIME_FORMAT),
+            "notification_updated_at": n.updated_at.strftime(DATETIME_FORMAT),
+            "notification_sent_at": n.sent_at.strftime(DATETIME_FORMAT),
+            "notification_type": n.notification_type,
+            "service_callback_api_url": callback_api.url,
+            "service_callback_api_bearer_token": callback_api.bearer_token,
+        }
+        encrypted_status_update = encryption.encrypt(data)
+        send_delivery_status_to_service.apply_async([str(n.id), encrypted_status_update],
+                                                    queue=QueueNames.CALLBACKS)
+
+    print("Replay service status for service: {}. Sent {} notification status updates to the queue".format(
+        service_id, len(notifications)))
+
+
 def setup_commands(application):
     application.cli.add_command(command_group)
+
+
+@notify_command(name='migrate-data-to-ft-billing')
+@click.option('-s', '--start_date', required=True, help="start date inclusive", type=click_dt(format='%Y-%m-%d'))
+@click.option('-e', '--end_date', required=True, help="end date inclusive", type=click_dt(format='%Y-%m-%d'))
+@statsd(namespace="tasks")
+def migrate_data_to_ft_billing(start_date, end_date):
+
+    print('Billing migration from date {} to {}'.format(start_date, end_date))
+
+    process_date = start_date
+    total_updated = 0
+
+    while process_date < end_date:
+
+        sql = \
+            """
+            select count(*) from notification_history where notification_status!='technical-failure'
+            and key_type!='test'
+            and notification_status!='created'
+            and created_at >= (date :start + time '00:00:00') at time zone 'Europe/London' at time zone 'UTC'
+            and created_at < (date :end + time '00:00:00') at time zone 'Europe/London' at time zone 'UTC'
+            """
+        num_notifications = db.session.execute(sql, {"start": process_date,
+                                                     "end": process_date + timedelta(days=1)}).fetchall()[0][0]
+        sql = \
+            """
+            select count(*) from
+            (select distinct service_id, template_id, rate_multiplier,
+            sent_by from notification_history
+            where notification_status!='technical-failure'
+            and key_type!='test'
+            and notification_status!='created'
+            and created_at >= (date :start + time '00:00:00') at time zone 'Europe/London' at time zone 'UTC'
+            and created_at < (date :end + time '00:00:00') at time zone 'Europe/London' at time zone 'UTC'
+            ) as distinct_records
+            """
+
+        predicted_records = db.session.execute(sql, {"start": process_date,
+                                                     "end": process_date + timedelta(days=1)}).fetchall()[0][0]
+
+        start_time = datetime.now()
+        print('ft_billing: Migrating date: {}, notifications: {}, expecting {} ft_billing rows'
+              .format(process_date.date(), num_notifications, predicted_records))
+
+        # migrate data into ft_billing, ignore if records already exist - do not do upsert
+        sql = \
+            """
+            insert into ft_billing (bst_date, template_id, service_id, notification_type, provider, rate_multiplier,
+                international, billable_units, notifications_sent, rate)
+                select bst_date, template_id, service_id, notification_type, provider, rate_multiplier, international,
+                    sum(billable_units) as billable_units, sum(notifications_sent) as notification_sent,
+                    case when notification_type = 'sms' then sms_rate else letter_rate end as rate
+                from (
+                    select
+                        n.id,
+                        da.bst_date,
+                        coalesce(n.template_id, '00000000-0000-0000-0000-000000000000') as template_id,
+                        coalesce(n.service_id, '00000000-0000-0000-0000-000000000000') as service_id,
+                        n.notification_type,
+                        coalesce(n.sent_by, (
+                        case
+                        when notification_type = 'sms' then
+                            coalesce(sent_by, 'unknown')
+                        when notification_type = 'letter' then
+                            coalesce(sent_by, 'dvla')
+                        else
+                            coalesce(sent_by, 'ses')
+                        end )) as provider,
+                        coalesce(n.rate_multiplier,1) as rate_multiplier,
+                        s.crown,
+                        coalesce((select rates.rate from rates
+                        where n.notification_type = rates.notification_type and n.sent_at > rates.valid_from
+                        order by rates.valid_from desc limit 1), 0) as sms_rate,
+                        coalesce((select l.rate from letter_rates l where n.rate_multiplier = l.sheet_count
+                        and s.crown = l.crown and n.notification_type='letter'), 0) as letter_rate,
+                        coalesce(n.international, false) as international,
+                        n.billable_units,
+                        1 as notifications_sent
+                    from public.notification_history n
+                    left join templates t on t.id = n.template_id
+                    left join dm_datetime da on n.created_at>= da.utc_daytime_start
+                        and n.created_at < da.utc_daytime_end
+                    left join services s on s.id = n.service_id
+                    where n.notification_status!='technical-failure'
+                        and n.key_type!='test'
+                        and n.notification_status!='created'
+                        and n.created_at >= (date :start + time '00:00:00') at time zone 'Europe/London'
+                        at time zone 'UTC'
+                        and n.created_at < (date :end + time '00:00:00') at time zone 'Europe/London' at time zone 'UTC'
+                    ) as individual_record
+                group by bst_date, template_id, service_id, notification_type, provider, rate_multiplier, international,
+                    sms_rate, letter_rate
+                order by bst_date
+            on conflict on constraint ft_billing_pkey do update set
+             billable_units = excluded.billable_units,
+             notifications_sent = excluded.notifications_sent,
+             rate = excluded.rate
+            """
+
+        result = db.session.execute(sql, {"start": process_date, "end": process_date + timedelta(days=1)})
+        db.session.commit()
+        print('ft_billing: --- Completed took {}ms. Migrated {} rows.'.format(datetime.now() - start_time,
+                                                                              result.rowcount))
+        if predicted_records != result.rowcount:
+            print('          : ^^^ Result mismatch by {} rows ^^^'
+                  .format(predicted_records - result.rowcount))
+
+        process_date += timedelta(days=1)
+
+        total_updated += result.rowcount
+    print('Total inserted/updated records = {}'.format(total_updated))
+
+
+@notify_command()
+@click.option('-s', '--service_id', required=True, type=click.UUID)
+@click.option('-d', '--day', required=True, type=click_dt(format='%Y-%m-%d'))
+def populate_redis_template_usage(service_id, day):
+    """
+    Recalculate and replace the stats in redis for a day.
+    To be used if redis data is lost for some reason.
+    """
+    if not current_app.config['REDIS_ENABLED']:
+        current_app.logger.error('Cannot populate redis template usage - redis not enabled')
+        sys.exit(1)
+
+    # the day variable is set by click to be midnight of that day
+    start_time = get_london_midnight_in_utc(day)
+    end_time = get_london_midnight_in_utc(day + timedelta(days=1))
+
+    usage = {
+        str(row.template_id): row.count
+        for row in db.session.query(
+            Notification.template_id,
+            func.count().label('count')
+        ).filter(
+            Notification.service_id == service_id,
+            Notification.created_at >= start_time,
+            Notification.created_at < end_time
+        ).group_by(
+            Notification.template_id
+        )
+    }
+    current_app.logger.info('Populating usage dict for service {} day {}: {}'.format(
+        service_id,
+        day,
+        usage.items())
+    )
+    if usage:
+        key = cache_key_for_service_template_usage_per_day(service_id, day)
+        redis_store.set_hash_and_expire(
+            key,
+            usage,
+            current_app.config['EXPIRE_CACHE_EIGHT_DAYS'],
+            raise_exception=True
+        )

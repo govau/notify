@@ -22,4 +22,4 @@ def test_take():
         _append, '!'
     ).then(
         _prepend_with_service_name, service_name='Service name'
-    ).as_string
+    )

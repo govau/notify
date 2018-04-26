@@ -1,6 +1,10 @@
+from time import time
+
 from flask_redis import FlaskRedis
 from flask import current_app
-from time import time
+
+# expose redis exceptions so that they can be caught
+from redis.exceptions import RedisError  # noqa
 
 
 class RedisClient:
@@ -54,7 +58,7 @@ class RedisClient:
                 result = pipe.execute()
                 return result[2] > limit
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, 'rate-limit-pipeline', cache_key)
                 return False
         else:
             return False
@@ -64,21 +68,21 @@ class RedisClient:
             try:
                 self.redis_store.set(key, value, ex, px, nx, xx)
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, 'set', key)
 
     def incr(self, key, raise_exception=False):
         if self.active:
             try:
                 return self.redis_store.incr(key)
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, 'incr', key)
 
     def get(self, key, raise_exception=False):
         if self.active:
             try:
                 return self.redis_store.get(key)
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, 'get', key)
 
         return None
 
@@ -90,14 +94,14 @@ class RedisClient:
             try:
                 return self.redis_store.hincrby(key, value, incr_by)
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, 'increment_hash_value', key)
 
     def get_all_from_hash(self, key, raise_exception=False):
         if self.active:
             try:
                 return self.redis_store.hgetall(key)
             except Exception as e:
-                self.__handle_exception(e, raise_exception)
+                self.__handle_exception(e, raise_exception, 'get_all_from_hash', key)
 
     def set_hash_and_expire(self, key, values, expire_in_seconds, raise_exception=False):
         if self.active:
@@ -105,9 +109,23 @@ class RedisClient:
                 self.redis_store.hmset(key, values)
                 return self.redis_store.expire(key, expire_in_seconds)
             except Exception as e:
-                self.__handle_exception(e, raise_exception, "Error setting key: {} in redis cache".format(key))
+                self.__handle_exception(e, raise_exception, 'set_hash_and_expire', key)
 
-    def __handle_exception(self, e, raise_exception, message=None):
-        current_app.logger.exception("{} \n {}".format(message, e))
+    def expire(self, key, expire_in_seconds, raise_exception=False):
+        if self.active:
+            try:
+                self.redis_store.expire(key, expire_in_seconds)
+            except Exception as e:
+                self.__handle_exception(e, raise_exception, 'expire', key)
+
+    def delete(self, key, raise_exception=False):
+        if self.active:
+            try:
+                self.redis_store.delete(key)
+            except Exception as e:
+                self.__handle_exception(e, raise_exception, 'delete', key)
+
+    def __handle_exception(self, e, raise_exception, operation, key_name):
+        current_app.logger.exception('Redis error performing {} on {}'.format(operation, key_name))
         if raise_exception:
             raise e

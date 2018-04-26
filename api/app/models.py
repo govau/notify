@@ -6,11 +6,12 @@ from flask import url_for, current_app
 
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import (
     UUID,
     JSON
 )
-from sqlalchemy import UniqueConstraint, CheckConstraint
+from sqlalchemy import UniqueConstraint, CheckConstraint, Index
 from notifications_utils.columns import Columns
 from notifications_utils.recipients import (
     validate_email_address,
@@ -23,7 +24,7 @@ from notifications_utils.letter_timings import get_letter_timings
 from notifications_utils.template import (
     PlainTextEmailTemplate,
     SMSMessageTemplate,
-    LetterDVLATemplate,
+    LetterPrintTemplate,
 )
 
 from app.encryption import (
@@ -115,11 +116,11 @@ class User(db.Model):
     services = db.relationship(
         'Service',
         secondary='user_to_service',
-        backref=db.backref('user_to_service', lazy='dynamic'))
+        backref='user_to_service')
     organisations = db.relationship(
         'Organisation',
         secondary='user_to_organisation',
-        backref=db.backref('user_to_organisation', lazy='dynamic'))
+        backref='users')
 
     @property
     def password(self):
@@ -131,6 +132,38 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_hash(password, self._password)
+
+    def get_permissions(self):
+        from app.dao.permissions_dao import permission_dao
+        retval = {}
+        for x in permission_dao.get_permissions_by_user_id(self.id):
+            service_id = str(x.service_id)
+            if service_id not in retval:
+                retval[service_id] = []
+            retval[service_id].append(x.permission)
+        return retval
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email_address': self.email_address,
+            'auth_type': self.auth_type,
+            'current_session_id': self.current_session_id,
+            'failed_login_count': self.failed_login_count,
+            'logged_in_at': self.logged_in_at.strftime(DATETIME_FORMAT) if self.logged_in_at else None,
+            'mobile_number': self.mobile_number,
+            'organisations': [x.id for x in self.organisations if x.active],
+            'password_changed_at': (
+                self.password_changed_at.strftime('%Y-%m-%d %H:%M:%S.%f')
+                if self.password_changed_at
+                else None
+            ),
+            'permissions': self.get_permissions(),
+            'platform_admin': self.platform_admin,
+            'services': [x.id for x in self.services if x.active],
+            'state': self.state,
+        }
 
 
 user_to_service = db.Table(
@@ -205,6 +238,7 @@ SCHEDULE_NOTIFICATIONS = 'schedule_notifications'
 EMAIL_AUTH = 'email_auth'
 LETTERS_AS_PDF = 'letters_as_pdf'
 PRECOMPILED_LETTER = 'precompiled_letter'
+UPLOAD_DOCUMENT = 'upload_document'
 
 SERVICE_PERMISSION_TYPES = [
     EMAIL_TYPE,
@@ -216,6 +250,7 @@ SERVICE_PERMISSION_TYPES = [
     EMAIL_AUTH,
     LETTERS_AS_PDF,
     PRECOMPILED_LETTER,
+    UPLOAD_DOCUMENT,
 ]
 
 
@@ -641,6 +676,9 @@ class TemplateProcessTypes(db.Model):
     name = db.Column(db.String(255), primary_key=True)
 
 
+PRECOMPILED_TEMPLATE_NAME = 'Pre-compiled PDF'
+
+
 class TemplateBase(db.Model):
     __abstract__ = True
 
@@ -718,6 +756,14 @@ class TemplateBase(db.Model):
         else:
             return None
 
+    @hybrid_property
+    def is_precompiled_letter(self):
+        return self.hidden and self.name == PRECOMPILED_TEMPLATE_NAME and self.template_type == LETTER_TYPE
+
+    @is_precompiled_letter.setter
+    def is_precompiled_letter(self, value):
+        pass
+
     def _as_utils_template(self):
         if self.template_type == EMAIL_TYPE:
             return PlainTextEmailTemplate(
@@ -728,9 +774,8 @@ class TemplateBase(db.Model):
                 {'content': self.content}
             )
         if self.template_type == LETTER_TYPE:
-            return LetterDVLATemplate(
+            return LetterPrintTemplate(
                 {'content': self.content, 'subject': self.subject},
-                notification_reference=1,
                 contact_block=self.service.get_default_letter_contact(),
             )
 
@@ -992,11 +1037,14 @@ NOTIFICATION_FAILED = 'failed'
 NOTIFICATION_TECHNICAL_FAILURE = 'technical-failure'
 NOTIFICATION_TEMPORARY_FAILURE = 'temporary-failure'
 NOTIFICATION_PERMANENT_FAILURE = 'permanent-failure'
+NOTIFICATION_PENDING_VIRUS_CHECK = 'pending-virus-check'
+NOTIFICATION_VIRUS_SCAN_FAILED = 'virus-scan-failed'
 
 NOTIFICATION_STATUS_TYPES_FAILED = [
     NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
+    NOTIFICATION_VIRUS_SCAN_FAILED,
 ]
 
 NOTIFICATION_STATUS_TYPES_COMPLETED = [
@@ -1033,6 +1081,8 @@ NOTIFICATION_STATUS_TYPES = [
     NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
+    NOTIFICATION_PENDING_VIRUS_CHECK,
+    NOTIFICATION_VIRUS_SCAN_FAILED,
 ]
 
 NOTIFICATION_STATUS_TYPES_NON_BILLABLE = list(set(NOTIFICATION_STATUS_TYPES) - set(NOTIFICATION_STATUS_TYPES_BILLABLE))
@@ -1535,54 +1585,6 @@ class Rate(db.Model):
         return the_string
 
 
-class JobStatistics(db.Model):
-    __tablename__ = 'job_statistics'
-
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    job_id = db.Column(UUID(as_uuid=True), db.ForeignKey('jobs.id'), index=True, unique=True, nullable=False)
-    job = db.relationship('Job', backref=db.backref('job_statistics', lazy='dynamic'))
-    emails_sent = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    emails_delivered = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    emails_failed = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    sms_sent = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    sms_delivered = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    sms_failed = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    letters_sent = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    letters_failed = db.Column(db.BigInteger, index=False, unique=False, nullable=False, default=0)
-    sent = db.Column(db.BigInteger, index=False, unique=False, nullable=True, default=0)
-    delivered = db.Column(db.BigInteger, index=False, unique=False, nullable=True, default=0)
-    failed = db.Column(db.BigInteger, index=False, unique=False, nullable=True, default=0)
-    created_at = db.Column(
-        db.DateTime,
-        index=False,
-        unique=False,
-        nullable=True,
-        default=datetime.datetime.utcnow)
-    updated_at = db.Column(
-        db.DateTime,
-        index=False,
-        unique=False,
-        nullable=True,
-        onupdate=datetime.datetime.utcnow)
-
-    def __str__(self):
-        the_string = ""
-        the_string += "email sent {} email delivered {} email failed {} ".format(
-            self.emails_sent, self.emails_delivered, self.emails_failed
-        )
-        the_string += "sms sent {} sms delivered {} sms failed {} ".format(
-            self.sms_sent, self.sms_delivered, self.sms_failed
-        )
-        the_string += "letter sent {} letter failed {} ".format(
-            self.letters_sent, self.letters_failed
-        )
-        the_string += "job_id {} ".format(
-            self.job_id
-        )
-        the_string += "created at {}".format(self.created_at)
-        return the_string
-
-
 class InboundSms(db.Model):
     __tablename__ = 'inbound_sms'
 
@@ -1758,7 +1760,49 @@ class DailySortedLetter(db.Model):
     __tablename__ = "daily_sorted_letter"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    billing_day = db.Column(db.Date, nullable=False, index=True, unique=True)
+    billing_day = db.Column(db.Date, nullable=False, index=True)
+    file_name = db.Column(db.String, nullable=True, index=True)
     unsorted_count = db.Column(db.Integer, nullable=False, default=0)
     sorted_count = db.Column(db.Integer, nullable=False, default=0)
     updated_at = db.Column(db.DateTime, nullable=True, onupdate=datetime.datetime.utcnow)
+
+    __table_args__ = (UniqueConstraint('file_name', 'billing_day', name='uix_file_name_billing_day'),
+                      )
+
+
+class FactBilling(db.Model):
+    __tablename__ = "ft_billing"
+
+    bst_date = db.Column(db.Date, nullable=False, primary_key=True, index=True)
+    template_id = db.Column(UUID(as_uuid=True), nullable=False, primary_key=True, index=True)
+    service_id = db.Column(UUID(as_uuid=True), nullable=False, index=True)
+    notification_type = db.Column(db.Text, nullable=False, primary_key=True)
+    provider = db.Column(db.Text, nullable=True, primary_key=True)
+    rate_multiplier = db.Column(db.Numeric(), nullable=True, primary_key=True)
+    international = db.Column(db.Boolean, nullable=False, primary_key=False)
+    rate = db.Column(db.Numeric(), nullable=True)
+    billable_units = db.Column(db.Numeric(), nullable=True)
+    notifications_sent = db.Column(db.Integer(), nullable=True)
+
+
+class DateTimeDimension(db.Model):
+    __tablename__ = "dm_datetime"
+    bst_date = db.Column(db.Date, nullable=False, primary_key=True, index=True)
+    year = db.Column(db.Integer(), nullable=False)
+    month = db.Column(db.Integer(), nullable=False)
+    month_name = db.Column(db.Text(), nullable=False)
+    day = db.Column(db.Integer(), nullable=False)
+    bst_day = db.Column(db.Integer(), nullable=False)
+    day_of_year = db.Column(db.Integer(), nullable=False)
+    week_day_name = db.Column(db.Text(), nullable=False)
+    calendar_week = db.Column(db.Integer(), nullable=False)
+    quartal = db.Column(db.Text(), nullable=False)
+    year_quartal = db.Column(db.Text(), nullable=False)
+    year_month = db.Column(db.Text(), nullable=False)
+    year_calendar_week = db.Column(db.Text(), nullable=False)
+    financial_year = db.Column(db.Integer(), nullable=False)
+    utc_daytime_start = db.Column(db.DateTime, nullable=False)
+    utc_daytime_end = db.Column(db.DateTime, nullable=False)
+
+
+Index('ix_dm_datetime_yearmonth', DateTimeDimension.year, DateTimeDimension.month)

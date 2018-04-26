@@ -1,15 +1,19 @@
 import base64
+from io import BytesIO
 
 import botocore
+from PyPDF2.utils import PdfReadError
 from flask import (
     Blueprint,
     current_app,
     jsonify,
     request)
+from notifications_utils.pdf import extract_page_from_pdf
+from notifications_utils.template import SMSMessageTemplate
 from requests import post as requests_post
 
-
 from app.dao.notifications_dao import get_notification_by_id
+from app.dao.services_dao import dao_fetch_service_by_id
 from app.dao.templates_dao import (
     dao_update_template,
     dao_create_template,
@@ -19,20 +23,17 @@ from app.dao.templates_dao import (
     dao_get_template_versions,
     dao_update_template_reply_to,
     dao_get_template_by_id)
-from notifications_utils.template import SMSMessageTemplate
-from app.dao.services_dao import dao_fetch_service_by_id
-from app.letters.utils import get_letter_pdf, is_precompiled_letter
-from app.models import SMS_TYPE
-from app.notifications.validators import service_has_permission, check_reply_to
-from app.schemas import (template_schema, template_history_schema)
 from app.errors import (
     register_errors,
     InvalidRequest
 )
+from app.letters.utils import get_letter_pdf
+from app.models import SMS_TYPE
+from app.notifications.validators import service_has_permission, check_reply_to
+from app.schemas import (template_schema, template_history_schema)
 from app.utils import get_template_instance, get_public_notify_type_text
 
 template_blueprint = Blueprint('template', __name__, url_prefix='/service/<uuid:service_id>/template')
-
 
 register_errors(template_blueprint)
 
@@ -189,7 +190,6 @@ def redact_template(template, data):
 
 @template_blueprint.route('/preview/<uuid:notification_id>/<file_type>', methods=['GET'])
 def preview_letter_template_by_notification_id(service_id, notification_id, file_type):
-
     if file_type not in ('pdf', 'png'):
         raise InvalidRequest({'content': ["file_type must be pdf or png"]}, status_code=400)
 
@@ -199,28 +199,39 @@ def preview_letter_template_by_notification_id(service_id, notification_id, file
 
     template = dao_get_template_by_id(notification.template_id)
 
-    if is_precompiled_letter(template):
-
+    if template.is_precompiled_letter:
         try:
 
             pdf_file = get_letter_pdf(notification)
 
-        except botocore.exceptions.ClientError:
-            current_app.logger.info
-            raise InvalidRequest('Error getting letter file from S3 notification id {}'.format(notification_id),
-                                 status_code=500)
+        except botocore.exceptions.ClientError as e:
+            raise InvalidRequest(
+                'Error extracting requested page from PDF file for notification_id {} type {} {}'.format(
+                    notification_id, type(e), e),
+                status_code=500
+            )
 
         content = base64.b64encode(pdf_file).decode('utf-8')
 
         if file_type == 'png':
+            try:
+                page_number = page if page else "1"
+
+                pdf_page = extract_page_from_pdf(BytesIO(pdf_file), int(page_number) - 1)
+                content = base64.b64encode(pdf_page).decode('utf-8')
+            except PdfReadError as e:
+                raise InvalidRequest(
+                    'Error extracting requested page from PDF file for notification_id {} type {} {}'.format(
+                        notification_id, type(e), e),
+                    status_code=500
+                )
 
             url = '{}/precompiled-preview.png{}'.format(
                 current_app.config['TEMPLATE_PREVIEW_API_HOST'],
-                '?page={}'.format(page) if page else ''
+                '?hide_notify=true' if page_number == '1' else ''
             )
 
-            content = _get_png_preview(url, content, notification.id)
-
+            content = _get_png_preview(url, content, notification.id, json=False)
     else:
 
         template_for_letter_print = {
@@ -244,22 +255,32 @@ def preview_letter_template_by_notification_id(service_id, notification_id, file
             file_type,
             '?page={}'.format(page) if page else ''
         )
-
-        content = _get_png_preview(url, data, notification.id)
+        content = _get_png_preview(url, data, notification.id, json=True)
 
     return jsonify({"content": content})
 
 
-def _get_png_preview(url, data, notification_id):
-    resp = requests_post(
-        url,
-        data=data,
-        headers={'Authorization': 'Token {}'.format(current_app.config['TEMPLATE_PREVIEW_API_KEY'])}
-    )
+def _get_png_preview(url, data, notification_id, json=True):
+    if json:
+        resp = requests_post(
+            url,
+            json=data,
+            headers={'Authorization': 'Token {}'.format(current_app.config['TEMPLATE_PREVIEW_API_KEY'])}
+        )
+    else:
+        resp = requests_post(
+            url,
+            data=data,
+            headers={'Authorization': 'Token {}'.format(current_app.config['TEMPLATE_PREVIEW_API_KEY'])}
+        )
 
     if resp.status_code != 200:
         raise InvalidRequest(
-            'Error generating preview for {}'.format(notification_id), status_code=500
+            'Error generating preview letter for {} Status code: {} {}'.format(
+                notification_id,
+                resp.status_code,
+                resp.content
+            ), status_code=500
         )
 
     return base64.b64encode(resp.content).decode('utf-8')

@@ -1,7 +1,7 @@
 import json
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 import requests_mock
@@ -9,7 +9,8 @@ from freezegun import freeze_time
 from requests import RequestException
 from sqlalchemy.exc import SQLAlchemyError
 from celery.exceptions import Retry
-from notifications_utils.template import SMSMessageTemplate, WithSubjectTemplate, LetterDVLATemplate
+from notifications_utils.template import SMSMessageTemplate, WithSubjectTemplate
+from notifications_utils.columns import Row
 
 from app import (encryption, DATETIME_FORMAT)
 from app.celery import provider_tasks
@@ -37,6 +38,7 @@ from app.models import (
     KEY_TYPE_TEAM,
     KEY_TYPE_TEST,
     JOB_STATUS_FINISHED,
+    JOB_STATUS_ERROR,
     JOB_STATUS_IN_PROGRESS,
     LETTER_TYPE,
     SMS_TYPE
@@ -303,18 +305,17 @@ def test_should_process_letter_job(sample_letter_job, mocker):
     )
 
     row_call = process_row_mock.mock_calls[0][1]
-
-    assert row_call[0] == 0
-    assert row_call[1] == ['A1', 'A2', 'A3', 'A4', None, None, 'A_POST']
-    assert dict(row_call[2]) == {
+    assert row_call[0].index == 0
+    assert row_call[0].recipient == ['A1', 'A2', 'A3', 'A4', None, None, 'A_POST']
+    assert row_call[0].personalisation == {
         'addressline1': 'A1',
         'addressline2': 'A2',
         'addressline3': 'A3',
         'addressline4': 'A4',
         'postcode': 'A_POST'
     }
-    assert row_call[4] == sample_letter_job
-    assert row_call[5] == sample_letter_job.service
+    assert row_call[2] == sample_letter_job
+    assert row_call[3] == sample_letter_job.service
 
     assert process_row_mock.call_count == 1
 
@@ -363,7 +364,19 @@ def test_process_row_sends_letter_task(template_type, research_mode, expected_fu
     job = Mock(id='job_id', template_version='temp_vers')
     service = Mock(id='service_id', research_mode=research_mode)
 
-    process_row('row_num', 'recip', {'foo': 'bar'}, template, job, service)
+    process_row(
+        Row(
+            {'foo': 'bar', 'to': 'recip'},
+            index='row_num',
+            error_fn=lambda k, v: None,
+            recipient_column_headers=['to'],
+            placeholders={'foo'},
+            template=template,
+        ),
+        template,
+        job,
+        service,
+    )
 
     encrypt_mock.assert_called_once_with({
         'template': 'template_id',
@@ -1209,14 +1222,6 @@ def test_get_template_class(template_type, expected_class):
     assert get_template_class(template_type) == expected_class
 
 
-@freeze_time("2017-03-23 11:09:00.061258")
-def test_dvla_letter_template(sample_letter_notification):
-    t = {"content": sample_letter_notification.template.content,
-         "subject": sample_letter_notification.template.subject}
-    letter = LetterDVLATemplate(t, sample_letter_notification.personalisation, "random-string")
-    assert str(letter) == "140|500|001||random-string|||||||||||||A1||A2|A3|A4|A5|A6|A_POST|||||||||23 March 2017<cr><cr><h1>Template subject<normal><cr><cr>Dear Sir/Madam, Hello. Yours Truly, The Government.<cr><cr>"  # noqa
-
-
 def test_send_inbound_sms_to_service_post_https_request_to_service(notify_api, sample_service):
     inbound_api = create_service_inbound_api(service=sample_service, url="https://some.service.gov.uk/",
                                              bearer_token="something_unique")
@@ -1342,7 +1347,7 @@ def test_process_incomplete_job_sms(mocker, sample_template):
                      created_at=datetime.utcnow() - timedelta(hours=2),
                      scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                      processing_started=datetime.utcnow() - timedelta(minutes=31),
-                     job_status=JOB_STATUS_IN_PROGRESS)
+                     job_status=JOB_STATUS_ERROR)
 
     create_notification(sample_template, job, 0)
     create_notification(sample_template, job, 1)
@@ -1367,7 +1372,7 @@ def test_process_incomplete_job_with_notifications_all_sent(mocker, sample_templ
                      created_at=datetime.utcnow() - timedelta(hours=2),
                      scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                      processing_started=datetime.utcnow() - timedelta(minutes=31),
-                     job_status=JOB_STATUS_IN_PROGRESS)
+                     job_status=JOB_STATUS_ERROR)
 
     create_notification(sample_template, job, 0)
     create_notification(sample_template, job, 1)
@@ -1400,7 +1405,7 @@ def test_process_incomplete_jobs_sms(mocker, sample_template):
                      created_at=datetime.utcnow() - timedelta(hours=2),
                      scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                      processing_started=datetime.utcnow() - timedelta(minutes=31),
-                     job_status=JOB_STATUS_IN_PROGRESS)
+                     job_status=JOB_STATUS_ERROR)
     create_notification(sample_template, job, 0)
     create_notification(sample_template, job, 1)
     create_notification(sample_template, job, 2)
@@ -1411,7 +1416,7 @@ def test_process_incomplete_jobs_sms(mocker, sample_template):
                       created_at=datetime.utcnow() - timedelta(hours=2),
                       scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                       processing_started=datetime.utcnow() - timedelta(minutes=31),
-                      job_status=JOB_STATUS_IN_PROGRESS)
+                      job_status=JOB_STATUS_ERROR)
 
     create_notification(sample_template, job2, 0)
     create_notification(sample_template, job2, 1)
@@ -1442,7 +1447,7 @@ def test_process_incomplete_jobs_no_notifications_added(mocker, sample_template)
                      created_at=datetime.utcnow() - timedelta(hours=2),
                      scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                      processing_started=datetime.utcnow() - timedelta(minutes=31),
-                     job_status=JOB_STATUS_IN_PROGRESS)
+                     job_status=JOB_STATUS_ERROR)
 
     assert Notification.query.filter(Notification.job_id == job.id).count() == 0
 
@@ -1486,7 +1491,7 @@ def test_process_incomplete_job_email(mocker, sample_email_template):
                      created_at=datetime.utcnow() - timedelta(hours=2),
                      scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                      processing_started=datetime.utcnow() - timedelta(minutes=31),
-                     job_status=JOB_STATUS_IN_PROGRESS)
+                     job_status=JOB_STATUS_ERROR)
 
     create_notification(sample_email_template, job, 0)
     create_notification(sample_email_template, job, 1)
@@ -1510,7 +1515,7 @@ def test_process_incomplete_job_letter(mocker, sample_letter_template):
                      created_at=datetime.utcnow() - timedelta(hours=2),
                      scheduled_for=datetime.utcnow() - timedelta(minutes=31),
                      processing_started=datetime.utcnow() - timedelta(minutes=31),
-                     job_status=JOB_STATUS_IN_PROGRESS)
+                     job_status=JOB_STATUS_ERROR)
 
     create_notification(sample_letter_template, job, 0)
     create_notification(sample_letter_template, job, 1)
@@ -1520,3 +1525,29 @@ def test_process_incomplete_job_letter(mocker, sample_letter_template):
     process_incomplete_job(str(job.id))
 
     assert mock_letter_saver.call_count == 8
+
+
+@freeze_time('2017-01-01')
+def test_process_incomplete_jobs_sets_status_to_in_progress_and_resets_processing_started_time(mocker, sample_template):
+    mock_process_incomplete_job = mocker.patch('app.celery.tasks.process_incomplete_job')
+
+    job1 = create_job(
+        sample_template,
+        processing_started=datetime.utcnow() - timedelta(minutes=30),
+        job_status=JOB_STATUS_ERROR
+    )
+    job2 = create_job(
+        sample_template,
+        processing_started=datetime.utcnow() - timedelta(minutes=31),
+        job_status=JOB_STATUS_ERROR
+    )
+
+    process_incomplete_jobs([str(job1.id), str(job2.id)])
+
+    assert job1.job_status == JOB_STATUS_IN_PROGRESS
+    assert job1.processing_started == datetime.utcnow()
+
+    assert job2.job_status == JOB_STATUS_IN_PROGRESS
+    assert job2.processing_started == datetime.utcnow()
+
+    assert mock_process_incomplete_job.mock_calls == [call(str(job1.id)), call(str(job2.id))]

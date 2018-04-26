@@ -50,7 +50,7 @@ from app.dao.provider_details_dao import get_current_provider
 from app.dao.service_inbound_api_dao import get_service_inbound_api_for_service
 from app.dao.services_dao import dao_fetch_service_by_id, fetch_todays_total_message_count
 from app.dao.templates_dao import dao_get_template_by_id
-from app.exceptions import DVLAException
+from app.exceptions import DVLAException, NotificationTechnicalFailureException
 from app.models import (
     DVLA_RESPONSE_STATUS_SENT,
     EMAIL_TYPE,
@@ -111,12 +111,12 @@ def process_job(job_id):
 
     current_app.logger.debug("Starting job {} processing {} notifications".format(job_id, job.notification_count))
 
-    for row_number, recipient, personalisation in RecipientCSV(
+    for row in RecipientCSV(
             s3.get_job_from_s3(str(service.id), str(job_id)),
             template_type=template.template_type,
             placeholders=template.placeholders
-    ).enumerated_recipients_and_personalisation:
-        process_row(row_number, recipient, personalisation, template, job, service)
+    ).rows:
+        process_row(row, template, job, service)
 
     job_complete(job, start=start)
 
@@ -138,15 +138,15 @@ def job_complete(job, resumed=False, start=None):
         )
 
 
-def process_row(row_number, recipient, personalisation, template, job, service):
+def process_row(row, template, job, service):
     template_type = template.template_type
     encrypted = encryption.encrypt({
         'template': str(template.id),
         'template_version': job.template_version,
         'job': str(job.id),
-        'to': recipient,
-        'row_number': row_number,
-        'personalisation': dict(personalisation)
+        'to': row.recipient,
+        'row_number': row.index,
+        'personalisation': dict(row.personalisation)
     })
 
     send_fns = {
@@ -371,8 +371,10 @@ def update_letter_notifications_to_error(self, notification_references):
             'updated_at': datetime.utcnow()
         }
     )
-
-    current_app.logger.debug("Updated {} letter notifications to technical-failure".format(updated_count))
+    message = "Updated {} letter notifications to technical-failure with references {}".format(
+        updated_count, notification_references
+    )
+    raise NotificationTechnicalFailureException(message=message)
 
 
 def handle_exception(task, notification, notification_id, exc):
@@ -420,33 +422,37 @@ def update_letter_notifications_statuses(self, filename):
             update_letter_notification(filename, temporary_failures, update)
             sorted_letter_counts[update.cost_threshold] += 1
 
-        if temporary_failures:
-            # This will alert Notify that DVLA was unable to deliver the letters, we need to investigate
-            message = "DVLA response file: {filename} has failed letters with notification.reference {failures}".format(
-                filename=filename, failures=temporary_failures)
-            raise DVLAException(message)
+        try:
+            if sorted_letter_counts.keys() - {'Unsorted', 'Sorted'}:
+                unknown_status = sorted_letter_counts.keys() - {'Unsorted', 'Sorted'}
 
-        if sorted_letter_counts.keys() - {'Unsorted', 'Sorted'}:
-            unknown_status = sorted_letter_counts.keys() - {'Unsorted', 'Sorted'}
+                message = 'DVLA response file: {} contains unknown Sorted status {}'.format(
+                    filename, unknown_status
+                )
+                raise DVLAException(message)
 
-            message = 'DVLA response file: {} contains unknown Sorted status {}'.format(
-                filename, unknown_status
-            )
-            raise DVLAException(message)
-
-        billing_date = get_billing_date_in_bst_from_filename(filename)
-        persist_daily_sorted_letter_counts(billing_date, sorted_letter_counts)
+            billing_date = get_billing_date_in_bst_from_filename(filename)
+            persist_daily_sorted_letter_counts(day=billing_date,
+                                               file_name=filename,
+                                               sorted_letter_counts=sorted_letter_counts)
+        finally:
+            if temporary_failures:
+                # This will alert Notify that DVLA was unable to deliver the letters, we need to investigate
+                message = "DVLA response file: {filename} has failed letters with notification.reference {failures}" \
+                    .format(filename=filename, failures=temporary_failures)
+                raise DVLAException(message)
 
 
 def get_billing_date_in_bst_from_filename(filename):
-    datetime_string = filename.split('.')[1]
+    datetime_string = filename.split('-')[1]
     datetime_obj = datetime.strptime(datetime_string, '%Y%m%d%H%M%S')
     return convert_utc_to_bst(datetime_obj).date()
 
 
-def persist_daily_sorted_letter_counts(day, sorted_letter_counts):
+def persist_daily_sorted_letter_counts(day, file_name, sorted_letter_counts):
     daily_letter_count = DailySortedLetter(
         billing_day=day,
+        file_name=file_name,
         unsorted_count=sorted_letter_counts['Unsorted'],
         sorted_count=sorted_letter_counts['Sorted']
     )
@@ -550,6 +556,14 @@ def send_inbound_sms_to_service(self, inbound_sms_id, service_id):
 @notify_celery.task(name='process-incomplete-jobs')
 @statsd(namespace="tasks")
 def process_incomplete_jobs(job_ids):
+    jobs = [dao_get_job_by_id(job_id) for job_id in job_ids]
+
+    # reset the processing start time so that the check_job_status scheduled task doesn't pick this job up again
+    for job in jobs:
+        job.job_status = JOB_STATUS_IN_PROGRESS
+        job.processing_started = datetime.utcnow()
+        dao_update_job(job)
+
     current_app.logger.info("Resuming Job(s) {}".format(job_ids))
     for job_id in job_ids:
         process_incomplete_job(job_id)
@@ -573,12 +587,12 @@ def process_incomplete_job(job_id):
     TemplateClass = get_template_class(db_template.template_type)
     template = TemplateClass(db_template.__dict__)
 
-    for row_number, recipient, personalisation in RecipientCSV(
+    for row in RecipientCSV(
             s3.get_job_from_s3(str(job.service_id), str(job.id)),
             template_type=template.template_type,
             placeholders=template.placeholders
-    ).enumerated_recipients_and_personalisation:
-        if row_number > resume_from_row:
-            process_row(row_number, recipient, personalisation, template, job, job.service)
+    ).rows:
+        if row.index > resume_from_row:
+            process_row(row, template, job, job.service)
 
     job_complete(job, resumed=True)

@@ -15,7 +15,15 @@ import dateutil
 import pyexcel
 import pytz
 import yaml
-from flask import abort, current_app, redirect, request, session, url_for
+from flask import (
+    Markup,
+    abort,
+    current_app,
+    redirect,
+    request,
+    session,
+    url_for,
+)
 from flask_login import current_user
 from notifications_utils.recipients import RecipientCSV
 from notifications_utils.template import (
@@ -27,36 +35,10 @@ from notifications_utils.template import (
 from orderedset._orderedset import OrderedSet
 from werkzeug.datastructures import MultiDict
 
-SENDING_STATUSES = ['created', 'pending', 'sending']
+SENDING_STATUSES = ['created', 'pending', 'sending', 'pending-virus-check']
 DELIVERED_STATUSES = ['delivered', 'sent']
-FAILURE_STATUSES = ['failed', 'temporary-failure', 'permanent-failure', 'technical-failure']
+FAILURE_STATUSES = ['failed', 'temporary-failure', 'permanent-failure', 'technical-failure', 'virus-scan-failed']
 REQUESTED_STATUSES = SENDING_STATUSES + DELIVERED_STATUSES + FAILURE_STATUSES
-
-
-class BrowsableItem(object):
-    """
-    Maps for the template browse-list.
-    """
-
-    def __init__(self, item, *args, **kwargs):
-        self._item = item
-        super(BrowsableItem, self).__init__()
-
-    @property
-    def title(self):
-        pass
-
-    @property
-    def link(self):
-        pass
-
-    @property
-    def hint(self):
-        pass
-
-    @property
-    def destructive(self):
-        pass
 
 
 def user_has_permissions(*permissions, **permission_kwargs):
@@ -102,7 +84,7 @@ def get_errors_for_csv(recipients, template_type):
 
     errors = []
 
-    if recipients.rows_with_bad_recipients:
+    if any(recipients.rows_with_bad_recipients):
         number_of_bad_recipients = len(list(recipients.rows_with_bad_recipients))
         if 'sms' == template_type:
             if 1 == number_of_bad_recipients:
@@ -120,7 +102,7 @@ def get_errors_for_csv(recipients, template_type):
             else:
                 errors.append("fix {} addresses".format(number_of_bad_recipients))
 
-    if recipients.rows_with_missing_data:
+    if any(recipients.rows_with_missing_data):
         number_of_rows_with_missing_data = len(list(recipients.rows_with_missing_data))
         if 1 == number_of_rows_with_missing_data:
             errors.append("enter missing data in 1 row")
@@ -156,7 +138,7 @@ def generate_notifications_csv(**kwargs):
                 values = [
                     notification['row_number'],
                 ] + [
-                    original_upload[notification['row_number'] - 1].get(header)
+                    original_upload[notification['row_number'] - 1].get(header).data
                     for header in original_column_headers
                 ] + [
                     notification['template_name'],
@@ -310,7 +292,7 @@ def get_template(
         return EmailPreviewTemplate(
             template,
             from_name=service['name'],
-            from_address='{}@notifications.service.gov.uk'.format(service['email_from']),
+            from_address='{}@digital.gov.au'.format(service['email_from']),
             expanded=expand_emails,
             show_recipient=show_recipient,
             redact_missing_personalisation=redact_missing_personalisation,
@@ -443,7 +425,7 @@ def set_status_filters(filter_args):
 _dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class GovernmentDomain:
+class AgreementInfo:
 
     with open('{}/domains.yml'.format(_dir_path)) as domains:
         domains = yaml.safe_load(domains)
@@ -460,7 +442,82 @@ class GovernmentDomain:
             self.owner,
             self.crown_status,
             self.agreement_signed
-        ) = self._get_details_of_domain()
+        ) = self._get_info()
+
+    @classmethod
+    def from_user(cls, user):
+        return cls(user.email_address if user.is_authenticated else '')
+
+    @classmethod
+    def from_current_user(cls):
+        return cls.from_user(current_user)
+
+    @property
+    def as_human_readable(self):
+        if self.agreement_signed:
+            return 'Yes, on behalf of {}'.format(self.owner)
+        elif self.owner:
+            return '{} (organisation is {}, {})'.format(
+                {
+                    False: 'No',
+                    None: 'Can’t tell',
+                }.get(self.agreement_signed),
+                self.owner,
+                {
+                    True: 'a crown body',
+                    False: 'a non-crown body',
+                    None: 'crown status unknown',
+                }.get(self.crown_status),
+            )
+        else:
+            return 'Can’t tell'
+
+    def as_terms_of_use_paragraph(self, **kwargs):
+        return Markup(self._as_terms_of_use_paragraph(**kwargs))
+
+    def _as_terms_of_use_paragraph(self, download_link, contact_link):
+
+        if self.agreement_signed:
+            return (
+                'Your organisation ({}) has already accepted the '
+                'GOV.UK&nbsp;Notify data sharing and financial '
+                'agreement.'.format(self.owner)
+            )
+
+        if self.crown_status is False:
+            return ((
+                '{} <a href="{}">Download a copy</a>.'
+            ).format(self._acceptance_required, download_link))
+
+        return ((
+            '{} <a href="{}">Contact us</a> to get a copy.'
+        ).format(self._acceptance_required, contact_link))
+
+    @property
+    def _acceptance_required(self):
+        return (
+            'Your organisation {} must also accept our data sharing '
+            'and financial agreement.'.format(
+                '({})'.format(self.owner) if self.owner else '',
+            )
+        )
+
+    @property
+    def crown_status_or_404(self):
+        if self.crown_status in {None, True}:
+            abort(404)
+        return self.crown_status
+
+    def as_request_for_agreement(self, with_owner=False):
+        if with_owner and self.owner:
+            return (
+                'Please send me a copy of the GOV.UK Notify data sharing '
+                'and financial agreement for {} to sign.'.format(self.owner)
+            )
+        return (
+            'Please send me a copy of the GOV.UK Notify data sharing '
+            'and financial agreement.'
+        )
 
     @staticmethod
     def get_matching_function(email_address_or_domain):
@@ -479,12 +536,12 @@ class GovernmentDomain:
 
         return fn
 
-    def _get_details_of_domain(self):
+    def _get_info(self):
 
         details = self.domains.get(self._match) or {}
 
         if isinstance(details, str):
-            return GovernmentDomain(details)._get_details_of_domain()
+            return AgreementInfo(details)._get_info()
 
         elif isinstance(details, dict):
             return(
@@ -498,7 +555,7 @@ class NotGovernmentEmailDomain(Exception):
     pass
 
 
-class GovernmentEmailDomain(GovernmentDomain):
+class GovernmentEmailDomain(AgreementInfo):
 
     with open('{}/email_domains.yml'.format(_dir_path)) as email_domains:
         domain_names = yaml.safe_load(email_domains)

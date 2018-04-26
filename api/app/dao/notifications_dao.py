@@ -8,10 +8,9 @@ from datetime import (
 from flask import current_app
 
 from notifications_utils.recipients import (
-    validate_and_format_phone_number,
     validate_and_format_email_address,
-    InvalidPhoneError,
     InvalidEmailError,
+    try_validate_and_format_phone_number
 )
 from notifications_utils.statsd_decorators import statsd
 from werkzeug.datastructures import MultiDict
@@ -23,6 +22,7 @@ from notifications_utils.international_billing_rates import INTERNATIONAL_BILLIN
 
 from app import db, create_uuid
 from app.dao import days_ago
+from app.errors import InvalidRequest
 from app.models import (
     Notification,
     NotificationHistory,
@@ -40,10 +40,13 @@ from app.models import (
     NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
-    NOTIFICATION_SENT
+    NOTIFICATION_SENT,
+    SMS_TYPE,
+    EMAIL_TYPE
 )
 
 from app.dao.dao_utils import transactional
+from app.utils import convert_utc_to_bst
 
 
 @statsd(namespace="dao")
@@ -83,6 +86,7 @@ def dao_get_template_usage(service_id, limit_days=None):
         Template.id.label('template_id'),
         Template.name,
         Template.template_type,
+        Template.is_precompiled_letter,
         notifications_aggregate_query.c.count
     ).join(
         notifications_aggregate_query,
@@ -93,10 +97,11 @@ def dao_get_template_usage(service_id, limit_days=None):
 
 
 @statsd(namespace="dao")
-def dao_get_last_template_usage(template_id):
+def dao_get_last_template_usage(template_id, template_type):
     return Notification.query.filter(
         Notification.template_id == template_id,
-        Notification.key_type != KEY_TYPE_TEST
+        Notification.key_type != KEY_TYPE_TEST,
+        Notification.notification_type == template_type
     ).order_by(
         desc(Notification.created_at)
     ).first()
@@ -313,7 +318,7 @@ def _filter_query(query, filter_dict=None):
 @statsd(namespace="dao")
 @transactional
 def delete_notifications_created_more_than_a_week_ago_by_type(notification_type):
-    seven_days_ago = date.today() - timedelta(days=7)
+    seven_days_ago = convert_utc_to_bst(datetime.utcnow()).date() - timedelta(days=7)
     deleted = db.session.query(Notification).filter(
         func.date(Notification.created_at) < seven_days_ago,
         Notification.notification_type == notification_type,
@@ -371,14 +376,15 @@ def dao_timeout_notifications(timeout_period_in_seconds):
     timeout = functools.partial(_timeout_notifications, timeout_start=timeout_start, updated_at=updated_at)
 
     # Notifications still in created status are marked with a technical-failure:
-    updated_ids = timeout([NOTIFICATION_CREATED], NOTIFICATION_TECHNICAL_FAILURE)
+    technical_failure_notifications = timeout([NOTIFICATION_CREATED], NOTIFICATION_TECHNICAL_FAILURE)
 
     # Notifications still in sending or pending status are marked with a temporary-failure:
-    updated_ids += timeout([NOTIFICATION_SENDING, NOTIFICATION_PENDING], NOTIFICATION_TEMPORARY_FAILURE)
+    temporary_failure_notifications = timeout([NOTIFICATION_SENDING, NOTIFICATION_PENDING],
+                                              NOTIFICATION_TEMPORARY_FAILURE)
 
     db.session.commit()
 
-    return updated_ids
+    return technical_failure_notifications, temporary_failure_notifications
 
 
 def get_total_sent_notifications_in_date_range(start_date, end_date, notification_type):
@@ -434,23 +440,40 @@ def dao_update_notifications_by_reference(references, update_dict):
 
 
 @statsd(namespace="dao")
-def dao_get_notifications_by_to_field(service_id, search_term, statuses=None):
-    try:
-        normalised = validate_and_format_phone_number(search_term)
-    except InvalidPhoneError:
+def dao_get_notifications_by_to_field(service_id, search_term, notification_type, statuses=None):
+
+    if notification_type == SMS_TYPE:
+        normalised = try_validate_and_format_phone_number(search_term)
+
+        for character in {'(', ')', ' ', '-'}:
+            normalised = normalised.replace(character, '')
+
+        normalised = normalised.lstrip('+0')
+
+    elif notification_type == EMAIL_TYPE:
         try:
             normalised = validate_and_format_email_address(search_term)
         except InvalidEmailError:
-            normalised = search_term
+            normalised = search_term.lower()
+    else:
+        raise InvalidRequest("Only email and SMS can use search by recipient", 400)
+
+    for special_character in ('\\', '_', '%', '/'):
+        normalised = normalised.replace(
+            special_character,
+            '\{}'.format(special_character)
+        )
 
     filters = [
         Notification.service_id == service_id,
-        Notification.normalised_to == normalised,
+        Notification.normalised_to.like("%{}%".format(normalised)),
         Notification.key_type != KEY_TYPE_TEST,
     ]
 
     if statuses:
         filters.append(Notification.status.in_(statuses))
+    if notification_type:
+        filters.append(Notification.notification_type == notification_type)
 
     results = db.session.query(Notification).filter(*filters).order_by(desc(Notification.created_at)).all()
     return results
@@ -578,3 +601,14 @@ def dao_get_count_of_letters_to_process_for_date(date_to_process=None):
     ).count()
 
     return count_of_letters_to_process_for_date
+
+
+def notifications_not_yet_sent(should_be_sending_after_seconds, notification_type):
+    older_than_date = datetime.utcnow() - timedelta(seconds=should_be_sending_after_seconds)
+
+    notifications = Notification.query.filter(
+        Notification.created_at <= older_than_date,
+        Notification.notification_type == notification_type,
+        Notification.status == NOTIFICATION_CREATED
+    ).all()
+    return notifications

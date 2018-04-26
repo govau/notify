@@ -1,15 +1,115 @@
 version: 2
 
+references:
+  cf_install: &cf_install
+    run:
+      command: |
+        curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+        mkdir -p `pwd`/bin
+        chmod +x ./cf
+        mv ./cf bin/
+        echo export PATH="$PWD/bin:\$PATH" >> $BASH_ENV
+        source $BASH_ENV
+        cf install-plugin -f https://github.com/contraband/autopilot/releases/download/0.0.6/autopilot-linux
+
 jobs:
-  dummy:
+  setup:
     docker:
-      - image: circleci/python:3.5.4
+      - image: circleci/python:3.6.5-node
     steps:
-      - checkout
-      - run: echo "dummy"
+        - checkout
+        - persist_to_workspace:
+            root: .
+            paths:
+              - Makefile
+              - utils
+              - api
+              - admin
+  build-admin:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - attach_workspace:
+            at: .
+        - attach_workspace:
+            at: .
+        - run: make -C admin setup
+        - run: make -C admin vendor
+        - persist_to_workspace:
+            root: .
+            paths:
+              - admin
+  build-api:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - attach_workspace:
+            at: .
+        - attach_workspace:
+            at: .
+        - run: make -C api setup
+        - run: make -C api vendor
+        - persist_to_workspace:
+            root: .
+            paths:
+              - api
+  deploy-admin:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - *cf_install
+        - attach_workspace:
+            at: .
+        - run:
+            command: |
+              CF_USERNAME="${CF_Y_USER}" \
+              CF_PASSWORD="${CF_Y_PASSWORD}" \
+                make cf-login
+        - run: make -C admin deploy
+  deploy-api:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - *cf_install
+        - attach_workspace:
+            at: .
+        - run:
+            command: |
+              CF_USERNAME="${CF_Y_USER}" \
+              CF_PASSWORD="${CF_Y_PASSWORD}" \
+                make cf-login
+        - run: make -C api deploy-api
+  deploy-celery:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - *cf_install
+        - attach_workspace:
+            at: .
+        - run:
+            command: |
+              CF_USERNAME="${CF_Y_USER}" \
+              CF_PASSWORD="${CF_Y_PASSWORD}" \
+                make cf-login
+        - run: make -C api deploy-celery
 
 workflows:
   version: 2
-  all:
+  build-and-deploy:
     jobs:
-      - dummy
+      - setup
+      - build-admin:
+          requires:
+            - setup
+      - build-api:
+          requires:
+            - setup
+      - deploy-admin:
+          requires:
+            - build-admin
+      - deploy-api:
+          requires:
+            - build-api
+      - deploy-celery:
+          requires:
+            - build-api

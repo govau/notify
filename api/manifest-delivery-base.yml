@@ -43,6 +43,7 @@ env:
 
   TEMPLATE_PREVIEW_API_HOST: null
   TEMPLATE_PREVIEW_API_KEY: null
+  SQLALCHEMY_POOL_SIZE: 1
 
 applications:
   - name: notify-delivery-celery-beat
@@ -63,7 +64,8 @@ applications:
       NOTIFY_APP_NAME: delivery-worker-research
 
   - name: notify-delivery-worker-sender
-    command: scripts/run_app_paas.sh celery -A run_celery.notify_celery worker --loglevel=INFO --concurrency=11 -Q send-sms-tasks,send-email-tasks
+    command: scripts/run_multi_worker_app_paas.sh celery multi start 3 -c 10 -A run_celery.notify_celery --loglevel=INFO -Q send-sms-tasks,send-email-tasks
+    memory: 2G
     env:
       NOTIFY_APP_NAME: delivery-worker-sender
 
@@ -95,6 +97,6 @@ applications:
       NOTIFY_APP_NAME: delivery-worker-receipts
 
   - name: notify-delivery-worker-service-callbacks
-    command: scripts/run_app_paas.sh celery -A run_celery.notify_celery worker --loglevel=INFO -P eventlet -c 1000 -Q service-callbacks
+    command: scripts/run_app_paas.sh celery -A run_celery.notify_celery worker --loglevel=INFO --concurrency=11 -Q service-callbacks
     env:
       NOTIFY_APP_NAME: delivery-worker-service-callbacks

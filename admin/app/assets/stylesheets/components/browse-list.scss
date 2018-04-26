@@ -1,18 +1,25 @@
 .browse-list {
+  margin-bottom: $gutter-half;
 
-  margin-bottom: $gutter;
+  .browse-sub-list {
+    margin-top: $gutter-half;
+    margin-left: $gutter;
+    @include media('desktop') {
+      margin-left: $gutter * 2;
+    }
+  }
 
-  &-item {
+  &-item,
+  &-sub-item {
+    @include bold-24;
     list-style: none;
-    margin-bottom: $gutter-two-thirds;
+    margin-bottom: $gutter-half;
   }
 
   &-link {
-
     @include bold-24;
 
     &-destructive {
-
       @include bold-24;
       color: $error-colour;
 
@@ -25,14 +32,11 @@
       &:hover {
         color: $mellow-red;
       }
-
     }
-
   }
 
   &-hint {
     @include core-19;
     margin-top: 5px;
   }
-
 }

@@ -144,7 +144,7 @@ def create_app(application):
 
 def init_app(application):
     application.after_request(useful_headers_after_request)
-    application.after_request(save_service_after_request)
+    application.after_request(save_service_or_org_after_request)
     application.before_request(load_service_before_request)
     application.before_request(load_organisation_before_request)
     application.before_request(request_helper.check_proxy_header_before_request)
@@ -251,19 +251,15 @@ def format_time_24h(date):
 
 def get_human_day(time):
 
-    #  Add 1 hour to get ‘midnight today’ instead of ‘midnight tomorrow’
-    time_as_day = (gmt_timezones(time) - timedelta(hours=1)).strftime('%A')
-    six_days_ago = gmt_timezones((datetime.utcnow() + timedelta(days=-6)).isoformat())
-
-    if gmt_timezones(time) < six_days_ago:
-        return format_date_short(time)
-    if time_as_day == (datetime.utcnow() + timedelta(days=1)).strftime('%A'):
+    #  Add 1 minute to transform 00:00 into ‘midnight today’ instead of ‘midnight tomorrow’
+    date = (gmt_timezones(time) - timedelta(minutes=1)).date()
+    if date == (datetime.utcnow() + timedelta(days=1)).date():
         return 'tomorrow'
-    if time_as_day == datetime.utcnow().strftime('%A'):
+    if date == datetime.utcnow().date():
         return 'today'
-    if time_as_day == (datetime.utcnow() + timedelta(days=-1)).strftime('%A'):
+    if date == (datetime.utcnow() - timedelta(days=1)).date():
         return 'yesterday'
-    return format_date_short(time)
+    return _format_datetime_short(date)
 
 
 def format_time(date):
@@ -285,7 +281,11 @@ def format_date_normal(date):
 
 
 def format_date_short(date):
-    return gmt_timezones(date).strftime('%d %B').lstrip('0')
+    return _format_datetime_short(gmt_timezones(date))
+
+
+def _format_datetime_short(datetime):
+    return datetime.strftime('%d %B').lstrip('0')
 
 
 def format_delta(date):
@@ -344,7 +344,9 @@ def format_notification_status(status, template_type):
             'delivered': 'Delivered',
             'sending': 'Sending',
             'created': 'Sending',
-            'sent': 'Delivered'
+            'sent': 'Delivered',
+            'pending-virus-check': 'Pending virus check',
+            'virus-scan-failed': 'Virus detected',
         }
     }[template_type].get(status, status)
 
@@ -356,17 +358,34 @@ def format_notification_status_as_time(status, created, updated):
     }.get(status, updated)
 
 
-def format_notification_status_as_field_status(status):
+def format_notification_status_as_field_status(status, notification_type):
     return {
-        'failed': 'error',
-        'technical-failure': 'error',
-        'temporary-failure': 'error',
-        'permanent-failure': 'error',
-        'delivered': None,
-        'sent': None,
-        'sending': 'default',
-        'created': 'default'
-    }.get(status, 'error')
+        'letter': {
+            'failed': 'error',
+            'technical-failure': 'error',
+            'temporary-failure': 'error',
+            'permanent-failure': 'error',
+            'delivered': None,
+            'sent': None,
+            'sending': None,
+            'created': None,
+            'accepted': None,
+            'pending-virus-check': None,
+            'virus-scan-failed': 'error',
+        }
+    }.get(
+        notification_type,
+        {
+            'failed': 'error',
+            'technical-failure': 'error',
+            'temporary-failure': 'error',
+            'permanent-failure': 'error',
+            'delivered': None,
+            'sent': None,
+            'sending': 'default',
+            'created': 'default'
+        }
+    ).get(status, 'error')
 
 
 def format_notification_status_as_url(status):
@@ -431,11 +450,17 @@ def load_organisation_before_request():
                         raise
 
 
-def save_service_after_request(response):
+def save_service_or_org_after_request(response):
     # Only save the current session if the request is 200
     service_id = request.view_args.get('service_id', None) if request.view_args else None
-    if response.status_code == 200 and service_id:
-        session['service_id'] = service_id
+    organisation_id = request.view_args.get('org_id', None) if request.view_args else None
+    if response.status_code == 200:
+        if service_id:
+            session['service_id'] = service_id
+            session['organisation_id'] = None
+        elif organisation_id:
+            session['service_id'] = None
+            session['organisation_id'] = organisation_id
     return response
 
 
@@ -467,7 +492,7 @@ def register_errorhandlers(application):  # noqa (C901 too complex)
 
     @application.errorhandler(HTTPError)
     def render_http_error(error):
-        application.logger.error("API {} failed with status {} message {}".format(
+        application.logger.warning("API {} failed with status {} message {}".format(
             error.response.url if error.response else 'unknown',
             error.status_code,
             error.message
@@ -480,13 +505,23 @@ def register_errorhandlers(application):  # noqa (C901 too complex)
                 msg = list(itertools.chain(*[error.message[x] for x in error.message.keys()]))
             resp = make_response(render_template("error/400.html", message=msg))
             return useful_headers_after_request(resp)
-        elif error_code not in [401, 404, 403, 410, 500]:
+        elif error_code not in [401, 404, 403, 410]:
+            # probably a 500 or 503
+            application.logger.exception("API {} failed with status {} message {}".format(
+                error.response.url if error.response else 'unknown',
+                error.status_code,
+                error.message
+            ))
             error_code = 500
         return _error_response(error_code)
 
     @application.errorhandler(410)
     def handle_gone(error):
         return _error_response(410)
+
+    @application.errorhandler(413)
+    def handle_payload_too_large(error):
+        return _error_response(413)
 
     @application.errorhandler(404)
     def handle_not_found(error):

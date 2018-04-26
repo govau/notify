@@ -146,7 +146,7 @@ def international_phone_number(label='Mobile number'):
 def password(label='Password'):
     return PasswordField(label,
                          validators=[DataRequired(message='Can’t be empty'),
-                                     Length(8, 255, message='Must be at least 8 characters'),
+                                     Length(4, 255, message='Must be at least 8 characters'),
                                      Blacklist(message='Choose a password that’s harder to guess')])
 
 
@@ -324,6 +324,14 @@ class TextNotReceivedForm(StripWhitespaceForm):
 class RenameServiceForm(StripWhitespaceForm):
     name = StringField(
         u'Service name',
+        validators=[
+            DataRequired(message='Can’t be empty')
+        ])
+
+
+class RenameOrganisationForm(StripWhitespaceForm):
+    name = StringField(
+        u'Organisation name',
         validators=[
             DataRequired(message='Can’t be empty')
         ])
@@ -546,18 +554,6 @@ class Triage(StripWhitespaceForm):
 
 
 class RequestToGoLiveForm(StripWhitespaceForm):
-    mou = RadioField(
-        (
-            'Has your organisation accepted the GOV.UK&nbsp;Notify data sharing and financial '
-            'agreement?'
-        ),
-        choices=[
-            ('yes', 'Yes'),
-            ('no', 'No'),
-            ('don’t know', 'I don’t know')
-        ],
-        validators=[DataRequired()]
-    )
     channel_email = BooleanField('Emails')
     channel_sms = BooleanField('Text messages')
     channel_letter = BooleanField('Letters')
@@ -877,13 +873,20 @@ class SMSPrefixForm(StripWhitespaceForm):
 def get_placeholder_form_instance(
     placeholder_name,
     dict_to_populate_from,
+    template_type,
     optional_placeholder=False,
     allow_international_phone_numbers=False,
 ):
 
-    if Columns.make_key(placeholder_name) == 'emailaddress':
+    if (
+        Columns.make_key(placeholder_name) == 'emailaddress' and
+        template_type == 'email'
+    ):
         field = email_address(label=placeholder_name, gov_user=False)
-    elif Columns.make_key(placeholder_name) == 'phonenumber':
+    elif (
+        Columns.make_key(placeholder_name) == 'phonenumber' and
+        template_type == 'sms'
+    ):
         if allow_international_phone_numbers:
             field = international_phone_number(label=placeholder_name)
         else:

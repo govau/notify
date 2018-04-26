@@ -32,10 +32,10 @@ from app.celery.scheduled_tasks import (
     send_scheduled_notifications,
     send_total_sent_notifications_to_performance_platform,
     switch_current_sms_provider_on_slow_delivery,
-    timeout_job_statistics,
     timeout_notifications,
     daily_stats_template_usage_by_month,
-    letter_raise_alert_if_no_ack_file_for_zip
+    letter_raise_alert_if_no_ack_file_for_zip,
+    replay_created_notifications
 )
 from app.clients.performance_platform.performance_platform_client import PerformancePlatformClient
 from app.config import QueueNames, TaskNames
@@ -45,6 +45,7 @@ from app.dao.provider_details_dao import (
     dao_update_provider_details,
     get_current_provider
 )
+from app.exceptions import NotificationTechnicalFailureException
 from app.models import (
     MonthlyBilling,
     NotificationHistory,
@@ -53,12 +54,17 @@ from app.models import (
     JOB_STATUS_READY_TO_SEND,
     JOB_STATUS_IN_PROGRESS,
     JOB_STATUS_SENT_TO_DVLA,
+    JOB_STATUS_ERROR,
     LETTER_TYPE,
     SMS_TYPE
 )
 from app.utils import get_london_midnight_in_utc
+from app.celery.service_callback_tasks import create_encrypted_callback_data
 from app.v2.errors import JobIncompleteError
-from tests.app.db import create_notification, create_service, create_template, create_job, create_rate
+from tests.app.db import (
+    create_notification, create_service, create_template, create_job, create_rate,
+    create_service_callback_api
+)
 
 from tests.app.conftest import (
     sample_job as create_sample_job,
@@ -177,8 +183,9 @@ def test_update_status_of_notifications_after_timeout(notify_api, sample_templat
             status='pending',
             created_at=datetime.utcnow() - timedelta(
                 seconds=current_app.config.get('SENDING_NOTIFICATIONS_TIMEOUT_PERIOD') + 10))
-        timeout_notifications()
-
+        with pytest.raises(NotificationTechnicalFailureException) as e:
+            timeout_notifications()
+        assert str(not2.id) in e.value.message
         assert not1.status == 'temporary-failure'
         assert not2.status == 'technical-failure'
         assert not3.status == 'temporary-failure'
@@ -204,6 +211,20 @@ def test_should_not_update_status_of_letter_notifications(client, sample_letter_
 
     assert not1.status == 'sending'
     assert not2.status == 'created'
+
+
+def test_timeout_notifications_sends_status_update_to_service(client, sample_template, mocker):
+    callback_api = create_service_callback_api(service=sample_template.service)
+    mocked = mocker.patch('app.celery.service_callback_tasks.send_delivery_status_to_service.apply_async')
+    notification = create_notification(
+        template=sample_template,
+        status='sending',
+        created_at=datetime.utcnow() - timedelta(
+            seconds=current_app.config.get('SENDING_NOTIFICATIONS_TIMEOUT_PERIOD') + 10))
+    timeout_notifications()
+
+    encrypted_data = create_encrypted_callback_data(notification, callback_api)
+    mocked.assert_called_once_with([str(notification.id), encrypted_data], queue=QueueNames.CALLBACKS)
 
 
 def test_should_update_scheduled_jobs_and_put_on_queue(notify_db, notify_db_session, mocker):
@@ -489,13 +510,6 @@ def test_should_send_all_scheduled_notifications_to_deliver_queue(sample_templat
     mocked.apply_async.assert_called_once_with([str(message_to_deliver.id)], queue='send-sms-tasks')
     scheduled_notifications = dao_get_scheduled_notifications()
     assert not scheduled_notifications
-
-
-def test_timeout_job_statistics_called_with_notification_timeout(notify_api, mocker):
-    notify_api.config['SENDING_NOTIFICATIONS_TIMEOUT_PERIOD'] = 999
-    dao_mock = mocker.patch('app.celery.scheduled_tasks.dao_timeout_job_statistics')
-    timeout_job_statistics()
-    dao_mock.assert_called_once_with(999)
 
 
 def test_should_call_delete_inbound_sms_older_than_seven_days(notify_api, mocker):
@@ -896,6 +910,68 @@ def test_check_job_status_task_raises_job_incomplete_error_for_multiple_jobs(moc
     )
 
 
+def test_check_job_status_task_only_sends_old_tasks(mocker, sample_template):
+    mock_celery = mocker.patch('app.celery.tasks.notify_celery.send_task')
+    job = create_job(
+        template=sample_template,
+        notification_count=3,
+        created_at=datetime.utcnow() - timedelta(hours=2),
+        scheduled_for=datetime.utcnow() - timedelta(minutes=31),
+        processing_started=datetime.utcnow() - timedelta(minutes=31),
+        job_status=JOB_STATUS_IN_PROGRESS
+    )
+    job_2 = create_job(
+        template=sample_template,
+        notification_count=3,
+        created_at=datetime.utcnow() - timedelta(minutes=31),
+        processing_started=datetime.utcnow() - timedelta(minutes=29),
+        job_status=JOB_STATUS_IN_PROGRESS
+    )
+    with pytest.raises(expected_exception=JobIncompleteError) as e:
+        check_job_status()
+    assert str(job.id) in e.value.message
+    assert str(job_2.id) not in e.value.message
+
+    # job 2 not in celery task
+    mock_celery.assert_called_once_with(
+        name=TaskNames.PROCESS_INCOMPLETE_JOBS,
+        args=([str(job.id)],),
+        queue=QueueNames.JOBS
+    )
+
+
+def test_check_job_status_task_sets_jobs_to_error(mocker, sample_template):
+    mock_celery = mocker.patch('app.celery.tasks.notify_celery.send_task')
+    job = create_job(
+        template=sample_template,
+        notification_count=3,
+        created_at=datetime.utcnow() - timedelta(hours=2),
+        scheduled_for=datetime.utcnow() - timedelta(minutes=31),
+        processing_started=datetime.utcnow() - timedelta(minutes=31),
+        job_status=JOB_STATUS_IN_PROGRESS
+    )
+    job_2 = create_job(
+        template=sample_template,
+        notification_count=3,
+        created_at=datetime.utcnow() - timedelta(minutes=31),
+        processing_started=datetime.utcnow() - timedelta(minutes=29),
+        job_status=JOB_STATUS_IN_PROGRESS
+    )
+    with pytest.raises(expected_exception=JobIncompleteError) as e:
+        check_job_status()
+    assert str(job.id) in e.value.message
+    assert str(job_2.id) not in e.value.message
+
+    # job 2 not in celery task
+    mock_celery.assert_called_once_with(
+        name=TaskNames.PROCESS_INCOMPLETE_JOBS,
+        args=([str(job.id)],),
+        queue=QueueNames.JOBS
+    )
+    assert job.job_status == JOB_STATUS_ERROR
+    assert job_2.job_status == JOB_STATUS_IN_PROGRESS
+
+
 def test_daily_stats_template_usage_by_month(notify_db, notify_db_session):
     notification_history = functools.partial(
         create_notification_history,
@@ -1116,3 +1192,33 @@ def test_letter_not_raise_alert_if_no_files_do_not_cause_error(mocker, notify_db
 
     assert mock_file_list.call_count == 2
     assert mock_get_file.call_count == 0
+
+
+def test_replay_created_notifications(notify_db_session, sample_service, mocker):
+    email_delivery_queue = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
+    sms_delivery_queue = mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
+
+    sms_template = create_template(service=sample_service, template_type='sms')
+    email_template = create_template(service=sample_service, template_type='email')
+    older_than = (60 * 60 * 4) + (60 * 15)  # 4 hours 15 minutes
+    # notifications expected to be resent
+    old_sms = create_notification(template=sms_template, created_at=datetime.utcnow() - timedelta(seconds=older_than),
+                                  status='created')
+    old_email = create_notification(template=email_template,
+                                    created_at=datetime.utcnow() - timedelta(seconds=older_than),
+                                    status='created')
+    # notifications that are not to be resent
+    create_notification(template=sms_template, created_at=datetime.utcnow() - timedelta(seconds=older_than),
+                        status='sending')
+    create_notification(template=email_template, created_at=datetime.utcnow() - timedelta(seconds=older_than),
+                        status='delivered')
+    create_notification(template=sms_template, created_at=datetime.utcnow(),
+                        status='created')
+    create_notification(template=email_template, created_at=datetime.utcnow(),
+                        status='created')
+
+    replay_created_notifications()
+    email_delivery_queue.assert_called_once_with([str(old_email.id)],
+                                                 queue='send-email-tasks')
+    sms_delivery_queue.assert_called_once_with([str(old_sms.id)],
+                                               queue="send-sms-tasks")

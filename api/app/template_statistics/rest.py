@@ -47,7 +47,8 @@ def get_template_statistics_for_service_by_day(service_id):
             'count': data.count,
             'template_id': str(data.template_id),
             'template_name': data.name,
-            'template_type': data.template_type
+            'template_type': data.template_type,
+            'is_precompiled_letter': data.is_precompiled_letter
         }
 
     return jsonify(data=[serialize(row) for row in stats])
@@ -62,7 +63,7 @@ def get_template_statistics_for_template_id(service_id, template_id):
         raise InvalidRequest(errors, status_code=404)
 
     data = None
-    notification = dao_get_last_template_usage(template_id)
+    notification = dao_get_last_template_usage(template_id, template.template_type)
     if notification:
         data = notification_with_template_schema.dump(notification).data
 
@@ -78,7 +79,22 @@ def get_template_statistics_for_7_days(limit_days, service_id):
         if cache_values:
             redis_store.set_hash_and_expire(cache_key,
                                             cache_values,
-                                            current_app.config.get('EXPIRE_CACHE_IN_SECONDS', 600))
+                                            current_app.config['EXPIRE_CACHE_TEN_MINUTES'])
     else:
         stats = dao_get_templates_for_cache(template_stats_by_id.items())
     return stats
+
+    # TODO: can only switch to this code when redis has been populated (either through time passing or a manual step)
+    # from collections import Counter
+    # from notifications_utils.redis_client import RedisException
+    # template_stats_by_id = Counter()
+    # for day in last_7_days:
+    #     # "<SERVICE_ID>-template-usage-{YYYY-MM-DD}"
+    #     key = cache_key_for_service_templates_used_per_day(service_id, limit_days)
+    #     try:
+    #         template_stats_by_id += Counter(redis_store.get_all_from_hash(key, raise_exception=True))
+    #     except RedisException:
+    #         # TODO: ????
+    #
+    # # TODO: streamline db query and avoid weird unions if possible.
+    # return dao_get_templates_for_cache(template_stats_by_id.items())

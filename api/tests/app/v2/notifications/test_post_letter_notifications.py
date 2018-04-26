@@ -1,19 +1,25 @@
 import uuid
+from unittest.mock import ANY
 
 from flask import json
 from flask import url_for
 import pytest
 
-from app.config import QueueNames
-from app.models import EMAIL_TYPE
-from app.models import Job
-from app.models import KEY_TYPE_NORMAL
-from app.models import KEY_TYPE_TEAM
-from app.models import KEY_TYPE_TEST
-from app.models import LETTER_TYPE
-from app.models import Notification
-from app.models import NOTIFICATION_SENDING, NOTIFICATION_DELIVERED
-from app.models import SMS_TYPE
+from app.config import TaskNames, QueueNames
+from app.models import (
+    Job,
+    Notification,
+    EMAIL_TYPE,
+    KEY_TYPE_NORMAL,
+    KEY_TYPE_TEAM,
+    KEY_TYPE_TEST,
+    LETTER_TYPE,
+    NOTIFICATION_CREATED,
+    NOTIFICATION_SENDING,
+    NOTIFICATION_DELIVERED,
+    NOTIFICATION_PENDING_VIRUS_CHECK,
+    SMS_TYPE,
+)
 from app.schema_validation import validate
 from app.v2.errors import RateLimitError
 from app.v2.notifications.notification_schemas import post_letter_response
@@ -29,9 +35,13 @@ test_address = {
 }
 
 
-def letter_request(client, data, service_id, key_type=KEY_TYPE_NORMAL, _expected_status=201):
+def letter_request(client, data, service_id, key_type=KEY_TYPE_NORMAL, _expected_status=201, precompiled=False):
+    if precompiled:
+        url = url_for('v2_notifications.post_precompiled_letter_notification')
+    else:
+        url = url_for('v2_notifications.post_notification', notification_type=LETTER_TYPE)
     resp = client.post(
-        url_for('v2_notifications.post_notification', notification_type=LETTER_TYPE),
+        url,
         data=json.dumps(data),
         headers=[
             ('Content-Type', 'application/json'),
@@ -65,6 +75,7 @@ def test_post_letter_notification_returns_201(client, sample_letter_template, mo
     assert validate(resp_json, post_letter_response) == resp_json
     assert Job.query.count() == 0
     notification = Notification.query.one()
+    assert notification.status == NOTIFICATION_CREATED
     notification_id = notification.id
     assert resp_json['id'] == str(notification_id)
     assert resp_json['reference'] == reference
@@ -85,12 +96,11 @@ def test_post_letter_notification_returns_201(client, sample_letter_template, mo
 
 
 @pytest.mark.parametrize('env', [
-    'development',
-    'preview',
+    'staging',
+    'live',
 ])
-def test_post_letter_notification_calls_create_fake_response_in_research_and_test_key_correct_env(
+def test_post_letter_notification_with_test_key_set_status_to_delivered(
         notify_api, client, sample_letter_template, mocker, env):
-    sample_letter_template.service.research_mode = True
 
     data = {
         'template_id': str(sample_letter_template.id),
@@ -115,83 +125,44 @@ def test_post_letter_notification_calls_create_fake_response_in_research_and_tes
 
     notification = Notification.query.one()
 
+    assert not fake_create_letter_task.called
+    assert not fake_create_dvla_response_task.called
+    assert notification.status == NOTIFICATION_DELIVERED
+
+
+@pytest.mark.parametrize('env', [
+    'development',
+    'preview',
+])
+def test_post_letter_notification_with_test_key_sets_status_to_sending_and_sends_fake_response_file(
+        notify_api, client, sample_letter_template, mocker, env):
+
+    data = {
+        'template_id': str(sample_letter_template.id),
+        'personalisation': {
+            'address_line_1': 'Her Royal Highness Queen Elizabeth II',
+            'address_line_2': 'Buckingham Palace',
+            'address_line_3': 'London',
+            'postcode': 'SW1 1AA',
+            'name': 'Lizzie'
+        },
+        'reference': 'foo'
+    }
+
+    fake_create_letter_task = mocker.patch('app.celery.letters_pdf_tasks.create_letters_pdf.apply_async')
+    fake_create_dvla_response_task = mocker.patch(
+        'app.celery.research_mode_tasks.create_fake_letter_response_file.apply_async')
+
+    with set_config_values(notify_api, {
+        'NOTIFY_ENVIRONMENT': env
+    }):
+        letter_request(client, data, service_id=sample_letter_template.service_id, key_type=KEY_TYPE_TEST)
+
+    notification = Notification.query.one()
+
+    assert not fake_create_letter_task.called
+    assert fake_create_dvla_response_task.called
     assert notification.status == NOTIFICATION_SENDING
-    assert not fake_create_letter_task.called
-    fake_create_dvla_response_task.assert_called_once_with((notification.reference,), queue=QueueNames.RESEARCH_MODE)
-
-
-@pytest.mark.parametrize('env', [
-    'staging',
-    'live',
-])
-def test_post_letter_notification_sets_status_delivered_in_research_and_test_key_incorrect_env(
-        notify_api, client, sample_letter_template, mocker, env):
-    sample_letter_template.service.research_mode = True
-
-    data = {
-        'template_id': str(sample_letter_template.id),
-        'personalisation': {
-            'address_line_1': 'Her Royal Highness Queen Elizabeth II',
-            'address_line_2': 'Buckingham Palace',
-            'address_line_3': 'London',
-            'postcode': 'SW1 1AA',
-            'name': 'Lizzie'
-        },
-        'reference': 'foo'
-    }
-
-    fake_create_letter_task = mocker.patch('app.celery.letters_pdf_tasks.create_letters_pdf.apply_async')
-    fake_create_dvla_response_task = mocker.patch(
-        'app.celery.research_mode_tasks.create_fake_letter_response_file.apply_async')
-
-    with set_config_values(notify_api, {
-        'NOTIFY_ENVIRONMENT': env
-    }):
-        letter_request(client, data, service_id=sample_letter_template.service_id, key_type=KEY_TYPE_TEST)
-
-    notification = Notification.query.one()
-
-    assert not fake_create_letter_task.called
-    assert not fake_create_dvla_response_task.called
-    assert notification.status == NOTIFICATION_DELIVERED
-
-
-@pytest.mark.parametrize('env', [
-    'development',
-    'preview',
-    'staging',
-    'live',
-])
-def test_post_letter_notification_sets_status_to_delivered_using_test_key_and_not_research_all_env(
-        notify_api, client, sample_letter_template, mocker, env):
-    sample_letter_template.service.research_mode = False
-
-    data = {
-        'template_id': str(sample_letter_template.id),
-        'personalisation': {
-            'address_line_1': 'Her Royal Highness Queen Elizabeth II',
-            'address_line_2': 'Buckingham Palace',
-            'address_line_3': 'London',
-            'postcode': 'SW1 1AA',
-            'name': 'Lizzie'
-        },
-        'reference': 'foo'
-    }
-
-    fake_create_letter_task = mocker.patch('app.celery.letters_pdf_tasks.create_letters_pdf.apply_async')
-    fake_create_dvla_response_task = mocker.patch(
-        'app.celery.research_mode_tasks.create_fake_letter_response_file.apply_async')
-
-    with set_config_values(notify_api, {
-        'NOTIFY_ENVIRONMENT': env
-    }):
-        letter_request(client, data, service_id=sample_letter_template.service_id, key_type=KEY_TYPE_TEST)
-
-    notification = Notification.query.one()
-
-    assert not fake_create_letter_task.called
-    assert not fake_create_dvla_response_task.called
-    assert notification.status == NOTIFICATION_DELIVERED
 
 
 def test_post_letter_notification_returns_400_and_missing_template(
@@ -223,11 +194,11 @@ def test_post_letter_notification_returns_400_for_empty_personalisation(
 
     assert error_json['status_code'] == 400
     assert all([e['error'] == 'ValidationError' for e in error_json['errors']])
-    assert set([e['message'] for e in error_json['errors']]) == set([
+    assert set([e['message'] for e in error_json['errors']]) == {
         'personalisation address_line_1 is required',
         'personalisation address_line_2 is required',
         'personalisation postcode is required'
-    ])
+    }
 
 
 def test_notification_returns_400_for_missing_template_field(
@@ -382,6 +353,36 @@ def test_post_letter_notification_is_delivered_if_in_trial_mode_and_using_test_k
     assert not fake_create_letter_task.called
 
 
+def test_post_letter_notification_is_delivered_and_has_pdf_uploaded_to_test_letters_bucket_using_test_key(
+    client,
+    notify_user,
+    mocker
+):
+    sample_letter_service = create_service(service_permissions=['letter', 'precompiled_letter'])
+    s3mock = mocker.patch('app.v2.notifications.post_notifications.upload_letter_pdf', return_value='test.pdf')
+    mocker.patch('app.v2.notifications.post_notifications.pdf_page_count', return_value=1)
+    mock_celery = mocker.patch("app.letters.rest.notify_celery.send_task")
+    data = {
+        "reference": "letter-reference",
+        "content": "bGV0dGVyLWNvbnRlbnQ="
+    }
+    letter_request(
+        client,
+        data=data,
+        service_id=str(sample_letter_service.id),
+        key_type=KEY_TYPE_TEST,
+        precompiled=True)
+
+    notification = Notification.query.one()
+    assert notification.status == NOTIFICATION_PENDING_VIRUS_CHECK
+    s3mock.assert_called_once_with(ANY, b'letter-content', precompiled=True)
+    mock_celery.assert_called_once_with(
+        name=TaskNames.SCAN_FILE,
+        kwargs={'filename': 'test.pdf'},
+        queue=QueueNames.ANTIVIRUS
+    )
+
+
 def test_post_letter_notification_persists_notification_reply_to_text(
     client, notify_db_session, mocker
 ):
@@ -400,3 +401,92 @@ def test_post_letter_notification_persists_notification_reply_to_text(
     notifications = Notification.query.all()
     assert len(notifications) == 1
     assert notifications[0].reply_to_text == service_address
+
+
+def test_post_precompiled_letter_requires_permission(client, sample_service, notify_user, mocker):
+    mocker.patch('app.v2.notifications.post_notifications.upload_letter_pdf')
+    data = {
+        "reference": "letter-reference",
+        "content": "bGV0dGVyLWNvbnRlbnQ="
+    }
+    auth_header = create_authorization_header(service_id=sample_service.id)
+    response = client.post(
+        path="v2/notifications/letter",
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+
+    assert response.status_code == 400, response.get_data(as_text=True)
+    resp_json = json.loads(response.get_data(as_text=True))
+    assert resp_json['errors'][0]['message'] == 'Cannot send precompiled_letters'
+
+
+def test_post_precompiled_letter_with_invalid_base64(client, notify_user, mocker):
+    sample_service = create_service(service_permissions=['letter', 'precompiled_letter'])
+    mocker.patch('app.v2.notifications.post_notifications.upload_letter_pdf')
+
+    data = {
+        "reference": "letter-reference",
+        "content": "hi"
+    }
+    auth_header = create_authorization_header(service_id=sample_service.id)
+    response = client.post(
+        path="v2/notifications/letter",
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+
+    assert response.status_code == 400, response.get_data(as_text=True)
+    resp_json = json.loads(response.get_data(as_text=True))
+    assert resp_json['errors'][0]['message'] == 'Cannot decode letter content (invalid base64 encoding)'
+
+    assert not Notification.query.first()
+
+
+def test_post_precompiled_letter_notification_returns_201(client, notify_user, mocker):
+    sample_service = create_service(service_permissions=['letter', 'precompiled_letter'])
+    s3mock = mocker.patch('app.v2.notifications.post_notifications.upload_letter_pdf')
+    mocker.patch('app.v2.notifications.post_notifications.pdf_page_count', return_value=5)
+    mocker.patch("app.letters.rest.notify_celery.send_task")
+    data = {
+        "reference": "letter-reference",
+        "content": "bGV0dGVyLWNvbnRlbnQ="
+    }
+    auth_header = create_authorization_header(service_id=sample_service.id)
+    response = client.post(
+        path="v2/notifications/letter",
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+
+    assert response.status_code == 201, response.get_data(as_text=True)
+
+    s3mock.assert_called_once_with(ANY, b'letter-content', precompiled=True)
+
+    notification = Notification.query.first()
+
+    assert notification.billable_units == 3
+    assert notification.status == NOTIFICATION_PENDING_VIRUS_CHECK
+
+    resp_json = json.loads(response.get_data(as_text=True))
+    assert resp_json == {'id': str(notification.id), 'reference': 'letter-reference'}
+
+
+def test_post_precompiled_letter_notification_returns_400_with_invalid_pdf(client, notify_user, mocker):
+    sample_service = create_service(service_permissions=['letter', 'precompiled_letter'])
+    s3mock = mocker.patch('app.v2.notifications.post_notifications.upload_letter_pdf')
+    data = {
+        "reference": "letter-reference",
+        "content": "bGV0dGVyLWNvbnRlbnQ="
+    }
+    auth_header = create_authorization_header(service_id=sample_service.id)
+    response = client.post(
+        path="v2/notifications/letter",
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+
+    resp_json = json.loads(response.get_data(as_text=True))
+
+    assert response.status_code == 400, response.get_data(as_text=True)
+    assert resp_json['errors'][0]['message'] == 'Letter content is not a valid PDF'
+
+    assert s3mock.called is False
+
+    assert Notification.query.count() == 0

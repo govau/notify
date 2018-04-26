@@ -8,7 +8,9 @@ communities.gsi.gov.uk: communities.gov.uk
 communities.gov.uk:
   owner: "Ministry of Housing, Communities & Local Government"
   agreement_signed: true
-hmcts.net:
+hmcts.net: hmcts.gov.uk
+hmcts.gsi.gov.uk: hmcts.gov.uk
+hmcts.gov.uk:
   owner: Her Majesty’s Courts and Tribunals Service
   agreement_signed: true
 cqc.org.uk:
@@ -17,8 +19,10 @@ cqc.org.uk:
 marinemanagement.org.uk:
   owner: Marine Management Organisation
   agreement_signed: true
+crowncommercial.gov.uk: cabinet-office.gov.uk
 cabinet-office.gov.uk:
   owner: Cabinet Office
+  crown: true
   agreement_signed: true
 cica.gsi.gov.uk: cica.gov.uk
 cica.gov.uk:
@@ -35,6 +39,7 @@ environment-agency.gsi.gov.uk: environment-agency.gov.uk
 environment-agency.gov.uk:
   owner: Environment Agency
   agreement_signed: true
+food.gov.uk: foodstandards.gov.uk
 foodstandards.gsi.gov.uk: foodstandards.gov.uk
 foodstandards.gov.uk:
   owner: Food Standards Agency
@@ -46,6 +51,10 @@ gla.gov.uk:
 governmentlegal.gov.uk:
   owner: Government Legal Department
   agreement_signed: true
+gov.scot:
+  owner: Scottish Government
+  crown: true
+  agreement_signed: false
 innovateuk.gsi.gov.uk: innovateuk.gov.uk
 innovateuk.gov.uk:
   owner: Innovate UK
@@ -53,6 +62,8 @@ innovateuk.gov.uk:
 ncsc.gov.uk:
   owner: National Cyber Security Center
   agreement_signed: true
+nhs.net:
+  owner: NHS
 nhsdigital.nhs.uk: digital.nhs.uk
 digital.nhs.uk:
   owner: NHS Digital
@@ -66,6 +77,11 @@ statistics.gov.uk: ons.gov.uk
 ons.gov.uk:
   owner: Office for National Statistics
   agreement_signed: true
+pins.gsi.gov.uk: pins.gov.uk
+pins.gov.uk:
+  owner: The Planning Inspectorate
+  agreement_signed: true
+  crown: true
 publicguardian.gsi.gov.uk: publicguardian.gov.uk
 publicguardian.gov.uk:
   owner: Office of the Public Guardian
@@ -124,6 +140,10 @@ trade.gsi.gov.uk: trade.gov.uk
 trade.gov.uk:
   owner: Department for International Trade
   agreement_signed: true
+ips.gsi.gov.uk: ips.gov.uk
+ips.gov.uk: hmpo.gov.uk
+hmpo.gov.uk: homeoffice.gov.uk
+hmpo.gsi.gov.uk: homeoffice.gov.uk
 homeoffice.gsi.gov.uk: homeoffice.gov.uk
 homeoffice.gov.uk:
   owner: Home Office
@@ -140,6 +160,22 @@ rpa.gsi.gov.uk: rpa.gov.uk
 rpa.gov.uk:
   owner: Rural Payments Agency
   agreement_signed: true
+mcga.gov.uk:
+  owner: Maritime and Coastguard Agency
+  agreement_signed: true
+metoffice.gov.uk:
+  owner: Met Office
+  agreement_signed: false
+  crown: true
+dft.gsi.gov.uk: dft.gov.uk
+dft.gov.uk:
+  owner: Department for Transport
+  agreement_signed: true
+  crown: true
+innovateuk.gov.uk:
+  owner: Innovate UK
+  agreement_signed: false
+  crown: false
 
 # Local Government
 aberdeencityandshire-sdpa.gov.uk:
@@ -248,10 +284,6 @@ antrimandnewtownabbey.gov.uk:
   agreement_signed: false
 antrim.gov.uk:
   owner: Antrim Borough Council
-  crown: false
-  agreement_signed: false
-apprenticeships.gov.uk:
-  owner: Learning and Skills Council
   crown: false
   agreement_signed: false
 archifaugwent.gov.uk:
@@ -1256,10 +1288,6 @@ cromer-tc.gov.uk:
   agreement_signed: false
 crowboroughtowncouncil.gov.uk:
   owner: Crowborough Town Council
-  crown: false
-  agreement_signed: false
-cst.gov.uk:
-  owner: Council for Science and Technology
   crown: false
   agreement_signed: false
 cullomptontowncouncil.gov.uk:
@@ -2650,7 +2678,7 @@ ludlow.gov.uk:
 luton.gov.uk:
   owner: Luton Borough Council
   crown: false
-  agreement_signed: false
+  agreement_signed: true
 lymeregistowncouncil.gov.uk:
   owner: Lyme Regis Town Council
   crown: false
@@ -3548,6 +3576,12 @@ ribblevalley.gov.uk:
   owner: Ribblevalley Borough Council
   crown: false
   agreement_signed: false
+richmond.gov.uk: richmondandwandsworth.gov.uk
+wandsworth.gov.uk: richmondandwandsworth.gov.uk
+richmondandwandsworth.gov.uk:
+  owner: London Boroughs of Richmond and Wandsworth
+  crown: false
+  agreement_signed: true
 richmondshire.gov.uk:
   owner: Richmondshire District Council
   crown: false
@@ -3603,7 +3637,7 @@ roystontowncouncil.gov.uk:
 rugby.gov.uk:
   owner: Rugby Borough Council
   crown: false
-  agreement_signed: false
+  agreement_signed: true
 rugeleytowncouncil.gov.uk:
   owner: Rugeley Town Council
   crown: false
@@ -4576,6 +4610,10 @@ tunbridgewells.gov.uk:
   owner: Tunbridge Wells Borough Council
   crown: false
   agreement_signed: true
+twfire.gov.uk:
+  owner: Tyne and Wear Fire and Rescue Authority
+  crown: false
+  agreement_signed: true
 twict.gov.uk:
   owner: Sunderland City Metropolitan Borough Council
   crown: false
@@ -5046,13 +5084,10 @@ wyrebc.gov.uk:
   crown: false
   agreement_signed: false
 wyreforestdc.gov.uk:
-  owner: Wyre Forest District Council
-  crown: false
-  agreement_signed: false
 wyreforest.gov.uk:
   owner: Wyre Forest District Council
   crown: false
-  agreement_signed: false
+  agreement_signed: true
 wyre.gov.uk:
   owner: Wyre Council
   crown: false

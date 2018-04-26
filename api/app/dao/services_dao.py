@@ -20,7 +20,6 @@ from app.models import (
     InboundNumber,
     InvitedUser,
     Job,
-    JobStatistics,
     Notification,
     NotificationHistory,
     Permission,
@@ -220,10 +219,6 @@ def delete_service_and_all_associated_db_objects(service):
         query.delete(synchronize_session=False)
         db.session.commit()
 
-    job_stats = JobStatistics.query.join(Job).filter(Job.service_id == service.id)
-    list(map(db.session.delete, job_stats))
-    db.session.commit()
-
     subq = db.session.query(Template.id).filter_by(service=service).subquery()
     _delete_commit(TemplateRedacted.query.filter(TemplateRedacted.template_id.in_(subq)))
 
@@ -338,6 +333,9 @@ def dao_fetch_monthly_historical_stats_for_service(service_id, year):
 
 @statsd(namespace='dao')
 def dao_fetch_todays_stats_for_all_services(include_from_test_key=True, only_active=True):
+    today = date.today()
+    start_date = get_london_midnight_in_utc(today)
+    end_date = get_london_midnight_in_utc(today + timedelta(days=1))
 
     subquery = db.session.query(
         Notification.notification_type,
@@ -345,7 +343,8 @@ def dao_fetch_todays_stats_for_all_services(include_from_test_key=True, only_act
         Notification.service_id,
         func.count(Notification.id).label('count')
     ).filter(
-        func.date(Notification.created_at) == date.today(),
+        Notification.created_at >= start_date,
+        Notification.created_at < end_date
     ).group_by(
         Notification.notification_type,
         Notification.status,
@@ -522,6 +521,7 @@ def dao_fetch_monthly_historical_usage_by_template_for_service(service_id, year)
         stat.month = result.month
         stat.year = result.year
         stat.count = result.count
+        stat.is_precompiled_letter = result.is_precompiled_letter
         stats.append(stat)
 
     month = get_london_month_from_utc_column(Notification.created_at)
@@ -533,6 +533,7 @@ def dao_fetch_monthly_historical_usage_by_template_for_service(service_id, year)
     if fy_start < datetime.now() < fy_end:
         today_results = db.session.query(
             Notification.template_id,
+            Template.is_precompiled_letter,
             Template.name,
             Template.template_type,
             extract('month', month).label('month'),
@@ -547,6 +548,7 @@ def dao_fetch_monthly_historical_usage_by_template_for_service(service_id, year)
             Notification.key_type != KEY_TYPE_TEST
         ).group_by(
             Notification.template_id,
+            Template.hidden,
             Template.name,
             Template.template_type,
             month,
@@ -571,6 +573,7 @@ def dao_fetch_monthly_historical_usage_by_template_for_service(service_id, year)
                 new_stat.month = int(today_result.month)
                 new_stat.year = int(today_result.year)
                 new_stat.count = today_result.count
+                new_stat.is_precompiled_letter = today_result.is_precompiled_letter
                 stats.append(new_stat)
 
     return stats

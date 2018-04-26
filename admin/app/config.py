@@ -1,11 +1,7 @@
 import os
 
 if os.environ.get('VCAP_APPLICATION'):
-    # on cloudfoundry, config is a json blob in VCAP_APPLICATION - unpack it, and populate
-    # standard environment variables from it
-    from app.cloudfoundry_config import extract_cloudfoundry_config
-    extract_cloudfoundry_config()
-
+    pass
 
 class Config(object):
     ADMIN_CLIENT_SECRET = os.environ.get('ADMIN_CLIENT_SECRET')
@@ -69,6 +65,7 @@ class Config(object):
     STATSD_PORT = 8125
     NOTIFY_ENVIRONMENT = 'development'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-local'
+    MOU_BUCKET_NAME = 'local-mou'
     ROUTE_SECRET_KEY_1 = os.environ.get('ROUTE_SECRET_KEY_1', '')
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
     CHECK_PROXY_HEADER = False
@@ -82,6 +79,7 @@ class Development(Config):
     STATSD_ENABLED = False
     CSV_UPLOAD_BUCKET_NAME = 'development-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-tools'
+    MOU_BUCKET_NAME = 'notify.tools-mou'
 
     ADMIN_CLIENT_SECRET = 'dev-notify-secret-key'
     API_HOST_NAME = 'http://localhost:6011'
@@ -98,7 +96,9 @@ class Test(Development):
     WTF_CSRF_ENABLED = False
     CSV_UPLOAD_BUCKET_NAME = 'test-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-test'
+    MOU_BUCKET_NAME = 'test-mou'
     NOTIFY_ENVIRONMENT = 'test'
+    API_HOST_NAME = 'http://you-forgot-to-mock-an-api-call-to'
     TEMPLATE_PREVIEW_API_HOST = 'http://localhost:9999'
 
 
@@ -108,6 +108,7 @@ class Preview(Config):
     STATSD_ENABLED = True
     CSV_UPLOAD_BUCKET_NAME = 'preview-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-preview'
+    MOU_BUCKET_NAME = 'notify.works-mou'
     NOTIFY_ENVIRONMENT = 'preview'
     CHECK_PROXY_HEADER = True
 
@@ -119,6 +120,7 @@ class Staging(Config):
     STATSD_ENABLED = True
     CSV_UPLOAD_BUCKET_NAME = 'staging-notify-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-staging'
+    MOU_BUCKET_NAME = 'staging-notify.works-mou'
     NOTIFY_ENVIRONMENT = 'staging'
     CHECK_PROXY_HEADER = True
 
@@ -130,6 +132,7 @@ class Live(Config):
     STATSD_ENABLED = True
     CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-production'
+    MOU_BUCKET_NAME = 'notifications.service.gov.uk-mou'
     NOTIFY_ENVIRONMENT = 'live'
     CHECK_PROXY_HEADER = False
 

@@ -82,7 +82,6 @@ from app.service.send_notification import send_one_off_notification
 from app.schemas import (
     service_schema,
     api_key_schema,
-    user_schema,
     permission_schema,
     notification_with_template_schema,
     notifications_filter_schema,
@@ -258,8 +257,7 @@ def get_api_keys(service_id, key_id=None):
 @service_blueprint.route('/<uuid:service_id>/users', methods=['GET'])
 def get_users_for_service(service_id):
     fetched = dao_fetch_service_by_id(service_id)
-    result = user_schema.dump(fetched.users, many=True)
-    return jsonify(data=result.data)
+    return jsonify(data=[x.serialize() for x in fetched.users])
 
 
 @service_blueprint.route('/<uuid:service_id>/users/<user_id>', methods=['POST'])
@@ -337,7 +335,11 @@ def get_service_history(service_id):
 def get_all_notifications_for_service(service_id):
     data = notifications_filter_schema.load(request.args).data
     if data.get('to'):
-        return search_for_notification_by_to_field(service_id, data['to'], statuses=data.get('status'))
+        notification_type = data.get('template_type')[0] if data.get('template_type') else None
+        return search_for_notification_by_to_field(service_id=service_id,
+                                                   search_term=data['to'],
+                                                   statuses=data.get('status'),
+                                                   notification_type=notification_type)
     page = data['page'] if 'page' in data else 1
     page_size = data['page_size'] if 'page_size' in data else current_app.config.get('PAGE_SIZE')
     limit_days = data.get('limit_days')
@@ -380,8 +382,13 @@ def get_notification_for_service(service_id, notification_id):
     ), 200
 
 
-def search_for_notification_by_to_field(service_id, search_term, statuses):
-    results = notifications_dao.dao_get_notifications_by_to_field(service_id, search_term, statuses)
+def search_for_notification_by_to_field(service_id, search_term, statuses, notification_type):
+    results = notifications_dao.dao_get_notifications_by_to_field(
+        service_id=service_id,
+        search_term=search_term,
+        statuses=statuses,
+        notification_type=notification_type
+    )
     return jsonify(
         notifications=notification_with_template_schema.dump(results, many=True).data
     ), 200
@@ -536,7 +543,8 @@ def get_monthly_template_usage(service_id):
                     'type': i.template_type,
                     'month': i.month,
                     'year': i.year,
-                    'count': i.count
+                    'count': i.count,
+                    'is_precompiled_letter': i.is_precompiled_letter
                 }
             )
 

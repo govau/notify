@@ -210,15 +210,15 @@ def test_get_notification_by_id_invalid_id(client, sample_notification, id):
         path='/v2/notifications/{}'.format(id),
         headers=[('Content-Type', 'application/json'), auth_header])
 
-    assert response.status_code == 404
+    assert response.status_code == 400
     assert response.headers['Content-type'] == 'application/json'
 
     json_response = json.loads(response.get_data(as_text=True))
-    assert json_response == {
-        "message": "The requested URL was not found on the server.  "
-                   "If you entered the URL manually please check your spelling and try again.",
-        "result": "error"
-    }
+    assert json_response == {"errors": [
+        {"error": "ValidationError",
+         "message": "notification_id is not a valid UUID"
+         }],
+        "status_code": 400}
 
 
 @pytest.mark.parametrize('created_at_month, estimated_delivery', [
@@ -422,7 +422,8 @@ def test_get_all_notifications_filter_by_status_invalid_status(client, sample_no
     assert json_response['status_code'] == 400
     assert len(json_response['errors']) == 1
     assert json_response['errors'][0]['message'] == "status elephant is not one of [created, sending, sent, " \
-        "delivered, pending, failed, technical-failure, temporary-failure, permanent-failure, accepted, received]"
+        "delivered, pending, failed, technical-failure, temporary-failure, permanent-failure, pending-virus-check, " \
+        "virus-scan-failed, accepted, received]"
 
 
 def test_get_all_notifications_filter_by_multiple_statuses(client, sample_template):
@@ -627,7 +628,7 @@ def test_get_notifications_renames_letter_statuses(client, sample_letter_templat
     )
     auth_header = create_authorization_header(service_id=letter_noti.service_id)
     response = client.get(
-        path=url_for('v2_notifications.get_notification_by_id', id=letter_noti.id),
+        path=url_for('v2_notifications.get_notification_by_id', notification_id=letter_noti.id),
         headers=[('Content-Type', 'application/json'), auth_header]
     )
 

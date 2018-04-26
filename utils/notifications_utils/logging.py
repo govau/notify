@@ -1,4 +1,5 @@
 from itertools import product
+from pathlib import Path
 import re
 import sys
 
@@ -43,7 +44,6 @@ def build_statsd_line(extra_fields):
 def init_app(app, statsd_client=None):
     app.config.setdefault('NOTIFY_LOG_LEVEL', 'INFO')
     app.config.setdefault('NOTIFY_APP_NAME', 'none')
-    app.config.setdefault('NOTIFY_LOG_PATH', './log/application.log')
 
     @app.after_request
     def after_request(response):
@@ -93,19 +93,22 @@ def init_app(app, statsd_client=None):
     app.logger.info("Logging configured")
 
 
+def ensure_log_path_exists(path):
+    """
+    This function assumes you're passing a path to a file and attempts to create
+    the path leading to that file.
+    """
+    Path(path).parent.mkdir(mode=755, parents=True, exist_ok=True)
+
+
 def get_handlers(app):
     handlers = []
     standard_formatter = CustomLogFormatter(LOG_FORMAT, TIME_FORMAT)
     json_formatter = JSONFormatter(LOG_FORMAT, TIME_FORMAT)
-
     stream_handler = logging.StreamHandler(sys.stdout)
     if not app.debug:
         # machine readable json to both file and stdout
-        file_handler = logging.handlers.WatchedFileHandler(
-            filename='{}.json'.format(app.config['NOTIFY_LOG_PATH'])
-        )
         handlers.append(configure_handler(stream_handler, app, json_formatter))
-        handlers.append(configure_handler(file_handler, app, json_formatter))
     else:
         # human readable stdout logs
         handlers.append(configure_handler(stream_handler, app, standard_formatter))

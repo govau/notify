@@ -7,8 +7,10 @@ from app.dao.inbound_sms_dao import (
     dao_count_inbound_sms_for_service,
     delete_inbound_sms_created_more_than_a_week_ago,
     dao_get_inbound_sms_by_id,
-    dao_get_paginated_inbound_sms_for_service
+    dao_get_paginated_inbound_sms_for_service_for_public_api,
+    dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service
 )
+from tests.conftest import set_config
 from tests.app.db import create_inbound_sms, create_service
 
 from app.models import InboundSms
@@ -97,31 +99,31 @@ def test_get_inbound_sms_by_id_returns(sample_service):
     assert inbound_sms == inbound_from_db
 
 
-def test_dao_get_paginated_inbound_sms_for_service(sample_service):
+def test_dao_get_paginated_inbound_sms_for_service_for_public_api(sample_service):
     inbound_sms = create_inbound_sms(service=sample_service)
-    inbound_from_db = dao_get_paginated_inbound_sms_for_service(inbound_sms.service.id)
+    inbound_from_db = dao_get_paginated_inbound_sms_for_service_for_public_api(inbound_sms.service.id)
 
     assert inbound_sms == inbound_from_db[0]
 
 
-def test_dao_get_paginated_inbound_sms_for_service_return_only_for_service(sample_service):
+def test_dao_get_paginated_inbound_sms_for_service_for_public_api_return_only_for_service(sample_service):
     inbound_sms = create_inbound_sms(service=sample_service)
     another_service = create_service(service_name='another service')
     another_inbound_sms = create_inbound_sms(another_service)
 
-    inbound_from_db = dao_get_paginated_inbound_sms_for_service(inbound_sms.service.id)
+    inbound_from_db = dao_get_paginated_inbound_sms_for_service_for_public_api(inbound_sms.service.id)
 
     assert inbound_sms in inbound_from_db
     assert another_inbound_sms not in inbound_from_db
 
 
-def test_dao_get_paginated_inbound_sms_for_service_no_inbound_sms_returns_empty_list(sample_service):
-    inbound_from_db = dao_get_paginated_inbound_sms_for_service(sample_service.id)
+def test_dao_get_paginated_inbound_sms_for_service_for_public_api_no_inbound_sms_returns_empty_list(sample_service):
+    inbound_from_db = dao_get_paginated_inbound_sms_for_service_for_public_api(sample_service.id)
 
     assert inbound_from_db == []
 
 
-def test_dao_get_paginated_inbound_sms_for_service_page_size_returns_correct_size(sample_service):
+def test_dao_get_paginated_inbound_sms_for_service_for_public_api_page_size_returns_correct_size(sample_service):
     inbound_sms_list = [
         create_inbound_sms(sample_service),
         create_inbound_sms(sample_service),
@@ -130,7 +132,7 @@ def test_dao_get_paginated_inbound_sms_for_service_page_size_returns_correct_siz
     ]
     reversed_inbound_sms = sorted(inbound_sms_list, key=lambda sms: sms.created_at, reverse=True)
 
-    inbound_from_db = dao_get_paginated_inbound_sms_for_service(
+    inbound_from_db = dao_get_paginated_inbound_sms_for_service_for_public_api(
         sample_service.id,
         older_than=reversed_inbound_sms[1].id,
         page_size=2
@@ -139,7 +141,7 @@ def test_dao_get_paginated_inbound_sms_for_service_page_size_returns_correct_siz
     assert len(inbound_from_db) == 2
 
 
-def test_dao_get_paginated_inbound_sms_for_service_older_than_returns_correct_list(sample_service):
+def test_dao_get_paginated_inbound_sms_for_service_for_public_api_older_than_returns_correct_list(sample_service):
     inbound_sms_list = [
         create_inbound_sms(sample_service),
         create_inbound_sms(sample_service),
@@ -148,7 +150,7 @@ def test_dao_get_paginated_inbound_sms_for_service_older_than_returns_correct_li
     ]
     reversed_inbound_sms = sorted(inbound_sms_list, key=lambda sms: sms.created_at, reverse=True)
 
-    inbound_from_db = dao_get_paginated_inbound_sms_for_service(
+    inbound_from_db = dao_get_paginated_inbound_sms_for_service_for_public_api(
         sample_service.id,
         older_than=reversed_inbound_sms[1].id,
         page_size=2
@@ -159,17 +161,63 @@ def test_dao_get_paginated_inbound_sms_for_service_older_than_returns_correct_li
     assert expected_inbound_sms == inbound_from_db
 
 
-def test_dao_get_paginated_inbound_sms_for_service_older_than_end_returns_empty_list(sample_service):
+def test_dao_get_paginated_inbound_sms_for_service_for_public_api_older_than_end_returns_empty_list(sample_service):
     inbound_sms_list = [
         create_inbound_sms(sample_service),
         create_inbound_sms(sample_service),
     ]
     reversed_inbound_sms = sorted(inbound_sms_list, key=lambda sms: sms.created_at, reverse=True)
 
-    inbound_from_db = dao_get_paginated_inbound_sms_for_service(
+    inbound_from_db = dao_get_paginated_inbound_sms_for_service_for_public_api(
         sample_service.id,
         older_than=reversed_inbound_sms[1].id,
         page_size=2
     )
 
     assert inbound_from_db == []
+
+
+def test_most_recent_inbound_sms_only_returns_most_recent_for_each_number(notify_api, sample_service):
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 1', created_at=datetime(2017, 1, 1))
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 2', created_at=datetime(2017, 1, 2))
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 3', created_at=datetime(2017, 1, 3))
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 4', created_at=datetime(2017, 1, 4))
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 5', created_at=datetime(2017, 1, 5))
+    create_inbound_sms(sample_service, user_number='447700900222', content='222 1', created_at=datetime(2017, 1, 1))
+    create_inbound_sms(sample_service, user_number='447700900222', content='222 2', created_at=datetime(2017, 1, 2))
+
+    with set_config(notify_api, 'PAGE_SIZE', 3):
+        res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, page=1)
+
+    assert len(res.items) == 2
+    assert res.has_next is False
+    assert res.per_page == 3
+    assert res.items[0].content == '111 5'
+    assert res.items[1].content == '222 2'
+
+
+def test_most_recent_inbound_sms_paginates_properly(notify_api, sample_service):
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 1', created_at=datetime(2017, 1, 1))
+    create_inbound_sms(sample_service, user_number='447700900111', content='111 2', created_at=datetime(2017, 1, 2))
+    create_inbound_sms(sample_service, user_number='447700900222', content='222 1', created_at=datetime(2017, 1, 3))
+    create_inbound_sms(sample_service, user_number='447700900222', content='222 2', created_at=datetime(2017, 1, 4))
+    create_inbound_sms(sample_service, user_number='447700900333', content='333 1', created_at=datetime(2017, 1, 5))
+    create_inbound_sms(sample_service, user_number='447700900333', content='333 2', created_at=datetime(2017, 1, 6))
+    create_inbound_sms(sample_service, user_number='447700900444', content='444 1', created_at=datetime(2017, 1, 7))
+    create_inbound_sms(sample_service, user_number='447700900444', content='444 2', created_at=datetime(2017, 1, 8))
+
+    with set_config(notify_api, 'PAGE_SIZE', 2):
+        # first page has most recent 444 and 333
+        res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, page=1)
+        assert len(res.items) == 2
+        assert res.has_next is True
+        assert res.per_page == 2
+        assert res.items[0].content == '444 2'
+        assert res.items[1].content == '333 2'
+
+        # second page has no 444 or 333 - just most recent 222 and 111
+        res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, page=2)
+        assert len(res.items) == 2
+        assert res.has_next is False
+        assert res.items[0].content == '222 2'
+        assert res.items[1].content == '111 2'

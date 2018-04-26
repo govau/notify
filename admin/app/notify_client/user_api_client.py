@@ -3,6 +3,7 @@ from notifications_python_client.errors import HTTPError
 from app.notify_client import NotifyAdminAPIClient
 from app.notify_client.models import (
     User,
+    roles,
     translate_permissions_from_admin_roles_to_db,
 )
 
@@ -134,6 +135,8 @@ class UserApiClient(NotifyAdminAPIClient):
         return [User(data) for data in resp['data']]
 
     def get_count_of_users_with_permission(self, service_id, permission):
+        if permission not in roles.keys():
+            raise TypeError('{} is not a valid permission'.format(permission))
         return len([
             user for user in self.get_users_for_service(service_id)
             if user.has_permission_for_service(service_id, permission)
@@ -182,3 +185,7 @@ class UserApiClient(NotifyAdminAPIClient):
         endpoint = '/user/{}/change-email-verification'.format(user_id)
         data = {'email': new_email}
         self.post(endpoint, data)
+
+    def get_organisations_and_services_for_user(self, user):
+        endpoint = '/user/{}/organisations-and-services'.format(user.id)
+        return self.get(endpoint)

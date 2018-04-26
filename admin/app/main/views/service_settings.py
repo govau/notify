@@ -44,6 +44,7 @@ from app.main.forms import (
     SMSPrefixForm,
 )
 from app.utils import (
+    AgreementInfo,
     email_safe,
     get_cdn_domain,
     user_has_permissions,
@@ -163,7 +164,23 @@ def service_name_change_confirm(service_id):
 @login_required
 @user_has_permissions('manage_service')
 def request_to_go_live(service_id):
-    return render_template('views/service-settings/request-to-go-live.html')
+    return render_template(
+        'views/service-settings/request-to-go-live.html',
+        has_team_members=(
+            user_api_client.get_count_of_users_with_permission(
+                service_id, 'manage_service'
+            ) > 1
+        ),
+        has_templates=(
+            service_api_client.count_service_templates(service_id) > 0
+        ),
+        has_email_templates=(
+            service_api_client.count_service_templates(service_id, template_type='email') > 0
+        ),
+        has_email_reply_to_address=bool(
+            service_api_client.get_reply_to_email_addresses(service_id)
+        )
+    )
 
 
 @main.route("/services/<service_id>/service-settings/submit-request-to-go-live", methods=['GET', 'POST'])
@@ -180,7 +197,7 @@ def submit_request_to_go_live(service_id):
                     'On behalf of {} ({})\n'
                     '\n---'
                     '\nOrganisation type: {}'
-                    '\nMOU in place: {}'
+                    '\nAgreement signed: {}'
                     '\nChannel: {}\nStart date: {}\nStart volume: {}'
                     '\nPeak volume: {}'
                     '\nFeatures: {}'
@@ -188,7 +205,7 @@ def submit_request_to_go_live(service_id):
                     current_service['name'],
                     url_for('main.service_dashboard', service_id=current_service['id'], _external=True),
                     current_service['organisation_type'],
-                    form.mou.data,
+                    AgreementInfo.from_current_user().as_human_readable,
                     formatted_list(filter(None, (
                         'email' if form.channel_email.data else None,
                         'text messages' if form.channel_sms.data else None,

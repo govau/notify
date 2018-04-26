@@ -126,13 +126,13 @@ def create_service_with_defined_sms_sender(
 
 
 def create_template(
-        service,
-        template_type=SMS_TYPE,
-        template_name=None,
-        subject='Template subject',
-        content='Dear Sir/Madam, Hello. Yours Truly, The Government.',
-        reply_to=None,
-        hidden=False
+    service,
+    template_type=SMS_TYPE,
+    template_name=None,
+    subject='Template subject',
+    content='Dear Sir/Madam, Hello. Yours Truly, The Government.',
+    reply_to=None,
+    hidden=False
 ):
     data = {
         'name': template_name or '{} Template Name'.format(template_type),
@@ -509,9 +509,13 @@ def create_invited_org_user(organisation, invited_by, email_address='invite@exam
     return invited_org_user
 
 
-def create_daily_sorted_letter(billing_day=date(2018, 1, 18), unsorted_count=0, sorted_count=0):
+def create_daily_sorted_letter(billing_day=date(2018, 1, 18),
+                               file_name="Notify-20180118123.rs.txt",
+                               unsorted_count=0,
+                               sorted_count=0):
     daily_sorted_letter = DailySortedLetter(
         billing_day=billing_day,
+        file_name=file_name,
         unsorted_count=unsorted_count,
         sorted_count=sorted_count
     )

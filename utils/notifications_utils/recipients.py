@@ -4,6 +4,7 @@ import csv
 import phonenumbers
 from contextlib import suppress
 from functools import lru_cache, partial
+from itertools import islice
 from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
 
@@ -11,7 +12,7 @@ from flask import current_app
 
 from notifications_utils.formatters import formatted_list
 from notifications_utils.template import Template
-from notifications_utils.columns import Columns
+from notifications_utils.columns import Columns, Row, Cell
 from notifications_utils.international_billing_rates import (
     COUNTRY_PREFIXES,
     INTERNATIONAL_BILLING_RATES,
@@ -19,6 +20,7 @@ from notifications_utils.international_billing_rates import (
 
 
 uk_prefix = '44'
+au_prefix = '61'
 
 first_column_headings = {
     'email': ['email address'],
@@ -52,8 +54,6 @@ tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECA
 
 class RecipientCSV():
 
-    missing_field_error = 'Missing'
-
     max_rows = 50000
 
     def __init__(
@@ -77,12 +77,11 @@ class RecipientCSV():
         self.template = template if isinstance(template, Template) else None
         self.international_sms = international_sms
         self.rows = list(self.get_rows())
-        self.annotated_rows = list(self.get_annotated_rows())
         self.remaining_messages = remaining_messages
 
     def __len__(self):
         if not hasattr(self, '_len'):
-            self._len = len(list(self.rows))
+            self._len = len(self.rows)
         return self._len
 
     def __getitem__(self, requested_index):
@@ -135,10 +134,8 @@ class RecipientCSV():
             self.more_rows_than_can_send or
             self.too_many_rows or
             (not self.allowed_to_send_to) or
-            self.rows_with_missing_data or
-            self.rows_with_bad_recipients or
-            self.rows_with_message_too_long
-        )  # This is 3x faster than using `any()`
+            any(self.rows_with_errors)
+        )  # `or` is 3x faster than using `any()` here
 
     @property
     def allowed_to_send_to(self):
@@ -147,8 +144,8 @@ class RecipientCSV():
         if not self.whitelist:
             return True
         return all(
-            allowed_to_send_to(recipient, self.whitelist)
-            for recipient in self.recipients
+            allowed_to_send_to(row.recipient, self.whitelist)
+            for row in self.rows
         )
 
     @property
@@ -168,7 +165,7 @@ class RecipientCSV():
 
         next(rows_as_lists_of_columns)  # skip the header row
 
-        for row in rows_as_lists_of_columns:
+        for index, row in enumerate(rows_as_lists_of_columns):
 
             output_dict = OrderedDict()
 
@@ -186,36 +183,17 @@ class RecipientCSV():
                 for key in column_headers[length_of_row:]:
                     insert_or_append_to_dict(output_dict, key, None)
 
-            yield Columns(output_dict)
-
-    @property
-    def rows_with_errors(self):
-        return self.rows_with_missing_data | self.rows_with_bad_recipients | self.rows_with_message_too_long
-
-    @property
-    def rows_with_missing_data(self):
-        return set(
-            row['index'] for row in self.annotated_rows if any(
-                value.get('error') == self.missing_field_error
-                for key, value in row['columns'].items()
-            )
-        )
-
-    @property
-    def rows_with_bad_recipients(self):
-        return set(
-            row['index'] for row in self.annotated_rows if any(
-                row['columns'].get(recipient_column, {}).get('error')
-                not in [None, self.missing_field_error]
-                for recipient_column in self.recipient_column_headers
-            )
-        )
-
-    @property
-    def rows_with_message_too_long(self):
-        return set(
-            row['index'] for row in self.annotated_rows if row['message_too_long']
-        )
+            if index < self.max_rows:
+                yield Row(
+                    output_dict,
+                    index=index,
+                    error_fn=self._get_error_for_field,
+                    recipient_column_headers=self.recipient_column_headers,
+                    placeholders=self.placeholders_as_column_keys,
+                    template=self.template,
+                )
+            else:
+                yield None
 
     @property
     def more_rows_than_can_send(self):
@@ -225,71 +203,38 @@ class RecipientCSV():
     def too_many_rows(self):
         return len(self) > self.max_rows
 
-    def get_annotated_rows(self):
-        if self.too_many_rows:
-            return []
-        for row_index, row in enumerate(self.rows):
-            if self.template:
-                self.template.values = dict(row.items())
-            yield dict(
-                columns=Columns({key: {
-                    'data': value,
-                    'error': self._get_error_for_field(key, value),
-                    'ignore': (
-                        key not in self.placeholders_as_column_keys
-                    )
-                } for key, value in row.items()}),
-                index=row_index,
-                message_too_long=bool(
-                    self.template and
-                    self.template.is_message_too_long()
-                )
-            )
+    @property
+    def initial_rows(self):
+        return islice(self.rows, self.max_initial_rows_shown)
 
     @property
-    def initial_annotated_rows(self):
-        for row in self.annotated_rows:
-            if row['index'] < self.max_initial_rows_shown:
-                yield row
+    def displayed_rows(self):
+        if any(self.rows_with_errors) and not self.missing_column_headers:
+            return self.initial_rows_with_errors
+        return self.initial_rows
+
+    def _filter_rows(self, attr):
+        return (row for row in self.rows if getattr(row, attr))
 
     @property
-    def annotated_rows_with_errors(self):
-        for row in self.annotated_rows:
-            if RecipientCSV.row_has_error(row):
-                yield row
+    def rows_with_errors(self):
+        return self._filter_rows('has_error')
 
     @property
-    def initial_annotated_rows_with_errors(self):
-        for row_index, row in enumerate(self.annotated_rows_with_errors):
-            if row_index < self.max_errors_shown:
-                yield row
+    def rows_with_bad_recipients(self):
+        return self._filter_rows('has_bad_recipient')
 
     @property
-    def recipients(self):
-        for row in self.rows:
-            yield self._get_recipient_from_row(row)
+    def rows_with_missing_data(self):
+        return self._filter_rows('has_missing_data')
 
     @property
-    def personalisation(self):
-        for row in self.rows:
-            yield self._get_personalisation_from_row(row)
+    def rows_with_message_too_long(self):
+        return self._filter_rows('message_too_long')
 
     @property
-    def enumerated_recipients_and_personalisation(self):
-        for row_index, row in enumerate(self.rows):
-            yield (
-                row_index,
-                self._get_recipient_from_row(row),
-                self._get_personalisation_from_row(row)
-            )
-
-    @property
-    def recipients_and_personalisation(self):
-        for row in self.rows:
-            yield (
-                self._get_recipient_from_row(row),
-                self._get_personalisation_from_row(row)
-            )
+    def initial_rows_with_errors(self):
+        return islice(self.rows_with_errors, self.max_errors_shown)
 
     @property
     def _raw_column_headers(self):
@@ -349,9 +294,9 @@ class RecipientCSV():
         if self.is_optional_address_column(key):
             return
 
-        if key in self.recipient_column_headers_as_column_keys:
+        if Columns.make_key(key) in self.recipient_column_headers_as_column_keys:
             if value in [None, '']:
-                return self.missing_field_error
+                return Cell.missing_field_error
             try:
                 validate_recipient(
                     value,
@@ -362,32 +307,11 @@ class RecipientCSV():
             except (InvalidEmailError, InvalidPhoneError, InvalidAddressError) as error:
                 return str(error)
 
-        if key not in self.placeholders_as_column_keys:
+        if Columns.make_key(key) not in self.placeholders_as_column_keys:
             return
 
         if value in [None, '']:
-            return self.missing_field_error
-
-    def _get_recipient_from_row(self, row):
-        if len(self.recipient_column_headers) == 1:
-            return row[
-                self.recipient_column_headers[0]
-            ]
-        else:
-            return [
-                row[column] for column in self.recipient_column_headers
-            ]
-
-    def _get_personalisation_from_row(self, row):
-        return Columns({
-            key: value for key, value in row.items() if key in self.placeholders_as_column_keys
-        })
-
-    @staticmethod
-    def row_has_error(row):
-        return any(
-            key != 'index' and value.get('error') for key, value in row['columns'].items()
-        )
+            return Cell.missing_field_error
 
 
 class InvalidEmailError(Exception):
@@ -427,13 +351,16 @@ def is_uk_phone_number(number):
     number = normalise_phone_number(number)
 
     if (
-        number.startswith(uk_prefix) or
+        number.startswith(au_prefix) or
         (number.startswith('7') and len(number) < 11)
     ):
         return True
 
     return False
 
+
+def is_au_phone_number(number):
+    return True
 
 international_phone_info = namedtuple('PhoneNumber', [
     'international',
@@ -448,7 +375,7 @@ def get_international_phone_info(number):
     prefix = get_international_prefix(number)
 
     return international_phone_info(
-        international=(prefix != uk_prefix),
+        international=(prefix != au_prefix),
         country_prefix=prefix,
         billable_units=get_billable_units_for_prefix(prefix)
     )
@@ -467,23 +394,23 @@ def get_billable_units_for_prefix(prefix):
 
 def validate_uk_phone_number(number, column=None):
 
-    number = normalise_phone_number(number).lstrip(uk_prefix).lstrip('0')
+    number = normalise_phone_number(number).lstrip(au_prefix).lstrip('0')
 
-    if not number.startswith('7'):
-        raise InvalidPhoneError('Not a UK mobile number')
+    if not number.startswith('4'):
+        raise InvalidPhoneError('Not an AU mobile number')
 
-    if len(number) > 10:
+    if len(number) > 9:
         raise InvalidPhoneError('Too many digits')
 
-    if len(number) < 10:
+    if len(number) < 9:
         raise InvalidPhoneError('Not enough digits')
 
-    return '{}{}'.format(uk_prefix, number)
+    return '{}{}'.format(au_prefix, number)
 
 
 def validate_phone_number(number, column=None, international=False):
 
-    if (not international) or is_uk_phone_number(number):
+    if (not international) or is_au_phone_number(number):
         return validate_uk_phone_number(number)
 
     number = normalise_phone_number(number)
@@ -534,7 +461,6 @@ def validate_email_address(email_address, column=None):  # noqa (C901 too comple
     try:
         hostname = hostname.encode('idna').decode('ascii')
     except UnicodeError:
-        current_app.logger.error('Invalid hostname {}'.format(hostname))
         raise InvalidEmailError
 
     parts = hostname.split('.')

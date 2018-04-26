@@ -10,41 +10,33 @@ from celery.exceptions import MaxRetriesExceededError
 from requests import RequestException
 from sqlalchemy.orm.exc import NoResultFound
 
+from app.errors import VirusScanError
 from app.variables import Retention
 from app.celery.letters_pdf_tasks import (
     create_letters_pdf,
     get_letters_pdf,
     collate_letter_pdfs_for_day,
     group_letters,
-    letter_in_created_state
-)
-from app.letters.utils import get_letter_pdf_filename
-from app.models import Notification, NOTIFICATION_SENDING
+    letter_in_created_state,
+    process_virus_scan_passed,
+    process_virus_scan_failed,
+    process_virus_scan_error)
+from app.letters.utils import get_letter_pdf_filename, ScanErrorType
+from app.models import (
+    KEY_TYPE_NORMAL,
+    KEY_TYPE_TEST,
+    Notification,
+    NOTIFICATION_CREATED,
+    NOTIFICATION_DELIVERED,
+    NOTIFICATION_VIRUS_SCAN_FAILED,
+    NOTIFICATION_SENDING,
+    NOTIFICATION_TECHNICAL_FAILURE)
 
 from tests.conftest import set_config_values
 
 
 def test_should_have_decorated_tasks_functions():
     assert create_letters_pdf.__wrapped__.__name__ == 'create_letters_pdf'
-
-
-@pytest.mark.parametrize('crown_flag,expected_crown_text', [
-    (True, 'C'),
-    (False, 'N'),
-])
-@freeze_time("2017-12-04 17:29:00")
-def test_get_letter_pdf_filename_returns_correct_filename(
-        notify_api, mocker, crown_flag, expected_crown_text):
-    filename = get_letter_pdf_filename(reference='foo', crown=crown_flag)
-
-    assert filename == '2017-12-04/NOTIFY.FOO.D.2.C.{}.20171204172900.PDF'.format(expected_crown_text)
-
-
-@freeze_time("2017-12-04 17:31:00")
-def test_get_letter_pdf_filename_returns_tomorrows_filename(notify_api, mocker):
-    filename = get_letter_pdf_filename(reference='foo', crown=True)
-
-    assert filename == '2017-12-05/NOTIFY.FOO.D.2.C.C.20171204173100.PDF'
 
 
 @pytest.mark.parametrize('personalisation', [{'name': 'test'}, None])
@@ -327,3 +319,47 @@ def test_letter_in_created_state_fails_if_notification_doesnt_exist(sample_notif
     sample_notification.reference = 'QWERTY1234567890'
     filename = '2018-01-13/NOTIFY.ABCDEF1234567890.D.2.C.C.20180113120000.PDF'
     assert letter_in_created_state(filename) is False
+
+
+@pytest.mark.parametrize('key_type,is_test_letter,noti_status', [
+    (KEY_TYPE_NORMAL, False, NOTIFICATION_CREATED),
+    (KEY_TYPE_TEST, True, NOTIFICATION_DELIVERED)
+])
+def test_process_letter_task_check_virus_scan_passed(
+    sample_letter_notification, mocker, key_type, is_test_letter, noti_status
+):
+    filename = 'NOTIFY.{}'.format(sample_letter_notification.reference)
+    sample_letter_notification.status = 'pending-virus-check'
+    sample_letter_notification.key_type = key_type
+    mock_move_pdf = mocker.patch('app.celery.letters_pdf_tasks.move_scanned_pdf_to_test_or_live_pdf_bucket')
+
+    process_virus_scan_passed(filename)
+
+    mock_move_pdf.assert_called_once_with(filename, is_test_letter=is_test_letter)
+    assert sample_letter_notification.status == noti_status
+
+
+def test_process_letter_task_check_virus_scan_failed(sample_letter_notification, mocker):
+    filename = 'NOTIFY.{}'.format(sample_letter_notification.reference)
+    sample_letter_notification.status = 'pending-virus-check'
+    mock_move_failed_pdf = mocker.patch('app.celery.letters_pdf_tasks.move_failed_pdf')
+
+    with pytest.raises(VirusScanError) as e:
+        process_virus_scan_failed(filename)
+
+    assert "Virus scan failed:" in str(e)
+    mock_move_failed_pdf.assert_called_once_with(filename, ScanErrorType.FAILURE)
+    assert sample_letter_notification.status == NOTIFICATION_VIRUS_SCAN_FAILED
+
+
+def test_process_letter_task_check_virus_scan_error(sample_letter_notification, mocker):
+    filename = 'NOTIFY.{}'.format(sample_letter_notification.reference)
+    sample_letter_notification.status = 'pending-virus-check'
+    mock_move_failed_pdf = mocker.patch('app.celery.letters_pdf_tasks.move_failed_pdf')
+
+    with pytest.raises(VirusScanError) as e:
+        process_virus_scan_error(filename)
+
+    assert "Virus scan error:" in str(e)
+    mock_move_failed_pdf.assert_called_once_with(filename, ScanErrorType.ERROR)
+    assert sample_letter_notification.status == NOTIFICATION_TECHNICAL_FAILURE

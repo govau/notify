@@ -14,6 +14,7 @@ class TestClient(FlaskClient):
     def login(self, user, mocker=None, service=None):
         # Skipping authentication here and just log them in
         with self.session_transaction() as session:
+            session['current_session_id'] = user.current_session_id
             session['user_id'] = user.id
         if mocker:
             mocker.patch('app.user_api_client.get_user', return_value=user)
@@ -63,6 +64,7 @@ def user_json(
     platform_admin=False,
     current_session_id='1234',
     organisations=[],
+    services=None
 
 ):
     return {
@@ -78,7 +80,8 @@ def user_json(
         'max_failed_login_count': max_failed_login_count,
         'platform_admin': platform_admin,
         'current_session_id': current_session_id,
-        'organisations': organisations
+        'organisations': organisations,
+        'services': list(permissions.keys()) if services is None else services
     }
 
 
@@ -358,7 +361,8 @@ def notification_json(
     rows=5,
     personalisation=None,
     template_type=None,
-    reply_to_text=None
+    reply_to_text=None,
+    client_reference=None,
 ):
     if template is None:
         template = template_json(service_id, str(generate_uuid()), type_=template_type)
@@ -407,6 +411,7 @@ def notification_json(
             'personalisation': personalisation or {},
             'notification_type': template_type,
             'reply_to_text': reply_to_text,
+            'client_reference': client_reference,
         } for i in range(rows)],
         'total': rows,
         'page_size': 50,

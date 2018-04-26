@@ -13,7 +13,6 @@ if os.environ.get('VCAP_SERVICES'):
     # on cloudfoundry, config is a json blob in VCAP_SERVICES - unpack it, and populate
     # standard environment variables from it
     from app.cloudfoundry_config import extract_cloudfoundry_config
-
     extract_cloudfoundry_config()
 
 
@@ -32,6 +31,7 @@ class QueueNames(object):
     CREATE_LETTERS_PDF = 'create-letters-pdf-tasks'
     CALLBACKS = 'service-callbacks'
     LETTERS = 'letter-tasks'
+    ANTIVIRUS = 'antivirus-tasks'
 
     @staticmethod
     def all_queues():
@@ -56,6 +56,7 @@ class TaskNames(object):
     DVLA_JOBS = 'send-jobs-to-dvla'
     PROCESS_INCOMPLETE_JOBS = 'process-incomplete-jobs'
     ZIP_AND_SEND_LETTER_PDFS = 'zip-and-send-letter-pdfs'
+    SCAN_FILE = 'scan-file'
 
 
 class Config(object):
@@ -93,7 +94,8 @@ class Config(object):
     # URL of redis instance
     REDIS_URL = os.getenv('REDIS_URL')
     REDIS_ENABLED = os.getenv('REDIS_ENABLED') == '1'
-    EXPIRE_CACHE_IN_SECONDS = 600
+    EXPIRE_CACHE_TEN_MINUTES = 600
+    EXPIRE_CACHE_EIGHT_DAYS = 8 * 24 * 60 * 60
 
     # Performance platform
     PERFORMANCE_PLATFORM_ENABLED = False
@@ -116,6 +118,7 @@ class Config(object):
     ###########################
 
     NOTIFY_ENVIRONMENT = 'development'
+    NOTIFY_EMAIL_DOMAIN = 'digital.gov.au'
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
     AWS_REGION = 'eu-west-1'
     INVITATION_EXPIRATION_DAYS = 2
@@ -149,8 +152,10 @@ class Config(object):
     CHANGE_EMAIL_CONFIRMATION_TEMPLATE_ID = 'eb4d9930-87ab-4aef-9bce-786762687884'
     SERVICE_NOW_LIVE_TEMPLATE_ID = '618185c6-3636-49cd-b7d2-6f6f5eb3bdde'
     ORGANISATION_INVITATION_EMAIL_TEMPLATE_ID = '203566f0-d835-47c5-aa06-932439c86573'
-    PRECOMPILED_TEMPLATE_NAME = 'Pre-compiled PDF'
 
+    BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
+    
+    """
     BROKER_URL = 'sqs://'
     BROKER_TRANSPORT_OPTIONS = {
         'region': AWS_REGION,
@@ -158,11 +163,14 @@ class Config(object):
         'visibility_timeout': 310,
         'queue_name_prefix': NOTIFICATION_QUEUE_PREFIX
     }
+    CELERY_ALWAYS_EAGER = True
+    """
+
     CELERY_ENABLE_UTC = True
     CELERY_TIMEZONE = 'Europe/London'
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
-    CELERY_IMPORTS = ('app.celery.tasks', 'app.celery.scheduled_tasks')
+    CELERY_IMPORTS = ('app.celery.tasks', 'app.celery.scheduled_tasks', 'app.celery.reporting_tasks')
     CELERYBEAT_SCHEDULE = {
         'run-scheduled-jobs': {
             'task': 'run-scheduled-jobs',
@@ -214,6 +222,11 @@ class Config(object):
             'schedule': crontab(hour=3, minute=0),
             'options': {'queue': QueueNames.PERIODIC}
         },
+        'create-nightly-billing': {
+            'task': 'create-nightly-billing',
+            'schedule': crontab(hour=3, minute=30),
+            'options': {'queue': QueueNames.PERIODIC}
+        },
         'remove_sms_email_jobs': {
             'task': 'remove_csv_files',
             'schedule': crontab(hour=4, minute=0),
@@ -259,6 +272,11 @@ class Config(object):
         'daily-stats-template-usage-by-month': {
             'task': 'daily-stats-template-usage-by-month',
             'schedule': crontab(hour=0, minute=5),
+            'options': {'queue': QueueNames.PERIODIC}
+        },
+        'replay-created-notifications': {
+            'task': 'replay-created-notifications',
+            'schedule': crontab(minute='0, 15, 30, 45'),
             'options': {'queue': QueueNames.PERIODIC}
         }
     }
@@ -322,7 +340,10 @@ class Development(Config):
 
     CSV_UPLOAD_BUCKET_NAME = 'development-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'development-letters-pdf'
+    TEST_LETTERS_BUCKET_NAME = 'development-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notify.tools-ftp'
+    LETTERS_PDF_BUCKET_NAME = 'development-letters-pdf'
+    LETTERS_SCAN_BUCKET_NAME = 'development-letters-scan'
 
     ADMIN_CLIENT_SECRET = 'dev-notify-secret-key'
     SECRET_KEY = 'dev-notify-secret-key'
@@ -331,10 +352,10 @@ class Development(Config):
     NOTIFY_ENVIRONMENT = 'development'
     NOTIFY_LOG_PATH = 'application.log'
     NOTIFICATION_QUEUE_PREFIX = 'development'
-    NOTIFY_EMAIL_DOMAIN = "notify.tools"
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/notification_api'
     REDIS_URL = 'redis://localhost:6379/0'
+    BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
 
     STATSD_ENABLED = False
     STATSD_HOST = "localhost"
@@ -351,14 +372,16 @@ class Development(Config):
 
 
 class Test(Development):
-    NOTIFY_EMAIL_DOMAIN = 'test.notify.com'
     FROM_NUMBER = 'testing'
     NOTIFY_ENVIRONMENT = 'test'
     TESTING = True
 
     CSV_UPLOAD_BUCKET_NAME = 'test-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
+    TEST_LETTERS_BUCKET_NAME = 'test-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'test.notify.com-ftp'
+    LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
+    LETTERS_SCAN_BUCKET_NAME = 'test-letters-scan'
 
     # this is overriden in jenkins and on cloudfoundry
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/test_notification_api')
@@ -381,22 +404,26 @@ class Test(Development):
 
 
 class Preview(Config):
-    NOTIFY_EMAIL_DOMAIN = 'notify.works'
     NOTIFY_ENVIRONMENT = 'preview'
     CSV_UPLOAD_BUCKET_NAME = 'preview-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'preview-letters-pdf'
+    TEST_LETTERS_BUCKET_NAME = 'preview-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notify.works-ftp'
+    LETTERS_PDF_BUCKET_NAME = 'preview-letters-pdf'
+    LETTERS_SCAN_BUCKET_NAME = 'preview-letters-scan'
     FROM_NUMBER = 'preview'
     API_RATE_LIMIT_ENABLED = True
     CHECK_PROXY_HEADER = True
 
 
 class Staging(Config):
-    NOTIFY_EMAIL_DOMAIN = 'staging-notify.works'
     NOTIFY_ENVIRONMENT = 'staging'
     CSV_UPLOAD_BUCKET_NAME = 'staging-notify-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'staging-letters-pdf'
+    TEST_LETTERS_BUCKET_NAME = 'staging-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'staging-notify.works-ftp'
+    LETTERS_PDF_BUCKET_NAME = 'staging-letters-pdf'
+    LETTERS_SCAN_BUCKET_NAME = 'staging-letters-scan'
     STATSD_ENABLED = True
     FROM_NUMBER = 'stage'
     API_RATE_LIMIT_ENABLED = True
@@ -405,11 +432,13 @@ class Staging(Config):
 
 
 class Live(Config):
-    NOTIFY_EMAIL_DOMAIN = 'notifications.service.gov.uk'
     NOTIFY_ENVIRONMENT = 'live'
     CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
+    TEST_LETTERS_BUCKET_NAME = 'production-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notifications.service.gov.uk-ftp'
+    LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
+    LETTERS_SCAN_BUCKET_NAME = 'production-letters-scan'
     STATSD_ENABLED = True
     FROM_NUMBER = 'GOVUK'
     FUNCTIONAL_TEST_PROVIDER_SERVICE_ID = '6c1d81bb-dae2-4ee9-80b0-89a4aae9f649'
@@ -425,11 +454,13 @@ class CloudFoundryConfig(Config):
 
 # CloudFoundry sandbox
 class Sandbox(CloudFoundryConfig):
-    NOTIFY_EMAIL_DOMAIN = 'notify.works'
     NOTIFY_ENVIRONMENT = 'sandbox'
     CSV_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'cf-sandbox-letters-pdf'
+    TEST_LETTERS_BUCKET_NAME = 'cf-sandbox-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notify.works-ftp'
+    LETTERS_PDF_BUCKET_NAME = 'cf-sandbox-letters-pdf'
+    LETTERS_SCAN_BUCKET_NAME = 'cf-sandbox-letters-scan'
     FROM_NUMBER = 'sandbox'
     REDIS_ENABLED = False
 

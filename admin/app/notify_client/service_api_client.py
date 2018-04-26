@@ -1,9 +1,6 @@
 from __future__ import unicode_literals
 
-from flask import url_for
-
 from app.notify_client import NotifyAdminAPIClient, _attach_current_user
-from app.utils import BrowsableItem
 
 
 class ServiceAPIClient(NotifyAdminAPIClient):
@@ -264,13 +261,26 @@ class ServiceAPIClient(NotifyAdminAPIClient):
     def update_whitelist(self, service_id, data):
         return self.put(url='/service/{}/whitelist'.format(service_id), data=data)
 
-    def get_inbound_sms(self, service_id, user_number=''):
+    def get_inbound_sms(self, service_id, user_number='', page=None):
         return self.get(
-            '/service/{}/inbound-sms?user_number={}'.format(
+            '/service/{}/inbound-sms'.format(
                 service_id,
-                user_number,
-            )
-        )['data']
+            ),
+            params={
+                'user_number': user_number,
+                'page': page
+            }
+        )
+
+    def get_most_recent_inbound_sms(self, service_id, page=None):
+        return self.get(
+            '/service/{}/inbound-sms/most-recent'.format(
+                service_id,
+            ),
+            params={
+                'page': page
+            }
+        )
 
     def get_inbound_sms_by_id(self, service_id, notification_id):
         return self.get(
@@ -426,21 +436,3 @@ class ServiceAPIClient(NotifyAdminAPIClient):
             "updated_by_id": user_id
         }
         return self.post("/service/{}/delivery-receipt-api".format(service_id), data)
-
-
-class ServicesBrowsableItem(BrowsableItem):
-    @property
-    def title(self):
-        return self._item['name']
-
-    @property
-    def link(self):
-        return url_for('main.service_dashboard', service_id=self._item['id'])
-
-    @property
-    def destructive(self):
-        return False
-
-    @property
-    def hint(self):
-        return None

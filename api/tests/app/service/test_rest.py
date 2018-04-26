@@ -25,7 +25,8 @@ from app.models import (
     User,
     DVLA_ORG_LAND_REGISTRY,
     KEY_TYPE_NORMAL, KEY_TYPE_TEAM, KEY_TYPE_TEST,
-    EMAIL_TYPE, SMS_TYPE, LETTER_TYPE, INTERNATIONAL_SMS_TYPE, INBOUND_SMS_TYPE
+    EMAIL_TYPE, SMS_TYPE, LETTER_TYPE, INTERNATIONAL_SMS_TYPE, INBOUND_SMS_TYPE,
+    PRECOMPILED_TEMPLATE_NAME
 )
 from tests import create_authorization_header
 from tests.app.conftest import (
@@ -1634,6 +1635,7 @@ def test_get_detailed_services_only_includes_todays_notifications(notify_db, not
     create_sample_notification(notify_db, notify_db_session, created_at=datetime(2015, 10, 9, 23, 59))
     create_sample_notification(notify_db, notify_db_session, created_at=datetime(2015, 10, 10, 0, 0))
     create_sample_notification(notify_db, notify_db_session, created_at=datetime(2015, 10, 10, 12, 0))
+    create_sample_notification(notify_db, notify_db_session, created_at=datetime(2015, 10, 10, 23, 0))
 
     with freeze_time('2015-10-10T12:00:00'):
         data = get_detailed_services(start_date=datetime.utcnow().date(), end_date=datetime.utcnow().date())
@@ -1642,7 +1644,7 @@ def test_get_detailed_services_only_includes_todays_notifications(notify_db, not
     assert len(data) == 1
     assert data[0]['statistics'] == {
         EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 2},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 3},
         LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
     }
 
@@ -1831,7 +1833,12 @@ def test_get_template_usage_by_month_returns_two_templates(
         sample_service
 ):
 
-    template_one = create_template(sample_service)
+    template_one = create_template(
+        sample_service,
+        template_type=LETTER_TYPE,
+        template_name=PRECOMPILED_TEMPLATE_NAME,
+        hidden=True
+    )
 
     # add a historical notification for template
     not1 = create_notification_history(
@@ -1889,6 +1896,7 @@ def test_get_template_usage_by_month_returns_two_templates(
     assert resp_json[0]["month"] == 4
     assert resp_json[0]["year"] == 2017
     assert resp_json[0]["count"] == 1
+    assert resp_json[0]["is_precompiled_letter"] is True
 
     assert resp_json[1]["template_id"] == str(sample_template.id)
     assert resp_json[1]["name"] == sample_template.name
@@ -1896,6 +1904,7 @@ def test_get_template_usage_by_month_returns_two_templates(
     assert resp_json[1]["month"] == 4
     assert resp_json[1]["year"] == 2017
     assert resp_json[1]["count"] == 3
+    assert resp_json[1]["is_precompiled_letter"] is False
 
     assert resp_json[2]["template_id"] == str(sample_template.id)
     assert resp_json[2]["name"] == sample_template.name
@@ -1903,15 +1912,18 @@ def test_get_template_usage_by_month_returns_two_templates(
     assert resp_json[2]["month"] == 11
     assert resp_json[2]["year"] == 2017
     assert resp_json[2]["count"] == 1
+    assert resp_json[2]["is_precompiled_letter"] is False
 
 
-def test_search_for_notification_by_to_field(client, notify_db, notify_db_session):
-    create_notification = partial(create_sample_notification, notify_db, notify_db_session)
-    notification1 = create_notification(to_field='+447700900855', normalised_to='447700900855')
-    notification2 = create_notification(to_field='jack@gmail.com', normalised_to='jack@gmail.com')
+def test_search_for_notification_by_to_field(client, sample_template, sample_email_template):
+
+    notification1 = create_notification(template=sample_template, to_field='+447700900855',
+                                        normalised_to='447700900855')
+    notification2 = create_notification(template=sample_email_template, to_field='jack@gmail.com',
+                                        normalised_to='jack@gmail.com')
 
     response = client.get(
-        '/service/{}/notifications?to={}'.format(notification1.service_id, 'jack@gmail.com'),
+        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, 'jack@gmail.com', 'email'),
         headers=[create_authorization_header()]
     )
     notifications = json.loads(response.get_data(as_text=True))['notifications']
@@ -1929,7 +1941,7 @@ def test_search_for_notification_by_to_field_return_empty_list_if_there_is_no_ma
     create_notification(to_field='jack@gmail.com')
 
     response = client.get(
-        '/service/{}/notifications?to={}'.format(notification1.service_id, '+447700900800'),
+        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447700900800', 'sms'),
         headers=[create_authorization_header()]
     )
     notifications = json.loads(response.get_data(as_text=True))['notifications']
@@ -1946,7 +1958,7 @@ def test_search_for_notification_by_to_field_return_multiple_matches(client, not
     notification4 = create_notification(to_field='jack@gmail.com', normalised_to='jack@gmail.com')
 
     response = client.get(
-        '/service/{}/notifications?to={}'.format(notification1.service_id, '+447700900855'),
+        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447700900855', 'sms'),
         headers=[create_authorization_header()]
     )
     notifications = json.loads(response.get_data(as_text=True))['notifications']
@@ -1959,6 +1971,18 @@ def test_search_for_notification_by_to_field_return_multiple_matches(client, not
     assert str(notification2.id) in notification_ids
     assert str(notification3.id) in notification_ids
     assert str(notification4.id) not in notification_ids
+
+
+def test_search_for_notification_by_to_field_return_400_for_letter_type(
+        client, notify_db, notify_db_session, sample_service
+):
+    response = client.get(
+        '/service/{}/notifications?to={}&template_type={}'.format(sample_service.id, 'A. Name', 'letter'),
+        headers=[create_authorization_header()]
+    )
+    response.status_code = 400
+    error_message = json.loads(response.get_data(as_text=True))
+    assert error_message['message'] == 'Only email and SMS can use search by recipient'
 
 
 def test_update_service_calls_send_notification_as_service_becomes_live(notify_db, notify_db_session, client, mocker):
@@ -2040,8 +2064,8 @@ def test_search_for_notification_by_to_field_filters_by_status(client, notify_db
     create_notification(status='sending')
 
     response = client.get(
-        '/service/{}/notifications?to={}&status={}'.format(
-            notification1.service_id, '+447700900855', 'delivered'
+        '/service/{}/notifications?to={}&status={}&template_type={}'.format(
+            notification1.service_id, '+447700900855', 'delivered', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2065,8 +2089,8 @@ def test_search_for_notification_by_to_field_filters_by_statuses(client, notify_
     notification2 = create_notification(status='sending')
 
     response = client.get(
-        '/service/{}/notifications?to={}&status={}&status={}'.format(
-            notification1.service_id, '+447700900855', 'delivered', 'sending'
+        '/service/{}/notifications?to={}&status={}&status={}&template_type={}'.format(
+            notification1.service_id, '+447700900855', 'delivered', 'sending', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2095,8 +2119,8 @@ def test_search_for_notification_by_to_field_returns_content(
     )
 
     response = client.get(
-        '/service/{}/notifications?to={}'.format(
-            sample_template_with_placeholders.service_id, '+447700900855'
+        '/service/{}/notifications?to={}&template_type={}'.format(
+            sample_template_with_placeholders.service_id, '+447700900855', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2139,6 +2163,17 @@ def test_get_notification_for_service_includes_template_redacted(admin_request, 
     assert resp['template']['redact_personalisation'] is False
 
 
+def test_get_notification_for_service_includes_precompiled_letter(admin_request, sample_notification):
+    resp = admin_request.get(
+        'service.get_notification_for_service',
+        service_id=sample_notification.service_id,
+        notification_id=sample_notification.id
+    )
+
+    assert resp['id'] == str(sample_notification.id)
+    assert resp['template']['is_precompiled_letter'] is False
+
+
 def test_get_all_notifications_for_service_includes_template_redacted(admin_request, sample_service):
     normal_template = create_template(sample_service)
 
@@ -2162,6 +2197,33 @@ def test_get_all_notifications_for_service_includes_template_redacted(admin_requ
     assert resp['notifications'][1]['template']['redact_personalisation'] is True
 
 
+def test_get_all_notifications_for_service_includes_template_hidden(admin_request, sample_service):
+    letter_template = create_template(sample_service, template_type=LETTER_TYPE)
+    precompiled_template = create_template(
+        sample_service,
+        template_type=LETTER_TYPE,
+        template_name='Pre-compiled PDF',
+        subject='Pre-compiled PDF',
+        hidden=True
+    )
+
+    with freeze_time('2000-01-01'):
+        letter_noti = create_notification(letter_template)
+    with freeze_time('2000-01-02'):
+        precompiled_noti = create_notification(precompiled_template)
+
+    resp = admin_request.get(
+        'service.get_all_notifications_for_service',
+        service_id=sample_service.id
+    )
+
+    assert resp['notifications'][0]['id'] == str(precompiled_noti.id)
+    assert resp['notifications'][0]['template']['is_precompiled_letter'] is True
+
+    assert resp['notifications'][1]['id'] == str(letter_noti.id)
+    assert resp['notifications'][1]['template']['is_precompiled_letter'] is False
+
+
 def test_search_for_notification_by_to_field_returns_personlisation(
     client,
     notify_db,
@@ -2178,8 +2240,8 @@ def test_search_for_notification_by_to_field_returns_personlisation(
     )
 
     response = client.get(
-        '/service/{}/notifications?to={}'.format(
-            sample_template_with_placeholders.service_id, '+447700900855'
+        '/service/{}/notifications?to={}&template_type={}'.format(
+            sample_template_with_placeholders.service_id, '+447700900855', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2189,6 +2251,42 @@ def test_search_for_notification_by_to_field_returns_personlisation(
     assert len(notifications) == 1
     assert 'personalisation' in notifications[0].keys()
     assert notifications[0]['personalisation']['name'] == 'Foo'
+
+
+def test_search_for_notification_by_to_field_returns_notifications_by_type(
+    client,
+    notify_db,
+    notify_db_session,
+    sample_template,
+    sample_email_template
+):
+    sms_notification = create_sample_notification(
+        notify_db,
+        notify_db_session,
+        to_field='+447700900855',
+        normalised_to='447700900855',
+        template=sample_template
+    )
+    create_sample_notification(
+        notify_db,
+        notify_db_session,
+        to_field='44770@gamil.com',
+        normalised_to='44770@gamil.com',
+        template=sample_email_template
+    )
+
+    response = client.get(
+        '/service/{}/notifications?to={}&template_type={}'.format(
+            sms_notification.service_id, '0770', 'sms'
+
+        ),
+        headers=[create_authorization_header()]
+    )
+    notifications = json.loads(response.get_data(as_text=True))['notifications']
+
+    assert response.status_code == 200
+    assert len(notifications) == 1
+    assert notifications[0]['id'] == str(sms_notification.id)
 
 
 def test_is_service_name_unique_returns_200_if_unique(admin_request, notify_db, notify_db_session):

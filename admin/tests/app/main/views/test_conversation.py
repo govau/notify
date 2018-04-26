@@ -79,7 +79,7 @@ def test_view_conversation(
     mock_get_inbound_sms
 ):
 
-    mock_get_notifications(
+    mock = mock_get_notifications(
         mocker,
         api_user_active,
         template_content='Hello ((name))',
@@ -158,6 +158,8 @@ def test_view_conversation(
             normalize_spaces(statuses[index].text),
         ) == expected
 
+    mock.assert_called_once_with(SERVICE_ONE_ID, to='07123 456789', template_type='sms')
+
 
 def test_view_conversation_updates(
     logged_in_client,
@@ -194,13 +196,16 @@ def test_view_conversation_with_empty_inbound(
 ):
     mock_get_inbound_sms = mocker.patch(
         'app.main.views.conversation.service_api_client.get_inbound_sms',
-        return_value=[{
-            'user_number': '07900000001',
-            'notify_number': '07900000002',
-            'content': '',
-            'created_at': datetime.utcnow().isoformat(),
-            'id': fake_uuid
-        }]
+        return_value={
+            'has_next': False,
+            'data': [{
+                'user_number': '07900000001',
+                'notify_number': '07900000002',
+                'content': '',
+                'created_at': datetime.utcnow().isoformat(),
+                'id': fake_uuid
+            }]
+        }
     )
 
     page = client_request.get(

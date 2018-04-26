@@ -1,4 +1,4 @@
-from flask import redirect, render_template, request, url_for
+from flask import abort, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from notifications_utils.international_billing_rates import (
     INTERNATIONAL_BILLING_RATES,
@@ -9,13 +9,21 @@ from app import convert_to_boolean
 from app.main import main
 from app.main.forms import SearchTemplatesForm
 from app.main.views.sub_navigation_dictionaries import features_nav
+from app.utils import AgreementInfo
 
 
 @main.route('/')
 def index():
     if current_user and current_user.is_authenticated:
-        return redirect(url_for('main.choose_service'))
+        return redirect(url_for('main.choose_account'))
     return render_template('views/signedout.html')
+
+
+@main.route('/error/<int:status_code>')
+def error(status_code):
+    if status_code >= 500:
+        abort(404)
+    abort(status_code)
 
 
 @main.route("/verify-mobile")
@@ -44,6 +52,7 @@ def pricing():
             for cc, country in INTERNATIONAL_BILLING_RATES.items()
         ], key=lambda x: x[0]),
         search_form=SearchTemplatesForm(),
+        agreement_info=AgreementInfo.from_current_user(),
     )
 
 
@@ -145,7 +154,8 @@ def security():
 def terms():
     return render_template(
         'views/terms-of-use.html',
-        navigation_links=features_nav()
+        navigation_links=features_nav(),
+        agreement_info=AgreementInfo.from_current_user(),
     )
 
 

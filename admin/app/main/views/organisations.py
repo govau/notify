@@ -1,16 +1,23 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from notifications_python_client.errors import HTTPError
 from werkzeug.exceptions import abort
 
-from app import org_invite_api_client, organisations_client, user_api_client
+from app import (
+    current_organisation,
+    org_invite_api_client,
+    organisations_client,
+    user_api_client,
+)
 from app.main import main
 from app.main.forms import (
+    ConfirmPasswordForm,
     CreateOrUpdateOrganisation,
     InviteOrgUserForm,
+    RenameOrganisationForm,
     SearchUsersForm,
 )
-from app.utils import user_is_platform_admin
+from app.utils import user_has_permissions, user_is_platform_admin
 
 
 @main.route("/organisations", methods=['GET'])
@@ -46,9 +53,12 @@ def add_organisation():
 
 @main.route("/organisations/<org_id>", methods=['GET'])
 @login_required
-@user_is_platform_admin
+@user_has_permissions()
 def organisation_dashboard(org_id):
     organisation_services = organisations_client.get_organisation_services(org_id)
+    for service in organisation_services:
+        has_permission = current_user.has_permission_for_service(service['id'], 'view_activity')
+        service.update({'has_permission_to_view': has_permission})
 
     return render_template(
         'views/organisations/organisation/index.html',
@@ -56,34 +66,9 @@ def organisation_dashboard(org_id):
     )
 
 
-@main.route("/organisations/<org_id>/edit", methods=['GET', 'POST'])
-@login_required
-@user_is_platform_admin
-def update_organisation(org_id):
-    org = organisations_client.get_organisation(org_id)
-
-    form = CreateOrUpdateOrganisation()
-
-    if form.validate_on_submit():
-        organisations_client.update_organisation(
-            org_id=org_id,
-            name=form.name.data
-        )
-
-        return redirect(url_for('.organisations'))
-
-    form.name.data = org['name']
-
-    return render_template(
-        'views/organisations/organisation/update-organisation.html',
-        form=form,
-        organisation=org
-    )
-
-
 @main.route("/organisations/<org_id>/users", methods=['GET'])
 @login_required
-@user_is_platform_admin
+@user_has_permissions()
 def manage_org_users(org_id):
     users = sorted(
         user_api_client.get_users_for_organisation(org_id=org_id) + [
@@ -103,7 +88,7 @@ def manage_org_users(org_id):
 
 @main.route("/organisations/<org_id>/users/invite", methods=['GET', 'POST'])
 @login_required
-@user_is_platform_admin
+@user_has_permissions()
 def invite_org_user(org_id):
     form = InviteOrgUserForm(
         invalid_email_address=current_user.email_address
@@ -127,7 +112,7 @@ def invite_org_user(org_id):
 
 @main.route("/organisations/<org_id>/users/<user_id>", methods=['GET', 'POST'])
 @login_required
-@user_is_platform_admin
+@user_has_permissions()
 def edit_user_org_permissions(org_id, user_id):
     user = user_api_client.get_user(user_id)
 
@@ -139,7 +124,7 @@ def edit_user_org_permissions(org_id, user_id):
 
 @main.route("/organisations/<org_id>/users/<user_id>/delete", methods=['GET', 'POST'])
 @login_required
-@user_is_platform_admin
+@user_has_permissions()
 def remove_user_from_organisation(org_id, user_id):
     user = user_api_client.get_user(user_id)
     if request.method == 'POST':
@@ -169,8 +154,73 @@ def remove_user_from_organisation(org_id, user_id):
 
 @main.route("/organisations/<org_id>/cancel-invited-user/<invited_user_id>", methods=['GET'])
 @login_required
-@user_is_platform_admin
+@user_has_permissions()
 def cancel_invited_org_user(org_id, invited_user_id):
     org_invite_api_client.cancel_invited_user(org_id=org_id, invited_user_id=invited_user_id)
 
     return redirect(url_for('main.manage_org_users', org_id=org_id))
+
+
+@main.route("/organisations/<org_id>/settings/", methods=['GET'])
+@login_required
+@user_has_permissions()
+def organisation_settings(org_id):
+    return render_template(
+        'views/organisations/organisation/settings/index.html',
+    )
+
+
+@main.route("/organisations/<org_id>/settings/edit-name", methods=['GET', 'POST'])
+@login_required
+@user_has_permissions()
+def edit_organisation_name(org_id):
+    form = RenameOrganisationForm()
+
+    if request.method == 'GET':
+        form.name.data = current_organisation.get('name')
+
+    if form.validate_on_submit():
+        unique_name = organisations_client.is_organisation_name_unique(org_id, form.name.data)
+        if not unique_name:
+            form.name.errors.append("This organisation name is already in use")
+            return render_template('views/organisations/organisation/settings/edit-name/index.html', form=form)
+        session['organisation_name_change'] = form.name.data
+        return redirect(url_for('.confirm_edit_organisation_name', org_id=org_id))
+
+    return render_template(
+        'views/organisations/organisation/settings/edit-name/index.html',
+        form=form,
+    )
+
+
+@main.route("/organisations/<org_id>/settings/edit-name/confirm", methods=['GET', 'POST'])
+@login_required
+@user_has_permissions()
+def confirm_edit_organisation_name(org_id):
+    # Validate password for form
+    def _check_password(pwd):
+        return user_api_client.verify_password(current_user.id, pwd)
+
+    form = ConfirmPasswordForm(_check_password)
+
+    if form.validate_on_submit():
+        try:
+            organisations_client.update_organisation_name(
+                current_organisation['id'],
+                name=session['organisation_name_change'],
+            )
+        except HTTPError as e:
+            error_msg = "Organisation name already exists"
+            if e.status_code == 400 and error_msg in e.message:
+                # Redirect the user back to the change service name screen
+                flash('This organisation name is already in use', 'error')
+                return redirect(url_for('main.edit_organisation_name', org_id=org_id))
+            else:
+                raise e
+        else:
+            session.pop('organisation_name_change')
+            return redirect(url_for('.organisation_settings', org_id=org_id))
+    return render_template(
+        'views/organisations/organisation/settings/edit-name/confirm.html',
+        new_name=session['organisation_name_change'],
+        form=form)

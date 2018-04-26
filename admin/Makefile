@@ -1,3 +1,9 @@
+PIPENV ?= pipenv
+RUNNER ?= $(PIPENV) run
+NPM    ?= npm
+PORT   ?= 6012
+WORKERS?= 4
+
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 DATE = $(shell date +%Y-%m-%d:%H:%M:%S)
@@ -19,13 +25,16 @@ BUILD_URL ?=
 
 DOCKER_CONTAINER_PREFIX = ${USER}-${BUILD_TAG}
 
-CF_API ?= api.cloud.service.gov.uk
-CF_ORG ?= govuk-notify
-CF_SPACE ?= ${DEPLOY_ENV}
-CF_HOME ?= ${HOME}
+CLD_HOST   ?= y.cld.gov.au
+DEPLOY_ENV ?= notifications
+DNS_NAME   ?= notify-admin.apps.$(CLD_HOST)
+CF_API     ?= https://api.system.$(CLD_HOST)
+CF_ORG     ?= dta
+CF_SPACE   ?= $(DEPLOY_ENV)
+CF_HOME    ?= $(HOME)
 $(eval export CF_HOME)
 
-CF_MANIFEST_FILE ?= manifest-${CF_SPACE}.yml
+CF_MANIFEST_FILE ?= manifest.yml
 NOTIFY_CREDENTIALS ?= ~/.notify-credentials
 
 .PHONY: help
@@ -97,10 +106,6 @@ upload-paas-artifact:
 	$(if ${JENKINS_S3_BUCKET},,$(error Must specify JENKINS_S3_BUCKET))
 	aws s3 cp --region eu-west-1 --sse AES256 target/notifications-admin.zip s3://${JENKINS_S3_BUCKET}/build/notifications-admin/${DEPLOY_BUILD_NUMBER}.zip
 
-.PHONY: test
-test: venv ## Run tests
-	./scripts/run_tests.sh
-
 .PHONY: coverage
 coverage: venv ## Create coverage report
 	. venv/bin/activate && coveralls
@@ -162,14 +167,6 @@ clean-docker-containers: ## Clean up any remaining docker containers
 clean:
 	rm -rf node_modules cache target venv .coverage
 
-.PHONY: cf-login
-cf-login: ## Log in to Cloud Foundry
-	$(if ${CF_USERNAME},,$(error Must specify CF_USERNAME))
-	$(if ${CF_PASSWORD},,$(error Must specify CF_PASSWORD))
-	$(if ${CF_SPACE},,$(error Must specify CF_SPACE))
-	@echo "Logging in to Cloud Foundry on ${CF_API}"
-	@cf login -a "${CF_API}" -u ${CF_USERNAME} -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
-
 .PHONY: generate-manifest
 generate-manifest:
 	$(if ${CF_SPACE},,$(error Must specify CF_SPACE))
@@ -224,3 +221,64 @@ disable-failwhale: cf-target cf-failwhale-deployed ## Disable the failwhale app 
 	@cf map-route notify-admin ${DNS_NAME} --hostname www
 	@cf unmap-route notify-admin-failwhale ${DNS_NAME} --hostname www
 	@echo "Failwhale is disabled"
+
+
+
+# --- DTA additions ---
+# ---------------------
+
+.PHONY: cf-login
+cf-login:
+	@cf login\
+		-a "${CF_API}"\
+		-u "${CF_USERNAME}"\
+		-p "${CF_PASSWORD}"\
+		-o "${CF_ORG}"\
+		-s "${CF_SPACE}"
+
+${APP_VERSION_FILE}:
+	@echo -e "__travis_commit__ = \"${GIT_COMMIT}\"\n__time__ = \"${DATE}\"\n__travis_job_number__ = \"${BUILD_NUMBER}\"\n__travis_job_url__ = \"${BUILD_URL}\"" > $@
+
+version-file: ${APP_VERSION_FILE}
+
+Pipfile Pipfile.lock:
+	$(PIPENV) install
+
+setup:
+	$(NPM) install
+	$(NPM) run build
+	$(PIPENV) install
+
+test: version-file
+	$(RUNNER) flake8 .
+	$(RUNNER) isort --check-only -rc ./app ./tests
+	$(RUNNER) py.test --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 --maxfail=10
+	$(NPM) test
+
+run: version-file
+	$(RUNNER) flask run -p $(PORT)
+
+run-gunicorn: version-file
+	$(RUNNER) gunicorn -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
+
+pipenv-requirements.txt: Pipfile.lock
+	$(PIPENV) lock -r > $@
+
+vendor: pipenv-requirements.txt
+	$(RUNNER) pip download -d $@ -r $<
+
+requirements.txt: pipenv-requirements.txt
+	cat $< | $(RUNNER) python fixup-requirements.py > $@
+
+native-vendor:
+	mkdir -p $@
+
+build-linux-wheels: pipenv-requirements.txt native-vendor
+	cat $< | docker run -i --rm\
+		-v $(shell pwd)/build-linux-wheels.sh:/build-linux-wheels.sh\
+		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
+
+deploy: vendor requirements.txt
+	cf push
+
+.PHONY: ttest setup run run-gunicorn deploy
