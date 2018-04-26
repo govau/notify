@@ -70,7 +70,6 @@ class Config(object):
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
     CHECK_PROXY_HEADER = False
 
-
 class Development(Config):
     NOTIFY_LOG_PATH = 'application.log'
     DEBUG = True
@@ -136,6 +135,8 @@ class Live(Config):
     NOTIFY_ENVIRONMENT = 'live'
     CHECK_PROXY_HEADER = False
 
+    BASIC_AUTH_USER = 'notify'
+    BASIC_AUTH_PASS = 'notify'
 
 class CloudFoundryConfig(Config):
     pass

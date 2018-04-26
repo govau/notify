@@ -21,6 +21,7 @@ from flask import (
     current_app,
     redirect,
     request,
+    Response,
     session,
     url_for,
 )
@@ -40,6 +41,34 @@ DELIVERED_STATUSES = ['delivered', 'sent']
 FAILURE_STATUSES = ['failed', 'temporary-failure', 'permanent-failure', 'technical-failure', 'virus-scan-failed']
 REQUESTED_STATUSES = SENDING_STATUSES + DELIVERED_STATUSES + FAILURE_STATUSES
 
+
+def check_auth(config, auth):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    if not config.get('BASIC_AUTH_USER'):
+        return True
+
+    if not auth:
+        return False
+
+    return  config.get('BASIC_AUTH_USER') == auth.username and\
+            config.get('BASIC_AUTH_PASS') == auth.password
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not check_auth(current_app.config, request.authorization):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 def user_has_permissions(*permissions, **permission_kwargs):
     def wrap(func):

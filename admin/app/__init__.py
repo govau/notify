@@ -57,6 +57,7 @@ from app.notify_client.letter_jobs_client import LetterJobsClient
 from app.notify_client.inbound_number_client import InboundNumberClient
 from app.notify_client.billing_api_client import BillingAPIClient
 from app.commands import setup_commands
+from app.utils import requires_auth
 from app.utils import get_cdn_domain
 from app.utils import gmt_timezones
 
@@ -145,6 +146,7 @@ def create_app(application):
 def init_app(application):
     application.after_request(useful_headers_after_request)
     application.after_request(save_service_or_org_after_request)
+    application.before_request(requires_auth(lambda: None))
     application.before_request(load_service_before_request)
     application.before_request(load_organisation_before_request)
     application.before_request(request_helper.check_proxy_header_before_request)
