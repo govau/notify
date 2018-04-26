@@ -297,6 +297,12 @@ requirements.txt: pipenv-requirements.txt
 run-production: setup-db
 	$(MAKE) run-gunicorn
 
+deploy-api: vendor requirements.txt
+	cf push notify-api
+
+deploy-celery: vendor requirements.txt
+	cf push notify-celery
+
 deploy: vendor requirements.txt
 	cf push
 
