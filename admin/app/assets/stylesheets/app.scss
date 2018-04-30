@@ -6,9 +6,7 @@
 
 #global-header,
 #global-header.with-proposition {
-
   #logo {
-
     white-space: nowrap;
 
     #product-name {
@@ -16,13 +14,11 @@
       font-weight: 400;
       padding-left: 5px;
     }
-
   }
 
   .header-wrapper {
     .header-global {
       .header-logo {
-
         @include media(desktop) {
           width: auto;
         }
@@ -30,24 +26,8 @@
         &:after {
           display: none;
         }
-
       }
     }
-  }
-
-  .header-proposition {
-    #proposition-links {
-      li {
-        padding: 0 0 0 15px;
-      }
-    }
-  }
-
-}
-
-@include media(desktop) {
-  #proposition-menu {
-    float: right;
   }
 }
 
@@ -62,33 +42,27 @@ a {
 }
 
 .form-control-5em {
-
   width: 100%;
 
   @include media(tablet) {
     width: 5em;
   }
-
 }
 
 .column-main {
-
   .heading-large,
   > .heading-medium {
     margin: 10px 0 15px 0;
     word-wrap: break-word;
   }
 
-  > .grid-row:first-child  {
-
+  > .grid-row:first-child {
     .heading-large,
     .heading-medium {
       margin: 10px 0 15px 0;
       word-wrap: break-word;
     }
-
   }
-
 }
 
 .highlight {
@@ -98,16 +72,12 @@ a {
 }
 
 .inline {
-
   .block-label {
-
     @include media(tablet) {
       float: none;
       display: inline-block;
     }
-
   }
-
 }
 
 td {
@@ -131,11 +101,9 @@ td {
 }
 
 .list-bullet {
-
   .list-bullet {
     list-style: circle;
   }
-
 }
 
 details summary {
@@ -144,7 +112,6 @@ details summary {
 }
 
 .spreadsheet {
-
   margin-bottom: -$gutter;
 
   th,
@@ -154,7 +121,8 @@ details summary {
     text-align: center;
   }
 
-  th, td {
+  th,
+  td {
     padding-left: 10px;
     padding-right: 10px;
     border: 1px solid $border-colour;
@@ -163,13 +131,10 @@ details summary {
   td {
     border-top: 0;
   }
-
 }
 
 .body-copy-table {
-
   table {
-
     th,
     td {
       @include core-19;
@@ -181,9 +146,7 @@ details summary {
         @include bold-19;
       }
     }
-
   }
-
 }
 
 .tabular-numbers {
@@ -221,7 +184,7 @@ details .arrow {
   padding-bottom: 0;
 }
 
-.multiple-choice input:disabled+label {
+.multiple-choice input:disabled + label {
   opacity: 1;
   color: $secondary-text-colour;
   cursor: default;
@@ -232,12 +195,26 @@ details .arrow {
 }
 
 .branding-radio {
-
   img {
-    background: linear-gradient(45deg, $black 25%, transparent 25%, transparent 75%, $black 75%, $black 0), linear-gradient(45deg, $black 25%, transparent 25%, transparent 75%, $black 75%, $black 0), $white;
+    background: linear-gradient(
+        45deg,
+        $black 25%,
+        transparent 25%,
+        transparent 75%,
+        $black 75%,
+        $black 0
+      ),
+      linear-gradient(
+        45deg,
+        $black 25%,
+        transparent 25%,
+        transparent 75%,
+        $black 75%,
+        $black 0
+      ),
+      $white;
     background-repeat: repeat, repeat;
     background-position: 0px 0, 5px 5px;
     background-size: 2px 2px, 2px 2px;
   }
-
 }

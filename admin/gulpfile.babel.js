@@ -153,7 +153,7 @@ gulp.task('default',
   [
     'copy:govuk_template:template',
     'copy:govuk_template:images',
-    'copy:govuk_template:css',
+    //'copy:govuk_template:css',
     'copy:govuk_template:js',
     'copy:govuk_template:error_page',
     'javascripts',

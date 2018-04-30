@@ -1,39 +1,23 @@
 .navigation {
-
   padding: 0 $gutter 0 0;
 
   &-service {
-
-    padding: 11px 0 9px 0;
-    border-bottom: 1px solid $border-colour;
-    margin: 0 0 10px;
-    position: relative;
+    padding: 2rem 0;
+    display: flex;
+    justify-content: space-between;
 
     &-name {
-      @include bold-19;
+      @include bold-27;
+      font-size: 2.8rem;
       margin: 0 0 0 0;
     }
 
     &-switch {
-
       @include core-16;
-      text-align: right;
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 13px 0 9px 15px;
-
       &:focus {
-        outline: none;
-        border-bottom: 4px solid $yellow;
-        border-left: 10px solid $yellow;
-        border-right: 3px solid $yellow;
-        right: -3px;
         color: $text-colour;
       }
-
     }
-
   }
 
   li {
@@ -43,7 +27,6 @@
   }
 
   a {
-
     display: block;
     padding: 5px 0;
     position: relative;
@@ -62,9 +45,7 @@
     &:focus {
       color: $text-colour;
     }
-
   }
-
 }
 
 // https://github.com/alphagov/product-page-example/blob/master/source/stylesheets/modules/_sub-navigation.scss
@@ -99,8 +80,9 @@
 
   &__item--active {
     @include bold-16;
-    
-    a:link, a:visited {
+
+    a:link,
+    a:visited {
       color: $text-colour;
     }
   }

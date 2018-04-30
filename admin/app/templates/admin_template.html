@@ -47,21 +47,25 @@
             {% if current_user.platform_admin %}
               <li><a href="{{ url_for('main.platform_admin') }}">Platform admin</a></li>
             {% endif %}
-            <li><a href="{{ url_for('main.sign_out')}}">Sign out</a></li>
           {% else %}
             <li><a href="{{ url_for('main.features') }}">Features</a></li>
             <li><a href="{{ url_for('main.pricing' )}}">Pricing</a></li>
             <li><a href="{{ url_for('main.documentation') }}">Documentation</a></li>
-            <li><a href="{{ url_for('main.sign_in' )}}">Sign in</a></li>
           {% endif %}
         </ul>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('main.sign_out')}}">Sign out</a>
+        {% else %}
+          <a href="{{ url_for('main.sign_in' )}}">Sign in</a>
+        {% endif %}
       </nav>
     </div>
   </div>
 {% endblock %}
 
 
-{% set global_header_text = "GOV.UK <span id='product-name'>Notify</span>"|safe %}
+{% set global_header_text = "Notify"|safe %}
 
 {% set homepage_url = url_for('main.show_accounts_or_dashboard') %}
 
