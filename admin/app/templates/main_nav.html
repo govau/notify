@@ -1,5 +1,11 @@
 {% from "components/banner.html" import banner_wrapper %}
 
+{% macro nav_item(href, link) -%}
+  <li class="au-navitem {{ "au-navitem--active" if request.path == href }}">
+    <a href="{{ href }}" >{{ link }}</a>
+  </li>
+{%- endmacro %}
+
 {% if help %}
   {% call banner_wrapper(type='tour') %}
       <p class="heading-medium">Try sending yourself this example</p>
@@ -41,7 +47,27 @@
 
   {% endcall %}
 {% else %}
-<nav class="navigation">
+
+<nav class="navigation au-navigation">
+  <ul>
+  {{ nav_item(url_for('.service_dashboard', service_id=current_service.id), 'Dashboard') }}
+  {% if current_user.has_permissions('view_activity') %}
+    {{ nav_item(url_for('.choose_template', service_id=current_service.id), 'Templates') }}
+  {% endif %}
+  {{ nav_item(url_for('.manage_users', service_id=current_service.id), 'Team members') }}
+  {% if current_user.has_permissions('manage_service') %}
+    {{ nav_item(url_for('.usage', service_id=current_service.id), 'Usage') }}
+  {% endif %}
+  {% if current_user.has_permissions('manage_api_keys', 'manage_service') %}
+    {{ nav_item(url_for('.service_settings', service_id=current_service.id), 'Settings') }}
+  {% endif %}
+  {% if current_user.has_permissions('manage_api_keys') %}
+    {{ nav_item(url_for('.api_integration', service_id=current_service.id), 'API integration') }}
+  {% endif %}
+  </ul>
+</nav>
+
+<nav class="navigation au-navigation">
   <ul>
     <li><a href="{{ url_for('.service_dashboard', service_id=current_service.id) }}">Dashboard</a></li>
   {% if current_user.has_permissions('view_activity') %}

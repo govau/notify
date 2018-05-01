@@ -24,6 +24,13 @@
     @include core-19;
     margin: 0;
     list-style-type: none;
+    // background-color: #e9f6f9;
+    // border-bottom: 1px solid #d3d5d7;
+    // padding: 1rem 2rem;
+  }
+
+  .au-navitem--active {
+    //border-left: 4px solid #006f99;
   }
 
   a {

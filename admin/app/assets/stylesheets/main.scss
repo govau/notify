@@ -38,7 +38,8 @@ $path: '/static/images/';
 @import 'components/page-footer';
 @import 'components/table';
 @import 'components/navigation';
-@import 'components/big-number';
+/* @import 'components/big-number'; */
+@import 'components/au-big-number';
 @import 'components/banner';
 @import 'components/textbox';
 @import 'components/file-upload';
@@ -60,6 +61,7 @@ $path: '/static/images/';
 @import 'components/fullscreen-table';
 @import 'components/vendor/breadcrumbs';
 @import 'components/vendor/responsive-embed';
+@import 'components/overrides';
 
 @import 'views/dashboard';
 @import 'views/users';

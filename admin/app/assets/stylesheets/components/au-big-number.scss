@@ -1,0 +1,29 @@
+%big-number,
+.big-number {
+}
+
+.big-number-with-status {
+  display: flex;
+  flex-flow: column nowrap;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  .big-number-link {
+    margin: 2rem;
+    font-size: 2em;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .big-number-label {
+    display: none;
+  }
+
+  %big-number-status,
+  .big-number-status {
+    background-color: white;
+    padding: 1rem;
+  }
+}

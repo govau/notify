@@ -40,6 +40,7 @@
       <a href="#proposition-links" class="js-header-toggle menu">Menu</a>
       <nav id="proposition-menu">
         <ul id="proposition-links">
+          <li><a href="{{ url_for('main.show_accounts_or_dashboard') }}">Services</a></li>
           <li><a href="{{ url_for('main.support') }}">Support</a></li>
           {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('main.documentation') }}">Documentation</a></li>
