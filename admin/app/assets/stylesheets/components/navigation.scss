@@ -20,28 +20,32 @@
     }
   }
 
+  li:first-child {
+    border-top: 1px solid #d3d5d7;
+  }
+
   li {
-    @include core-19;
+    @include core-16;
     margin: 0;
+    padding: 1rem 2rem;
     list-style-type: none;
-    // background-color: #e9f6f9;
-    // border-bottom: 1px solid #d3d5d7;
-    // padding: 1rem 2rem;
+    border-bottom: 1px solid #d3d5d7;
   }
 
   .au-navitem--active {
-    //border-left: 4px solid #006f99;
+    border-left: 4px solid #006f99;
+    background-color: #e9f6f9;
+
+    a {
+      @include bold-16;
+    }
   }
 
   a {
-    display: block;
-    padding: 5px 0;
-    position: relative;
-    top: 5px;
-
     &:link,
     &:visited {
       text-decoration: none;
+      color: $text-colour;
     }
 
     &:hover {

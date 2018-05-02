@@ -1,5 +1,4 @@
 .table {
-  margin-bottom: $gutter;
   width: 100%;
 }
 
@@ -35,6 +34,8 @@
 
   .table-row,
   thead tr {
+    border-bottom: 1px solid #d3d5d7;
+
     th,
     td {
       padding: 0.5em 1em;

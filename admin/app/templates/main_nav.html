@@ -50,7 +50,7 @@
 
 <nav class="navigation au-navigation">
   <ul>
-  {{ nav_item(url_for('.service_dashboard', service_id=current_service.id), 'Dashboard') }}
+  {{ nav_item(url_for('.service_dashboard', service_id=current_service.id), 'Service overview') }}
   {% if current_user.has_permissions('view_activity') %}
     {{ nav_item(url_for('.choose_template', service_id=current_service.id), 'Templates') }}
   {% endif %}
@@ -63,25 +63,6 @@
   {% endif %}
   {% if current_user.has_permissions('manage_api_keys') %}
     {{ nav_item(url_for('.api_integration', service_id=current_service.id), 'API integration') }}
-  {% endif %}
-  </ul>
-</nav>
-
-<nav class="navigation au-navigation">
-  <ul>
-    <li><a href="{{ url_for('.service_dashboard', service_id=current_service.id) }}">Dashboard</a></li>
-  {% if current_user.has_permissions('view_activity') %}
-    <li><a href="{{ url_for('.choose_template', service_id=current_service.id) }}">Templates</a></li>
-  {% endif %}
-  <li><a href="{{ url_for('.manage_users', service_id=current_service.id) }}">Team members</a></li>
-  {% if current_user.has_permissions('manage_service') %}
-    <li><a href="{{ url_for('.usage', service_id=current_service.id) }}">Usage</a></li>
-  {% endif %}
-  {% if current_user.has_permissions('manage_api_keys', 'manage_service') %}
-    <li><a href="{{ url_for('.service_settings', service_id=current_service.id) }}">Settings</a></li>
-  {% endif %}
-  {% if current_user.has_permissions('manage_api_keys') %}
-    <li><a href="{{ url_for('.api_integration', service_id=current_service.id) }}">API integration</a></li>
   {% endif %}
   </ul>
 </nav>

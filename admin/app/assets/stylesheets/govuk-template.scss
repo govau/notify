@@ -152,7 +152,7 @@ a:link {
 }
 
 a:visited {
-  color: #4c2c92;
+  // color: #4c2c92;
 }
 
 a:hover {
@@ -530,6 +530,8 @@ button:focus {
     padding: 1rem 2rem;
   }
 }
+
+#global-header .header-proposition #proposition-menu a,
 #global-header .header-proposition #proposition-link a,
 #global-header .header-proposition #proposition-links a {
   color: white;
@@ -541,6 +543,7 @@ button:focus {
   line-height: 1.25;
 }
 @media (min-width: 641px) {
+  #global-header .header-proposition #proposition-menu a,
   #global-header .header-proposition #proposition-link a,
   #global-header .header-proposition #proposition-links a {
     font-size: 14px;
@@ -549,6 +552,7 @@ button:focus {
 }
 
 @media (min-width: 769px) {
+  #global-header .header-proposition #proposition-menu a,
   #global-header .header-proposition #proposition-link a,
   #global-header .header-proposition #proposition-links a {
     font-family: 'nta', Arial, sans-serif;
@@ -561,6 +565,7 @@ button:focus {
 }
 
 @media (min-width: 769px) and (min-width: 641px) {
+  #global-header .header-proposition #proposition-menu a,
   #global-header .header-proposition #proposition-link a,
   #global-header .header-proposition #proposition-links a {
     font-size: 16px;
@@ -568,16 +573,19 @@ button:focus {
   }
 }
 
+#global-header .header-proposition #proposition-menu a:hover,
 #global-header .header-proposition #proposition-link a:hover,
 #global-header .header-proposition #proposition-links a:hover {
   text-decoration: underline;
 }
 
+#global-header .header-proposition #proposition-menu a.active,
 #global-header .header-proposition #proposition-link a.active,
 #global-header .header-proposition #proposition-links a.active {
   color: #1d8feb;
 }
 
+#global-header .header-proposition #proposition-menu a:focus,
 #global-header .header-proposition #proposition-link a:focus,
 #global-header .header-proposition #proposition-links a:focus {
   color: #0b0c0c;
