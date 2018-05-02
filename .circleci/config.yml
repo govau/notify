@@ -107,9 +107,18 @@ workflows:
       - deploy-admin:
           requires:
             - build-admin
+          filters:
+            branches:
+              only: master
       - deploy-api:
           requires:
             - build-api
+          filters:
+            branches:
+              only: master
       - deploy-celery:
           requires:
             - build-api
+          filters:
+            branches:
+              only: master
