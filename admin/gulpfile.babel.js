@@ -16,7 +16,6 @@ const plugins = loadPlugins(),
     paths = {
         src: 'app/assets/',
         dist: 'app/static/',
-        templates: 'app/templates/',
         npm: 'node_modules/',
         template: 'node_modules/govuk_template_jinja/',
         toolkit: 'node_modules/govuk_frontend_toolkit/'
@@ -26,10 +25,6 @@ const plugins = loadPlugins(),
 // - - - - - - - - - - - - - - -
 
 // Move GOV.UK template resources
-
-gulp.task('copy:govuk_template:template', () => gulp.src(paths.template + 'views/layouts/govuk_template.html')
-  .pipe(gulp.dest(paths.templates))
-);
 
 gulp.task('copy:govuk_template:css', () => gulp.src(paths.template + 'assets/stylesheets/**/*.css')
   .pipe(plugins.sass({
@@ -151,7 +146,6 @@ gulp.task('lint',
 // Default: compile everything
 gulp.task('default',
   [
-    'copy:govuk_template:template',
     'copy:govuk_template:images',
     //'copy:govuk_template:css',
     'copy:govuk_template:js',
