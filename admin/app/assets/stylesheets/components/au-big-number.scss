@@ -1,5 +1,33 @@
 %big-number,
 .big-number {
+  display: block;
+
+  &-number {
+    @include bold-48($tabular-numbers: true);
+    display: block;
+  }
+
+  &-label {
+    @include core-19;
+    display: inline-block;
+    padding-bottom: 10px;
+  }
+}
+
+.big-number-smaller {
+  @extend %big-number;
+
+  .big-number-number {
+    @include bold-36($tabular-numbers: true);
+  }
+}
+
+.big-number-smallest {
+  @extend %big-number;
+
+  .big-number-number {
+    @include bold-24($tabular-numbers: true);
+  }
 }
 
 .big-number-with-status {

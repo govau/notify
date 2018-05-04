@@ -1,0 +1,22 @@
+.button {
+  padding: 0.5rem 1.5rem;
+  display: inline-block;
+  appearance: none;
+  border-radius: 4px;
+  box-shadow: none;
+  background-color: #00698f;
+  border: 3px solid #00698f;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
+
+  &:visited {
+    background-color: #00698f;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: #313131;
+    border-color: #313131;
+    text-decoration: underline;
+  }
+}
