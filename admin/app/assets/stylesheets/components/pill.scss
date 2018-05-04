@@ -14,30 +14,26 @@
     padding: 2rem 0;
     margin-bottom: -6px;
 
-
     &[aria-selected='true'] {
       border-bottom: 6px solid #017099;
     }
   }
 }
 
-.pill-separate {
-  &-item {
-    display: block;
-    text-align: left;
-    padding: 10px $gutter-half;
+.pill-separate-item {
+  color: $white;
+  padding: 0.5rem 1.5rem;
+  display: block;
+  border-radius: 4px;
+  box-shadow: none;
+  background-color: #00698f;
+  border: 3px solid #00698f;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 
-    &:link,
-    &:visited {
-      background: $link-colour;
-      color: $white;
-      text-decoration: underline;
-    }
-
-    &:hover,
-    &:focus,
-    &:link:focus {
-      color: $light-blue-25;
-    }
+  &:link,
+  &:visited {
+    color: $white;
   }
 }

@@ -285,8 +285,8 @@ a {
 }
 
 a:focus {
-  background-color: #ffbf47;
-  outline: 3px solid #ffbf47;
+  background-color: #61daff;
+  outline: 3px solid #61daff;
 }
 
 /* Make links slightly darker when focused to improve contrast. */
@@ -329,12 +329,12 @@ input:focus,
 textarea:focus,
 select:focus,
 button:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #61daff;
   outline-offset: 0;
 }
 
 #global-header input[type='search']:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #61daff;
   /* Focus appears inside the input */
   outline-offset: -2px;
 }
@@ -394,6 +394,18 @@ button:focus {
   padding-right: 1rem;
   width: 225px;
 }
+
+#global-header #logo .header-badge {
+  padding: 2px 0.5rem;
+  margin-left: 0.5rem;
+  border: solid 2px #fff;
+  border-radius: 2em;
+  font-size: 1.5rem;
+  font-weight: normal;
+  vertical-align: super;
+  text-transform: capitalize;
+}
+
 #global-header #logo:hover,
 #global-header #logo:focus {
   text-decoration: none;

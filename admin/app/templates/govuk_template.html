@@ -58,6 +58,7 @@
             <a href="{{ homepage_url|default('https://www.gov.uk') }}" title="{{ logo_link_title|default('Go to the GOV.UK homepage') }}" id="logo" class="content">
               <img src="{{ asset_path }}images/header-logo-agov.svg" alt="Australian Government logo">
               <span>{{ global_header_text|default('GOV.AU') }}</span>
+              <span class="header-badge">alpha</span>
             </a>
           </div>
           {% block inside_header %}{% endblock %}
