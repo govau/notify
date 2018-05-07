@@ -131,7 +131,8 @@
   }
 
   &-index {
-    @include bold-16;
+    @include core-small;
+    @include core-strong;
     width: 15px;
 
     a {
@@ -160,7 +161,8 @@
 
 .table-font-xsmall td.table-field-index {
   // overrides GOV.UK Elements
-  @include bold-16;
+  @include core-small;
+  @include core-strong;
 }
 
 .table-field-headings {
@@ -180,7 +182,7 @@
 .table-field-headings,
 .table-field-headings-visible {
   th {
-    @include bold-19;
+    @include core-strong;
   }
 
   .dashboard-table &-first {
@@ -210,14 +212,14 @@
 }
 
 .table-empty-message {
-  @include core-16;
+  @include core-small;
   color: $secondary-text-colour;
   border-bottom: 1px solid $border-colour;
   padding: 0.75em 0 0.5625em 0;
 }
 
 .table-show-more-link {
-  @include core-16;
+  @include core-small;
   color: $secondary-text-colour;
   margin-bottom: $gutter * 1.3333;
   border-bottom: 1px solid $border-colour;
@@ -234,7 +236,7 @@ a.table-show-more-link {
 }
 
 .table-no-data {
-  @include core-16;
+  @include core-small;
   color: $secondary-text-colour;
   margin-top: 10px;
   margin-bottom: $gutter * 1.3333;

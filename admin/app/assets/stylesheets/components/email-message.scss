@@ -11,12 +11,10 @@ $email-message-gutter: $gutter * 2;
 
   &-meta {
 
-    @include core-19;
     margin: 0;
 
     td,
     th {
-      @include core-19;
       border-top: 0;
       border-bottom: 1px solid $border-colour;
       vertical-align: top;

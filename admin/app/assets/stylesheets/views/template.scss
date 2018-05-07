@@ -4,22 +4,20 @@
 
 %edit-template-link,
 .edit-template-link {
-
-  @include core-19;
   position: absolute;
   background: $link-colour;
   color: $white;
   padding: 10px $gutter-half;
   z-index: 10000;
 
-  &:link, &:visited {
+  &:link,
+  &:visited {
     color: $white;
   }
 
   &:hover {
     color: $light-blue-25;
   }
-
 }
 
 .edit-template-link-letter-contact {

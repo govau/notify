@@ -35,6 +35,8 @@ class Config(object):
         'central': 250000,
         'local': 25000,
         'nhs': 25000,
+        'federal': 250000,
+        'state': 25000,
     }
     EMAIL_EXPIRY_SECONDS = 3600  # 1 hour
     INVITATION_EXPIRY_SECONDS = 3600 * 24 * 2  # 2 days - also set on api

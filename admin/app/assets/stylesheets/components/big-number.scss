@@ -4,12 +4,13 @@
   display: block;
 
   &-number {
-    @include bold-48($tabular-numbers: true);
+    @include core-strong;
+    @include core-huge;
+    //@include bold-48($tabular-numbers: true);
     display: block;
   }
 
   &-label {
-    @include core-19;
     display: inline-block;
     padding-bottom: 10px;
   }
@@ -21,7 +22,9 @@
   @extend %big-number;
 
   .big-number-number {
-    @include bold-36($tabular-numbers: true);
+    @include core-strong;
+    @include core-xxlarge;
+    //@include bold-36($tabular-numbers: true);
   }
 
 }
@@ -31,7 +34,9 @@
   @extend %big-number;
 
   .big-number-number {
-    @include bold-24($tabular-numbers: true);
+    @include core-strong;
+    @include core-large;
+    //@include bold-24($tabular-numbers: true);
   }
 
 }
@@ -98,8 +103,6 @@
 
   %big-number-status,
   .big-number-status {
-
-    @include core-19;
     display: block;
     background: $green;
     color: $white;

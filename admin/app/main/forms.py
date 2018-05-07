@@ -162,9 +162,9 @@ def organisation_type():
     return RadioField(
         'Who runs this service?',
         choices=[
-            ('central', 'Central government'),
-            ('local', 'Local government'),
-            ('nhs', 'NHS'),
+            ('federal', 'Australian Government'),
+            ('state', 'State Government'),
+            ('local', 'Local Government'),
         ],
         validators=[DataRequired()],
     )

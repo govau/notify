@@ -1,13 +1,10 @@
 .dashboard {
-
   table {
     th {
-      @include core-19;
       border-bottom: 0;
     }
 
     td {
-      @include core-19;
       border: 0;
     }
   }
@@ -15,7 +12,6 @@
   > .heading-medium:first-of-type {
     margin-top: 10px;
   }
-
 }
 
 .keyline-block {
@@ -24,8 +20,7 @@
 }
 
 .spark-bar {
-
-  @include core-16;
+  @include core-small;
   box-sizing: border-box;
   display: block;
   width: 100%;
@@ -45,13 +40,11 @@
     margin: 3px 0 5px 0;
     transition: width 0.6s ease-in-out;
   }
-
 }
 
 .file-list {
-
   &-filename {
-    @include bold-19;
+    @include core-strong;
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -63,7 +56,7 @@
   }
 
   &-hint {
-    @include core-16;
+    @include core-small;
     display: block;
     color: $secondary-text-colour;
     pointer-events: none;
@@ -72,16 +65,14 @@
     text-overflow: ellipsis;
     max-width: 580px;
   }
-
 }
 
 .failure-highlight {
-  @include bold-19;
+  @include core-strong;
   color: $error-colour;
 }
 
 .template-usage-table {
-
   border-top: 1px solid $border-colour;
   border-bottom: 1px solid $border-colour;
   margin-top: 10px;
@@ -90,7 +81,6 @@
   .table {
     margin-bottom: 5px;
   }
-
 }
 
 .align-with-message-body {

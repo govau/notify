@@ -137,20 +137,18 @@ details summary {
   table {
     th,
     td {
-      @include core-19;
       word-wrap: break-word;
     }
 
     thead {
       th {
-        @include bold-19;
+        @include core-strong;
       }
     }
   }
 }
 
 .tabular-numbers {
-  @include core-19($tabular-numbers: true);
 }
 
 summary::-moz-details-marker {
@@ -176,7 +174,7 @@ details .arrow {
 }
 
 .block-label-hint {
-  @include core-16;
+  @include core-small;
   margin-top: 5px;
 }
 

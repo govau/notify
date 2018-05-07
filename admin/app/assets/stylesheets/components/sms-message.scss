@@ -61,7 +61,7 @@ $tail-angle: 20deg;
 }
 
 .sms-message-status {
-  @include core-16;
+  @include core-small;
   color: $secondary-text-colour;
   margin: -20px $gutter-half 20px $gutter-half;
 }

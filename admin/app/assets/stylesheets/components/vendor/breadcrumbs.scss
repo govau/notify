@@ -30,7 +30,7 @@
 
 .breadcrumbs {
   @extend %site-width-container;
-  @include core-16($line-height: (25 / 16), $line-height-640: 1.75);
+  @include core-small;
 
   padding: $gutter-one-third 0;
   list-style: none;

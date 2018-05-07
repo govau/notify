@@ -11,21 +11,25 @@
 
   &-item,
   &-sub-item {
-    @include bold-24;
+    @include core-large;
+    @include core-strong;
     list-style: none;
     margin-bottom: $gutter-half;
   }
 
   &-link {
-    @include bold-24;
+    @include core-large;
+    @include core-strong;
 
     &-destructive {
-      @include bold-24;
+      @include core-large;
+      @include core-strong;
       color: $error-colour;
 
       &:visited,
       &:link {
-        @include bold-24;
+        @include core-large;
+        @include core-strong;
         color: $error-colour;
       }
 
@@ -36,7 +40,6 @@
   }
 
   &-hint {
-    @include core-19;
     margin-top: 5px;
   }
 }

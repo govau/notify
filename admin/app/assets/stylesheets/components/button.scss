@@ -1,5 +1,5 @@
 .button {
-  //@include core-alz-medium();
+  @include core-medium;
 
   padding: 0.5rem 1.5rem;
   line-height: 1.5;
@@ -16,9 +16,17 @@
     background-color: #00698f;
   }
 
+  &:focus,
+  &:active,
   &:hover:not(:disabled) {
+    outline: none;
     background-color: #313131;
     border-color: #313131;
     text-decoration: underline;
+  }
+
+  &:focus {
+    outline: 3px solid #9263de;
+    outline-offset: 2px;
   }
 }

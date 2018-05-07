@@ -29,6 +29,7 @@ $path: '/static/images/';
 @import 'elements/panels';
 @import 'elements/tables';
 
+@import 'components/overrides';
 
 // Specific to this application
 @import 'grids';
@@ -62,7 +63,6 @@ $path: '/static/images/';
 @import 'components/fullscreen-table';
 @import 'components/vendor/breadcrumbs';
 @import 'components/vendor/responsive-embed';
-@import 'components/overrides';
 
 @import 'views/dashboard';
 @import 'views/users';
