@@ -274,11 +274,12 @@ native-vendor:
 	mkdir -p $@
 
 build-linux-wheels: pipenv-requirements.txt native-vendor
-	cat $< | docker run -i --rm\
+	cat $< | $(RUNNER) python fixup-requirements.py --ignore | docker run\
+		-i --rm\
 		-v $(shell pwd)/build-linux-wheels.sh:/build-linux-wheels.sh\
 		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
 
 deploy: vendor requirements.txt
-	cf push
+	cf zero-downtime-push notify-admin -f manifest.yml
 
-.PHONY: ttest setup run run-gunicorn deploy
+.PHONY: ttest setup run run-gunicorn deploy build-linux-wheels

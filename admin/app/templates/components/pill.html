@@ -10,7 +10,7 @@
     {% for label, option, link, count in items %}
       {% if current_value == option %}
         <li aria-selected='true' role='tab'>
-          <div class='pill-selected-item{% if not show_count %} pill-centered-item{% endif %}' tabindex='0'>
+          <a href="{{ link }}">
       {% else %}
         <li aria-selected='false' role='tab'>
           <a href="{{ link }}">
@@ -20,7 +20,7 @@
         {% endif %}
             <div class="pill-label{% if not show_count %} pill-centered-item{% endif %}">{{ label }}</div>
       {% if current_value == option %}
-          </div>
+          </a>
       {% else %}
           </a>
       {% endif %}

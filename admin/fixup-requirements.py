@@ -7,6 +7,9 @@ if __name__ == '__main__':
             sys.stdout.write(line)
             continue
 
+        if '--ignore' in sys.argv:
+            continue
+
         line = line[2:].strip()
         parsed = urllib.parse.urlparse(line)
         egg = next(iter(urllib.parse.parse_qs(parsed.fragment).get('egg')),None)

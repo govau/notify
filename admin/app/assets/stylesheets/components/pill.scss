@@ -6,6 +6,9 @@
   a,
   &-selected-item {
     text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   li {
