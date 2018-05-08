@@ -246,7 +246,7 @@ Pipfile Pipfile.lock:
 
 setup:
 	$(NPM) install
-	$(NPM) run build
+	$(NPM) run build -- --production
 	$(PIPENV) install
 
 test: version-file

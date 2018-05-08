@@ -55,11 +55,13 @@
           {% endif %}
         </ul>
 
+        {% block header_sign_in_out %}
         {% if current_user.is_authenticated %}
           <a href="{{ url_for('main.sign_out')}}">Sign out</a>
         {% else %}
           <a href="{{ url_for('main.sign_in' )}}">Sign in</a>
         {% endif %}
+        {% endblock %}
       </nav>
     </div>
   </div>

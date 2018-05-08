@@ -1,3 +1,4 @@
+%button,
 .button {
   @include core-medium;
 
@@ -28,5 +29,17 @@
   &:focus {
     outline: 3px solid #9263de;
     outline-offset: 2px;
+  }
+}
+
+%button-submit {
+  background-color: #61daff;
+  color: #135e70;
+
+  &:active,
+  &:hover:not(:disabled) {
+    color: #135e70;
+    border-color: #fff;
+    background-color: #fff;
   }
 }
