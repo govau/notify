@@ -12,6 +12,28 @@ references:
         source $BASH_ENV
         cf install-plugin -f https://github.com/contraband/autopilot/releases/download/0.0.6/autopilot-linux
 
+  cf_login: &cf_login
+    run:
+      command: |
+        CF_USERNAME="${CF_Y_USER}" \
+        CF_PASSWORD="${CF_Y_PASSWORD}" \
+          make cf-login
+
+  deploy_admin: &deploy_admin
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - *cf_install
+        - attach_workspace:
+            at: .
+        - *cf_login
+        - run: make -C admin deploy
+  master_branch: &master_branch
+    filters:
+      branches:
+        only:
+          - master
+
 jobs:
   setup:
     docker:
@@ -31,8 +53,6 @@ jobs:
     steps:
         - attach_workspace:
             at: .
-        - attach_workspace:
-            at: .
         - run: make -C admin setup
         - run: make -C admin vendor
         - persist_to_workspace:
@@ -45,27 +65,22 @@ jobs:
     steps:
         - attach_workspace:
             at: .
-        - attach_workspace:
-            at: .
         - run: make -C api setup
         - run: make -C api vendor
         - persist_to_workspace:
             root: .
             paths:
               - api
+  deploy-dev-admin:
+    environment:
+      - APP: notify-dev
+    <<: *deploy_admin
+  deploy-notify:
+    environment:
+      - APP: notify
+    <<: *deploy_admin
   deploy-admin:
-    docker:
-      - image: circleci/python:3.6.5-node
-    steps:
-        - *cf_install
-        - attach_workspace:
-            at: .
-        - run:
-            command: |
-              CF_USERNAME="${CF_Y_USER}" \
-              CF_PASSWORD="${CF_Y_PASSWORD}" \
-                make cf-login
-        - run: make -C admin deploy
+    <<: *deploy_admin
   deploy-api:
     docker:
       - image: circleci/python:3.6.5-node
@@ -73,11 +88,7 @@ jobs:
         - *cf_install
         - attach_workspace:
             at: .
-        - run:
-            command: |
-              CF_USERNAME="${CF_Y_USER}" \
-              CF_PASSWORD="${CF_Y_PASSWORD}" \
-                make cf-login
+        - *cf_login
         - run: make -C api deploy-api
   deploy-celery:
     docker:
@@ -86,11 +97,7 @@ jobs:
         - *cf_install
         - attach_workspace:
             at: .
-        - run:
-            command: |
-              CF_USERNAME="${CF_Y_USER}" \
-              CF_PASSWORD="${CF_Y_PASSWORD}" \
-                make cf-login
+        - *cf_login
         - run: make -C api deploy-celery
 
 workflows:
@@ -104,21 +111,27 @@ workflows:
       - build-api:
           requires:
             - setup
-      - deploy-admin:
+      - deploy-dev-admin:
           requires:
             - build-admin
-          filters:
-            branches:
-              only: master
+      - deploy-admin:
+          <<: *master_branch
+          requires:
+            - build-admin
       - deploy-api:
+          <<: *master_branch
           requires:
             - build-api
-          filters:
-            branches:
-              only: master
       - deploy-celery:
+          <<: *master_branch
           requires:
             - build-api
-          filters:
-            branches:
-              only: master
+      - unlock-prod-deploy:
+          type: approval
+          requires:
+            - deploy-admin
+            - deploy-api
+            - deploy-celery
+      - deploy-notify:
+          requires:
+            - unlock-prod-deploy

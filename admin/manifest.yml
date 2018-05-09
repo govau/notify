@@ -3,12 +3,7 @@ defaults: &defaults
   buildpack: python_buildpack
   instances: 1
   memory: 1G
-
-applications:
-- name: notify-admin
-  <<: *defaults
-  command: make run-gunicorn
-  env:
+  env: &defaults_env
     RUNNER: ''
     NOTIFY_ENVIRONMENT: production
     ADMIN_CLIENT_SECRET: 817659DB3E1DAFB86819C53BC625FA3D7243CC7EE4B1D7BBC383FD4A52B25891
@@ -25,3 +20,18 @@ applications:
     DESKPRO_API_KEY: not-real
     TEMPLATE_PREVIEW_API_HOST: not-real
     TEMPLATE_PREVIEW_API_KEY: not-real
+  command: make run-gunicorn
+
+applications:
+- name: notify-admin
+  <<: *defaults
+- name: notify-dev
+  <<: *defaults
+  env:
+    <<: *defaults_env
+    ADMIN_BASE_URL: https://notify-dev.apps.y.cld.gov.au/
+- name: notify
+  <<: *defaults
+  env:
+    <<: *defaults_env
+    ADMIN_BASE_URL: https://notify.apps.y.cld.gov.au/
