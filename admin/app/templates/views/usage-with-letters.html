@@ -58,7 +58,7 @@
             {{ big_number(
               (sms_chargeable * sms_rate),
               'spent',
-              currency="£",
+              currency="$",
               smaller=True
             ) }}
           </div>
@@ -68,7 +68,7 @@
             {{ big_number(
                 letter_cost,
                 'spent',
-                currency="£",
+                currency="$",
                 smaller=True
               ) }}
           </div>
@@ -95,7 +95,7 @@
             {% call field(align='left') %}
               {{ big_number(
                 (sms_rate * month.paid) + month.letter_total,
-                currency="£",
+                currency="$",
                 smallest=True
               ) }}
           <ul>

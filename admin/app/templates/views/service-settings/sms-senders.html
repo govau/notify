@@ -46,4 +46,9 @@
       </div>
     {% endfor %}
   </div>
+
+{{ page_footer(
+  back_link=url_for('.service_settings', service_id=current_service.id),
+  back_link_text='Back to settings'
+) }}
 {% endblock %}

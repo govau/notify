@@ -13,7 +13,7 @@
 
     <p>
         There are different types of API keys that let you do functional or performance integration testing.
-        You don’t need different GOV.UK Notify accounts or access to other GOV.UK Notify environments.
+        You don’t need different Notify accounts or access to other Notify environments.
     </p>
 
     <h2 class="heading-medium">Types of API Keys</h2>
@@ -70,7 +70,7 @@
 
     <h2 class="heading-medium">Test key</h2>
       <p>
-        Use a test key to test the performance of your service and its integration with GOV.UK Notify.
+        Use a test key to test the performance of your service and its integration with Notify.
       </p>
       <p>
           Test keys don’t send real messages but do generate realistic responses.
@@ -119,7 +119,7 @@
 
       <h2 class="heading-medium">Smoke testing your integration</h2>
       <p>
-         If you need to smoke test your integration with GOV.UK Notify on a regular basis, you should use the smoke test numbers and addresses below.
+         If you need to smoke test your integration with Notify on a regular basis, you should use the smoke test numbers and addresses below.
 <div class="bottom-gutter-3-2">
         {% call mapping_table(
             caption='Test numbers/address that generate error responses',
@@ -137,14 +137,14 @@
               {{ text_field('07700900333') }}
             {% endcall %}
             {% call row() %}
-              {{ text_field('simulate-delivered@notifications.service.gov.uk') }}
+              {{ text_field('simulate-delivered@notify.digital.gov.au') }}
             {% endcall %}
            {% call row() %}
-              {{ text_field('simulate-delivered-2@notifications.service.gov.uk') }}
+              {{ text_field('simulate-delivered-2@notify.digital.gov.au') }}
             {% endcall %}
 
            {% call row() %}
-              {{ text_field('simulate-delivered-3@notifications.service.gov.uk') }}
+              {{ text_field('simulate-delivered-3@notify.digital.gov.au') }}
             {% endcall %}
           {% endcall %}
       </div>

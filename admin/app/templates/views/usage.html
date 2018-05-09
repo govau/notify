@@ -52,7 +52,7 @@
             {{ big_number(
               (sms_chargeable * sms_rate),
               'spent',
-              currency="£",
+              currency="$",
               smaller=True
             ) }}
           </div>
@@ -78,7 +78,7 @@
             {% call field(align='left') %}
               {{ big_number(
                 sms_rate * month.paid,
-                currency="£",
+                currency="$",
                 smallest=True
               ) }}
               <ul>

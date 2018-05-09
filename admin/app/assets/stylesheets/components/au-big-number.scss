@@ -60,4 +60,9 @@
     background-color: white;
     padding: 1rem;
   }
+
+  .big-number-status-failing {
+    @extend %big-number-status;
+    background-color: #ffaf87;
+  }
 }
