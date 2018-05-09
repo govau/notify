@@ -255,6 +255,9 @@ test: version-file
 	$(RUNNER) py.test --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 --maxfail=10
 	$(NPM) test
 
+run-gulp:
+	$(NPM) run watch
+
 run: version-file
 	$(RUNNER) flask run -p $(PORT)
 
