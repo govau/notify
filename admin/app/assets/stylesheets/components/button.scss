@@ -1,3 +1,16 @@
+%secondary {
+  background-color: transparent;
+  color: #00698f;
+
+  &:focus,
+  &:active,
+  &:hover:not(:disabled) {
+    background-color: transparent;
+    border-color: #313131;
+    color: #313131;
+  }
+}
+
 %button,
 .button {
   @include core-medium;
@@ -12,6 +25,15 @@
   cursor: pointer;
   vertical-align: middle;
   transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
+
+  &.secondary {
+    @extend %secondary;
+  }
+
+  &.tertiary {
+    @extend %secondary;
+    border: none;
+  }
 
   &:visited {
     background-color: #00698f;
