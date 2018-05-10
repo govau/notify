@@ -14,7 +14,7 @@
     <div class="bottom-gutter">
       {% call banner_wrapper(type='dangerous', subhead='Are you sure you want to revoke this API key?') %}
         <p>
-          ‘{{ revoke_key }}’ will no longer let you connect to GOV.UK Notify.
+          ‘{{ revoke_key }}’ will no longer let you connect to Notify.
         </p>
         <form method='post'>
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />

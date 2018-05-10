@@ -4,7 +4,7 @@
 <!--[if gt IE 8]><!--><html lang="{{ html_lang|default('en') }}"><!--<![endif]-->
   <head>
     <meta charset="utf-8" />
-    <title>{% block page_title %}GOV.UK - The best place to find government services and information{% endblock %}</title>
+    <title>{% block page_title %}Notify{% endblock %}</title>
 
     <!--[if gt IE 8]><!--><link rel="stylesheet" media="screen" href="{{ asset_path }}stylesheets/govuk-template.css?0.23.0"/><!--<![endif]-->
     <!--[if IE 6]><link rel="stylesheet" media="screen" href="{{ asset_path }}stylesheets/govuk-template-ie6.css?0.23.0"/><![endif]-->
@@ -55,7 +55,7 @@
       <div class="header-wrapper">
         <div class="header-global">
           <div class="header-logo">
-            <a href="{{ homepage_url|default('https://www.gov.uk') }}" title="{{ logo_link_title|default('Go to the GOV.UK homepage') }}" id="logo" class="content">
+            <a href="{{ homepage_url }}" title="{{ logo_link_title }}" id="logo" class="content">
               <img src="{{ asset_path }}images/coa_white.svg" alt="Australian Government logo">
               <span>{{ global_header_text|default('GOV.AU') }}</span>
               <span class="header-badge">alpha</span>
@@ -82,17 +82,6 @@
         <div class="footer-meta">
           <div class="footer-meta-inner">
             {% block footer_support_links %}{% endblock %}
-
-            <div class="open-government-licence">
-              <p class="logo"><a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license">Open Government Licence</a></p>
-              
-                {% block licence_message %}<p>All content is available under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license">Open Government Licence v3.0</a>, except where otherwise stated</p>{% endblock %}
-              
-            </div>
-          </div>
-
-          <div class="copyright">
-            <a href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/">{{ crown_copyright_message|default('&copy; Crown copyright')|safe }}</a>
           </div>
         </div>
       </div>
