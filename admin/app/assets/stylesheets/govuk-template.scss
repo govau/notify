@@ -321,12 +321,18 @@ a:link:focus {
   margin: 0.75em 0 0 30px;
 }
 
+.banner-dangerous:focus,
+.multiple-choice [type='checkbox']:focus + label::before,
 input:focus,
 textarea:focus,
 select:focus,
 button:focus {
   outline: 3px solid #61daff;
   outline-offset: 0;
+}
+
+.banner-dangerous:focus {
+  outline: none;
 }
 
 #global-header input[type='search']:focus {
@@ -339,7 +345,6 @@ button:focus {
   outline: none;
 }
 #global-header a:focus {
-  color: #0b0c0c;
 }
 
 #global-header .header-wrapper:after,
@@ -388,6 +393,7 @@ button:focus {
   border-right: 1px solid #a9a9a9;
   margin-right: 2rem;
   padding-right: 2rem;
+  padding-left: 14px; // ALZ MAGIC NUMBERS
   height: 64px;
 }
 

@@ -46,11 +46,13 @@
       <a href="#proposition-links" class="js-header-toggle menu">Menu</a>
       <nav id="proposition-menu">
         <ul id="proposition-links">
+          {% if current_user.is_authenticated %}
           {{ top_nav_item(
             url_for('main.show_accounts_or_dashboard'),
             'Services',
             active=request.path.startswith('/services'))
           }}
+          {% endif %}
           {{ top_nav_item(url_for('main.support'), 'Support') }}
           {% if current_user.is_authenticated %}
             {{ top_nav_item(url_for('main.documentation'), 'Documentation') }}

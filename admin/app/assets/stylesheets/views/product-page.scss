@@ -7,29 +7,18 @@
 
     &-wrapper {
       @extend %site-width-container;
-
-      @include media(desktop) {
-        background-image: file-url('product/proposition-illustration.png');
-        background-size: 320px;
-        background-repeat: no-repeat;
-        background-position: right -6px top 100px;
-
-        @include ie-lte(8) {
-          background-image: none;
-        }
-      }
     }
 
     h1 {
       @include core-strong;
       @include core-huge;
-      margin: 20px 0 $gutter 0;
+      margin: 20px 0 0 0;
       line-height: 1.2;
     }
 
     p {
       @include core-large;
-      margin: $gutter-half 0 $gutter;
+      margin: $gutter-half 0 $gutter * 1.5;
       line-height: 1.4;
     }
 
@@ -38,20 +27,38 @@
     }
 
     .button {
-      //@extend %button-submit;
-      background: $white;
+      border-color: #61daff;
+      background: #61daff;
+      color: #313131;
       margin-right: 15px;
-      padding-right: 1.25em;
 
       &:link,
       &:visited,
       &:hover {
-        color: $govuk-blue;
+        color: #313131;
       }
 
       &:hover {
-        background: $light-blue-25;
-        outline: none;
+        background: white;
+        border-color: white;
+      }
+
+      &.secondary {
+        color: #61daff;
+        background: transparent;
+
+        &:focus,
+        &:link,
+        &:visited,
+        &:hover {
+          color: #61daff;
+          border-color: #61daff;
+        }
+
+        &:hover {
+          border-color: #61daff;
+          background: transparent;
+        }
       }
     }
 

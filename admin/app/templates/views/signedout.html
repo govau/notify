@@ -9,7 +9,7 @@
       <div class="grid-row">
         <div class="column-two-thirds">
           <h1>
-            Send emails, text messages and letters to your users
+            Send emails and text messages to your users
           </h1>
           <p>
             Try Notify now if you work in Australian government.
@@ -18,8 +18,9 @@
             <a class="button" href='{{ url_for('.register' )}}'>
               Create an account
             </a>
-            or <a href="{{ url_for('.sign_in' )}}">sign in</a> if you’ve used
-            it before
+            <a class="button secondary" href='{{ url_for('.sign_in' )}}'>
+                Sign in
+            </a>
           </div>
         </div>
       </div>
@@ -28,7 +29,7 @@
 {% endblock %}
 
 {% block meta %}
-  <meta name="description" content="Notify.gov.au lets you send emails, text messages and letters to your users. Try it now if you work in central government, a local authority, or the NHS.">
+  <meta name="description" content="Notify.gov.au lets you send emails and text messages to your users. Try it now if you work in central government, a local authority, or the NHS.">
 {% endblock %}
 
 {% block page_title %}

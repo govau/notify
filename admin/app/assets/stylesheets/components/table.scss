@@ -159,9 +159,12 @@
   }
 }
 
+.table-font-xsmall td {
+  @include core-medium;
+}
+
 .table-font-xsmall td.table-field-index {
   // overrides GOV.UK Elements
-  @include core-small;
   @include core-strong;
 }
 
