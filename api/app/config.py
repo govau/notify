@@ -154,7 +154,7 @@ class Config(object):
     ORGANISATION_INVITATION_EMAIL_TEMPLATE_ID = '203566f0-d835-47c5-aa06-932439c86573'
 
     BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
-    
+
     """
     BROKER_URL = 'sqs://'
     BROKER_TRANSPORT_OPTIONS = {
