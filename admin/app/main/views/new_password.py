@@ -17,6 +17,8 @@ from app.main import main
 from app.main.forms import NewPasswordForm
 from app.main.views.two_factor import log_in_user
 
+NOTIFY_USER_ID = '6af522d0-2915-4e52-83a3-3690455a5fe6'
+
 
 @main.route('/new-password/<path:token>', methods=['GET', 'POST'])
 def new_password(token):
@@ -42,6 +44,11 @@ def new_password(token):
             'id': user.id,
             'email': user.email_address,
             'password': form.new_password.data}
+
+        # TODO: remove this after alpha, when templates are sorted
+        if user.id == NOTIFY_USER_ID:
+            return log_in_user(user.id)
+
         if user.auth_type == 'email_auth':
             # they've just clicked an email link, so have done an email auth journey anyway. Just log them in.
             return log_in_user(user.id)

@@ -292,7 +292,7 @@ vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
 requirements.txt: pipenv-requirements.txt
-	cat $< | $(RUNNER) python fixup-requirements.py > $@
+	cat $< | $(RUNNER) python scripts/fixup-requirements.py > $@
 
 run-production: setup-db
 	$(MAKE) run-gunicorn
@@ -306,4 +306,9 @@ deploy-celery: vendor requirements.txt
 deploy: vendor requirements.txt
 	cf push
 
-.PHONY: ttest setup setup-db run run-celery deploy run-production
+create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
+create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
+create-migration:
+	$(RUNNER) flask db revision --rev-id $(MIGRATION_NUMBER) --message "$(MIGRATION_MESSAGE)"
+
+.PHONY: ttest setup setup-db run run-celery deploy run-production create-migration
