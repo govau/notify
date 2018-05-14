@@ -13,7 +13,7 @@ class IdentitySMSClient(SmsClient):
 
     @property
     def name(self):
-        return 'ses'
+        return 'identity'
 
     def get_name(self):
         return self.name
