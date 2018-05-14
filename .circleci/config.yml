@@ -33,6 +33,11 @@ references:
       branches:
         only:
           - master
+  not_master_branch: &not_master_branch
+    filters:
+      branches:
+        ignore:
+          - master
 
 jobs:
   setup:
@@ -112,6 +117,7 @@ workflows:
           requires:
             - setup
       - deploy-dev-admin:
+          <<: *not_master_branch
           requires:
             - build-admin
       - deploy-admin:
