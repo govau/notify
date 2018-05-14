@@ -18,8 +18,10 @@ defaults: &defaults
     FLASK_APP: application.py
     SMTP_ADDR: smtp.hasmtp.cld.gov.au
     SMTP_USER: notifications@digital.gov.au
-    SMS_ADDR: https://sms-gateway.apps.y.cld.gov.au
-    SMS_USER: dto
+    TELSTRA_MESSAGING_CLIENT_ID: ''
+    TELSTRA_MESSAGING_CLIENT_SECRET: ''
+    IDENTITY_SMS_ADDR: https://sms-gateway.apps.y.cld.gov.au
+    IDENTITY_SMS_USER: dto
 
 applications:
 - name: notify-api
