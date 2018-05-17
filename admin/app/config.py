@@ -3,6 +3,7 @@ import os
 if os.environ.get('VCAP_APPLICATION'):
     pass
 
+
 class Config(object):
     ADMIN_CLIENT_SECRET = os.environ.get('ADMIN_CLIENT_SECRET')
     API_HOST_NAME = os.environ.get('API_HOST_NAME')
@@ -72,6 +73,7 @@ class Config(object):
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
     CHECK_PROXY_HEADER = False
 
+
 class Development(Config):
     NOTIFY_LOG_PATH = 'application.log'
     DEBUG = True
@@ -139,6 +141,7 @@ class Live(Config):
 
     BASIC_AUTH_USER = 'notify'
     BASIC_AUTH_PASS = 'notify'
+
 
 class CloudFoundryConfig(Config):
     pass

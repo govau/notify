@@ -17,11 +17,11 @@ import pytz
 import yaml
 from flask import (
     Markup,
+    Response,
     abort,
     current_app,
     redirect,
     request,
-    Response,
     session,
     url_for,
 )
@@ -52,15 +52,17 @@ def check_auth(config, auth):
     if not auth:
         return False
 
-    return  config.get('BASIC_AUTH_USER') == auth.username and\
-            config.get('BASIC_AUTH_PASS') == auth.password
+    return config.get('BASIC_AUTH_USER') == auth.username and\
+        config.get('BASIC_AUTH_PASS') == auth.password
+
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
     return Response(
-    'Could not verify your access level for that URL.\n'
-    'You have to login with proper credentials', 401,
-    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
 
 def requires_auth(f):
     @wraps(f)
@@ -69,6 +71,7 @@ def requires_auth(f):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
+
 
 def user_has_permissions(*permissions, **permission_kwargs):
     def wrap(func):

@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
         line = line[2:].strip()
         parsed = urllib.parse.urlparse(line)
-        egg = next(iter(urllib.parse.parse_qs(parsed.fragment).get('egg')),None)
+        egg = next(iter(urllib.parse.parse_qs(parsed.fragment).get('egg')), None)
 
         if egg:
             sys.stdout.write('%s\n' % egg)

@@ -35,10 +35,15 @@ version-file: app/version.py
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
-setup:
+setup-frontend:
 	$(NPM) install
 	$(NPM) run build -- --production
+
+setup: setup-frontend
 	$(PIPENV) install
+
+setup-dev: setup-frontend
+	$(PIPENV) install --dev
 
 test: version-file
 	$(RUNNER) flake8 .
@@ -76,4 +81,4 @@ build-linux-wheels: pipenv-requirements.txt native-vendor
 deploy: vendor requirements.txt
 	cf zero-downtime-push $(APP) -f manifest.yml
 
-.PHONY: ttest setup run run-gunicorn deploy build-linux-wheels
+.PHONY: test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
