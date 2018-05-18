@@ -163,14 +163,14 @@ def test_inbound_messages_shows_count_of_messages(
 
 
 @pytest.mark.parametrize('index, expected_row', enumerate([
-    '07900 900000 message-1 1 hour ago',
-    '07900 900000 message-2 1 hour ago',
-    '07900 900000 message-3 1 hour ago',
-    '07900 900002 message-4 3 hours ago',
-    '07900 900004 message-5 5 hours ago',
-    '07900 900006 message-6 7 hours ago',
-    '07900 900008 message-7 9 hours ago',
-    '07900 900008 message-8 9 hours ago',
+    '0490 900 000 message-1 1 hour ago',
+    '0490 900 000 message-2 1 hour ago',
+    '0490 900 000 message-3 1 hour ago',
+    '0490 900 002 message-4 3 hours ago',
+    '0490 900 004 message-5 5 hours ago',
+    '0490 900 006 message-6 7 hours ago',
+    '0490 900 008 message-7 9 hours ago',
+    '0490 900 008 message-8 9 hours ago',
 ]))
 def test_inbox_showing_inbound_messages(
     logged_in_client,
@@ -326,14 +326,14 @@ def test_download_inbox(
     )
     assert response.get_data(as_text=True) == (
         'Phone number,Message,Received\r\n'
-        '07900900000,message-1,2016-07-01 13:00\r\n'
-        '07900900000,message-2,2016-07-01 12:59\r\n'
-        '07900900000,message-3,2016-07-01 12:59\r\n'
-        '07900900002,message-4,2016-07-01 10:59\r\n'
-        '07900900004,message-5,2016-07-01 08:59\r\n'
-        '07900900006,message-6,2016-07-01 06:59\r\n'
-        '07900900008,message-7,2016-07-01 04:59\r\n'
-        '07900900008,message-8,2016-07-01 04:59\r\n'
+        '0490900000,message-1,2016-07-01 13:00\r\n'
+        '0490900000,message-2,2016-07-01 12:59\r\n'
+        '0490900000,message-3,2016-07-01 12:59\r\n'
+        '0490900002,message-4,2016-07-01 10:59\r\n'
+        '0490900004,message-5,2016-07-01 08:59\r\n'
+        '0490900006,message-6,2016-07-01 06:59\r\n'
+        '0490900008,message-7,2016-07-01 04:59\r\n'
+        '0490900008,message-8,2016-07-01 04:59\r\n'
     )
 
 
