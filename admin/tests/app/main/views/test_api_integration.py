@@ -314,7 +314,7 @@ def test_should_show_confirm_revoke_api_key(
     )
     assert normalize_spaces(page.select('.banner-dangerous')[0].text) == (
         'Are you sure you want to revoke this API key? '
-        '‘some key name’ will no longer let you connect to GOV.UK Notify. '
+        '‘some key name’ will no longer let you connect to Notify. '
         'Confirm'
     )
     assert mock_get_api_keys.call_args_list == [
@@ -564,7 +564,7 @@ def test_back_link_directs_to_api_integration_from_delivery_callback_if_no_inbou
         _follow_redirects=True,
     )
 
-    assert page.select_one('.page-footer-back-link')['href'] == url_for(
+    assert page.select_one('.page-footer-secondary-link')['href'] == url_for(
         expected_link, service_id=service_one['id']
     )
 

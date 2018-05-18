@@ -15,11 +15,11 @@ def test_non_logged_in_user_can_see_homepage(
     page = BeautifulSoup(response.data.decode('utf-8'), 'html.parser')
 
     assert page.h1.text.strip() == (
-        'Send emails, text messages and letters to your users'
+        'Send emails and text messages to your users'
     )
 
     assert page.select_one('meta[name=description]')['content'].strip() == (
-        'GOV.UK Notify lets you send emails, text messages and letters '
+        'GOV.UK Notify lets you send emails and text messages '
         'to your users. Try it now if you work in central government, a '
         'local authority, or the NHS.'
     )
