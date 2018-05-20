@@ -721,8 +721,8 @@ def test_usage_page(
     nav_links = nav.find_all('a')
 
     assert normalize_spaces(nav_links[0].text) == '2010 to 2011 financial year'
-    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).text) == '2011 to 2012 financial year'
-    assert normalize_spaces(nav_links[1].text) == '2012 to 2013 financial year'
+    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).find('a').text) == '2011 to 2012 financial year'
+    assert normalize_spaces(nav_links[2].text) == '2012 to 2013 financial year'
     assert '252,190' in cols[1].text
     assert 'Text messages' in cols[1].text
 
@@ -730,14 +730,14 @@ def test_usage_page(
 
     assert '249,860 free text messages' in table
     assert '40 free text messages' in table
-    assert '960 text messages at 1.65p' in table
+    assert '960 text messages at 1.65c' in table
     assert 'April' in table
     assert 'February' in table
     assert 'March' in table
-    assert '£15.84' in table
+    assert '$15.84' in table
     assert '140 free text messages' in table
-    assert '£20.30' in table
-    assert '1,230 text messages at 1.65p' in table
+    assert '$20.30' in table
+    assert '1,230 text messages at 1.65c' in table
 
 
 @freeze_time("2012-03-31 12:12:12")
@@ -764,8 +764,8 @@ def test_usage_page_with_letters(
     nav_links = nav.find_all('a')
 
     assert normalize_spaces(nav_links[0].text) == '2010 to 2011 financial year'
-    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).text) == '2011 to 2012 financial year'
-    assert normalize_spaces(nav_links[1].text) == '2012 to 2013 financial year'
+    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).find('a').text) == '2011 to 2012 financial year'
+    assert normalize_spaces(nav_links[2].text) == '2012 to 2013 financial year'
     assert '252,190' in cols[1].text
     assert 'Text messages' in cols[1].text
 
@@ -773,15 +773,15 @@ def test_usage_page_with_letters(
 
     assert '249,860 free text messages' in table
     assert '40 free text messages' in table
-    assert '960 text messages at 1.65p' in table
+    assert '960 text messages at 1.65c' in table
     assert 'April' in table
     assert 'February' in table
     assert 'March' in table
-    assert '£18.94' in table
+    assert '$18.94' in table
     assert '140 free text messages' in table
-    assert '£20.30' in table
-    assert '1,230 text messages at 1.65p' in table
-    assert '10 letters at 31p' in table
+    assert '$20.30' in table
+    assert '1,230 text messages at 1.65c' in table
+    assert '10 letters at 31c' in table
 
 
 def test_usage_page_with_year_argument(
