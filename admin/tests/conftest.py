@@ -1984,7 +1984,7 @@ def mock_get_users_by_service(mocker):
     def _get_users_for_service(service_id):
         data = [{'id': 1,
                  'logged_in_at': None,
-                 'mobile_number': '+447700900986',
+                 'mobile_number': '+61470900986',
                  'permissions': {SERVICE_ONE_ID: ['send_texts',
                                                   'send_emails',
                                                   'send_letters',
@@ -1995,7 +1995,7 @@ def mock_get_users_by_service(mocker):
                  'state': 'active',
                  'password_changed_at': None,
                  'name': 'Test User',
-                 'email_address': 'notify@digital.cabinet-office.gov.uk',
+                 'email_address': 'notify@digital.gov.au',
                  'auth_type': 'sms_auth',
                  'failed_login_count': 0,
                  'organisations': []}]

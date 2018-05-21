@@ -87,7 +87,7 @@ def mock_get_service_settings_page_common(
         'Organisation Org 1 Change',
         'Organisation type Central Change',
         'Free text message allowance 250,000 Change',
-        'Email branding GOV.UK Change',
+        'Email branding GOV.AU Change',
         'Letter branding HM Government Change',
 
     ]),
