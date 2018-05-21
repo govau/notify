@@ -163,14 +163,14 @@ def test_inbound_messages_shows_count_of_messages(
 
 
 @pytest.mark.parametrize('index, expected_row', enumerate([
-    '07900 900000 message-1 1 hour ago',
-    '07900 900000 message-2 1 hour ago',
-    '07900 900000 message-3 1 hour ago',
-    '07900 900002 message-4 3 hours ago',
-    '07900 900004 message-5 5 hours ago',
-    '07900 900006 message-6 7 hours ago',
-    '07900 900008 message-7 9 hours ago',
-    '07900 900008 message-8 9 hours ago',
+    '0490 900 000 message-1 1 hour ago',
+    '0490 900 000 message-2 1 hour ago',
+    '0490 900 000 message-3 1 hour ago',
+    '0490 900 002 message-4 3 hours ago',
+    '0490 900 004 message-5 5 hours ago',
+    '0490 900 006 message-6 7 hours ago',
+    '0490 900 008 message-7 9 hours ago',
+    '0490 900 008 message-8 9 hours ago',
 ]))
 def test_inbox_showing_inbound_messages(
     logged_in_client,
@@ -326,14 +326,14 @@ def test_download_inbox(
     )
     assert response.get_data(as_text=True) == (
         'Phone number,Message,Received\r\n'
-        '07900900000,message-1,2016-07-01 13:00\r\n'
-        '07900900000,message-2,2016-07-01 12:59\r\n'
-        '07900900000,message-3,2016-07-01 12:59\r\n'
-        '07900900002,message-4,2016-07-01 10:59\r\n'
-        '07900900004,message-5,2016-07-01 08:59\r\n'
-        '07900900006,message-6,2016-07-01 06:59\r\n'
-        '07900900008,message-7,2016-07-01 04:59\r\n'
-        '07900900008,message-8,2016-07-01 04:59\r\n'
+        '0490900000,message-1,2016-07-01 13:00\r\n'
+        '0490900000,message-2,2016-07-01 12:59\r\n'
+        '0490900000,message-3,2016-07-01 12:59\r\n'
+        '0490900002,message-4,2016-07-01 10:59\r\n'
+        '0490900004,message-5,2016-07-01 08:59\r\n'
+        '0490900006,message-6,2016-07-01 06:59\r\n'
+        '0490900008,message-7,2016-07-01 04:59\r\n'
+        '0490900008,message-8,2016-07-01 04:59\r\n'
     )
 
 
@@ -721,8 +721,8 @@ def test_usage_page(
     nav_links = nav.find_all('a')
 
     assert normalize_spaces(nav_links[0].text) == '2010 to 2011 financial year'
-    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).text) == '2011 to 2012 financial year'
-    assert normalize_spaces(nav_links[1].text) == '2012 to 2013 financial year'
+    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).find('a').text) == '2011 to 2012 financial year'
+    assert normalize_spaces(nav_links[2].text) == '2012 to 2013 financial year'
     assert '252,190' in cols[1].text
     assert 'Text messages' in cols[1].text
 
@@ -730,14 +730,14 @@ def test_usage_page(
 
     assert '249,860 free text messages' in table
     assert '40 free text messages' in table
-    assert '960 text messages at 1.65p' in table
+    assert '960 text messages at 1.65c' in table
     assert 'April' in table
     assert 'February' in table
     assert 'March' in table
-    assert '£15.84' in table
+    assert '$15.84' in table
     assert '140 free text messages' in table
-    assert '£20.30' in table
-    assert '1,230 text messages at 1.65p' in table
+    assert '$20.30' in table
+    assert '1,230 text messages at 1.65c' in table
 
 
 @freeze_time("2012-03-31 12:12:12")
@@ -764,8 +764,8 @@ def test_usage_page_with_letters(
     nav_links = nav.find_all('a')
 
     assert normalize_spaces(nav_links[0].text) == '2010 to 2011 financial year'
-    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).text) == '2011 to 2012 financial year'
-    assert normalize_spaces(nav_links[1].text) == '2012 to 2013 financial year'
+    assert normalize_spaces(nav.find('li', {'aria-selected': 'true'}).find('a').text) == '2011 to 2012 financial year'
+    assert normalize_spaces(nav_links[2].text) == '2012 to 2013 financial year'
     assert '252,190' in cols[1].text
     assert 'Text messages' in cols[1].text
 
@@ -773,15 +773,15 @@ def test_usage_page_with_letters(
 
     assert '249,860 free text messages' in table
     assert '40 free text messages' in table
-    assert '960 text messages at 1.65p' in table
+    assert '960 text messages at 1.65c' in table
     assert 'April' in table
     assert 'February' in table
     assert 'March' in table
-    assert '£18.94' in table
+    assert '$18.94' in table
     assert '140 free text messages' in table
-    assert '£20.30' in table
-    assert '1,230 text messages at 1.65p' in table
-    assert '10 letters at 31p' in table
+    assert '$20.30' in table
+    assert '1,230 text messages at 1.65c' in table
+    assert '10 letters at 31c' in table
 
 
 def test_usage_page_with_year_argument(

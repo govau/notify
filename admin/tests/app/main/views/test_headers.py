@@ -13,6 +13,6 @@ def test_owasp_useful_headers_set(client, mocker):
         "connect-src 'self' *.google-analytics.com;"
         "object-src 'self';"
         "font-src 'self' data:;"
-        "img-src 'self' *.google-analytics.com *.notifications.service.gov.uk static-logos.test.com data:;"
+        "img-src 'self' *.google-analytics.com *.cld.gov.au static-logos.test.com data:;"
         "frame-src www.youtube.com;"
     )

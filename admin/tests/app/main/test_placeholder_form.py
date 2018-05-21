@@ -25,15 +25,15 @@ def test_form_class_not_mutated(app_):
     (False, 'email address', 'email', '12345', 'Enter a valid email address'),
     (False, 'email address', 'email', '“bad”@email-address.com', 'Enter a valid email address'),
     (False, 'email address', 'email', 'test@example.com', None),
-    (False, 'email address', 'email', 'test@example.gov.uk', None),
+    (False, 'email address', 'email', 'test@example.gov.au', None),
 
     (False, 'phone number', 'sms', '', 'Can’t be empty'),
-    (False, 'phone number', 'sms', '+1-2345-678890', 'Not a UK mobile number'),
-    (False, 'phone number', 'sms', '07900900123', None),
-    (False, 'phone number', 'sms', '+44(0)7900 900-123', None),
+    (False, 'phone number', 'sms', '+1-2345-678890', 'Not an AU mobile number'),
+    (False, 'phone number', 'sms', '0420900123', None),
+    (False, 'phone number', 'sms', '+61(0)400 900-123', None),
 
     (True, 'phone number', 'sms', '+123', 'Not enough digits'),
-    (True, 'phone number', 'sms', '+44(0)7900 900-123', None),
+    (True, 'phone number', 'sms', '+61(0)400 900-123', None),
     (True, 'phone number', 'sms', '+1-2345-678890', None),
 
     (False, 'anything else', 'sms', '', 'Can’t be empty'),

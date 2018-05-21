@@ -360,7 +360,14 @@ def is_uk_phone_number(number):
 
 
 def is_au_phone_number(number):
-    return True
+    number = normalise_phone_number(number)
+
+    if (
+        number.startswith(au_prefix) or
+        (number.startswith('4') and len(number) < 10)
+    ):
+        return True
+    return False
 
 international_phone_info = namedtuple('PhoneNumber', [
     'international',

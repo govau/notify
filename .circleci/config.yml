@@ -64,6 +64,14 @@ jobs:
             root: .
             paths:
               - admin
+  test-admin:
+    docker:
+      - image: circleci/python:3.6.5-node
+    steps:
+        - attach_workspace:
+            at: .
+        - run: make -C admin setup-dev
+        - run: make -C admin test
   build-api:
     docker:
       - image: circleci/python:3.6.5-node
@@ -116,14 +124,19 @@ workflows:
       - build-api:
           requires:
             - setup
+      - test-admin:
+          requires:
+            - setup
       - deploy-dev-admin:
           <<: *not_master_branch
           requires:
             - build-admin
+            - test-admin
       - deploy-admin:
           <<: *master_branch
           requires:
             - build-admin
+            - test-admin
       - deploy-api:
           <<: *master_branch
           requires:

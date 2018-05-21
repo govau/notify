@@ -40,7 +40,7 @@
   flex-flow: column nowrap;
   border-radius: 4px;
   margin-top: 2rem;
-  background-color: #f5f5f5;
+  background-color: #F5F5F5;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 
@@ -63,6 +63,6 @@
 
   .big-number-status-failing {
     @extend %big-number-status;
-    background-color: #ffaf87;
+    background-color: #FFAF87;
   }
 }

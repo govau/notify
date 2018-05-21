@@ -22,7 +22,7 @@
   }
 
   li:first-child {
-    border-top: 1px solid #d3d5d7;
+    border-top: 1px solid #D3D5D7;
   }
 
   li {
@@ -30,12 +30,12 @@
     margin: 0;
     padding: 1rem 2rem;
     list-style-type: none;
-    border-bottom: 1px solid #d3d5d7;
+    border-bottom: 1px solid #D3D5D7;
   }
 
   .au-navitem--active {
-    border-left: 4px solid #006f99;
-    background-color: #e9f6f9;
+    border-left: 4px solid #006F99;
+    background-color: #E9F6F9;
 
     a {
       @include core-strong;

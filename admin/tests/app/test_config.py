@@ -24,7 +24,7 @@ def reload_config():
     importlib.reload(config)
 
 
-def test_load_cloudfoundry_config_if_available(monkeypatch, reload_config):
+def test_load_cloudfoundry_config_ignored(monkeypatch, reload_config):
     os.environ['API_HOST_NAME'] = 'env'
     monkeypatch.setenv('VCAP_APPLICATION', 'some json blob')
 
@@ -32,10 +32,10 @@ def test_load_cloudfoundry_config_if_available(monkeypatch, reload_config):
         # reload config so that its module level code (ie: all of it) is re-instantiated
         importlib.reload(config)
 
-    assert cf_config.called
+    assert not cf_config.called
 
-    assert os.environ['API_HOST_NAME'] == 'cf'
-    assert config.Config.API_HOST_NAME == 'cf'
+    assert os.environ['API_HOST_NAME'] == 'env'
+    assert config.Config.API_HOST_NAME == 'env'
 
 
 def test_load_config_if_cloudfoundry_not_available(monkeypatch, reload_config):

@@ -31,17 +31,17 @@ from app.main.views.templates import (
 @pytest.mark.parametrize('extra_args, expected_nav_links, expected_templates', [
     (
         {},
-        ['Text message', 'Email'],
+        ['All', 'Text message', 'Email'],
         ['sms_template_one', 'sms_template_two', 'email_template_one', 'email_template_two']
     ),
     (
         {'template_type': 'sms'},
-        ['All', 'Email'],
+        ['All', 'Text message', 'Email'],
         ['sms_template_one', 'sms_template_two'],
     ),
     (
         {'template_type': 'email'},
-        ['All', 'Text message'],
+        ['All', 'Text message', 'Email'],
         ['email_template_one', 'email_template_two'],
     ),
 ])
@@ -341,8 +341,8 @@ def test_should_not_allow_creation_of_template_through_form_without_correct_perm
     assert response.status_code == 200
     assert page.select('main p')[0].text.strip() == \
         "Sending {} has been disabled for your service.".format(template_description[type_of_template])
-    assert page.select(".page-footer-back-link")[0].text == "Back to add new template"
-    assert page.select(".page-footer-back-link")[0]['href'] == url_for(
+    assert page.select(".page-footer-secondary-link")[0].text == "← Back to add new template"
+    assert page.select(".page-footer-secondary-link")[0]['href'] == url_for(
         '.add_template_by_type',
         service_id=service_one['id'],
         template_id='0',
@@ -370,8 +370,8 @@ def test_should_not_allow_creation_of_a_template_without_correct_permission(
     assert response.status_code == 200
     assert page.select('main p')[0].text.strip() == \
         "Sending {} has been disabled for your service.".format(template_description[type_of_template])
-    assert page.select(".page-footer-back-link")[0].text == "Back to templates"
-    assert page.select(".page-footer-back-link")[0]['href'] == url_for(
+    assert page.select(".page-footer-secondary-link")[0].text == "← Back to templates"
+    assert page.select(".page-footer-secondary-link")[0]['href'] == url_for(
         '.choose_template',
         service_id=service_one['id'],
         template_id='0',
@@ -491,8 +491,8 @@ def test_should_not_allow_template_edits_without_correct_permission(
 
     assert response.status_code == 200
     assert page.select('main p')[0].text.strip() == "Sending text messages has been disabled for your service."
-    assert page.select(".page-footer-back-link")[0].text == "Back to the template"
-    assert page.select(".page-footer-back-link")[0]['href'] == url_for(
+    assert page.select(".page-footer-secondary-link")[0].text == "← Back to the template"
+    assert page.select(".page-footer-secondary-link")[0]['href'] == url_for(
         '.view_template',
         service_id=service_one['id'],
         template_id=template_id,
@@ -610,9 +610,8 @@ def test_should_show_interstitial_when_making_breaking_change(
     assert response.status_code == 200
     page = BeautifulSoup(response.data.decode('utf-8'), 'html.parser')
     assert page.h1.string.strip() == "Confirm changes"
-    assert page.find('a', {'class': 'page-footer-back-link'})['href'] == url_for(".edit_service_template",
-                                                                                 service_id=service_id,
-                                                                                 template_id=template_id)
+    assert page.find('a', {'class': 'page-footer-secondary-link'})['href'] ==\
+        url_for(".edit_service_template", service_id=service_id, template_id=template_id)
     for index, p in enumerate(expected_paragraphs):
         assert normalize_spaces(page.select('main p')[index].text) == p
 

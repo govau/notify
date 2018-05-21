@@ -71,9 +71,9 @@ def test_should_add_service_and_redirect_to_tour_when_no_services(
 
 
 @pytest.mark.parametrize('organisation_type, free_allowance', [
-    ('central', 250 * 1000),
+    ('federal', 250 * 1000),
     ('local', 25 * 1000),
-    ('nhs', 25 * 1000),
+    ('state', 25 * 1000),
 ])
 def test_should_add_service_and_redirect_to_dashboard_when_existing_service(
     app_,
@@ -125,7 +125,7 @@ def test_should_return_form_errors_with_duplicate_service_name_regardless_of_cas
         url_for('main.add_service'),
         data={
             'name': 'SERVICE ONE',
-            'organisation_type': 'central',
+            'organisation_type': 'federal',
         },
     )
 

@@ -90,14 +90,14 @@ def test_get_feedback_page(client, ticket_type, expected_status_code):
     (
         'agreement',
         (
-            'Please send me a copy of the GOV.UK Notify data sharing '
+            'Please send me a copy of the Notify data sharing '
             'and financial agreement.'
         )
     ),
     (
         'agreement-with-owner',
         (
-            'Please send me a copy of the GOV.UK Notify data sharing '
+            'Please send me a copy of the Notify data sharing '
             'and financial agreement for Marine Management '
             'Organisation to sign.'
         )
