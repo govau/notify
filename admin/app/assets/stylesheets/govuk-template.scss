@@ -751,14 +751,15 @@ button:focus {
     height: 100%;
   }
 }
+
 #footer .footer-meta .footer-meta-inner .open-government-licence .logo a {
   display: block;
   width: 41px;
   height: 17px;
   overflow: hidden;
   text-indent: -999em;
-  background: url(images/open-government-licence.png?0.23.0) 0 0 no-repeat;
 }
+
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min--moz-device-pixel-ratio: 2),
   only screen and (-o-min-device-pixel-ratio: 20 / 10),

@@ -1048,7 +1048,7 @@ def api_user_pending(fake_uuid):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': 'test@user.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'pending',
                  'failed_login_count': 0,
                  'permissions': {},
@@ -1065,7 +1065,7 @@ def platform_admin_user(fake_uuid):
                  'name': 'Platform admin user',
                  'password': 'somepassword',
                  'email_address': 'platform@admin.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 0,
                  'permissions': {SERVICE_ONE_ID: ['send_texts',
@@ -1091,7 +1091,7 @@ def api_user_active(fake_uuid, email_address='test@user.gov.uk'):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': email_address,
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 0,
                  'permissions': {},
@@ -1111,7 +1111,7 @@ def api_user_active_email_auth(fake_uuid, email_address='test@user.gov.uk'):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': email_address,
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 0,
                  'permissions': {},
@@ -1131,7 +1131,7 @@ def api_nongov_user_active(fake_uuid):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': 'someuser@notonwhitelist.com',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 0,
                  'permissions': {},
@@ -1153,7 +1153,7 @@ def active_user_with_permissions(fake_uuid):
                  'password': 'somepassword',
                  'password_changed_at': str(datetime.utcnow()),
                  'email_address': 'test@user.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 0,
                  'permissions': {SERVICE_ONE_ID: ['send_texts',
@@ -1209,7 +1209,7 @@ def active_user_view_permissions(fake_uuid):
                  'password': 'somepassword',
                  'password_changed_at': str(datetime.utcnow()),
                  'email_address': 'test@user.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 0,
                  'permissions': {SERVICE_ONE_ID: ['view_activity']},
@@ -1231,7 +1231,7 @@ def active_user_manage_template_permission(fake_uuid):
         'password': 'somepassword',
         'password_changed_at': str(datetime.utcnow()),
         'email_address': 'test@user.gov.uk',
-        'mobile_number': '07700 900762',
+        'mobile_number': '0470 900 762',
         'state': 'active',
         'failed_login_count': 0,
         'permissions': {SERVICE_ONE_ID: [
@@ -1256,7 +1256,7 @@ def active_user_no_api_key_permission(fake_uuid):
         'password': 'somepassword',
         'password_changed_at': str(datetime.utcnow()),
         'email_address': 'test@user.gov.uk',
-        'mobile_number': '07700 900762',
+        'mobile_number': '0470 900 762',
         'state': 'active',
         'failed_login_count': 0,
         'permissions': {SERVICE_ONE_ID: [
@@ -1282,7 +1282,7 @@ def active_user_no_settings_permission(fake_uuid):
         'password': 'somepassword',
         'password_changed_at': str(datetime.utcnow()),
         'email_address': 'test@user.gov.uk',
-        'mobile_number': '07700 900762',
+        'mobile_number': '0470 900 762',
         'state': 'active',
         'failed_login_count': 0,
         'permissions': {SERVICE_ONE_ID: [
@@ -1304,7 +1304,7 @@ def api_user_locked(fake_uuid):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': 'test@user.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 5,
                  'permissions': {},
@@ -1322,7 +1322,7 @@ def api_user_request_password_reset(fake_uuid):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': 'test@user.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 5,
                  'permissions': {},
@@ -1341,7 +1341,7 @@ def api_user_changed_password(fake_uuid):
                  'name': 'Test User',
                  'password': 'somepassword',
                  'email_address': 'test@user.gov.uk',
-                 'mobile_number': '07700 900762',
+                 'mobile_number': '0470 900 762',
                  'state': 'active',
                  'failed_login_count': 5,
                  'permissions': {},
@@ -1995,7 +1995,7 @@ def mock_get_users_by_service(mocker):
                  'state': 'active',
                  'password_changed_at': None,
                  'name': 'Test User',
-                 'email_address': 'notify@digital.gov.au',
+                 'email_address': 'notify@digital.gov.uk',
                  'auth_type': 'sms_auth',
                  'failed_login_count': 0,
                  'organisations': []}]
@@ -2017,8 +2017,8 @@ def mock_s3_download(mocker, content=None):
     if not content:
         content = """
             phone number,name
-            +447700900986,John
-            +447700900986,Smith
+            +61470900986,John
+            +61470900986,Smith
         """
 
     def _download(service_id, upload_id):

@@ -1,6 +1,6 @@
 %secondary {
   background-color: transparent;
-  color: #00698f;
+  color: #00698F;
 
   &:focus,
   &:active,
@@ -20,8 +20,8 @@
   display: inline-block;
   border-radius: 4px;
   box-shadow: none;
-  background-color: #00698f;
-  border: 3px solid #00698f;
+  background-color: #00698F;
+  border: 3px solid #00698F;
   cursor: pointer;
   vertical-align: middle;
   transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
@@ -36,7 +36,7 @@
   }
 
   &:visited {
-    background-color: #00698f;
+    background-color: #00698F;
   }
 
   &:focus,
@@ -49,7 +49,7 @@
   }
 
   &:focus {
-    outline: 3px solid #9263de;
+    outline: 3px solid #9263DE;
     outline-offset: 2px;
   }
 }
@@ -60,8 +60,8 @@
 
   &:active,
   &:hover:not(:disabled) {
-    color: #135e70;
-    border-color: #fff;
-    background-color: #fff;
+    color: #135E70;
+    border-color: #FFF;
+    background-color: #FFF;
   }
 }

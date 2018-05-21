@@ -19,7 +19,7 @@ $text-bold: 700;
 @mixin core-typography() {
   @include core-font;
   font-size: 1.9rem;
-  color: #0b0c0c;
+  color: #0B0C0C;
   line-height: 1.6;
   font-weight: $text-normal;
 }

@@ -167,7 +167,7 @@ gulp.task('lint:js', () =>
     .pipe(plugins.jshint.reporter('fail')),
 )
 
-gulp.task('lint', ['lint:sass', 'lint:js'])
+gulp.task('lint', ['lint:js'])
 
 // Default: compile everything
 gulp.task('default', [
