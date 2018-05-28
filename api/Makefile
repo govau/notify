@@ -291,6 +291,15 @@ pipenv-requirements.txt: Pipfile.lock
 vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
+native-vendor:
+	mkdir -p $@
+
+build-linux-wheels: pipenv-requirements.txt native-vendor
+	cat $< | $(RUNNER) python fixup-requirements.py --ignore | docker run\
+		-i --rm\
+		-v $(shell pwd)/build-linux-wheels.sh:/build-linux-wheels.sh\
+		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
+
 requirements.txt: pipenv-requirements.txt
 	cat $< | $(RUNNER) python scripts/fixup-requirements.py > $@
 
@@ -298,17 +307,14 @@ run-production: setup-db
 	$(MAKE) run-gunicorn
 
 deploy-api: vendor requirements.txt
-	cf push notify-api
+	cf zero-downtime-push notify-api -f manifest.yml
 
 deploy-celery: vendor requirements.txt
-	cf push notify-celery
-
-deploy: vendor requirements.txt
-	cf push
+	cf zero-downtime-push notify-celery -f manifest.yml
 
 create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
 create-migration:
 	$(RUNNER) flask db revision --rev-id $(MIGRATION_NUMBER) --message "$(MIGRATION_MESSAGE)"
 
-.PHONY: ttest setup setup-db run run-celery deploy run-production create-migration
+.PHONY: ttest setup setup-db run run-celery deploy deploy-api deploy-celery run-production create-migration

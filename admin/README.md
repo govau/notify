@@ -58,16 +58,11 @@ in a separate terminal from the app
     npm run watch
 ```
 
-## Create a local environment.sh file containing the following:
+## Create a local `.env` by copying .env.sample
 
-```
-echo "
-export NOTIFY_ENVIRONMENT='development'
-export FLASK_APP=application.py
-export FLASK_DEBUG=1
-export WERKZEUG_DEBUG_PIN=off
-"> environment.sh
-```
+copy the `.env.sample` file to a new file called `.env`. Pipenv will load this
+when it runs commands.
+
 
 ## AWS credentials
 
