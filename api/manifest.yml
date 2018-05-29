@@ -5,8 +5,9 @@ defaults: &defaults
   memory: 1G
   services:
     - notify-psql
+    - notify-env
   env:
-    RUNNER: ''
+    RUNNER: './vcapenvwrapper --root notify-env'
     NOTIFY_ENVIRONMENT: production
     API_HOST_NAME: https://notify-api.apps.y.cld.gov.au
     ADMIN_BASE_URL: https://notify-admin.apps.y.cld.gov.au/

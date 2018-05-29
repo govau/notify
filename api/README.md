@@ -27,32 +27,8 @@ pip3 install --user pipenv
 
 ### `.env`
 
-Creating the .env file. Replace [unique-to-environment] with your something unique to the environment.
-
-Create a local .env file containing the following:
-
-```
-echo "
-NOTIFY_ENVIRONMENT='development'
-
-MMG_API_KEY='MMG_API_KEY'
-LOADTESTING_API_KEY='FIRETEXT_SIMULATION_KEY'
-FIRETEXT_API_KEY='FIRETEXT_ACTUAL_KEY'
-NOTIFICATION_QUEUE_PREFIX='YOUR_OWN_PREFIX'
-
-FLASK_APP=application.py
-FLASK_DEBUG=1
-WERKZEUG_DEBUG_PIN=off
-
-SMTP_ADDR=
-SMTP_USER=
-SMTP_PASSWORD=
-
-SMS_ADDR=
-SMS_USER=
-SMS_PASSWORD=
-"> environment.sh
-```
+copy .env.sample to a file called `.env` and fill in the missing values with the
+help of a colleague. Pipenv will read from this file in development
 
 NOTES:
 
