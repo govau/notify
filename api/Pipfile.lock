@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d177f2a0d74271790804a38a8597e3e50e0e408bc1c8160c8ac4fe75230d97f8"
+            "sha256": "5e2c83a8a176fbc1ee26eff522048e45773ead89d6f34973256cfcccc4c02620"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -596,6 +596,9 @@
             ],
             "version": "==3.2.2"
         },
+        "telstra-messaging": {
+            "git": "https://github.com/Telstra/MessagingAPI-SDK-python.git"
+        },
         "urllib3": {
             "hashes": [
                 "sha256:06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b",
@@ -635,10 +638,10 @@
         },
         "attrs": {
             "hashes": [
-                "sha256:1c7960ccfd6a005cd9f7ba884e6316b5e430a3f1a6c37c5f87d8b43f83b54ec9",
-                "sha256:a17a9573a6f475c99b551c0e0a812707ddda1ec9653bed04c13841404ed6f450"
+                "sha256:4b90b09eeeb9b88c35bc642cbac057e45a5fd85367b985bd2809c62b7b939265",
+                "sha256:e0d0eb91441a3b53dab4d9b743eafc1ac44476296a2053b6ca3af0b139faf87b"
             ],
-            "version": "==17.4.0"
+            "version": "==18.1.0"
         },
         "aws-xray-sdk": {
             "hashes": [
@@ -795,17 +798,17 @@
         },
         "docker": {
             "hashes": [
-                "sha256:0d698c3dc4df66c988de5df21a62cdc3450de2fa8523772779e5e23799c41f43",
-                "sha256:f1a512a0dbc518459159d4584572ebc6de2cc8006b2e376eff02cfae7d72aff0"
+                "sha256:43b45b92bed372161a5d4f3c7137e16b30d93845e99a00bc727938e52850694e",
+                "sha256:dc5cc0971a0d36fe94c5ce89bd4adb6c892713500af7b0818708229c3199911a"
             ],
-            "version": "==3.2.1"
+            "version": "==3.3.0"
         },
         "docker-pycreds": {
             "hashes": [
-                "sha256:408ae6ec2b97345e02cbb3a05e0055443a27969e5b61d6773c733b534a40845b",
-                "sha256:c7ab85de2894baff6ee8f15160cbbfa2fd3a04e56f0372c5793d24060687b299"
+                "sha256:764a7ea2f6484bc5de5bf0c060f08b41a1118cf1acb987626b3ff45f3cc40dac",
+                "sha256:e3732a03610a00461a716997670c7010bf1c214a3edc440f7d6a2a3a830ecd9d"
             ],
-            "version": "==0.2.2"
+            "version": "==0.2.3"
         },
         "docopt": {
             "hashes": [
@@ -945,8 +948,6 @@
         },
         "pycodestyle": {
             "hashes": [
-                "sha256:1ec08a51c901dfe44921576ed6e4c1f5b7ecbad403f871397feedb5eb8e4fa14",
-                "sha256:5ff2fbcbab997895ba9ead77e1b38b3ebc2e5c3b8a6194ef918666e4c790a00e",
                 "sha256:682256a5b318149ca0d2a9185d365d8864a768a28db66a84a2ea946bcc426766",
                 "sha256:6c4245ade1edfad79c3446fadfc96b0de2759662dc29d07d80a6f27ad1ca6ba9"
             ],
