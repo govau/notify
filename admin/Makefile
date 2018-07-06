@@ -67,13 +67,13 @@ vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
 requirements.txt: pipenv-requirements.txt
-	cat $< | $(RUNNER) python fixup-requirements.py > $@
+	cat $< | $(RUNNER) python scripts/fixup-requirements.py > $@
 
 native-vendor:
 	mkdir -p $@
 
 build-linux-wheels: pipenv-requirements.txt native-vendor
-	cat $< | $(RUNNER) python fixup-requirements.py --ignore | docker run\
+	cat $< | $(RUNNER) python scripts/fixup-requirements.py --ignore | docker run\
 		-i --rm\
 		-v $(shell pwd)/build-linux-wheels.sh:/build-linux-wheels.sh\
 		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x

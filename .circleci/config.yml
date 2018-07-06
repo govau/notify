@@ -131,12 +131,10 @@ workflows:
           <<: *not_master_branch
           requires:
             - build-admin
-            - test-admin
       - deploy-admin:
           <<: *master_branch
           requires:
             - build-admin
-            - test-admin
       - deploy-api:
           <<: *master_branch
           requires:

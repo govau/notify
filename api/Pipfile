@@ -25,7 +25,7 @@ PyJWT = "==1.6.1"
 SQLAlchemy = "==1.2.6"
 notifications-python-client = "==4.8.1"
 awscli-cwlogs = "<1.5,>=1.4"
-notifications-utils = {path = "file:./../utils#egg=notifications-utils", editable = true}
+notifications-utils = {path = "./../utils", editable = true}
 
 [dev-packages]
 "flake8" = "==3.5.0"
