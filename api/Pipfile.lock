@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "09c208a1aadeb785416810c899173e5c76968314df47200bbce22209d7561ee9"
+            "sha256": "f91afa4f13925240b2a28bb778aa17dd89b409a8c1115e62fe596badfb7ed449"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -607,6 +607,9 @@
                 "sha256:84f2427ef7b8ffab28cdb717933f6889d248d710eee32b5eb79e3fdac0e374dd"
             ],
             "version": "==3.2.2"
+        },
+        "telstra-messaging": {
+            "git": "https://github.com/Telstra/MessagingAPI-SDK-python.git"
         },
         "urllib3": {
             "hashes": [
