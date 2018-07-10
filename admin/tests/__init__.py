@@ -44,7 +44,7 @@ def created_by_json(id_, name='', email_address=''):
 def user_json(
     id_='1234',
     name='Test User',
-    email_address='test@gov.uk',
+    email_address='test@gov.au',
     mobile_number='+447700900986',
     password_changed_at=None,
     permissions={generate_uuid(): [
@@ -89,7 +89,7 @@ def invited_user(
     _id='1234',
     service=None,
     from_user='1234',
-    email_address='testinviteduser@gov.uk',
+    email_address='testinviteduser@gov.au',
     permissions=None,
     status='pending',
     created_at=datetime.utcnow(),
@@ -132,10 +132,10 @@ def service_json(
     restricted=True,
     email_from=None,
     reply_to_email_address=None,
-    sms_sender='GOVUK',
+    sms_sender='GOVAU',
     research_mode=False,
     email_branding=None,
-    branding='govuk',
+    branding='govau',
     created_at=None,
     letter_contact_block=None,
     inbound_api=None,
@@ -287,7 +287,7 @@ def org_invite_json(id_, invited_by, org_id, email_address, created_at, status):
     }
 
 
-TEST_USER_EMAIL = 'test@user.gov.uk'
+TEST_USER_EMAIL = 'test@user.gov.au'
 
 
 def create_test_api_user(state, permissions={}):
@@ -370,7 +370,7 @@ def notification_json(
         if template_type == 'letter':
             to = '1 Example Street'
         elif template_type == 'email':
-            to = 'example@gov.uk'
+            to = 'example@gov.au'
         else:
             to = '07123456789'
     if sent_at is None:

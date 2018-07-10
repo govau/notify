@@ -1,11 +1,11 @@
 /*
-Taken from the GOV.UK component at
+Taken from the govuk-component at
 https://github.com/alphagov/static/blob/3d93a762b9d7af54615c77ae3e479131c03b8175/app/assets/stylesheets/govuk-component/_previous-and-next-navigation.scss
 and
 https://github.com/alphagov/static/blob/da8aeeaa749093eab30286d7fc9f965533b66f47/app/assets/stylesheets/styleguide/_conditionals2.scss
 */
-@import '_colours.scss';
-@import '_typography.scss';
+@import "_colours.scss";
+@import "_typography.scss";
 
 // Media query helpers. These make producing IE layouts
 // super easy.

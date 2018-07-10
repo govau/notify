@@ -33,7 +33,7 @@ def encode(content):
         * characters with diacritics (accents, umlauts, cedillas etc) are replaced with their base character, eg é -> e
         * en dash and em dash (– and —) are replaced with hyphen (-)
         * left/right quotation marks (‘, ’, “, ”) are replaced with ' and "
-        * zero width spaces (sometimes used to stop eg "gov.uk" linkifying) are removed
+        * zero width spaces (sometimes used to stop eg "gov.au" linkifying) are removed
         * tabs are replaced with a single space
 
     * any remaining unicode characters (eg chinese/cyrillic/glyphs/emoji) are replaced with ?

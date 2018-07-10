@@ -2,7 +2,7 @@ import pytest
 from flask import Markup
 
 from notifications_utils.formatters import (
-    unlink_govuk_escaped,
+    unlink_govau_escaped,
     notify_email_markdown,
     notify_letter_preview_markdown,
     notify_plain_text_email_markdown,
@@ -31,11 +31,11 @@ from notifications_utils.template import (
 @pytest.mark.parametrize(
     "url", [
         "http://example.com",
-        "http://www.gov.uk/",
-        "https://www.gov.uk/",
-        "http://service.gov.uk",
-        "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-        pytest.mark.xfail("http://service.gov.uk/blah.ext?q=one two three"),
+        "http://www.gov.au/",
+        "https://www.gov.au/",
+        "http://service.gov.au",
+        "http://service.gov.au/blah.ext?q=a%20b%20c&order=desc#fragment",
+        pytest.mark.xfail("http://service.gov.au/blah.ext?q=one two three"),
     ]
 )
 def test_makes_links_out_of_URLs(url):
@@ -173,18 +173,18 @@ def test_preserves_whitespace_when_making_links(
 
 @pytest.mark.parametrize(
     "template_content,expected", [
-        ("gov.uk", u"gov.\u200Buk"),
-        ("GOV.UK", u"GOV.\u200BUK"),
-        ("Gov.uk", u"Gov.\u200Buk"),
-        ("https://gov.uk", "https://gov.uk"),
-        ("https://www.gov.uk", "https://www.gov.uk"),
-        ("www.gov.uk", "www.gov.uk"),
-        ("gov.uk/register-to-vote", "gov.uk/register-to-vote"),
-        ("gov.uk?q=", "gov.uk?q=")
+        ("gov.au", u"gov.\u200Bau"),
+        ("GOV.AU", u"GOV.\u200BAU"),
+        ("Gov.au", u"Gov.\u200Bau"),
+        ("https://gov.au", "https://gov.au"),
+        ("https://www.gov.au", "https://www.gov.au"),
+        ("www.gov.au", "www.gov.au"),
+        ("gov.au/register-to-vote", "gov.au/register-to-vote"),
+        ("gov.au?q=", "gov.au?q=")
     ]
 )
-def test_escaping_govuk_in_email_templates(template_content, expected):
-    assert unlink_govuk_escaped(template_content) == expected
+def test_escaping_govau_in_email_templates(template_content, expected):
+    assert unlink_govau_escaped(template_content) == expected
     assert expected in str(PlainTextEmailTemplate({'content': template_content, 'subject': ''}))
     assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 

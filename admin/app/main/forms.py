@@ -571,7 +571,7 @@ class RequestToGoLiveForm(StripWhitespaceForm):
     )
     method_one_off = BooleanField('One at a time')
     method_upload = BooleanField('Upload a spreadsheet of recipients')
-    method_api = BooleanField('Integrate with the GOV.UK Notify API')
+    method_api = BooleanField('Integrate with the GOV.AU Notify API')
 
 
 class ProviderForm(StripWhitespaceForm):
@@ -638,8 +638,8 @@ class ServiceSetBranding(StripWhitespaceForm):
     branding_type = RadioField(
         'Branding type',
         choices=[
-            ('govuk', 'GOV.UK only'),
-            ('both', 'GOV.UK and branding'),
+            ('govau', 'GOV.AU only'),
+            ('both', 'GOV.AU and branding'),
             ('org', 'Branding only'),
             ('org_banner', 'Branding banner')
         ],

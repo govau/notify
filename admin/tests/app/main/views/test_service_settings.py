@@ -54,7 +54,7 @@ def mock_get_service_settings_page_common(
 
         'Label Value Action',
         'Send text messages On Change',
-        'Text message sender GOVUK Manage',
+        'Text message sender GOVAU Manage',
         'Text messages start with service name On Change',
         'International text messages Off Change',
         'Receive text messages Off Change',
@@ -75,7 +75,7 @@ def mock_get_service_settings_page_common(
 
         'Label Value Action',
         'Send text messages On Change',
-        'Text message sender GOVUK Manage',
+        'Text message sender GOVAU Manage',
         'Text messages start with service name On Change',
         'International text messages Off Change',
         'Receive text messages Off Change',
@@ -134,7 +134,7 @@ def test_should_show_overview(
 
         'Label Value Action',
         'Send text messages On Change',
-        'Text message sender GOVUK Manage',
+        'Text message sender GOVAU Manage',
         'Text messages start with service name On Change',
         'International text messages On Change',
         'Receive text messages On Change',
@@ -154,7 +154,7 @@ def test_should_show_overview(
 
         'Label Value Action',
         'Send text messages On Change',
-        'Text message sender GOVUK Manage',
+        'Text message sender GOVAU Manage',
         'Text messages start with service name On Change',
         'International text messages Off Change',
         'Receive text messages Off Change',
@@ -544,7 +544,7 @@ def test_should_show_request_to_go_live(
     for feature, label in (
         ('one_off', 'One at a time'),
         ('upload', 'Upload a spreadsheet of recipients'),
-        ('api', 'Integrate with the GOV.UK Notify API'),
+        ('api', 'Integrate with the GOV.AU Notify API'),
     ):
         assert normalize_spaces(
             page.select_one('label[for=method_{}]'.format(feature)).text
@@ -776,7 +776,7 @@ def test_and_more_hint_appears_on_settings_with_more_than_just_a_single_sender(
 @pytest.mark.parametrize('sender_list_page, expected_output', [
     ('main.service_email_reply_to', 'test@example.com (default) Change'),
     ('main.service_letter_contact_details', '1 Example Street (default) Change'),
-    ('main.service_sms_senders', 'GOVUK (default) Change')
+    ('main.service_sms_senders', 'GOVAU (default) Change')
 ])
 def test_api_ids_dont_show_on_option_pages_with_a_single_sender(
     client_request,
@@ -1288,7 +1288,7 @@ def test_inbound_sms_sender_is_not_editable(
     if hide_textbox:
         assert normalize_spaces(
             page.select_one('form[method="post"] p').text
-        ) == "GOVUK This phone number receives replies and can’t be changed"
+        ) == "GOVAU This phone number receives replies and can’t be changed"
 
 
 def test_switch_service_to_research_mode(
@@ -1503,7 +1503,7 @@ def test_should_show_branding(
     assert response.status_code == 200
     page = BeautifulSoup(response.data.decode('utf-8'), 'html.parser')
 
-    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'govuk'
+    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'govau'
     assert page.find('input', attrs={"id": "branding_type-1"})['value'] == 'both'
     assert page.find('input', attrs={"id": "branding_type-2"})['value'] == 'org'
     assert page.find('input', attrs={"id": "branding_type-3"})['value'] == 'org_banner'
@@ -1528,7 +1528,7 @@ def test_should_show_organisations(
     assert response.status_code == 200
     page = BeautifulSoup(response.data.decode('utf-8'), 'html.parser')
 
-    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'govuk'
+    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'govau'
     assert page.find('input', attrs={"id": "branding_type-1"})['value'] == 'both'
     assert page.find('input', attrs={"id": "branding_type-2"})['value'] == 'org'
     assert page.find('input', attrs={"id": "branding_type-3"})['value'] == 'org_banner'

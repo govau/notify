@@ -5,7 +5,7 @@ from flask import url_for
 @pytest.mark.parametrize(
     "query_args, result", [
         ({}, True),
-        ({'govuk_banner': 'false'}, 'false')
+        ({'govau_banner': 'false'}, 'false')
     ]
 )
 def test_renders(client, mocker, query_args, result):

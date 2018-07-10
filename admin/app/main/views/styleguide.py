@@ -25,7 +25,7 @@ def styleguide():
         message = TextAreaField(u'Message')
         file_upload = FileField('Upload a CSV file to add your recipients’ details')
 
-    sms = "Your vehicle tax for ((registration number)) is due on ((date)). Renew online at www.gov.uk/vehicle-tax"
+    sms = "Your vehicle tax for ((registration number)) is due on ((date)). Renew online at www.gov.au/vehicle-tax"
 
     form = FormExamples()
     form.message.data = sms

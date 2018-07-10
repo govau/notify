@@ -278,7 +278,7 @@
         {% call row() %}
           {{ text_field('Email branding' )}}
           {% call field() %}
-            {% if current_service.branding == 'govuk' %}
+            {% if current_service.branding == 'govau' %}
               GOV.AU
             {% elif current_service.branding == 'both' %}
               GOV.AU and {{ email_branding.name if email_branding else None }}

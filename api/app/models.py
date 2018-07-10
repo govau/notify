@@ -184,7 +184,7 @@ user_to_organisation = db.Table(
 )
 
 
-BRANDING_GOVUK = 'govuk'
+BRANDING_GOVAU = 'govau'
 BRANDING_ORG = 'org'
 BRANDING_BOTH = 'both'
 BRANDING_ORG_BANNER = 'org_banner'
@@ -334,7 +334,7 @@ class Service(db.Model, Versioned):
         db.ForeignKey('branding_type.name'),
         index=True,
         nullable=False,
-        default=BRANDING_GOVUK
+        default=BRANDING_GOVAU
     )
     organisation_type = db.Column(
         db.String(255),

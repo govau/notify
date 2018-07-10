@@ -1,7 +1,7 @@
 /**
  * Breadcrumbs Component
  *
- * Based on the existing breadcrumbs from GOV.UK Elements, re-implemented
+ * Based on the existing breadcrumbs from govuk-elements, re-implemented
  * using BEM, allowing for an `inverse` modifier (e.g. against a masthead), with
  * structured data markup, and allowing for the 'current page' to be included
  * as the last element in the breadcrumb.
@@ -19,7 +19,7 @@
  * <nav class="breadcrumbs" aria-label="Breadcrumbs">
  *   <ol itemscope itemtype="http://schema.org/BreadcrumbList">
  *     <li class="breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
- *       <a href="https://www.gov.uk/service-toolkit#components" itemprop="item"><span itemprop="name">Components</span></a>
+ *       <a href="#components" itemprop="item"><span itemprop="name">Components</span></a>
  *     </li>
  *     <li class="breadcrumbs__item breadcrumbs__item--active" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
  *       <a href="#main" itemprop="item"><span itemprop="name">Product Page</span></a>
@@ -51,7 +51,7 @@
     margin: 0;
     padding: 0 $gutter-one-quarter 0 (11px + $gutter-one-quarter);
 
-    background-image: file-url('separator.png');
+    background-image: file-url("separator.png");
     background-repeat: no-repeat;
     background-size: 6px 11px;
     background-position: left center;
@@ -59,7 +59,7 @@
     white-space: nowrap;
 
     @include device-pixel-ratio(2) {
-      background-image: file-url('separator-2x.png');
+      background-image: file-url("separator-2x.png");
     }
 
     &,

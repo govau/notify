@@ -122,7 +122,7 @@
     }
 
     &-yes {
-      background-image: file-url('tick.png');
+      background-image: file-url("tick.png");
     }
   }
 
@@ -137,7 +137,7 @@
 
     a {
       &:before {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
@@ -164,7 +164,7 @@
 }
 
 .table-font-xsmall td.table-field-index {
-  // overrides GOV.UK Elements
+  // overrides govuk-elements
   @include core-strong;
 }
 

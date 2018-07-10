@@ -381,7 +381,7 @@ def single_sms_sender(mocker):
             {
                 'id': '1234',
                 'service_id': service_id,
-                'sms_sender': 'GOVUK',
+                'sms_sender': 'GOVAU',
                 'is_default': True,
                 'created_at': datetime.utcnow(),
                 'inbound_number_id': None,
@@ -398,7 +398,7 @@ def get_default_sms_sender(mocker):
         return {
             'id': '1234',
             'service_id': service_id,
-            'sms_sender': 'GOVUK',
+            'sms_sender': 'GOVAU',
             'is_default': True,
             'created_at': datetime.utcnow(),
             'inbound_number_id': None,
@@ -414,7 +414,7 @@ def get_non_default_sms_sender(mocker):
         return {
             'id': '1234',
             'service_id': service_id,
-            'sms_sender': 'GOVUK',
+            'sms_sender': 'GOVAU',
             'is_default': False,
             'created_at': datetime.utcnow(),
             'inbound_number_id': None,
@@ -430,7 +430,7 @@ def get_inbound_number_sms_sender(mocker):
         return {
             'id': '1234',
             'service_id': service_id,
-            'sms_sender': 'GOVUK',
+            'sms_sender': 'GOVAU',
             'is_default': False,
             'created_at': datetime.utcnow(),
             'inbound_number_id': '1234',

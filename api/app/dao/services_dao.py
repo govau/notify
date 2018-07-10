@@ -157,8 +157,9 @@ def dao_fetch_service_by_id_and_user(service_id, user_id):
 @version_class(Service)
 def dao_create_service(service, user, service_id=None, service_permissions=None):
     # the default property does not appear to work when there is a difference between the sqlalchemy schema and the
-    # db schema (ie: during a migration), so we have to set sms_sender manually here. After the GOVUK sms_sender
+    # db schema (ie: during a migration), so we have to set sms_sender manually here. After the GOVAU sms_sender
     # migration is completed, this code should be able to be removed.
+    # TODO
 
     if service_permissions is None:
         service_permissions = DEFAULT_SERVICE_PERMISSIONS
