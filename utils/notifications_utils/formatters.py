@@ -32,8 +32,8 @@ mistune.BlockGrammar.list_item = re.compile(
 )
 mistune.BlockGrammar.list_bullet = re.compile(r'^ *(?:[*+-]|\d+\.)')
 
-govuk_not_a_link = re.compile(
-    r'(?<!\.|\/)(GOV)\.(UK)(?!\/|\?)',
+govau_not_a_link = re.compile(
+    r'(?<!\.|\/)(GOV)\.(AU)(?!\/|\?)',
     re.IGNORECASE
 )
 
@@ -57,9 +57,9 @@ MAGIC_SEQUENCE = "🇬🇧🐦✉️"
 magic_sequence_regex = re.compile(MAGIC_SEQUENCE)
 
 
-def unlink_govuk_escaped(message):
+def unlink_govau_escaped(message):
     return re.sub(
-        govuk_not_a_link,
+        govau_not_a_link,
         r'\1' + '.\u200B' + r'\2',  # Unicode zero-width space
         message
     )

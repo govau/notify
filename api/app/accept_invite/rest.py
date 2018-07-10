@@ -35,7 +35,7 @@ def validate_invitation_token(invitation_type, token):
                                       max_age_seconds)
     except SignatureExpired:
         errors = {'invitation':
-                  ['Your invitation to GOV.UK Notify has expired. '
+                  ['Your invitation to GOV.AU Notify has expired. '
                    'Please ask the person that invited you to send you another one']}
         raise InvalidRequest(errors, status_code=400)
     except BadData:

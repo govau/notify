@@ -203,6 +203,7 @@ def is_weekend(time):
 
 def is_bank_holiday(time):
     return time.strftime('%Y-%m-%d') in {
+        # TODO
         # taken from https://www.gov.uk/bank-holidays.json
         "2016-01-01",
         "2016-03-25",

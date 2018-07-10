@@ -10,7 +10,7 @@ from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.columns import Columns
 from notifications_utils.field import Field
 from notifications_utils.formatters import (
-    unlink_govuk_escaped,
+    unlink_govau_escaped,
     nl2br,
     nl2li,
     add_prefix,
@@ -266,7 +266,7 @@ class PlainTextEmailTemplate(WithSubjectTemplate):
         return Take(Field(
             self.content, self.values, html='passthrough', markdown_lists=True
         )).then(
-            unlink_govuk_escaped
+            unlink_govau_escaped
         ).then(
             notify_plain_text_email_markdown
         ).then(
@@ -299,7 +299,7 @@ class HTMLEmailTemplate(WithSubjectTemplate):
         self,
         template,
         values=None,
-        govuk_banner=True,
+        govau_banner=True,
         complete_html=True,
         brand_logo=None,
         brand_name=None,
@@ -307,7 +307,7 @@ class HTMLEmailTemplate(WithSubjectTemplate):
         brand_banner=False
     ):
         super().__init__(template, values)
-        self.govuk_banner = govuk_banner
+        self.govau_banner = govau_banner
         self.complete_html = complete_html
         self.brand_logo = brand_logo
         self.brand_name = brand_name
@@ -320,7 +320,7 @@ class HTMLEmailTemplate(WithSubjectTemplate):
             'body': get_html_email_body(
                 self.content, self.values
             ),
-            'govuk_banner': self.govuk_banner,
+            'govau_banner': self.govau_banner,
             'complete_html': self.complete_html,
             'brand_logo': self.brand_logo,
             'brand_name': self.brand_name,
@@ -563,7 +563,7 @@ def get_html_email_body(template_content, template_values, redact_missing_person
         markdown_lists=True,
         redact_missing_personalisation=redact_missing_personalisation,
     )).then(
-        unlink_govuk_escaped
+        unlink_govau_escaped
     ).then(
         notify_email_markdown
     ).then(

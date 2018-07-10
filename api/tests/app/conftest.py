@@ -325,7 +325,7 @@ def sample_email_template_with_placeholders(notify_db, notify_db_session):
     return sample_email_template(
         notify_db,
         notify_db_session,
-        content="Hello ((name))\nThis is an email from GOV.UK",
+        content="Hello ((name))\nThis is an email from GOV.AU",
         subject_line="((name))")
 
 
@@ -334,7 +334,7 @@ def sample_email_template_with_html(notify_db, notify_db_session):
     return sample_email_template(
         notify_db,
         notify_db_session,
-        content="Hello ((name))\nThis is an email from GOV.UK with <em>some HTML</em>",
+        content="Hello ((name))\nThis is an email from GOV.AU with <em>some HTML</em>",
         subject_line="((name)) <em>some HTML</em>")
 
 
@@ -896,10 +896,10 @@ def email_2fa_code_template(notify_db, notify_db_session):
         content=(
             'Hi ((name)),'
             ''
-            'To sign in to GOV.​UK Notify please open this link:'
+            'To sign in to GOV.​AU Notify please open this link:'
             '((url))'
         ),
-        subject='Sign in to GOV.UK Notify',
+        subject='Sign in to GOV.AU Notify',
         template_type='email'
     )
 
@@ -983,7 +983,7 @@ def change_email_confirmation_template(notify_db,
     content = """Hi ((name)),
               Click this link to confirm your new email address:
               ((url))
-              If you didn’t try to change the email address for your GOV.UK Notify account, let us know here:
+              If you didn’t try to change the email address for your GOV.AU Notify account, let us know here:
               ((feedback_url))"""
     template = create_custom_template(
         service=service,

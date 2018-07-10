@@ -6,7 +6,7 @@ from unittest import mock
 from flask import Markup
 from freezegun import freeze_time
 
-from notifications_utils.formatters import unlink_govuk_escaped
+from notifications_utils.formatters import unlink_govau_escaped
 from notifications_utils.template import (
     Template,
     HTMLEmailTemplate,
@@ -37,7 +37,7 @@ def test_html_email_inserts_body():
 
 
 @pytest.mark.parametrize(
-    "content", ('DOCTYPE', 'html', 'body', 'GOV.UK', 'hello world')
+    "content", ('DOCTYPE', 'html', 'body', 'GOV.AU', 'hello world')
 )
 def test_default_template(content):
     assert content in str(HTMLEmailTemplate({'content': 'hello world', 'subject': ''}))
@@ -46,20 +46,20 @@ def test_default_template(content):
 @pytest.mark.parametrize(
     "show_banner", (True, False)
 )
-def test_govuk_banner(show_banner):
+def test_govau_banner(show_banner):
     email = HTMLEmailTemplate({'content': 'hello world', 'subject': ''})
-    email.govuk_banner = show_banner
+    email.govau_banner = show_banner
     if show_banner:
-        assert "GOV.UK" in str(email)
+        assert "GOV.AU" in str(email)
     else:
-        assert "GOV.UK" not in str(email)
+        assert "GOV.AU" not in str(email)
 
 
 def test_brand_banner_shows():
     email = str(HTMLEmailTemplate(
         {'content': 'hello world', 'subject': ''},
         brand_banner=True,
-        govuk_banner=False
+        govau_banner=False
     ))
     assert (
         '<td width="10" height="10" valign="middle"></td>'
@@ -83,13 +83,13 @@ def test_brand_data_shows(brand_logo, brand_name, brand_colour):
     email = str(HTMLEmailTemplate(
         {'content': 'hello world', 'subject': ''},
         brand_banner=True,
-        govuk_banner=False,
+        govau_banner=False,
         brand_logo=brand_logo,
         brand_name=brand_name,
         brand_colour=brand_colour
     ))
 
-    assert 'GOV.UK' not in email
+    assert 'GOV.AU' not in email
     if brand_logo:
         assert brand_logo in email
     if brand_name:
@@ -225,18 +225,18 @@ def test_HTML_template_has_URLs_replaced_with_links():
 
 @pytest.mark.parametrize(
     "template_content,expected", [
-        ("gov.uk", u"gov.\u200Buk"),
-        ("GOV.UK", u"GOV.\u200BUK"),
-        ("Gov.uk", u"Gov.\u200Buk"),
-        ("https://gov.uk", "https://gov.uk"),
-        ("https://www.gov.uk", "https://www.gov.uk"),
-        ("www.gov.uk", "www.gov.uk"),
-        ("gov.uk/register-to-vote", "gov.uk/register-to-vote"),
-        ("gov.uk?q=", "gov.uk?q=")
+        ("gov.au", u"gov.\u200Bau"),
+        ("GOV.AU", u"GOV.\u200BAU"),
+        ("Gov.au", u"Gov.\u200Bau"),
+        ("https://gov.au", "https://gov.au"),
+        ("https://www.gov.au", "https://www.gov.au"),
+        ("www.gov.au", "www.gov.au"),
+        ("gov.au/register-to-vote", "gov.au/register-to-vote"),
+        ("gov.au?q=", "gov.au?q=")
     ]
 )
-def test_escaping_govuk_in_email_templates(template_content, expected):
-    assert unlink_govuk_escaped(template_content) == expected
+def test_escaping_govau_in_email_templates(template_content, expected):
+    assert unlink_govau_escaped(template_content) == expected
     assert expected in str(PlainTextEmailTemplate({'content': template_content, 'subject': ''}))
     assert expected in str(HTMLEmailTemplate({'content': template_content, 'subject': ''}))
 
@@ -291,7 +291,7 @@ def test_sms_message_adds_prefix_only_if_asked_to(
 
 
 @pytest.mark.parametrize('content_to_look_for', [
-    'GOVUK', 'sms-message-sender'
+    'GOVAU', 'sms-message-sender'
 ])
 @pytest.mark.parametrize("show_sender", [
     True,
@@ -303,7 +303,7 @@ def test_sms_message_preview_shows_sender(
 ):
     assert content_to_look_for in str(SMSPreviewTemplate(
         {'content': 'foo'},
-        sender='GOVUK',
+        sender='GOVAU',
         show_sender=show_sender,
     ))
 
@@ -378,7 +378,7 @@ def test_sms_message_normalises_newlines(content):
 @freeze_time("2001-01-01 12:00:00.000000")
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
-@mock.patch('notifications_utils.template.unlink_govuk_escaped')
+@mock.patch('notifications_utils.template.unlink_govau_escaped')
 @mock.patch('notifications_utils.template.notify_letter_preview_markdown', return_value='Bar')
 @mock.patch('notifications_utils.template.strip_pipes', side_effect=lambda x: x)
 @pytest.mark.parametrize('values, expected_address', [
@@ -456,7 +456,7 @@ def test_sms_message_normalises_newlines(content):
 def test_letter_preview_renderer(
     strip_pipes,
     letter_markdown,
-    unlink_govuk,
+    unlink_govau,
     remove_empty_lines,
     jinja_template,
     values,
@@ -483,7 +483,7 @@ def test_letter_preview_renderer(
         'logo_file_name': expected_logo_file_name,
     })
     letter_markdown.assert_called_once_with(Markup('Foo'))
-    unlink_govuk.assert_not_called()
+    unlink_govau.assert_not_called()
     assert strip_pipes.call_args_list == [
         mock.call('Subject'),
         mock.call('Foo'),
@@ -1599,7 +1599,7 @@ def test_whitespace_in_subjects(template_class, subject, extra_args):
         ),
     ),
 ])
-def test_govuk_email_whitespace_hack(template_class, expected_output):
+def test_govau_email_whitespace_hack(template_class, expected_output):
 
     template_instance = template_class({
         'content': 'paragraph one\n\n&nbsp;\n\nparagraph two',

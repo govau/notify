@@ -21,7 +21,7 @@ from app.models import (
     KEY_TYPE_TEST,
     KEY_TYPE_TEAM,
     BRANDING_ORG,
-    BRANDING_GOVUK,
+    BRANDING_GOVAU,
     BRANDING_BOTH,
     BRANDING_ORG_BANNER
 )
@@ -408,18 +408,18 @@ def test_send_email_should_use_service_reply_to_email(
 
 def test_get_html_email_renderer_should_return_for_normal_service(sample_service):
     options = send_to_providers.get_html_email_options(sample_service)
-    assert options['govuk_banner']
+    assert options['govau_banner']
     assert 'brand_colour' not in options.keys()
     assert 'brand_logo' not in options.keys()
     assert 'brand_name' not in options.keys()
 
 
-@pytest.mark.parametrize('branding_type, govuk_banner', [
+@pytest.mark.parametrize('branding_type, govau_banner', [
     (BRANDING_ORG, False),
     (BRANDING_BOTH, True),
     (BRANDING_ORG_BANNER, False)
 ])
-def test_get_html_email_renderer_with_branding_details(branding_type, govuk_banner, notify_db, sample_service):
+def test_get_html_email_renderer_with_branding_details(branding_type, govau_banner, notify_db, sample_service):
     sample_service.branding = branding_type
     email_branding = EmailBranding(colour='#000000', logo='justice-league.png', name='Justice League')
     sample_service.email_branding = email_branding
@@ -428,7 +428,7 @@ def test_get_html_email_renderer_with_branding_details(branding_type, govuk_bann
 
     options = send_to_providers.get_html_email_options(sample_service)
 
-    assert options['govuk_banner'] == govuk_banner
+    assert options['govau_banner'] == govau_banner
     assert options['brand_colour'] == '#000000'
     assert options['brand_name'] == 'Justice League'
 
@@ -438,8 +438,8 @@ def test_get_html_email_renderer_with_branding_details(branding_type, govuk_bann
         assert options['brand_banner'] is False
 
 
-def test_get_html_email_renderer_with_branding_details_and_render_govuk_banner_only(notify_db, sample_service):
-    sample_service.branding = BRANDING_GOVUK
+def test_get_html_email_renderer_with_branding_details_and_render_govau_banner_only(notify_db, sample_service):
+    sample_service.branding = BRANDING_GOVAU
     email_branding = EmailBranding(colour='#000000', logo='justice-league.png', name='Justice League')
     sample_service.email_branding = email_branding
     notify_db.session.add_all([sample_service, email_branding])
@@ -447,7 +447,7 @@ def test_get_html_email_renderer_with_branding_details_and_render_govuk_banner_o
 
     options = send_to_providers.get_html_email_options(sample_service)
 
-    assert options == {'govuk_banner': True, 'brand_banner': False}
+    assert options == {'govau_banner': True, 'brand_banner': False}
 
 
 def test_get_html_email_renderer_prepends_logo_path(notify_api):

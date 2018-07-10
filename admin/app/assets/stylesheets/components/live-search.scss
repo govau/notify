@@ -1,12 +1,11 @@
-input[type=search] {
-  // overrides this nasty global from GOV.UK template
+input[type="search"] {
+  // overrides this nasty global from govuk-template
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
 .live-search {
-
   display: none;
 
   .js-enabled & {
@@ -16,5 +15,4 @@ input[type=search] {
   .form-group {
     margin-bottom: $gutter * 2 / 3;
   }
-
 }

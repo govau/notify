@@ -102,10 +102,10 @@ def email_template():
         '\n'
         '10. Three'
         '\n\n'
-        'This is an example of an email sent using GOV.UK Notify.'
+        'This is an example of an email sent using GOV.AU Notify.'
         '\n\n'
-        'https://www.notifications.service.gov.uk'
-    )}, govuk_banner=convert_to_boolean(request.args.get('govuk_banner', True))
+        'https://notify.gov.au'
+    )}, govau_banner=convert_to_boolean(request.args.get('govau_banner', True))
     ))
 
 

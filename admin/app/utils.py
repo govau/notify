@@ -512,7 +512,7 @@ class AgreementInfo:
         if self.agreement_signed:
             return (
                 'Your organisation ({}) has already accepted the '
-                'GOV.UK&nbsp;Notify data sharing and financial '
+                'GOV.AU&nbsp;Notify data sharing and financial '
                 'agreement.'.format(self.owner)
             )
 

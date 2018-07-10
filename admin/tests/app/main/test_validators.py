@@ -12,7 +12,7 @@ from app.main.validators import (
 
 
 @pytest.mark.parametrize('password', [
-    'govuknotify', '11111111', 'kittykat', 'evangeli'
+    'govaunotify', '11111111', 'kittykat', 'evangeli'
 ])
 def test_should_raise_validation_error_for_password(
     client,
@@ -21,7 +21,7 @@ def test_should_raise_validation_error_for_password(
 ):
     form = RegisterUserForm()
     form.name.data = 'test'
-    form.email_address.data = 'teset@example.gov.uk'
+    form.email_address.data = 'teset@example.gov.au'
     form.mobile_number.data = '441231231231'
     form.password.data = password
 
