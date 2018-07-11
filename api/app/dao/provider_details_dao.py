@@ -27,9 +27,8 @@ def get_provider_details_by_identifier(identifier):
 def get_alternative_sms_provider(identifier):
     alternate_provider = None
     if identifier == 'telstra':
-        alternate_provider = 'identity'
-    elif identifier == 'identity':
-        alternate_provider = 'telstra'
+        # Specifically note: we have no alt providers at the time of writing.
+        alternate_provider = None
 
     return ProviderDetails.query.filter_by(identifier=alternate_provider).one()
 
