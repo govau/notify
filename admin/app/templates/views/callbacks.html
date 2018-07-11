@@ -32,7 +32,7 @@
           ('created_at', 'The time the service sent the request', '2017-05-14T12:15:30.000000Z'),
           ('completed_at', 'The last time the status was updated', '2017-05-14T12:15:30.000000Z'),
           ('sent_at', 'The time the notification was sent', '2017-05-14T12:15:30.000000Z or nil'),
-          ('notification_type', 'The notification type', 'email | sms | letter')
+          ('notification_type', 'The notification type', 'email | sms')
         ] %}
           {% call row() %}
             {% call row_heading() %} {{ key }} {% endcall %}
