@@ -19,7 +19,9 @@
     <ul class="list list-bullet">
       <li>send emails</li>
       <li>send and receive text messages (Australia and internationally)</li>
+      {#
       <li>send letters</li>
+      #}
     </ul>
     <p>You don’t need any technical knowledge to use Notify.</p>
     <p><a href="{{ url_for('main.register') }}">Create an account</a> for free and try it yourself.</p>
@@ -40,7 +42,7 @@
       <li>choose the email address that users reply to</li>
       <li>get a unique phone number for text message replies</li>
     </ul>
-    
+
     <h2 class="heading-medium">Send messages in bulk or individually</h2>
     <p>With Notify, you can:</p>
     <ul class="list list-bullet">
@@ -49,7 +51,7 @@
       <li>schedule messages to be sent at a particular time</li>
       <li>send messages automatically <a href="/documentation">through our API</a></li>
     </ul>
-    
+
     <h2 class="heading-medium">Track your activity</h2>
     <p>Through the Notify dashboard, you can:</p>
     <ul class="list list-bullet">
@@ -57,19 +59,21 @@
       <li>see a real-time dashboard of your activity</li>
       <li>view your usage and reports</li>
     </ul>
-    
+
     <h2 class="heading-medium">Manage your team</h2>
     <p>Through the Notify dashboard, you can:</p>
     <ul class="list list-bullet">
       <li>set permission levels for different team members</li>
       <li>invite new users (including people without a government email address)</li>
     </ul>
-    
+
     <h2 class="heading-medium">Send messages reliably</h2>
     <p>Notify commits to:</p>
     <ul class="list list-bullet">
       <li>sending 95% of emails and text messages within 10 seconds</li>
+      {#
       <li>sending letters by 3pm the next working day (if you submit it through Notify before 5pm)</li>
+      #}
     </ul>
 
     <p>Notify sends messages through multiple providers. If one provider fails, Notify automatically switches to another so that your messages aren’t affected.</p>
