@@ -10,16 +10,18 @@ $text-normal: 400;
 $text-semibold: 500;
 $text-bold: 700;
 
+$button-colour: #00698f;
+
 @mixin core-font() {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
 }
 
 @mixin core-typography() {
   @include core-font;
   font-size: 1.9rem;
-  color: #0B0C0C;
+  color: #0b0c0c;
   line-height: 1.6;
   font-weight: $text-normal;
 }

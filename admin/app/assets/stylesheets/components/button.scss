@@ -1,18 +1,4 @@
-%secondary {
-  background-color: transparent;
-  color: #00698F;
-
-  &:focus,
-  &:active,
-  &:hover:not(:disabled) {
-    background-color: transparent;
-    border-color: #313131;
-    color: #313131;
-  }
-}
-
-%button,
-.button {
+@mixin au-button() {
   @include core-medium;
 
   padding: 0.5rem 1.5rem;
@@ -20,23 +6,14 @@
   display: inline-block;
   border-radius: 4px;
   box-shadow: none;
-  background-color: #00698F;
-  border: 3px solid #00698F;
+  background-color: #00698f;
+  border: 3px solid #00698f;
   cursor: pointer;
   vertical-align: middle;
   transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 
-  &.secondary {
-    @extend %secondary;
-  }
-
-  &.tertiary {
-    @extend %secondary;
-    border: none;
-  }
-
   &:visited {
-    background-color: #00698F;
+    background-color: #00698f;
   }
 
   &:focus,
@@ -49,8 +26,35 @@
   }
 
   &:focus {
-    outline: 3px solid #9263DE;
+    outline: 3px solid #9263de;
     outline-offset: 2px;
+  }
+}
+
+%secondary {
+  background-color: transparent;
+  color: #00698f;
+
+  &:focus,
+  &:active,
+  &:hover:not(:disabled) {
+    background-color: transparent;
+    border-color: #313131;
+    color: #313131;
+  }
+}
+
+%button,
+.button {
+  @include au-button;
+
+  &.secondary {
+    @extend %secondary;
+  }
+
+  &.tertiary {
+    @extend %secondary;
+    border: none;
   }
 }
 
@@ -60,8 +64,8 @@
 
   &:active,
   &:hover:not(:disabled) {
-    color: #135E70;
-    border-color: #FFF;
-    background-color: #FFF;
+    color: #135e70;
+    border-color: #fff;
+    background-color: #fff;
   }
 }
