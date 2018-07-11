@@ -21,8 +21,6 @@ defaults: &defaults
     SMTP_USER: notifications@digital.gov.au
     TELSTRA_MESSAGING_CLIENT_ID: ''
     TELSTRA_MESSAGING_CLIENT_SECRET: ''
-    IDENTITY_SMS_ADDR: https://sms-gateway.apps.y.cld.gov.au
-    IDENTITY_SMS_USER: dto
 
 applications:
 - name: notify-api

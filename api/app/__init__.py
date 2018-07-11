@@ -18,7 +18,6 @@ from app.celery.celery import NotifyCelery
 from app.clients import Clients
 from app.clients.email.smtp import SMTPClient
 from app.clients.sms.telstra import TelstraSMSClient
-from app.clients.sms.identity import IdentitySMSClient
 from app.clients.performance_platform.performance_platform_client import PerformancePlatformClient
 from app.encryption import Encryption
 
@@ -32,11 +31,6 @@ notify_celery = NotifyCelery()
 telstra_sms_client = TelstraSMSClient(
     client_id=os.getenv('TELSTRA_MESSAGING_CLIENT_ID'),
     client_secret=os.getenv('TELSTRA_MESSAGING_CLIENT_SECRET'),
-)
-identity_sms_client = IdentitySMSClient(
-    addr=os.getenv('IDENTITY_SMS_ADDR'),
-    user=os.getenv('IDENTITY_SMS_USER'),
-    password=os.getenv('IDENTITY_SMS_PASSWORD'),
 )
 smtp_client = SMTPClient(
     addr=os.getenv('SMTP_ADDR'),
@@ -73,14 +67,13 @@ def create_app(application):
     statsd_client.init_app(application)
     logging.init_app(application, statsd_client)
     telstra_sms_client.init_app(application)
-    identity_sms_client.init_app(application)
     smtp_client.init_app(application, statsd_client=statsd_client)
     notify_celery.init_app(application)
     encryption.init_app(application)
     redis_store.init_app(application)
     performance_platform_client.init_app(application)
     clients.init_app(
-        sms_clients=[telstra_sms_client, identity_sms_client],
+        sms_clients=[telstra_sms_client],
         email_clients=[smtp_client]
     )
 
