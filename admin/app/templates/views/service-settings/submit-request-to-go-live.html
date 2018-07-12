@@ -16,8 +16,7 @@
       <form method="post" class="top-gutter">
         {{ checkbox_group('What kind of messages will you be sending?', [
           form.channel_email,
-          form.channel_sms,
-          form.channel_letter
+          form.channel_sms
         ]) }}
         <div class="form-group">
           {{ textbox(form.start_date, width='1-1') }}
