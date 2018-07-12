@@ -21,11 +21,14 @@
           ('Letter jobs', url_for('main.letter_jobs')),
           ('Inbound SMS numbers', url_for('main.inbound_sms_admin'))
         ] %}
+          {# Disable letters #}
+          {% if link_text != 'Letter jobs' %}
           <li>
             <a href="{{ url }}">
               {{ link_text }}
             </a>
           </li>
+          {% endif %}
         {% endfor %}
       </nav>
     </div>
