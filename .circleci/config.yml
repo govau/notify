@@ -124,9 +124,6 @@ workflows:
       - build-api:
           requires:
             - setup
-      - test-admin:
-          requires:
-            - setup
       - deploy-dev-admin:
           <<: *not_master_branch
           requires:
