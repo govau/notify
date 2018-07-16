@@ -25,12 +25,16 @@ class Config(object):
     DEBUG = False
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')
 
+    CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME')
+
     DESKPRO_DEPT_ID = 5
     DESKPRO_ASSIGNED_AGENT_TEAM_ID = 5
 
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
     ASSETS_DEBUG = False
-    AWS_REGION = 'eu-west-1'
+
+    AWS_REGION = 'ap-southeast-2'
+
     DEFAULT_SERVICE_LIMIT = 50
     DEFAULT_FREE_SMS_FRAGMENT_LIMITS = {
         'central': 250000,
@@ -58,7 +62,7 @@ class Config(object):
     SMS_CHAR_COUNT_LIMIT = 459
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None
-    CSV_UPLOAD_BUCKET_NAME = 'local-notifications-csv-upload'
+
     DESKPRO_PERSON_EMAIL = 'donotreply@notifications.service.gov.uk'
     ACTIVITY_STATS_LIMIT_DAYS = 7
     TEST_MESSAGE_FILENAME = 'Report'
@@ -80,7 +84,6 @@ class Development(Config):
     SESSION_COOKIE_SECURE = False
     SESSION_PROTECTION = None
     STATSD_ENABLED = False
-    CSV_UPLOAD_BUCKET_NAME = 'development-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-tools'
     MOU_BUCKET_NAME = 'notify.tools-mou'
 
@@ -97,7 +100,6 @@ class Test(Development):
     TESTING = True
     STATSD_ENABLED = False
     WTF_CSRF_ENABLED = False
-    CSV_UPLOAD_BUCKET_NAME = 'test-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-test'
     MOU_BUCKET_NAME = 'test-mou'
     NOTIFY_ENVIRONMENT = 'test'
@@ -109,7 +111,6 @@ class Preview(Config):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
     STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'preview-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-preview'
     MOU_BUCKET_NAME = 'notify.works-mou'
     NOTIFY_ENVIRONMENT = 'preview'
@@ -121,7 +122,6 @@ class Staging(Config):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#6F72AF'  # $mauve
     STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'staging-notify-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-staging'
     MOU_BUCKET_NAME = 'staging-notify.works-mou'
     NOTIFY_ENVIRONMENT = 'staging'
@@ -133,7 +133,6 @@ class Live(Config):
     HEADER_COLOUR = '#313131'  # DTA dark gray
     HTTP_PROTOCOL = 'https'
     STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-production'
     MOU_BUCKET_NAME = 'notifications.service.gov.uk-mou'
     NOTIFY_ENVIRONMENT = 'live'
@@ -152,7 +151,6 @@ class Sandbox(CloudFoundryConfig):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
     STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-logo-upload'
     NOTIFY_ENVIRONMENT = 'sandbox'
 

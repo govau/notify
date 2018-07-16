@@ -113,6 +113,8 @@ class Config(object):
     DEBUG = False
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')
 
+    CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME')
+
     ###########################
     # Default config values ###
     ###########################
@@ -120,7 +122,9 @@ class Config(object):
     NOTIFY_ENVIRONMENT = 'development'
     NOTIFY_EMAIL_DOMAIN = 'digital.gov.au'
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
-    AWS_REGION = 'eu-west-1'
+
+    AWS_REGION = 'ap-southeast-2'
+
     INVITATION_EXPIRATION_DAYS = 2
     NOTIFY_APP_NAME = 'api'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = False
@@ -327,7 +331,6 @@ class Config(object):
     LETTER_PROCESSING_DEADLINE = time(17, 30)
 
     MMG_URL = "https://api.mmg.co.uk/json/api.php"
-    AWS_REGION = 'eu-west-1'
 
 
 ######################
@@ -338,7 +341,6 @@ class Development(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = False
 
-    CSV_UPLOAD_BUCKET_NAME = 'development-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'development-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'development-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notify.tools-ftp'
@@ -376,7 +378,6 @@ class Test(Development):
     NOTIFY_ENVIRONMENT = 'test'
     TESTING = True
 
-    CSV_UPLOAD_BUCKET_NAME = 'test-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'test-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'test.notify.com-ftp'
@@ -405,7 +406,6 @@ class Test(Development):
 
 class Preview(Config):
     NOTIFY_ENVIRONMENT = 'preview'
-    CSV_UPLOAD_BUCKET_NAME = 'preview-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'preview-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'preview-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notify.works-ftp'
@@ -418,7 +418,6 @@ class Preview(Config):
 
 class Staging(Config):
     NOTIFY_ENVIRONMENT = 'staging'
-    CSV_UPLOAD_BUCKET_NAME = 'staging-notify-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'staging-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'staging-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'staging-notify.works-ftp'
@@ -433,7 +432,6 @@ class Staging(Config):
 
 class Live(Config):
     NOTIFY_ENVIRONMENT = 'live'
-    CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'production-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notifications.service.gov.uk-ftp'
@@ -455,11 +453,9 @@ class CloudFoundryConfig(Config):
 # CloudFoundry sandbox
 class Sandbox(CloudFoundryConfig):
     NOTIFY_ENVIRONMENT = 'sandbox'
-    CSV_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-csv-upload'
     LETTERS_PDF_BUCKET_NAME = 'cf-sandbox-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'cf-sandbox-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notify.works-ftp'
-    LETTERS_PDF_BUCKET_NAME = 'cf-sandbox-letters-pdf'
     LETTERS_SCAN_BUCKET_NAME = 'cf-sandbox-letters-scan'
     FROM_NUMBER = 'sandbox'
     REDIS_ENABLED = False
