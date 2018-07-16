@@ -66,7 +66,10 @@ def create_app(application):
     deskpro_client.init_app(application)
     statsd_client.init_app(application)
     logging.init_app(application, statsd_client)
-    telstra_sms_client.init_app(application)
+    telstra_sms_client.init_app(
+        logger=application.logger,
+        callback_notify_url_host=application.config["API_HOST_NAME"]
+    )
     smtp_client.init_app(application, statsd_client=statsd_client)
     notify_celery.init_app(application)
     encryption.init_app(application)
