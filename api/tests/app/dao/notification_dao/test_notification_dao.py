@@ -402,7 +402,7 @@ def test_should_by_able_to_get_template_count_from_notifications_history_with_da
     ]
 
 
-def test_should_by_able_to_update_status_by_reference(sample_email_template, ses_provider):
+def test_should_by_able_to_update_status_by_reference(sample_email_template, smtp_provider):
     data = _notification_json(sample_email_template, status='sending')
 
     notification = Notification(**data)
@@ -566,7 +566,7 @@ def test_should_by_able_to_update_status_by_id_from_sending_to_permanent_failure
 
 def test_should_not_update_status_one_notification_status_is_delivered(notify_db, notify_db_session,
                                                                        sample_email_template,
-                                                                       ses_provider):
+                                                                       smtp_provider):
     notification = sample_notification(notify_db=notify_db, notify_db_session=notify_db_session,
                                        template=sample_email_template,
                                        status='sending')
@@ -653,7 +653,7 @@ def test_save_notification_and_create_email(sample_email_template, sample_job):
     assert notification_from_db.status == 'created'
 
 
-def test_save_notification(sample_email_template, sample_job, ses_provider):
+def test_save_notification(sample_email_template, sample_job, smtp_provider):
     assert Notification.query.count() == 0
     data = _notification_json(sample_email_template, job_id=sample_job.id)
 

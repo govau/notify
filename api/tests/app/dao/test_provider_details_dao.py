@@ -57,7 +57,7 @@ def test_can_get_sms_providers_in_order_of_priority(restore_provider_details):
 def test_can_get_email_providers_in_order_of_priority(restore_provider_details):
     providers = get_provider_details_by_notification_type('email')
 
-    assert providers[0].identifier == "ses"
+    assert providers[0].identifier == "smtp"
 
 
 def test_can_get_email_providers(restore_provider_details):
@@ -74,33 +74,33 @@ def test_should_not_error_if_any_provider_in_code_not_in_database(restore_provid
 
 @freeze_time('2000-01-01T00:00:00')
 def test_update_adds_history(restore_provider_details):
-    ses = ProviderDetails.query.filter(ProviderDetails.identifier == 'ses').one()
-    ses_history = ProviderDetailsHistory.query.filter(ProviderDetailsHistory.id == ses.id).one()
+    smtp = ProviderDetails.query.filter(ProviderDetails.identifier == 'smtp').one()
+    smtp_history = ProviderDetailsHistory.query.filter(ProviderDetailsHistory.id == smtp.id).one()
 
-    assert ses.version == 1
-    assert ses_history.version == 1
-    assert ses.updated_at is None
+    assert smtp.version == 1
+    assert smtp_history.version == 1
+    assert smtp.updated_at is None
 
-    ses.active = False
+    smtp.active = False
 
-    dao_update_provider_details(ses)
+    dao_update_provider_details(smtp)
 
-    assert not ses.active
-    assert ses.updated_at == datetime(2000, 1, 1, 0, 0, 0)
+    assert not smtp.active
+    assert smtp.updated_at == datetime(2000, 1, 1, 0, 0, 0)
 
-    ses_history = ProviderDetailsHistory.query.filter(
-        ProviderDetailsHistory.id == ses.id
+    smtp_history = ProviderDetailsHistory.query.filter(
+        ProviderDetailsHistory.id == smtp.id
     ).order_by(
         ProviderDetailsHistory.version
     ).all()
 
-    assert ses_history[0].active
-    assert ses_history[0].version == 1
-    assert ses_history[0].updated_at is None
+    assert smtp_history[0].active
+    assert smtp_history[0].version == 1
+    assert smtp_history[0].updated_at is None
 
-    assert not ses_history[1].active
-    assert ses_history[1].version == 2
-    assert ses_history[1].updated_at == datetime(2000, 1, 1, 0, 0, 0)
+    assert not smtp_history[1].active
+    assert smtp_history[1].version == 2
+    assert smtp_history[1].updated_at == datetime(2000, 1, 1, 0, 0, 0)
 
 
 def test_update_sms_provider_to_inactive_sets_inactive(restore_provider_details):
