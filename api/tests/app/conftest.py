@@ -825,8 +825,8 @@ def current_sms_provider():
 
 
 @pytest.fixture(scope='function')
-def ses_provider():
-    return ProviderDetails.query.filter_by(identifier='ses').one()
+def smtp_provider():
+    return ProviderDetails.query.filter_by(identifier='smtp').one()
 
 
 @pytest.fixture(scope='function')

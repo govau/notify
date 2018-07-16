@@ -24,7 +24,7 @@ class SMTPClient(EmailClient):
 
     @property
     def name(self):
-        return 'ses'
+        return 'smtp'
 
     def get_name(self):
         return self.name

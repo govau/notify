@@ -450,7 +450,7 @@ def migrate_data_to_ft_billing(start_date, end_date):
                         when notification_type = 'letter' then
                             coalesce(sent_by, 'dvla')
                         else
-                            coalesce(sent_by, 'ses')
+                            coalesce(sent_by, 'smtp')
                         end )) as provider,
                         coalesce(n.rate_multiplier,1) as rate_multiplier,
                         s.crown,
