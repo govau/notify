@@ -42,7 +42,7 @@ class Config(object):
     EMAIL_EXPIRY_SECONDS = 3600  # 1 hour
     INVITATION_EXPIRY_SECONDS = 3600 * 24 * 2  # 2 days - also set on api
     EMAIL_2FA_EXPIRY_SECONDS = 1800  # 30 Minutes
-    HEADER_COLOUR = '#FFBF47'  # $yellow
+    HEADER_COLOUR = '#9263de'  # DTA design system purple
     HTTP_PROTOCOL = 'http'
     MAX_FAILED_LOGIN_COUNT = 10
     NOTIFY_APP_NAME = 'admin'
@@ -130,7 +130,7 @@ class Staging(Config):
 
 class Live(Config):
     SHOW_STYLEGUIDE = False
-    HEADER_COLOUR = '#005EA5'  # $govuk-blue
+    HEADER_COLOUR = '#313131'  # DTA dark gray
     HTTP_PROTOCOL = 'https'
     STATSD_ENABLED = True
     CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
