@@ -33,7 +33,7 @@ class Config(object):
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
     ASSETS_DEBUG = False
 
-    AWS_REGION = 'ap-southeast-2'
+    AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-2')
 
     DEFAULT_SERVICE_LIMIT = 50
     DEFAULT_FREE_SMS_FRAGMENT_LIMITS = {

@@ -97,6 +97,8 @@ class Config(object):
     EXPIRE_CACHE_TEN_MINUTES = 600
     EXPIRE_CACHE_EIGHT_DAYS = 8 * 24 * 60 * 60
 
+    AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-2')
+
     # Performance platform
     PERFORMANCE_PLATFORM_ENABLED = False
     PERFORMANCE_PLATFORM_URL = 'https://www.performance.service.gov.uk/data/govuk-notify/'
@@ -122,8 +124,6 @@ class Config(object):
     NOTIFY_ENVIRONMENT = 'development'
     NOTIFY_EMAIL_DOMAIN = 'digital.gov.au'
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
-
-    AWS_REGION = 'ap-southeast-2'
 
     INVITATION_EXPIRATION_DAYS = 2
     NOTIFY_APP_NAME = 'api'
