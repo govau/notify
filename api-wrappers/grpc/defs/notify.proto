@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+service Notify {
+  rpc GetUsers (Request) returns (Users) {}
+}
+
+message Request {
+  string user_id = 1;
+}
+
+message Users {
+  repeated User users = 1;
+}
+
+message Permissions {
+  repeated string permissions = 1;
+}
+
+message User {
+  string name = 1;
+  string auth_type = 2;
+  string email_address = 3;
+  int64 failed_login_count = 4;
+  string password_changed_at = 5;
+  map<string, Permissions> permissions = 6;
+}

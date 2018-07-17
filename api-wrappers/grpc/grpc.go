@@ -1,15 +1,22 @@
 package main
 
+//go:generate protoc --go_out=plugins=grpc:. defs/notify.proto
+
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"time"
 
+	notify "./defs"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	jose "gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 )
@@ -66,20 +73,82 @@ func (c Client) Get(path string) (*http.Response, error) {
 	return c.Do(req)
 }
 
-func (c Client) Users() (json.RawMessage, error) {
+type DataJSON struct {
+	Data json.RawMessage `json:"data"`
+}
+
+func JSONData(reader io.Reader) (json.RawMessage, error) {
 	var buf bytes.Buffer
+	_, err := io.Copy(&buf, reader)
+
+	return buf.Bytes(), err
+}
+
+func JSONDataNested(reader io.Reader) (json.RawMessage, error) {
+	var data DataJSON
+	err := json.NewDecoder(reader).Decode(&data)
+	return data.Data, err
+}
+
+func (c Client) Users() (json.RawMessage, error) {
 	resp, err := c.Get("/user")
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = io.Copy(&buf, resp.Body)
-	return buf.Bytes(), err
+	return JSONDataNested(resp.Body)
+}
+
+type server struct {
+	c Client
+}
+
+type User struct {
+	Name              string              `json:"name"`
+	AuthType          string              `json:"auth_type"`
+	EmailAddress      string              `json:"email_address"`
+	FailedLoginCount  int64               `json:"failed_login_count"`
+	PasswordChangedAt string              `json:"password_changed_at"`
+	Permissions       map[string][]string `json:"permissions"`
+}
+
+type Users []User
+
+func (u Users) Protoify() *notify.Users {
+	users := [](*notify.User){}
+
+	for _, user := range u {
+		permissions := map[string]*notify.Permissions{}
+
+		for service, ps := range user.Permissions {
+			permissions[service] = &notify.Permissions{Permissions: ps}
+		}
+
+		users = append(users, &notify.User{
+			Name:              user.Name,
+			AuthType:          user.AuthType,
+			EmailAddress:      user.EmailAddress,
+			FailedLoginCount:  user.FailedLoginCount,
+			PasswordChangedAt: user.PasswordChangedAt,
+			Permissions:       permissions,
+		})
+	}
+
+	return &notify.Users{Users: users}
+}
+
+func (s *server) GetUsers(ctx context.Context, in *notify.Request) (*notify.Users, error) {
+	usersJSON, err := s.c.Users()
+	if err != nil {
+		return nil, err
+	}
+
+	var users Users
+	err = json.Unmarshal(usersJSON, &users)
+	return users.Protoify(), err
 }
 
 func main() {
-	fmt.Println("vim-go")
-
 	baseURL, err := url.Parse("http://localhost:6011")
 	if err != nil {
 		log.Fatal(err)
@@ -92,11 +161,17 @@ func main() {
 		RouteSecret: "",
 	}
 
-	log.Println(CreateJWT(c.ServiceID, c.API_Key))
-
-	users, err := c.Users()
+	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to listen: %v", err)
 	}
-	log.Println(string(users))
+
+	s := grpc.NewServer()
+	notify.RegisterNotifyServer(s, &server{c})
+	reflection.Register(s)
+
+	go log.Println("going out to listen now!")
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
