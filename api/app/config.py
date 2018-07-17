@@ -423,7 +423,7 @@ class Staging(Config):
     DVLA_RESPONSE_BUCKET_NAME = 'staging-notify.works-ftp'
     LETTERS_PDF_BUCKET_NAME = 'staging-letters-pdf'
     LETTERS_SCAN_BUCKET_NAME = 'staging-letters-scan'
-    STATSD_ENABLED = True
+    STATSD_ENABLED = False
     FROM_NUMBER = 'stage'
     API_RATE_LIMIT_ENABLED = True
     CHECK_PROXY_HEADER = True
@@ -437,7 +437,7 @@ class Live(Config):
     DVLA_RESPONSE_BUCKET_NAME = 'notifications.service.gov.uk-ftp'
     LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
     LETTERS_SCAN_BUCKET_NAME = 'production-letters-scan'
-    STATSD_ENABLED = True
+    STATSD_ENABLED = False
     FROM_NUMBER = 'GOVAU'
     FUNCTIONAL_TEST_PROVIDER_SERVICE_ID = '6c1d81bb-dae2-4ee9-80b0-89a4aae9f649'
     FUNCTIONAL_TEST_PROVIDER_SMS_TEMPLATE_ID = 'ba9e1789-a804-40b8-871f-cc60d4c1286f'

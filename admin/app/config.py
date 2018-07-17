@@ -110,7 +110,7 @@ class Test(Development):
 class Preview(Config):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
-    STATSD_ENABLED = True
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-preview'
     MOU_BUCKET_NAME = 'notify.works-mou'
     NOTIFY_ENVIRONMENT = 'preview'
@@ -121,7 +121,7 @@ class Staging(Config):
     SHOW_STYLEGUIDE = False
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#6F72AF'  # $mauve
-    STATSD_ENABLED = True
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-staging'
     MOU_BUCKET_NAME = 'staging-notify.works-mou'
     NOTIFY_ENVIRONMENT = 'staging'
@@ -132,7 +132,7 @@ class Live(Config):
     SHOW_STYLEGUIDE = False
     HEADER_COLOUR = '#313131'  # DTA dark gray
     HTTP_PROTOCOL = 'https'
-    STATSD_ENABLED = True
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-production'
     MOU_BUCKET_NAME = 'notifications.service.gov.uk-mou'
     NOTIFY_ENVIRONMENT = 'live'
@@ -150,7 +150,7 @@ class CloudFoundryConfig(Config):
 class Sandbox(CloudFoundryConfig):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
-    STATSD_ENABLED = True
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-logo-upload'
     NOTIFY_ENVIRONMENT = 'sandbox'
 

@@ -5,12 +5,13 @@ defaults: &defaults
   memory: 1G
   services:
     - notify-psql
-    - notify
+    - notify-shared
+    - notify-api
     - aws
     - telstra
     - smtp
   env:
-    RUNNER: './vcapenvwrapper --root notify --root aws --root telstra --root smtp'
+    RUNNER: './vcapenvwrapper --root notify-shared --root notify-api --root aws --root telstra --root smtp'
     FLASK_APP: application.py
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify-admin.apps.y.cld.gov.au/
