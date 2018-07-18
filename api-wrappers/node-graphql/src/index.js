@@ -1,69 +1,79 @@
 const { ApolloServer, gql } = require('apollo-server')
+const grpc = require('grpc')
+const notify = grpc.load('../grpc/defs/notify.proto')
 
-// This is a (sample) collection of books we'll be able to query
-// the GraphQL server for.  A more complete example might fetch
-// from an existing data source like a REST API or database.
-const books = [
-  {
-    title: 'Harry Potter and the Chamber of Secrets',
-    author: 'J.K. Rowling',
-  },
-  {
-    title: 'Jurassic Park',
-    author: 'Michael Crichton',
-  },
-]
+const client = new notify.Notify(
+  'localhost:50051',
+  grpc.credentials.createInsecure()
+)
 
-// Type definitions define the "shape" of your data and specify
-// which ways the data can be fetched from the GraphQL server.
+const getUsers = params =>
+  new Promise((resolve, reject) =>
+    client.getUsers(params, (err, data) => (err ? reject(err) : resolve(data)))
+  )
+
+getUsers({ user_id: 'a user. here it is' })
+  .then(data => console.log('we got the data.', data.users))
+  .catch(err => console.log('we got the error.', { err }))
+
 const typeDefs = gql`
-  # Comments in GraphQL are defined with the hash (#) symbol.
+  schema {
+    query: Query
+  }
 
-  type Author {
+  type Permission {
+    service: String
+    permission: String
+  }
+
+  type User {
     name: String
-    books: [Book!]
+    auth_type: String
+    email_address: String
+    failed_login_count: Int
+    password_changed_at: String
+    permissions: [Permission!]
   }
 
-  # This "Book" type can be used in other type declarations.
-  type Book {
-    title: String
-    author(whatever: String): Author
-  }
-
-  # The "Query" type is the root of all GraphQL queries.
-  # (A "Mutation" type will be covered later on.)
   type Query {
-    books(by: String): [Book]
+    users(id: String!): [User!]
+    hello: String!
   }
 `
+
+const flatMap = fx => xs => Array.prototype.concat(...xs.map(fx))
 
 // Resolvers define the technique for fetching the types in the
 // schema.  We'll retrieve books from the "books" array above.
 const resolvers = {
   Query: {
-    books(root, { by }, context, info) {
-      console.log('---root-books', { root, by, context, info })
-      return books
+    hello: () => 'hello world',
+    users(root, { id }, context, info) {
+      return new Promise((resolve, reject) =>
+        client.getUsers(
+          { user_id: id },
+          (err, data) => (err ? reject(err) : resolve(data.users))
+        )
+      )
     },
   },
 
-  Book: {
-    author(book, ...more) {
-      console.log('---author')
-      return { name: book.author }
-    },
-  },
-
-  Author: {
-    books(author, ...more) {
-      console.log('---books')
-      return books.filter(book => book.author === author.name)
+  User: {
+    permissions(user) {
+      return flatMap(({ service, permissions }) =>
+        permissions.map(permission => ({ service, permission }))
+      )(
+        Object.entries(user.permissions).map(([service, permissions]) => ({
+          service,
+          permissions: permissions.permissions,
+        }))
+      )
     },
   },
 }
 
 // In the most basic sense, the ApolloServer can be started
-// by passing type definitions (typeDefs) and the resolvers
+// by passing type definitions (schema) and the resolvers
 // responsible for fetching the data for those types.
 const server = new ApolloServer({ typeDefs, resolvers })
 
