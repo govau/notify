@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -140,6 +141,10 @@ func (u Users) Protoify() *notify.Users {
 func (s *server) GetUsers(ctx context.Context, in *notify.Request) (*notify.Users, error) {
 	log.Println("Getting users")
 	log.Println(in.UserId)
+
+	if in.UserId == "FAIL_NOW" {
+		return nil, errors.New("failing because you said the magic word")
+	}
 
 	usersJSON, err := s.c.Users()
 	if err != nil {
