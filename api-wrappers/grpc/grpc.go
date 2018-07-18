@@ -138,6 +138,9 @@ func (u Users) Protoify() *notify.Users {
 }
 
 func (s *server) GetUsers(ctx context.Context, in *notify.Request) (*notify.Users, error) {
+	log.Println("Getting users")
+	log.Println(in.UserId)
+
 	usersJSON, err := s.c.Users()
 	if err != nil {
 		return nil, err

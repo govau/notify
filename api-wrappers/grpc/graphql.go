@@ -1,10 +1,14 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
+	"net/http"
 	"time"
 
 	notify "./defs"
+	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/relay"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -12,6 +16,73 @@ import (
 const (
 	address = "localhost:50051"
 )
+
+type Resolver struct {
+	client notify.NotifyClient
+}
+
+type User struct {
+	client notify.NotifyClient
+	user   *notify.User
+}
+
+func (r *Resolver) Hello() string { return "hey there" }
+
+func (r *Resolver) Users(ctx context.Context, args struct{ ID string }) (*[]User, error) {
+	var generics []User
+
+	users, err := r.client.GetUsers(ctx, &notify.Request{UserId: args.ID})
+	for _, user := range users.Users {
+		generics = append(generics, User{r.client, user})
+	}
+
+	return &generics, err
+}
+
+func (u User) Name() *string {
+	return &u.user.Name
+}
+
+func (u User) AuthType() *string {
+	return &u.user.AuthType
+}
+
+func (u User) EmailAddress() *string {
+	return &u.user.EmailAddress
+}
+
+func (u User) FailedLoginCount() *int32 {
+	wow := int32(u.user.FailedLoginCount)
+	return &wow
+}
+
+func (u User) PasswordChangedAt() *string {
+	return &u.user.PasswordChangedAt
+}
+
+func (u User) Permissions() *[]Permission {
+	var generics []Permission
+
+	for service, permissions := range u.user.Permissions {
+		for _, permission := range permissions.Permissions {
+			generics = append(generics, Permission{service, permission})
+		}
+	}
+
+	return &generics
+}
+
+type Permission struct {
+	service, permission string
+}
+
+func (p Permission) Service() *string {
+	return &p.service
+}
+
+func (p Permission) Permission() *string {
+	return &p.permission
+}
 
 func main() {
 	// Set up a connection to the server.
@@ -32,4 +103,17 @@ func main() {
 
 	log.Println(r)
 	log.Println(err)
+
+	sfile, err := ioutil.ReadFile("schema.graphql")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	schema := graphql.MustParseSchema(string(sfile), &Resolver{c})
+	http.Handle("/query", &relay.Handler{Schema: schema})
+	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "graphiql.html")
+	}))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

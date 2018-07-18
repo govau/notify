@@ -1,0 +1,22 @@
+schema {
+  query: Query
+}
+
+type Permission {
+  service: String
+  permission: String
+}
+
+type User {
+  name: String
+  authType: String
+  emailAddress: String
+  failedLoginCount: Int
+  passwordChangedAt: String
+  permissions: [Permission!]
+}
+
+type Query {
+  users(id: String!): [User!]
+  hello: String!
+}
