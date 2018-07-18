@@ -100,11 +100,61 @@ func (c Client) Users() (json.RawMessage, error) {
 	return JSONDataNested(resp.Body)
 }
 
+func (c Client) Services(userID string) (json.RawMessage, error) {
+	resp, err := c.Get(fmt.Sprintf("/service?user_id=%s", userID))
+	if err != nil {
+		return nil, err
+	}
+
+	return JSONDataNested(resp.Body)
+}
+
 type server struct {
 	c Client
 }
 
+type Service struct {
+	Active           bool     `json:"active"`
+	Branding         string   `json:"branding"`
+	CreatedBy        string   `json:"created_by"`
+	EmailFrom        string   `json:"email_from"`
+	Id               string   `json:"id"`
+	Name             string   `json:"name"`
+	OrganisationType string   `json:"organisation_type"`
+	RateLimit        int64    `json:"rate_limit"`
+	AnnualBilling    []string `json:"annual_billing"`
+	Permissions      []string `json:"permissions"`
+	UserToService    []string `json:"user_to_service"`
+	Users            []string `json:"users"`
+}
+
+type Services []Service
+
+func (s Services) Protoify() *notify.Services {
+	services := [](*notify.Service){}
+
+	for _, service := range s {
+		services = append(services, &notify.Service{
+			Active:           service.Active,
+			Branding:         service.Branding,
+			CreatedBy:        service.CreatedBy,
+			EmailFrom:        service.EmailFrom,
+			Id:               service.Id,
+			Name:             service.Name,
+			OrganisationType: service.OrganisationType,
+			RateLimit:        service.RateLimit,
+			AnnualBilling:    service.AnnualBilling,
+			UserToService:    service.UserToService,
+			Permissions:      service.Permissions,
+			Users:            service.Users,
+		})
+	}
+
+	return &notify.Services{Services: services}
+}
+
 type User struct {
+	Id                string              `json:"id"`
 	Name              string              `json:"name"`
 	AuthType          string              `json:"auth_type"`
 	EmailAddress      string              `json:"email_address"`
@@ -126,6 +176,7 @@ func (u Users) Protoify() *notify.Users {
 		}
 
 		users = append(users, &notify.User{
+			Id:                user.Id,
 			Name:              user.Name,
 			AuthType:          user.AuthType,
 			EmailAddress:      user.EmailAddress,
@@ -154,6 +205,22 @@ func (s *server) GetUsers(ctx context.Context, in *notify.Request) (*notify.User
 	var users Users
 	err = json.Unmarshal(usersJSON, &users)
 	return users.Protoify(), err
+}
+
+func (s *server) ServicesForUser(ctx context.Context, in *notify.ServiceRequest) (*notify.Services, error) {
+	log.Println("Getting services")
+	log.Println(in.UserId)
+
+	servicesJSON, err := s.c.Services(in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(string(servicesJSON))
+
+	var services Services
+	err = json.Unmarshal(servicesJSON, &services)
+	return services.Protoify(), err
 }
 
 func main() {

@@ -56,6 +56,19 @@ class NotifyAdminAPIClient(NotificationsAPIClient):
             service_id=service_id)
         return self.get(endpoint, *params)['data']
 
+    def get_organisations_and_services_for_user(self, user):
+        endpoint = '/user/{}/organisations-and-services'.format(user['id'])
+        return self.get(endpoint)
+
+    def get_services_for_user(self, user):
+        endpoint = '/service'
+        return self.get(endpoint, params={'user_id': user['id']})
+
+    def get_templates_for_service(self, service_id):
+        endpoint = '/service/{}/template'.format(service_id)
+        return self.get(endpoint)
+
+
 
 api_key = 'tester_yo-1be3e4a4-2046-4fbd-9190-76148ad68827-42f1af0d-4742-44dd-af79-8591d64d553e'
 secret  = 'dev-notify-secret-key'
@@ -76,3 +89,12 @@ print(json.dumps(services, indent=4, sort_keys=True))
 
 serviceA = notifications_client.get_service_templates(services[0]['id'])
 print(json.dumps(serviceA, indent=4, sort_keys=True))
+
+user_services_orgs = notifications_client.get_organisations_and_services_for_user(users[1])
+print(json.dumps(user_services_orgs, indent=4, sort_keys=True))
+
+user_services = notifications_client.get_services_for_user(users[1])
+print(json.dumps(user_services, indent=4, sort_keys=True))
+
+templates = notifications_client.get_templates_for_service(user_services['data'][0]['id'])
+print(json.dumps(templates, indent=4, sort_keys=True))
