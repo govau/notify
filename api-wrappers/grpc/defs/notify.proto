@@ -3,7 +3,7 @@ syntax = "proto3";
 service Notify {
   rpc GetUsers (Request) returns (Users) {}
   rpc ServicesForUser (ServiceRequest) returns (Services) {}
-  //rpc TemplatesForService (TemplatesRequest) returns (Templates) {}
+  rpc TemplatesForService (TemplatesRequest) returns (Templates) {}
 }
 
 message Request {

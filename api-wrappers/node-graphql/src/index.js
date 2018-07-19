@@ -40,6 +40,19 @@ const typeDefs = gql`
     permission: String
   }
 
+  type Template {
+    id: String
+    name: String
+    subject: String
+    content: String
+    template_type: String
+    created_at: String
+    created_by: String
+    service: String
+    process_type: String
+    archived: Boolean
+  }
+
   type Service {
     active: Boolean
     branding: String
@@ -52,6 +65,7 @@ const typeDefs = gql`
     annual_billing: [String!]
     permissions: [String!]
     user_to_service: [String!]
+    templates: [Template!]
   }
 
   type User {
@@ -82,6 +96,17 @@ const resolvers = {
         client.getUsers(
           { user_id: id },
           (err, data) => (err ? reject(err) : resolve(data.users))
+        )
+      )
+    },
+  },
+
+  Service: {
+    templates(service) {
+      return new Promise((resolve, reject) =>
+        client.templatesForService(
+          { service_id: service.id },
+          (err, data) => (err ? reject(err) : resolve(data.templates))
         )
       )
     },

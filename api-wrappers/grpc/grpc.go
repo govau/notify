@@ -109,6 +109,15 @@ func (c Client) Services(userID string) (json.RawMessage, error) {
 	return JSONDataNested(resp.Body)
 }
 
+func (c Client) Templates(serviceID string) (json.RawMessage, error) {
+	resp, err := c.Get(fmt.Sprintf("/service/%s/template", serviceID))
+	if err != nil {
+		return nil, err
+	}
+
+	return JSONDataNested(resp.Body)
+}
+
 type server struct {
 	c Client
 }
@@ -151,6 +160,42 @@ func (s Services) Protoify() *notify.Services {
 	}
 
 	return &notify.Services{Services: services}
+}
+
+type Template struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Subject      string `json:"subject"`
+	Content      string `json:"content"`
+	TemplateType string `json:"template_type"`
+	CreatedAt    string `json:"created_at"`
+	CreatedBy    string `json:"created_by"`
+	Service      string `json:"service"`
+	ProcessType  string `json:"process_type"`
+	Archived     bool   `json:"archived"`
+}
+
+type Templates []Template
+
+func (t Templates) Protoify() *notify.Templates {
+	templates := [](*notify.Template){}
+
+	for _, template := range t {
+		templates = append(templates, &notify.Template{
+			Id:           template.Id,
+			Name:         template.Name,
+			Subject:      template.Subject,
+			Content:      template.Content,
+			TemplateType: template.TemplateType,
+			CreatedAt:    template.CreatedAt,
+			CreatedBy:    template.CreatedBy,
+			Service:      template.Service,
+			ProcessType:  template.ProcessType,
+			Archived:     template.Archived,
+		})
+	}
+
+	return &notify.Templates{Templates: templates}
 }
 
 type User struct {
@@ -216,11 +261,23 @@ func (s *server) ServicesForUser(ctx context.Context, in *notify.ServiceRequest)
 		return nil, err
 	}
 
-	log.Println(string(servicesJSON))
-
 	var services Services
 	err = json.Unmarshal(servicesJSON, &services)
 	return services.Protoify(), err
+}
+
+func (s *server) TemplatesForService(ctx context.Context, in *notify.TemplatesRequest) (*notify.Templates, error) {
+	log.Println("Getting templates")
+	log.Println(in.ServiceId)
+
+	templatesJSON, err := s.c.Templates(in.ServiceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var templates Templates
+	err = json.Unmarshal(templatesJSON, &templates)
+	return templates.Protoify(), err
 }
 
 func main() {
