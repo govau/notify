@@ -1,17 +1,26 @@
 syntax = "proto3";
 
 service Notify {
-  rpc GetUsers (Request) returns (Users) {}
-  rpc ServicesForUser (ServiceRequest) returns (Services) {}
+  rpc GetUser (ForUserRequest) returns (User) {}
+  rpc GetUsers (Empty) returns (Users) {}
+  rpc GetService (ServiceRequest) returns (Service) {}
+  rpc ServicesForUser (ForUserRequest) returns (Services) {}
   rpc TemplatesForService (TemplatesRequest) returns (Templates) {}
+}
+
+message Empty {
 }
 
 message Request {
   string user_id = 1;
 }
 
-message ServiceRequest {
+message ForUserRequest {
   string user_id = 1;
+}
+
+message ServiceRequest {
+  string service_id = 1;
 }
 
 message TemplatesRequest {

@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -100,6 +99,24 @@ func (c Client) Users() (json.RawMessage, error) {
 	return JSONDataNested(resp.Body)
 }
 
+func (c Client) User(userID string) (json.RawMessage, error) {
+	resp, err := c.Get(fmt.Sprintf("/user/%s", userID))
+	if err != nil {
+		return nil, err
+	}
+
+	return JSONDataNested(resp.Body)
+}
+
+func (c Client) Service(serviceID string) (json.RawMessage, error) {
+	resp, err := c.Get(fmt.Sprintf("/service/%s", serviceID))
+	if err != nil {
+		return nil, err
+	}
+
+	return JSONDataNested(resp.Body)
+}
+
 func (c Client) Services(userID string) (json.RawMessage, error) {
 	resp, err := c.Get(fmt.Sprintf("/service?user_id=%s", userID))
 	if err != nil {
@@ -137,26 +154,31 @@ type Service struct {
 	Users            []string `json:"users"`
 }
 
+func (service Service) Protoify() *notify.Service {
+	return &notify.Service{
+		Active:           service.Active,
+		Branding:         service.Branding,
+		CreatedBy:        service.CreatedBy,
+		EmailFrom:        service.EmailFrom,
+		Id:               service.Id,
+		Name:             service.Name,
+		OrganisationType: service.OrganisationType,
+		RateLimit:        service.RateLimit,
+		AnnualBilling:    service.AnnualBilling,
+		UserToService:    service.UserToService,
+		Permissions:      service.Permissions,
+		Users:            service.Users,
+	}
+
+}
+
 type Services []Service
 
 func (s Services) Protoify() *notify.Services {
 	services := [](*notify.Service){}
 
 	for _, service := range s {
-		services = append(services, &notify.Service{
-			Active:           service.Active,
-			Branding:         service.Branding,
-			CreatedBy:        service.CreatedBy,
-			EmailFrom:        service.EmailFrom,
-			Id:               service.Id,
-			Name:             service.Name,
-			OrganisationType: service.OrganisationType,
-			RateLimit:        service.RateLimit,
-			AnnualBilling:    service.AnnualBilling,
-			UserToService:    service.UserToService,
-			Permissions:      service.Permissions,
-			Users:            service.Users,
-		})
+		services = append(services, service.Protoify())
 	}
 
 	return &notify.Services{Services: services}
@@ -210,37 +232,49 @@ type User struct {
 
 type Users []User
 
+func (user User) Protoify() *notify.User {
+	permissions := map[string]*notify.Permissions{}
+
+	for service, ps := range user.Permissions {
+		permissions[service] = &notify.Permissions{Permissions: ps}
+	}
+
+	return &notify.User{
+		Id:                user.Id,
+		Name:              user.Name,
+		AuthType:          user.AuthType,
+		EmailAddress:      user.EmailAddress,
+		FailedLoginCount:  user.FailedLoginCount,
+		PasswordChangedAt: user.PasswordChangedAt,
+		Permissions:       permissions,
+	}
+}
+
 func (u Users) Protoify() *notify.Users {
 	users := [](*notify.User){}
 
 	for _, user := range u {
-		permissions := map[string]*notify.Permissions{}
-
-		for service, ps := range user.Permissions {
-			permissions[service] = &notify.Permissions{Permissions: ps}
-		}
-
-		users = append(users, &notify.User{
-			Id:                user.Id,
-			Name:              user.Name,
-			AuthType:          user.AuthType,
-			EmailAddress:      user.EmailAddress,
-			FailedLoginCount:  user.FailedLoginCount,
-			PasswordChangedAt: user.PasswordChangedAt,
-			Permissions:       permissions,
-		})
+		users = append(users, user.Protoify())
 	}
 
 	return &notify.Users{Users: users}
 }
 
-func (s *server) GetUsers(ctx context.Context, in *notify.Request) (*notify.Users, error) {
-	log.Println("Getting users")
-	log.Println(in.UserId)
+func (s *server) GetUser(ctx context.Context, in *notify.ForUserRequest) (*notify.User, error) {
+	log.Printf("Getting user: [%s]\n", in.UserId)
 
-	if in.UserId == "FAIL_NOW" {
-		return nil, errors.New("failing because you said the magic word")
+	userJSON, err := s.c.User(in.UserId)
+	if err != nil {
+		return nil, err
 	}
+
+	var user User
+	err = json.Unmarshal(userJSON, &user)
+	return user.Protoify(), err
+}
+
+func (s *server) GetUsers(ctx context.Context, in *notify.Empty) (*notify.Users, error) {
+	log.Println("Getting users")
 
 	usersJSON, err := s.c.Users()
 	if err != nil {
@@ -252,9 +286,21 @@ func (s *server) GetUsers(ctx context.Context, in *notify.Request) (*notify.User
 	return users.Protoify(), err
 }
 
-func (s *server) ServicesForUser(ctx context.Context, in *notify.ServiceRequest) (*notify.Services, error) {
-	log.Println("Getting services")
-	log.Println(in.UserId)
+func (s *server) GetService(ctx context.Context, in *notify.ServiceRequest) (*notify.Service, error) {
+	log.Printf("Getting service: [%s]\n", in.ServiceId)
+
+	serviceJSON, err := s.c.Service(in.ServiceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var service Service
+	err = json.Unmarshal(serviceJSON, &service)
+	return service.Protoify(), err
+}
+
+func (s *server) ServicesForUser(ctx context.Context, in *notify.ForUserRequest) (*notify.Services, error) {
+	log.Printf("Getting services: [%s]\n", in.UserId)
 
 	servicesJSON, err := s.c.Services(in.UserId)
 	if err != nil {
@@ -267,8 +313,7 @@ func (s *server) ServicesForUser(ctx context.Context, in *notify.ServiceRequest)
 }
 
 func (s *server) TemplatesForService(ctx context.Context, in *notify.TemplatesRequest) (*notify.Templates, error) {
-	log.Println("Getting templates")
-	log.Println(in.ServiceId)
+	log.Printf("Getting templates: [%s]\n", in.ServiceId)
 
 	templatesJSON, err := s.c.Templates(in.ServiceId)
 	if err != nil {
