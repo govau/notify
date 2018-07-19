@@ -6,6 +6,8 @@ service Notify {
   rpc GetService (ServiceRequest) returns (Service) {}
   rpc ServicesForUser (ForUserRequest) returns (Services) {}
   rpc TemplatesForService (TemplatesRequest) returns (Templates) {}
+
+  rpc CreateTemplate(CreateTemplateRequest) returns (Template) {}
 }
 
 message Empty {
@@ -25,6 +27,14 @@ message ServiceRequest {
 
 message TemplatesRequest {
   string service_id = 1;
+}
+
+message CreateTemplateRequest {
+  string service_id = 1;
+  string created_by = 2;
+  string name = 3;
+  string subject = 4;
+  string content = 5;
 }
 
 message Users {

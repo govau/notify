@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -70,7 +71,38 @@ func (c Client) Get(path string) (*http.Response, error) {
 		return nil, err
 	}
 
-	return c.Do(req)
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode > 300 {
+		return resp, errors.New("bad status code")
+	}
+
+	return resp, nil
+}
+
+func (c Client) Post(path string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest("POST", path, body)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode > 300 {
+		var buf bytes.Buffer
+		io.Copy(&buf, resp.Body)
+
+		log.Println("failed request", buf.String())
+		return resp, errors.New("bad status code")
+	}
+
+	return resp, nil
 }
 
 type DataJSON struct {
@@ -119,6 +151,21 @@ func (c Client) Service(serviceID string) (json.RawMessage, error) {
 
 func (c Client) Services(userID string) (json.RawMessage, error) {
 	resp, err := c.Get(fmt.Sprintf("/service?user_id=%s", userID))
+	if err != nil {
+		return nil, err
+	}
+
+	return JSONDataNested(resp.Body)
+}
+
+func (c Client) CreateTemplate(serviceID string, template Template) (json.RawMessage, error) {
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(template)
+
+	resp, err := c.Post(
+		fmt.Sprintf("/service/%s/template", serviceID),
+		&buf,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +232,7 @@ func (s Services) Protoify() *notify.Services {
 }
 
 type Template struct {
-	Id           string `json:"id"`
+	Id           string `json:"id,omitempty"`
 	Name         string `json:"name"`
 	Subject      string `json:"subject"`
 	Content      string `json:"content"`
@@ -199,22 +246,26 @@ type Template struct {
 
 type Templates []Template
 
+func (template Template) Protoify() *notify.Template {
+	return &notify.Template{
+		Id:           template.Id,
+		Name:         template.Name,
+		Subject:      template.Subject,
+		Content:      template.Content,
+		TemplateType: template.TemplateType,
+		CreatedAt:    template.CreatedAt,
+		CreatedBy:    template.CreatedBy,
+		Service:      template.Service,
+		ProcessType:  template.ProcessType,
+		Archived:     template.Archived,
+	}
+}
+
 func (t Templates) Protoify() *notify.Templates {
 	templates := [](*notify.Template){}
 
 	for _, template := range t {
-		templates = append(templates, &notify.Template{
-			Id:           template.Id,
-			Name:         template.Name,
-			Subject:      template.Subject,
-			Content:      template.Content,
-			TemplateType: template.TemplateType,
-			CreatedAt:    template.CreatedAt,
-			CreatedBy:    template.CreatedBy,
-			Service:      template.Service,
-			ProcessType:  template.ProcessType,
-			Archived:     template.Archived,
-		})
+		templates = append(templates, template.Protoify())
 	}
 
 	return &notify.Templates{Templates: templates}
@@ -323,6 +374,31 @@ func (s *server) TemplatesForService(ctx context.Context, in *notify.TemplatesRe
 	var templates Templates
 	err = json.Unmarshal(templatesJSON, &templates)
 	return templates.Protoify(), err
+}
+
+func (s *server) CreateTemplate(ctx context.Context, in *notify.CreateTemplateRequest) (*notify.Template, error) {
+
+	templateJSON, err := s.c.CreateTemplate(
+		in.ServiceId,
+		Template{
+			Name:         in.Name,
+			TemplateType: "email",
+			Subject:      in.Subject,
+			Content:      in.Content,
+			Service:      in.ServiceId,
+			CreatedBy:    in.CreatedBy,
+			CreatedAt:    time.Now().Format(time.RFC3339),
+			ProcessType:  "normal",
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var template Template
+	err = json.Unmarshal(templateJSON, &template)
+	return template.Protoify(), err
 }
 
 func main() {

@@ -7,32 +7,10 @@ const client = new notify.Notify(
   grpc.credentials.createInsecure()
 )
 
-const getUsers = params =>
-  new Promise((resolve, reject) =>
-    client.getUsers(params, (err, data) => (err ? reject(err) : resolve(data)))
-  )
-
-const servicesForUser = params =>
-  new Promise((resolve, reject) =>
-    client.servicesForUser(
-      params,
-      (err, data) => (err ? reject(err) : resolve(data))
-    )
-  )
-
-getUsers({})
-  .then(data => {
-    console.log('we got the data.', data.users, data.users[1].id)
-    return servicesForUser({ user_id: data.users[1].id }).then(sdata => {
-      console.log('we got the services.', sdata)
-      return sdata
-    })
-  })
-  .catch(err => console.log('we got the error.', { err }))
-
 const typeDefs = gql`
   schema {
     query: Query
+    mutation: Mutation
   }
 
   type Permission {
@@ -95,6 +73,16 @@ const typeDefs = gql`
     user(id: String!): User
     users: [User!]
   }
+
+  type Mutation {
+    createTemplate(
+      service_id: String!
+      created_by: String!
+      name: String!
+      subject: String!
+      content: String!
+    ): Template
+  }
 `
 
 const flatMap = fx => xs => Array.prototype.concat(...xs.map(fx))
@@ -122,13 +110,24 @@ const resolvers = {
     },
   },
 
+  Mutation: {
+    createTemplate(root, params, context, info) {
+      return new Promise((resolve, reject) =>
+        client.createTemplate(
+          params,
+          (err, data) => (err ? reject(err) : resolve(data))
+        )
+      )
+    },
+  },
+
   Template: {
     service(template) {
       return new Promise((resolve, reject) =>
-        client.getService({ service_id: template.service }, (err, data) => {
-          console.log('template-service', { err, data })
-          return err ? reject(err) : resolve(data)
-        })
+        client.getService(
+          { service_id: template.service },
+          (err, data) => (err ? reject(err) : resolve(data))
+        )
       )
     },
   },
