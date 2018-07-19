@@ -81,7 +81,14 @@ def send_sms_to_provider(notification):
                 raise e
             else:
                 notification.billable_units = template.fragment_count
-                update_notification(notification, provider, notification.international)
+                status = None
+                # An international notification (i.e. a text message with an
+                # abroad recipient phone number) instantly get marked as "sent".
+                # It might later get marked as "delivered" when the provider
+                # status callback is triggered.
+                if notification.international:
+                    status = NOTIFICATION_SENT
+                update_notification(notification, provider, status=status)
 
         current_app.logger.debug(
             "SMS {} sent to provider {} at {}".format(notification.id, provider.get_name(), notification.sent_at)
@@ -125,7 +132,7 @@ def send_email_to_provider(notification):
 
             email_reply_to = notification.reply_to_text
 
-            reference = provider.send_email(
+            reference, status = provider.send_email(
                 from_address,
                 validate_and_format_email_address(notification.to),
                 plain_text_email.subject,
@@ -134,7 +141,7 @@ def send_email_to_provider(notification):
                 reply_to_address=validate_and_format_email_address(email_reply_to) if email_reply_to else None,
             )
             notification.reference = reference
-            update_notification(notification, provider)
+            update_notification(notification, provider, status=status)
 
         current_app.logger.debug("SENT_MAIL: {} -- {}".format(
             validate_and_format_email_address(notification.to),
@@ -147,11 +154,11 @@ def send_email_to_provider(notification):
         statsd_client.timing("email.total-time", delta_milliseconds)
 
 
-def update_notification(notification, provider, international=False):
+def update_notification(notification, provider, status=None):
     notification.sent_at = datetime.utcnow()
     notification.sent_by = provider.get_name()
-    if international:
-        notification.status = NOTIFICATION_SENT
+    if status != None:
+        notification.status = status
     else:
         notification.status = NOTIFICATION_SENDING
     dao_update_notification(notification)
