@@ -7,9 +7,19 @@ const client = new notify.Notify(
   grpc.credentials.createInsecure()
 )
 
-const promisify = rpc => (params, resolver = data => data) =>
+const promisify = rpc => (
+  params,
+  resolver = data => data,
+  rejecter = err => {
+    console.warn(err.details)
+    return err
+  }
+) =>
   new Promise((resolve, reject) =>
-    rpc(params, (err, data) => (err ? reject(err) : resolve(resolver(data))))
+    rpc(
+      params,
+      (err, data) => (err ? reject(rejecter(err)) : resolve(resolver(data)))
+    )
   )
 
 const getUser = promisify(client.getUser.bind(client))
