@@ -7,6 +7,18 @@ const client = new notify.Notify(
   grpc.credentials.createInsecure()
 )
 
+const promisify = rpc => (params, resolver = data => data) =>
+  new Promise((resolve, reject) =>
+    rpc(params, (err, data) => (err ? reject(err) : resolve(resolver(data))))
+  )
+
+const getUser = promisify(client.getUser.bind(client))
+const getUsers = promisify(client.getUsers.bind(client))
+const getService = promisify(client.getService.bind(client))
+const createTemplate = promisify(client.createTemplate.bind(client))
+const templatesForService = promisify(client.templatesForService.bind(client))
+const servicesForUser = promisify(client.servicesForUser.bind(client))
+
 const typeDefs = gql`
   schema {
     query: Query
@@ -92,95 +104,53 @@ const flatMap = fx => xs => Array.prototype.concat(...xs.map(fx))
 const resolvers = {
   Query: {
     user(root, { id }, context, info) {
-      return new Promise((resolve, reject) =>
-        client.getUser(
-          { user_id: id },
-          (err, data) => (err ? reject(err) : resolve(data))
-        )
-      )
+      return getUser({ user_id: id })
     },
 
     users() {
-      return new Promise((resolve, reject) =>
-        client.getUsers(
-          {},
-          (err, data) => (err ? reject(err) : resolve(data.users))
-        )
-      )
+      return getUsers({}, data => data.users)
     },
   },
 
   Mutation: {
     createTemplate(root, params, context, info) {
-      return new Promise((resolve, reject) =>
-        client.createTemplate(
-          params,
-          (err, data) => (err ? reject(err) : resolve(data))
-        )
-      )
+      return createTemplate(params)
     },
   },
 
   Template: {
     service(template) {
-      return new Promise((resolve, reject) =>
-        client.getService(
-          { service_id: template.service },
-          (err, data) => (err ? reject(err) : resolve(data))
-        )
-      )
+      return getService({ service_id: template.service })
     },
   },
 
   Service: {
     created_by(service) {
-      return new Promise((resolve, reject) =>
-        client.getUser(
-          { user_id: service.created_by },
-          (err, data) => (err ? reject(err) : resolve(data))
-        )
-      )
+      return getUser({ user_id: service.created_by })
     },
 
     users(service) {
       return Promise.all(
-        service.users.map(
-          user_id =>
-            new Promise((resolve, reject) =>
-              client.getUser(
-                { user_id },
-                (err, user) =>
-                  err
-                    ? reject(err)
-                    : resolve({
-                        ...user,
-                        permissions: (user.permissions[service.id] || {})
-                          .permissions,
-                      })
-              )
-            )
+        service.users.map(user_id =>
+          getUser({ user_id }, user => ({
+            ...user,
+            permissions: (user.permissions[service.id] || {}).permissions,
+          }))
         )
       )
     },
 
     templates(service) {
-      return new Promise((resolve, reject) =>
-        client.templatesForService(
-          { service_id: service.id },
-          (err, data) => (err ? reject(err) : resolve(data.templates))
-        )
+      return templatesForService(
+        { service_id: service.id },
+        data => data.templates
       )
     },
   },
 
   User: {
     services(user) {
-      return new Promise((resolve, reject) =>
-        client.servicesForUser(
-          { user_id: user.id },
-          (err, data) => (err ? reject(err) : resolve(data.services))
-        )
-      )
+      return servicesForUser({ user_id: user.id }, data => data.services)
     },
 
     permissions(user) {
