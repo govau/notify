@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	notify "./defs"
+	notify "../grpc/defs"
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"golang.org/x/net/context"
