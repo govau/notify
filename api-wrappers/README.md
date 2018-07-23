@@ -1,4 +1,5 @@
 # API expedition
+
 ## How might we continue development of Notify in a way that leverages our strengths?
 
 The notify API is a solid foundation to build on, and is worth maintaining and extending; however python is not our strength, and we have no long-running knowledge of the existing system.
@@ -16,14 +17,14 @@ Each directory has a minimal makefile that contains a `setup` and `run` directiv
 
 You’ll need to have notify-api running in the background. After that, you should go into the [grpc](https://github.com/govau/notifications/tree/api-expedition/api-wrappers/grpc) directory, type `make setup`, and `make run`  to get our Go gRPC backend running.  Check the code there to see how we authenticate to the python API, and how we implement the protobuf spec.
 
-This spec is located in grpc_defs_notify.proto. 
+This spec is located in grpc/defs/notify.proto. 
 
 ### Node GraphQL
 
 Check out the code here to see how we define a GraphQL schema and proxy requests using a gRPC client. 
 
-## Go GraphQL
+### Go GraphQL
 A very rudimentary GraphQL server showing how awkward it is to write a GraphQL server in Go.
 
-## python-api
+### python-api
 [interact.py](https://github.com/govau/notifications/blob/api-expedition/api-wrappers/python-api/interact.py) is a simple script that lets us dump out responses from the python notify-api so that we can base types on them.
