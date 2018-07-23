@@ -26,17 +26,24 @@ type User struct {
 	user   *notify.User
 }
 
-func (r *Resolver) Hello() string { return "hey there" }
+func (r *Resolver) User(ctx context.Context, args struct{ ID string }) (*User, error) {
+	user, err := r.client.GetUser(ctx, &notify.ForUserRequest{UserId: args.ID})
+	return &User{r.client, user}, err
+}
 
-func (r *Resolver) Users(ctx context.Context, args struct{ ID string }) (*[]User, error) {
+func (r *Resolver) Users(ctx context.Context) (*[]User, error) {
 	var generics []User
 
-	users, err := r.client.GetUsers(ctx, &notify.Request{UserId: args.ID})
+	users, err := r.client.GetUsers(ctx, &notify.Empty{})
 	for _, user := range users.Users {
 		generics = append(generics, User{r.client, user})
 	}
 
 	return &generics, err
+}
+
+func (u User) Id() *string {
+	return &u.user.Id
 }
 
 func (u User) Name() *string {
@@ -96,7 +103,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := c.GetUsers(ctx, &notify.Request{UserId: "hello. thanks"})
+	r, err := c.GetUsers(ctx, &notify.Empty{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
