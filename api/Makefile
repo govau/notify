@@ -4,7 +4,6 @@ RUNNER ?= $(PIPENV) run
 PORT   ?= 6011
 WORKERS?= 4
 
-
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 DATE = $(shell date +%Y-%m-%d:%H:%M:%S)
@@ -47,7 +46,7 @@ test: version-file ## Run linter and tests
 	$(RUNNER) flake8 .
 	$(RUNNER) py.test --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 -v --maxfail=10
 
-run: version-file ## Run a dev server
+run: version-file ## Run a development server (reloading)
 	$(RUNNER) flask run -p $(PORT)
 
 run-gunicorn: version-file ## Run a production server
