@@ -1,9 +1,0 @@
----
-
-inherit: manifest-delivery-base.yml
-
-services:
-  - notify-db
-  - logit-ssl-syslog-drain
-
-memory: 1G
