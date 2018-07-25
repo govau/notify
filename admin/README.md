@@ -14,8 +14,8 @@ GOV.AU Notify admin application.
 Languages needed
 
 - Python 3.6+
-- [Node](https://nodejs.org/) 5.0.0 or greater
-- [npm](https://www.npmjs.com/) 3.0.0 or greater
+- [Node](https://nodejs.org/) 7.0.0 or greater
+- [npm](https://www.npmjs.com/) 5.0.0 or greater
 
 ```shell
     brew install node
