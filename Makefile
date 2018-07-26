@@ -1,16 +1,22 @@
-CLD_HOST   ?= y.cld.gov.au
-DEPLOY_ENV ?= notifications
-CF_API     ?= https://api.system.$(CLD_HOST)
-CF_ORG     ?= dta
-CF_SPACE   ?= $(DEPLOY_ENV)
-CF_HOME    ?= $(HOME)
+CLD_HOST    ?= y.cld.gov.au
+DEPLOY_ENV  ?= notifications
+CF_API      ?= https://api.system.$(CLD_HOST)
+CF_ORG      ?= dta
+CF_SPACE    ?= $(DEPLOY_ENV)
+CF_HOME     ?= $(HOME)
+CF          ?= cf
 
-TARGETS    = setup deploy
+TARGETS      = setup deploy
+SERVICES     = notify-shared notify-api notify-admin aws smtp telstra
+SVC_APPLIED  = $(SERVICES:%=apply-service-%)
+SVC_CREATED  = $(SERVICES:%=create-service-%)
+
+APPLY_ACTION?= update
 
 all: setup
 
 cf-login:
-	@cf login\
+	@$(CF) login\
 		-a "${CF_API}"\
 		-u "${CF_USERNAME}"\
 		-p "${CF_PASSWORD}"\
@@ -21,4 +27,13 @@ $(TARGETS):
 	$(MAKE) -C api $@
 	$(MAKE) -C admin $@
 
-.PHONY: cf-login setup deploy
+
+apply-services: $(SVC_APPLIED)
+
+$(SVC_APPLIED): apply-service-%: ci/ups/%.json
+	$(CF) $(APPLY_ACTION)-user-provided-service $* -p $<
+
+$(SVC_CREATED): create-service-%:
+	$(MAKE) apply-service-$* APPLY_ACTION=create
+
+.PHONY: cf-login $(TARGETS) $(SVC_APPLIED) $(SVC_CREATED)
