@@ -27,7 +27,6 @@ $(TARGETS):
 	$(MAKE) -C api $@
 	$(MAKE) -C admin $@
 
-
 apply-services: $(SVC_APPLIED)
 
 $(SVC_APPLIED): apply-service-%: ci/ups/%.json
