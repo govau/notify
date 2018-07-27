@@ -1,0 +1,27 @@
+---
+defaults: &defaults
+  buildpack: python_buildpack
+  instances: 1
+  memory: 1G
+  services:
+    - notify-psql
+    - notify-shared
+    - notify-api
+    - aws
+    - telstra
+    - smtp
+  env:
+    RUNNER: './vcapenvwrapper --root notify-shared --root notify-api --root aws --root telstra --root smtp'
+    FLASK_APP: application.py
+    NOTIFY_ENVIRONMENT: production
+    ADMIN_BASE_URL: https://notify-admin.apps.b.cld.gov.au/
+
+applications:
+- name: notify-api
+  <<: *defaults
+  command: make run-production
+- name: notify-celery
+  <<: *defaults
+  health-check-type: process
+  no-route: true
+  command: make run-celery

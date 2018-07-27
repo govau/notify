@@ -1,8 +1,7 @@
 CLD_HOST    ?= y.cld.gov.au
-DEPLOY_ENV  ?= notifications
 CF_API      ?= https://api.system.$(CLD_HOST)
 CF_ORG      ?= dta
-CF_SPACE    ?= $(DEPLOY_ENV)
+CF_SPACE    ?= notifications
 CF_HOME     ?= $(HOME)
 CF          ?= cf
 

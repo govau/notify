@@ -53,7 +53,7 @@ run-gunicorn: version-file ## Run a production server
 	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
 run-celery: version-file ## Run background workers
-	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO 
+	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
 
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
@@ -77,10 +77,10 @@ run-production: setup-db ## Apply migrations and run production server
 	$(MAKE) run-gunicorn
 
 deploy-api: vendor requirements.txt ## Deploy API to cloudfoundry
-	cf zero-downtime-push notify-api -f manifest.yml
+	cf zero-downtime-push notify-api -f manifest-$(CLD_HOST).yml
 
 deploy-celery: vendor requirements.txt ## Deploy celery to cloudfoundry
-	cf zero-downtime-push notify-celery -f manifest.yml
+	cf zero-downtime-push notify-celery -f manifest-$(CLD_HOST).yml
 
 create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')

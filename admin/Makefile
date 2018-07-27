@@ -74,6 +74,6 @@ build-linux-wheels: pipenv-requirements.txt native-vendor
 		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
 
 deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
-	cf zero-downtime-push $(APP) -f manifest.yml
+	cf zero-downtime-push $(APP) -f manifest-$(CLD_HOST).yml
 
 .PHONY: help test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
