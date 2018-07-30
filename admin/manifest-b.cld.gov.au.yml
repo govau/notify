@@ -20,11 +20,6 @@ defaults: &defaults
 applications:
 - name: notify-admin
   <<: *defaults
-- name: notify-dev
-  <<: *defaults
-  env:
-    <<: *defaults_env
-    ADMIN_BASE_URL: https://notify-dev.apps.b.cld.gov.au/
 - name: notify
   <<: *defaults
   env:
