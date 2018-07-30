@@ -12,6 +12,9 @@ SVC_CREATED  = $(SERVICES:%=create-service-%)
 
 APPLY_ACTION?= update
 
+PSQL_SVC_NAME ?= notify-psql
+PSQL_SVC_PLAN ?= shared
+
 all: setup
 
 cf-login:
@@ -33,5 +36,8 @@ $(SVC_APPLIED): apply-service-%: ci/ups/$(CLD_HOST)/%.json
 
 $(SVC_CREATED): create-service-%:
 	$(MAKE) apply-service-$* APPLY_ACTION=create
+
+create-psql-service:
+	$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
 
 .PHONY: cf-login $(TARGETS) $(SVC_APPLIED) $(SVC_CREATED)
