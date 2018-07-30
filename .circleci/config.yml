@@ -81,12 +81,12 @@ references:
   master_branch: &master_branch
     filters:
       branches:
-        only:
+        ignore:
           - master
   not_master_branch: &not_master_branch
     filters:
       branches:
-        ignore:
+        only:
           - master
 
 jobs:
