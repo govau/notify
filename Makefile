@@ -28,7 +28,7 @@ $(TARGETS):
 
 apply-services: $(SVC_APPLIED)
 
-$(SVC_APPLIED): apply-service-%: ci/ups/%.json
+$(SVC_APPLIED): apply-service-%: ci/ups/$(CLD_HOST)/%.json
 	$(CF) $(APPLY_ACTION)-user-provided-service $* -p $<
 
 $(SVC_CREATED): create-service-%:
