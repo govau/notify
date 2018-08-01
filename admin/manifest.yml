@@ -13,18 +13,8 @@ defaults: &defaults
   command: make run-gunicorn
 
 applications:
-- name: notify-admin
-  <<: *defaults
-  env:
-    <<: *defaults_env
-    ADMIN_BASE_URL: https://notify-admin.apps.y.cld.gov.au/
-- name: notify-dev
-  <<: *defaults
-  env:
-    <<: *defaults_env
-    ADMIN_BASE_URL: https://notify-dev.apps.y.cld.gov.au/
 - name: notify
   <<: *defaults
   env:
     <<: *defaults_env
-    ADMIN_BASE_URL: https://notify.apps.y.cld.gov.au/
+    ADMIN_BASE_URL: https://notify.apps.b.cld.gov.au/

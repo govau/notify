@@ -3,7 +3,9 @@ RUNNER ?= $(PIPENV) run
 NPM    ?= npm
 PORT   ?= 6012
 WORKERS?= 4
-APP    ?= notify-admin
+CF     ?= cf
+APP    ?= notify
+STG    ?= dev
 
 SHELL := /bin/bash
 DATE = $(shell date +%Y-%m-%d:%H:%M:%S)
@@ -74,6 +76,9 @@ build-linux-wheels: pipenv-requirements.txt native-vendor
 		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
 
 deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
-	cf zero-downtime-push $(APP) -f manifest-$(CLD_HOST).yml
+	$(CF) zero-downtime-push $(APP) -f manifest.yml
+
+deploy-dev: vendor requirements.txt ## Deploy admin to cloudfoundry
+	$(CF) push $(APP) -f manifest-dev.yml
 
 .PHONY: help test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
