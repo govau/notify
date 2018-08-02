@@ -48,6 +48,8 @@ def init_app(app):
 
 
 def check_proxy_header_before_request():
+    return None
+
     keys = [
         current_app.config.get('ROUTE_SECRET_KEY_1'),
         current_app.config.get('ROUTE_SECRET_KEY_2'),
