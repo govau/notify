@@ -3,6 +3,9 @@ PIPENV ?= pipenv
 RUNNER ?= $(PIPENV) run
 PORT   ?= 6011
 WORKERS?= 4
+CF     ?= cf
+APP    ?= notify-api
+STG    ?= dev
 
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
@@ -39,6 +42,9 @@ Pipfile Pipfile.lock:
 setup: ## Setup virtualenv and install python dependencies
 	$(PIPENV) install
 
+setup-dev: ## Setup everything in dev mode for testing
+	$(PIPENV) install --dev
+
 setup-db: version-file ## Run database migrations
 	$(RUNNER) flask db upgrade
 
@@ -53,7 +59,7 @@ run-gunicorn: version-file ## Run a production server
 	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
 run-celery: version-file ## Run background workers
-	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO 
+	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
 
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
@@ -76,11 +82,17 @@ requirements.txt: pipenv-requirements.txt
 run-production: setup-db ## Apply migrations and run production server
 	$(MAKE) run-gunicorn
 
-deploy-api: vendor requirements.txt ## Deploy API to cloudfoundry
-	cf zero-downtime-push notify-api -f manifest.yml
+deploy: vendor requirements.txt ## Deploy prod application
+	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
-deploy-celery: vendor requirements.txt ## Deploy celery to cloudfoundry
-	cf zero-downtime-push notify-celery -f manifest.yml
+deploy-dev: vendor requirements.txt
+	$(CF) push $(APP) -f manifest-dev.yml
+
+deploy-celery:
+	APP=notify-celery $(MAKE) deploy
+
+deploy-dev-celery:
+	APP=notify-celery $(MAKE) deploy-dev
 
 create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
