@@ -301,7 +301,7 @@ class Config(object):
         'simulate-delivered-3@notifications.service.gov.uk',
     )
 
-    SIMULATED_SMS_NUMBERS = ('+447700900000', '+447700900111', '+447700900222')
+    SIMULATED_SMS_NUMBERS = ('+61400900000', '+61400900111', '+61400900222')
 
     FUNCTIONAL_TEST_PROVIDER_SERVICE_ID = None
     FUNCTIONAL_TEST_PROVIDER_SMS_TEMPLATE_ID = None
