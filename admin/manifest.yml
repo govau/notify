@@ -20,4 +20,4 @@ applications:
     - route: notify.apps.b.cld.gov.au
   env:
     <<: *defaults_env
-    ADMIN_BASE_URL: https://notify.apps.b.cld.gov.au/
+    ADMIN_BASE_URL: https://notify.gov.au
