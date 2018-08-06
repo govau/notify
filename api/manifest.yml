@@ -20,6 +20,9 @@ applications:
 - name: notify-api
   <<: *defaults
   command: make run-production
+  routes:
+    - route: rest-api.notify.gov.au
+    - route: notify-api.apps.b.cld.gov.au
 - name: notify-celery
   <<: *defaults
   health-check-type: process
