@@ -18,4 +18,4 @@ applications:
   env:
     <<: *defaults_env
     ADMIN_BASE_URL: https://notify-((stg)).apps.y.cld.gov.au
-    API_HOST_NAME: https://notify-api-((stg).apps.y.cld.gov.au
+    API_HOST_NAME: https://notify-api-((stg)).apps.y.cld.gov.au
