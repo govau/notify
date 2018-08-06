@@ -15,6 +15,9 @@ defaults: &defaults
 applications:
 - name: notify
   <<: *defaults
+  routes:
+    - route: notify.gov.au
+    - route: notify.apps.b.cld.gov.au
   env:
     <<: *defaults_env
     ADMIN_BASE_URL: https://notify.apps.b.cld.gov.au/
