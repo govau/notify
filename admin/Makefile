@@ -76,13 +76,13 @@ build-linux-wheels: pipenv-requirements.txt native-vendor
 		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
 
 
-manifest-%.yml:
+manifest-vars-%.yml:
 	echo "stg: $*" > $@
 
 deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
-deploy-dev: manifest-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
+deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 .PHONY: help test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
