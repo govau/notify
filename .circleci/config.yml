@@ -61,8 +61,8 @@ jobs:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make -C admin setup
-      - run: make -C admin vendor
+      - run: make admin.setup
+      - run: make admin.vendor
       - persist_to_workspace:
           root: .
           paths:
@@ -72,24 +72,24 @@ jobs:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make -C admin setup-dev
+      - run: make admin.setup-dev
       - run: echo 're-enable tests here'
-      - run: echo 'make -C admin test'
+      - run: echo 'make admin.test'
 
   test-api:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make -C api setup-dev
+      - run: make api.setup-dev
       - run: echo 're-enable tests here'
-      - run: echo 'make -C api test'
+      - run: echo 'make api.test'
 
   build-api:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make -C api setup
-      - run: make -C api vendor
+      - run: make api.setup
+      - run: make api.vendor
       - persist_to_workspace:
           root: .
           paths:
@@ -101,7 +101,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
-      - run: make -C admin deploy-dev
+      - run: make admin.deploy-dev
 
   deploy-dev-api:
     <<: *deploy_image
@@ -109,7 +109,8 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
-      - run: make -C api deploy-dev
+      - run: make create-service-psql
+      - run: make api.deploy-dev
 
   deploy-dev-celery:
     <<: *deploy_image
@@ -117,7 +118,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
-      - run: make -C api deploy-dev-celery
+      - run: make api.deploy-dev-celery
 
   deploy-prod-admin:
     <<: *deploy_image
@@ -125,7 +126,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login_prod
-      - run: make -C admin deploy
+      - run: make admin.deploy
 
   deploy-prod-api:
     <<: *deploy_image
@@ -133,7 +134,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login_prod
-      - run: make -C api deploy
+      - run: make api.deploy
 
   deploy-prod-celery:
     <<: *deploy_image
@@ -141,7 +142,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login_prod
-      - run: make -C api deploy-celery
+      - run: make api.deploy-celery
 
 
 workflows:

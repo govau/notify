@@ -17,4 +17,4 @@ applications:
   <<: *defaults
   env:
     <<: *defaults_env
-    ADMIN_BASE_URL: https://notify.apps.y.cld.gov.au
+    ADMIN_BASE_URL: https://notify-((stg)).apps.y.cld.gov.au
