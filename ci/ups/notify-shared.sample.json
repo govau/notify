@@ -1,8 +1,6 @@
 {
   "NOTIFY_ENVIRONMENT": "",
-  "ADMIN_BASE_URL": "",
   "ADMIN_CLIENT_SECRET": "",
-  "API_HOST_NAME": "",
   "DANGEROUS_SALT": "",
   "ROUTE_SECRET_KEY_1": "",
   "ROUTE_SECRET_KEY_2": "",
