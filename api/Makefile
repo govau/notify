@@ -82,11 +82,15 @@ requirements.txt: pipenv-requirements.txt
 run-production: setup-db ## Apply migrations and run production server
 	$(MAKE) run-gunicorn
 
+
+manifest-vars-%.yml:
+	echo "stg: $*" > $@
+
 deploy: vendor requirements.txt ## Deploy prod application
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
-deploy-dev: vendor requirements.txt
-	$(CF) push $(APP) -f manifest-dev.yml
+deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
+	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 deploy-celery:
 	APP=notify-celery $(MAKE) deploy
