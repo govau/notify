@@ -1,0 +1,32 @@
+= form_for [:admin, @service] do |f|
+  = f.error_messages
+  .fieldSet.u-margin-2x
+    .row
+      .col.col--10
+        %dl.fieldSet__field.u-margin
+          %dt.fieldSet__label= f.label :name
+          %dd.fieldSet__input= f.text_field :name, :class => 'textInput', :autofocus => @service.new_record?, :required => true
+      .col.col--10
+        %dl.fieldSet__field.u-margin
+          %dt.fieldSet__label= f.label :permalink
+          %dd.fieldSet__input= f.text_field :permalink, :class => 'textInput', :required => true
+    %dl.fieldSet__field.u-margin
+      %dt.fieldSet__label= f.label :description
+      %dd.fieldSet__input= f.text_area :description, :class => 'textInput'
+    %dl.fieldSet__field.u-margin
+      %dt.fieldSet__label= f.label :status_id, "Current Status"
+      %dd.fieldSet__input
+        .fieldSet__selectContainer
+          = f.collection_select :status_id, ServiceStatus.all, :id, :name
+    - if ServiceGroup.count > 0
+      %dl.fieldSet__field.u-margin
+        %dt.fieldSet__label= f.label :group_id, "Service Group"
+        %dd.fieldSet__input
+          .fieldSet__selectContainer
+            = f.collection_select :group_id, ServiceGroup.all, :id, :name, :include_blank => true
+
+  .formButtons
+    - unless @service.new_record?
+      .formButtons__secondary= link_to "Delete Service", [:admin, @service], :class => 'button button--grey button--solid', :method => :delete, :data => {:confirm => "Are you sure you wish to delete #{@service.name}?"}
+    = f.submit "Save Service", :class => 'button button--solid'
+    = link_to "Cancel", admin_services_path, :class => 'button button--lightGrey'

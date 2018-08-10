@@ -60,6 +60,7 @@ jobs:
             - utils
             - api
             - admin
+            - status
             - ci
 
   build-admin:
@@ -158,6 +159,15 @@ jobs:
       - *cf_login_prod
       - run: make api.deploy-celery
 
+  deploy-statuspage:
+    docker:
+      - image: circleci/ruby:2.3-node
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make status.deploy
+
 
 workflows:
   version: 2
@@ -221,3 +231,7 @@ workflows:
           <<: *master_branch
           requires:
             - unlock-prod-deploy
+
+      - deploy-statuspage:
+          requires:
+            - setup

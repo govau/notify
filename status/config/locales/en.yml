@@ -1,0 +1,34 @@
+en:
+  banana: asd
+  maintenance_statuses:
+    active: In Progress
+    closed: Finished
+    upcoming: Upcoming
+
+  service_status_types:
+    ok: OK - everything is working as it should be
+    minor: Minor Issue - there are some issues but not affecting the whole service
+    major: Major Issues - a complete service outage affecting all users
+    maintenance: Maintenance - the service is currently undergoing planned maintenance
+
+  email_templates:
+    subscribed:
+      name: Subscription Confirmation Message
+      default_subject: "Confirm your subscription to {{site.title}}"
+    new_issue:
+      name: New issue is posted
+      default_subject: "[New Issue] {{issue.title}} on {{site.title}}"
+    new_issue_update:
+      name: Issue is updated
+      default_subject: "[Updated Issue] {{issue.title}} on {{site.title}}"
+    new_maintenance:
+      name: New maintenance session is posted
+      default_subject: "[Maintenance] {{maintenance.title}} on {{site.title}}"
+    new_maintenance_update:
+      name: Maintenance session is updated
+      default_subject: "[Maintenance Update] {{maintenance.title}} on {{site.title}}"
+
+  activerecord:
+    attributes:
+      maintenance:
+        length_in_minutes: Session length

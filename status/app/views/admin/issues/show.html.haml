@@ -1,0 +1,73 @@
+- @active_nav_item = :issues
+= content_for :page_header do
+  .pageHeader__button.buttonSet--onRight
+    = link_to "Edit Details", [:edit, :admin, @issue], :class => 'button button--small'
+    = link_to "Back", admin_issues_path, :class => 'button button--lightGrey button--small'
+  %h1.pageHeader__heading= @page_title = "Issue ##{@issue.id}"
+
+.u-margin
+  %dl.definition
+    %dt Description
+    %dd= @issue.title
+  %dl.definition.u-margin-top
+    %dt State
+    %dd= @issue.state.humanize
+
+  - unless @issue.services.empty?
+    %dl.definition.u-margin-top
+      %dt Service Status
+      %dd= service_status_tag @issue.service_status
+    %dl.definition.u-margin-top
+      %dt Affected Services
+      %dd
+        %ul.standardList.standardList--double
+          - for service in @issue.services
+            %li= service.name
+
+.box.box--white.u-margin-top-2x
+  = form_for [:admin, @issue, @update] do |f|
+    .fieldSet
+      %dl.fieldSet__field.u-margin
+        %dt.fieldSet__label= f.label :text, "Post an update"
+        %dd.fieldSet__field= f.text_area :text, :class => 'textInput', :placeholder => "Enter the text you wish to post here..."
+      %dl.fieldSet__field.u-margin
+        %dt.fieldSet__label= f.label :state, "Current State"
+        %dd.fieldSet__field
+          = render 'state_selection', :f => f, :field_name => :state, :class_name => 'issueStateSelection--small'
+
+      .row
+        .col.col--10
+          %dl.fieldSet__field.u-margin
+            %dt.fieldSet__label= f.label :service_status_id, "Update service statuses to..."
+            %dd.fieldSet__input
+              .fieldSet__selectContainer= f.collection_select :service_status_id, ServiceStatus.for_issues.sort_by_type, :id, :name, :include_blank => "Don't change service statuses"
+        .col.col--10
+          - if @issue.notify? && site.allow_subscriptions?
+            %dl.fieldSet__field.u-margin
+              %dt.fieldSet__label= f.label :notify, "Notify subscribers when posted?"
+              %dd.fieldSet__input
+                .fieldSet__checkbox.fieldSet__selectContainer
+                  = f.check_box :notify
+                  = f.label :notify, "Notify #{pluralize Subscriber.verified.count, 'subscriber'}"
+
+      %p.u-align-right= f.submit "Post Update", :class => 'button button--solid'
+
+  .box__footer
+    %ul.issueUpdates
+      - if @updates.empty?
+        .noDataArea There are no updates for this issue.
+      - else
+        - for update in @updates
+          %li.issueUpdates__item
+            %p.issueUpdates__text
+              %b= update.state.humanize
+              &mdash;
+              = update.text
+            - if update.service_status
+              %p.issueUpdates__status
+                Set service status to #{service_status_tag update.service_status}
+            %p.issueUpdates__meta
+              Posted #{time_tag update.created_at}
+              - if update.user
+                by #{update.user.name}
+              = link_to "Edit", [:edit, :admin, @issue, update], :class => 'u-underline issueUpdates__edit'

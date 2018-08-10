@@ -1,0 +1,12 @@
+!!!
+%html.loginPage
+  %head
+    %title Staytus
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400,600,700,300|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+    = javascript_include_tag 'admin'
+    = stylesheet_link_tag 'admin'
+    = csrf_meta_tags
+    %link{:href => image_path('favicon.png'), :rel => 'shortcut icon', :type => 'image/png'}
+  %body
+    = display_flash
+    = yield
