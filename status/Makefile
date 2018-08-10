@@ -40,4 +40,7 @@ build:
 deploy:
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
+create-service-mysql:
+	-$(CF) create-service mysql shared notify-mysql-status
+
 .PHONY: setup run deploy create-service-mysql setup-db migrate-db help

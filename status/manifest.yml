@@ -4,7 +4,7 @@ defaults: &defaults
   instances: 1
   memory: 1G
   services:
-    - notify-mysql-staytus
+    - notify-mysql-status
   env:
     RUNNER: ''
     PRODUCTION: true
