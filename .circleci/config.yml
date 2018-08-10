@@ -233,5 +233,6 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-statuspage:
+          <<: *master_branch
           requires:
-            - setup
+            - unlock-prod-deploy
