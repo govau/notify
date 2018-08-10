@@ -9,6 +9,10 @@ references:
     docker:
       - image: circleci/python:3.6.5-node
 
+  undeploy_image: &undeploy_image
+    docker:
+      - image: circleci/python:3.7-node
+
   attach_workspace: &attach_workspace
     attach_workspace:
       at: .
@@ -56,6 +60,7 @@ jobs:
             - utils
             - api
             - admin
+            - ci
 
   build-admin:
     <<: *python_node_image
@@ -95,6 +100,14 @@ jobs:
           paths:
             - api
 
+  cleanup-old-deploys:
+    <<: *undeploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make -C ci undeploy-feature-branches
+
   deploy-dev-admin:
     <<: *deploy_image
     steps:
@@ -118,6 +131,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
+      - run: make create-service-psql
       - run: make api.deploy-dev-celery
 
   deploy-prod-admin:
@@ -180,6 +194,10 @@ workflows:
           requires:
             - build-api
             - test-api
+
+      - cleanup-old-deploys:
+          requires:
+            - setup
 
       - unlock-prod-deploy:
           <<: *master_branch

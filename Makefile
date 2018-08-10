@@ -24,8 +24,8 @@ endif
 
 # export stg variable only if we are on a feature branch
 ifneq ($(BRANCH), $(FEATURE))
-	export STG    ?= $(FEATURE)
-	PSQL_SVC_NAME ?= notify-psql-$(STG)
+	export STG    ?= f-$(FEATURE)
+	PSQL_SVC_NAME ?= notify-psql-f-$(FEATURE)
 endif
 
 TARGETS      = setup deploy
