@@ -1,0 +1,17 @@
+---
+defaults: &defaults
+  buildpack: ruby_buildpack
+  instances: 1
+  memory: 1G
+  services:
+    - notify-mysql-status
+  env:
+    RUNNER: ''
+    PRODUCTION: true
+
+applications:
+- name: notify-status
+  <<: *defaults
+  routes:
+    - route: status.notify.gov.au
+    - route: notify-status.apps.b.cld.gov.au

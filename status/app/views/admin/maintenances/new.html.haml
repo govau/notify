@@ -1,0 +1,8 @@
+- @active_nav_item = :maintenance
+= content_for :page_header do
+  %h1.pageHeader__heading.u-margin= @page_title = 'Create a new maintenance session'
+  %p.u-intro
+    A maintenance session is a period of time when you are carrying out activities
+    on your infrastructure which may have an impact on your service.
+
+= render 'form'

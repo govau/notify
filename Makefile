@@ -28,7 +28,6 @@ ifneq ($(BRANCH), $(FEATURE))
 	PSQL_SVC_NAME ?= notify-psql-f-$(FEATURE)
 endif
 
-TARGETS      = setup deploy
 SERVICES     = notify-shared notify-api notify-admin aws smtp telstra
 SVC_APPLIED  = $(SERVICES:%=apply-service-%)
 SVC_CREATED  = $(SERVICES:%=create-service-%)
@@ -59,7 +58,7 @@ cf-login-prod:
 	  CF_SPACE=notify\
 	  cf-login
 
-DIRS        = api admin
+DIRS        = api admin status
 TARGETS     = setup setup-dev vendor clean deploy deploy-dev
 API_TARGETS = deploy-celery deploy-dev-celery
 ANY_TARGETS = $(TARGETS) $(API_TARGETS)

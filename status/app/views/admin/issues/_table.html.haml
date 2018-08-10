@@ -1,0 +1,21 @@
+- if issues.empty?
+  .noDataArea
+    There are no issues to display.
+- else
+  %table.dataTable
+    %thead
+      %tr
+        %td Title
+        %td Last Updated
+        %td Status
+        %td Services
+    %tbody
+      - for issue in issues
+        %tr
+          %td= link_to issue.title, [:admin, issue], :class => 'u-underline'
+          %td= time_tag issue.updated_at
+          %td= service_status_tag issue.service_status
+          %td
+            %ul
+              - for service in issue.services
+                %li= service.name
