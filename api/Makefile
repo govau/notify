@@ -16,6 +16,13 @@ GIT_COMMIT ?= $(shell git rev-parse HEAD)
 BUILD_NUMBER ?= 0
 BUILD_URL ?=
 
+APP_DIRS  = $(shell find tests/app -type d -d 1)
+APP_TESTS = $(APP_DIRS:tests/app/%=test-%)
+
+DAO_DIRS  = $(shell find tests/app/dao -type f -d 1)
+DAO_TESTS = $(DAO_DIRS:tests/app/dao/%=test-dao-%)
+
+
 # A help target including self-documenting targets (see the awk statement)
 define HELP_TEXT
 Usage: make [TARGET]... [MAKEVAR1=SOMETHING]...
@@ -48,9 +55,23 @@ setup-dev: ## Setup everything in dev mode for testing
 setup-db: version-file ## Run database migrations
 	$(RUNNER) flask db upgrade
 
-test: version-file ## Run linter and tests
+
+test: lint tests
+
+lint:
 	$(RUNNER) flake8 .
-	$(RUNNER) py.test --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 -v --maxfail=10
+
+tests: version-file
+	$(RUNNER) py.test -n4 tests
+
+$(APP_TESTS): test-%: version-file
+	$(RUNNER) py.test -n4 tests/app/$*
+
+$(DAO_TESTS): test-dao-%: version-file
+	$(RUNNER) py.test -n4 tests/app/dao/$*
+
+test-roots: version-file
+	$(RUNNER) py.test -n4 tests/app/*.py
 
 run: version-file ## Run a development server (reloading)
 	$(RUNNER) flask run -p $(PORT)
@@ -103,4 +124,10 @@ create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration messa
 create-migration: ## Create an appropriately ordered migration stub
 	$(RUNNER) flask db revision --rev-id $(MIGRATION_NUMBER) --message "$(MIGRATION_MESSAGE)"
 
-.PHONY: setup setup-db run run-celery deploy deploy-api deploy-celery run-production create-migration help
+.PHONY:
+	setup setup-dev setup-db \
+	test lint tests $(APP_TESTS) $(DAO_TESTS) test-roots \
+	run run-celery \
+	deploy deploy-api deploy-celery \
+	run-production \
+	create-migration help
