@@ -173,49 +173,6 @@
 
       {% endcall %}
 
-      {#
-      {% call mapping_table(
-        caption='Letters',
-        field_headings=['Label', 'Value', 'Action'],
-        field_headings_visible=False,
-        caption_visible=True
-      ) %}
-
-        {% call row() %}
-          {{ text_field('Send letters') }}
-          {{ boolean_field('letter' in current_service.permissions) }}
-          {{ edit_field(
-              'Change',
-              url_for('.service_set_letters',
-              service_id=current_service.id),
-              permissions=['manage_service']
-          )
-          }}
-        {% endcall %}
-
-        {% if 'letter' in current_service.permissions %}
-          {% call row() %}
-            {{ text_field('Sender addresses') }}
-            {% call field(status='default' if default_letter_contact_block == "Not set" else '') %}
-              {{ default_letter_contact_block | string | nl2br | safe if default_letter_contact_block else 'Not set'}}
-              {% if letter_contact_details_count > 1 %}
-                <div class="hint">
-                  {{ '…and %d more' | format(letter_contact_details_count - 1) }}
-                </div>
-              {% endif %}
-            {% endcall %}
-            {{ edit_field(
-                'Manage' if letter_contact_details_count else 'Change',
-                url_for('.service_letter_contact_details',
-                service_id=current_service.id),
-                permissions=['manage_service','manage_api_keys']
-            )
-            }}
-          {% endcall %}
-        {% endif %}
-
-      {% endcall %}
-      #}
     </div>
 
     {% if current_service.restricted %}
@@ -292,13 +249,6 @@
           {% endcall %}
           {{ edit_field('Change', url_for('.service_set_email_branding', service_id=current_service.id)) }}
         {% endcall %}
-        {#
-        {% call row() %}
-          {{ text_field('Letter branding')}}
-          {{ text_field(letter_branding) }}
-          {{ edit_field('Change', url_for('.set_letter_branding', service_id=current_service.id)) }}
-        {% endcall %}
-        #}
       {% endcall %}
 
       <ul>
@@ -331,15 +281,6 @@
           {% endif %}
           </li>
         {% endif %}
-        {#
-        {% if 'letter' in current_service.permissions %}
-          <li class="bottom-gutter">
-            <a href="{{ url_for('.service_switch_can_send_precompiled_letter', service_id=current_service.id) }}" class="button">
-              {{ 'Stop sending precompiled letters' if 'precompiled_letter' in current_service.permissions else 'Allow to send precompiled letters' }}
-            </a>
-          </li>
-        {% endif %}
-        #}
         <li class="bottom-gutter">
           <a href="{{ url_for('.service_switch_email_auth', service_id=current_service.id) }}" class="button">
             {{ 'Stop editing user auth' if 'email_auth' in current_service.permissions else 'Allow editing user auth' }}
