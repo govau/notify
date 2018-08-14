@@ -1,0 +1,17 @@
+- @active_nav_item = :issues
+- content_for :page_header do
+  .pageHeader__button= link_to "Post a new issue", new_admin_issue_path, :class => 'button button--small button--green button--solid'
+  %h1.pageHeader__heading.u-margin= @page_title = 'Outstanding Issues'
+  %p.u-intro
+    If anything goes wrong and it wasn't planned, it's an issue. You can add issues
+    which occur straight into here and they'll be published on your status site
+    straight away.
+
+- if @ongoing_issues.empty?
+  .noDataArea.noDataArea--large
+    %p.u-margin Well that's just brilliant - you've got no ongoing issues!
+    %p.u-subText= link_to "Show resolved issues", resolved_admin_issues_path, :class => 'u-underline'
+
+- else
+  = render 'issue_boxes', :issues => @ongoing_issues
+  %p.u-align-right= link_to "Show resolved issues", resolved_admin_issues_path, :class => 'button button--lightGrey button--small'

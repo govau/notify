@@ -9,6 +9,29 @@ from app.notifications.process_client_response import validate_callback_data, pr
 sms_callback_blueprint = Blueprint("sms_callback", __name__, url_prefix="/notifications/sms")
 register_errors(sms_callback_blueprint)
 
+@sms_callback_blueprint.route('/telstra/<notification_id>', methods=['POST'])
+def process_telstra_response(notification_id):
+    client_name = 'Telstra'
+    data = json.loads(request.data)
+    errors = validate_callback_data(data=data,
+                                    fields=['messageId', 'deliveryStatus'],
+                                    client_name=client_name)
+    if errors:
+        raise InvalidRequest(errors, status_code=400)
+
+    success, errors = process_sms_client_response(status=str(data.get('deliveryStatus')),
+                                                  provider_reference=notification_id,
+                                                  client_name=client_name)
+
+    redacted_data = data.copy()
+    redacted_data.pop("to")
+    current_app.logger.debug(
+        "Full delivery response from {} for notification: {}\n{}".format(client_name, notification_id, redacted_data))
+    if errors:
+        raise InvalidRequest(errors, status_code=400)
+    else:
+        return jsonify(result='success', message=success), 200
+
 
 @sms_callback_blueprint.route('/mmg', methods=['POST'])
 def process_mmg_response():
@@ -24,11 +47,11 @@ def process_mmg_response():
                                                   provider_reference=data.get('CID'),
                                                   client_name=client_name)
 
-    safe_to_log = data.copy()
-    safe_to_log.pop("MSISDN")
+    redacted_data = data.copy()
+    redacted_data.pop("MSISDN")
     current_app.logger.debug(
         "Full delivery response from {} for notification: {}\n{}".format(client_name, request.form.get('CID'),
-                                                                         safe_to_log))
+                                                                         redacted_data))
     if errors:
         raise InvalidRequest(errors, status_code=400)
     else:
@@ -43,11 +66,11 @@ def process_firetext_response():
                                     client_name=client_name)
     if errors:
         raise InvalidRequest(errors, status_code=400)
-    safe_to_log = dict(request.form).copy()
-    safe_to_log.pop('mobile')
+    redacted_data = dict(request.form).copy()
+    redacted_data.pop('mobile')
     current_app.logger.debug(
         "Full delivery response from {} for notification: {}\n{}".format(client_name, request.form.get('reference'),
-                                                                         safe_to_log))
+                                                                         redacted_data))
     success, errors = process_sms_client_response(status=request.form.get('status'),
                                                   provider_reference=request.form.get('reference'),
                                                   client_name=client_name)

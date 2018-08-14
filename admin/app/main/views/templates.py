@@ -108,7 +108,8 @@ def choose_template(service_id, template_type='all'):
             ('All', 'all'),
             ('Text message', 'sms'),
             ('Email', 'email'),
-            ('Letter', 'letter') if 'letter' in current_service['permissions'] else None,
+            # TODO: disabled letters
+            # ('Letter', 'letter') if 'letter' in current_service['permissions'] else None,
         ])
     ]
 

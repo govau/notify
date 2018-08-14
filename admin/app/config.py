@@ -25,12 +25,16 @@ class Config(object):
     DEBUG = False
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')
 
+    CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME', 'dta-notify-csv-upload-20180712070203208700000001')
+
     DESKPRO_DEPT_ID = 5
     DESKPRO_ASSIGNED_AGENT_TEAM_ID = 5
 
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
     ASSETS_DEBUG = False
-    AWS_REGION = 'eu-west-1'
+
+    AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-2')
+
     DEFAULT_SERVICE_LIMIT = 50
     DEFAULT_FREE_SMS_FRAGMENT_LIMITS = {
         'central': 250000,
@@ -42,7 +46,7 @@ class Config(object):
     EMAIL_EXPIRY_SECONDS = 3600  # 1 hour
     INVITATION_EXPIRY_SECONDS = 3600 * 24 * 2  # 2 days - also set on api
     EMAIL_2FA_EXPIRY_SECONDS = 1800  # 30 Minutes
-    HEADER_COLOUR = '#FFBF47'  # $yellow
+    HEADER_COLOUR = '#9263de'  # DTA design system purple
     HTTP_PROTOCOL = 'http'
     MAX_FAILED_LOGIN_COUNT = 10
     NOTIFY_APP_NAME = 'admin'
@@ -58,7 +62,7 @@ class Config(object):
     SMS_CHAR_COUNT_LIMIT = 459
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None
-    CSV_UPLOAD_BUCKET_NAME = 'local-notifications-csv-upload'
+
     DESKPRO_PERSON_EMAIL = 'donotreply@notifications.service.gov.uk'
     ACTIVITY_STATS_LIMIT_DAYS = 7
     TEST_MESSAGE_FILENAME = 'Report'
@@ -80,7 +84,6 @@ class Development(Config):
     SESSION_COOKIE_SECURE = False
     SESSION_PROTECTION = None
     STATSD_ENABLED = False
-    CSV_UPLOAD_BUCKET_NAME = 'development-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-tools'
     MOU_BUCKET_NAME = 'notify.tools-mou'
 
@@ -97,7 +100,6 @@ class Test(Development):
     TESTING = True
     STATSD_ENABLED = False
     WTF_CSRF_ENABLED = False
-    CSV_UPLOAD_BUCKET_NAME = 'test-notifications-csv-upload'
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-test'
     MOU_BUCKET_NAME = 'test-mou'
     NOTIFY_ENVIRONMENT = 'test'
@@ -108,8 +110,7 @@ class Test(Development):
 class Preview(Config):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
-    STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'preview-notifications-csv-upload'
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-preview'
     MOU_BUCKET_NAME = 'notify.works-mou'
     NOTIFY_ENVIRONMENT = 'preview'
@@ -120,8 +121,7 @@ class Staging(Config):
     SHOW_STYLEGUIDE = False
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#6F72AF'  # $mauve
-    STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'staging-notify-csv-upload'
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-staging'
     MOU_BUCKET_NAME = 'staging-notify.works-mou'
     NOTIFY_ENVIRONMENT = 'staging'
@@ -130,10 +130,9 @@ class Staging(Config):
 
 class Live(Config):
     SHOW_STYLEGUIDE = False
-    HEADER_COLOUR = '#005EA5'  # $govuk-blue
+    HEADER_COLOUR = '#313131'  # DTA dark gray
     HTTP_PROTOCOL = 'https'
-    STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'live-notifications-csv-upload'
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'public-logos-production'
     MOU_BUCKET_NAME = 'notifications.service.gov.uk-mou'
     NOTIFY_ENVIRONMENT = 'live'
@@ -151,8 +150,7 @@ class CloudFoundryConfig(Config):
 class Sandbox(CloudFoundryConfig):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
-    STATSD_ENABLED = True
-    CSV_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-csv-upload'
+    STATSD_ENABLED = False
     LOGO_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-logo-upload'
     NOTIFY_ENVIRONMENT = 'sandbox'
 

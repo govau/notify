@@ -1,6 +1,22 @@
 version: 2
 
 references:
+  python_node_image: &python_node_image
+    docker:
+      - image: circleci/python:3.6.5-node
+
+  deploy_image: &deploy_image
+    docker:
+      - image: circleci/python:3.6.5-node
+
+  undeploy_image: &undeploy_image
+    docker:
+      - image: circleci/python:3.7-node
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: .
+
   cf_install: &cf_install
     run:
       command: |
@@ -14,25 +30,18 @@ references:
 
   cf_login: &cf_login
     run:
-      command: |
-        CF_USERNAME="${CF_Y_USER}" \
-        CF_PASSWORD="${CF_Y_PASSWORD}" \
-          make cf-login
+      command: make cf-login
 
-  deploy_admin: &deploy_admin
-    docker:
-      - image: circleci/python:3.6.5-node
-    steps:
-        - *cf_install
-        - attach_workspace:
-            at: .
-        - *cf_login
-        - run: make -C admin deploy
+  cf_login_prod: &cf_login_prod
+    run:
+      command: make cf-login-prod
+
   master_branch: &master_branch
     filters:
       branches:
         only:
           - master
+
   not_master_branch: &not_master_branch
     filters:
       branches:
@@ -41,77 +50,124 @@ references:
 
 jobs:
   setup:
-    docker:
-      - image: circleci/python:3.6.5-node
+    <<: *python_node_image
     steps:
-        - checkout
-        - persist_to_workspace:
-            root: .
-            paths:
-              - Makefile
-              - utils
-              - api
-              - admin
+      - checkout
+      - persist_to_workspace:
+          root: .
+          paths:
+            - Makefile
+            - utils
+            - api
+            - admin
+            - status
+            - ci
+
   build-admin:
-    docker:
-      - image: circleci/python:3.6.5-node
+    <<: *python_node_image
     steps:
-        - attach_workspace:
-            at: .
-        - run: make -C admin setup
-        - run: make -C admin vendor
-        - persist_to_workspace:
-            root: .
-            paths:
-              - admin
+      - *attach_workspace
+      - run: make admin.setup
+      - run: make admin.vendor
+      - persist_to_workspace:
+          root: .
+          paths:
+            - admin
+
   test-admin:
-    docker:
-      - image: circleci/python:3.6.5-node
+    <<: *python_node_image
     steps:
-        - attach_workspace:
-            at: .
-        - run: make -C admin setup-dev
-        - run: make -C admin test
+      - *attach_workspace
+      - run: make admin.setup-dev
+      - run: echo 're-enable tests here'
+      - run: echo 'make admin.test'
+
+  test-api:
+    <<: *python_node_image
+    steps:
+      - *attach_workspace
+      - run: make api.setup-dev
+      - run: echo 're-enable tests here'
+      - run: echo 'make api.test'
+
   build-api:
-    docker:
-      - image: circleci/python:3.6.5-node
+    <<: *python_node_image
     steps:
-        - attach_workspace:
-            at: .
-        - run: make -C api setup
-        - run: make -C api vendor
-        - persist_to_workspace:
-            root: .
-            paths:
-              - api
+      - *attach_workspace
+      - run: make api.setup
+      - run: make api.vendor
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api
+
+  cleanup-old-deploys:
+    <<: *undeploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make -C ci undeploy-feature-branches
+
   deploy-dev-admin:
-    environment:
-      - APP: notify-dev
-    <<: *deploy_admin
-  deploy-notify:
-    environment:
-      - APP: notify
-    <<: *deploy_admin
-  deploy-admin:
-    <<: *deploy_admin
-  deploy-api:
-    docker:
-      - image: circleci/python:3.6.5-node
+    <<: *deploy_image
     steps:
-        - *cf_install
-        - attach_workspace:
-            at: .
-        - *cf_login
-        - run: make -C api deploy-api
-  deploy-celery:
-    docker:
-      - image: circleci/python:3.6.5-node
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make admin.deploy-dev
+
+  deploy-dev-api:
+    <<: *deploy_image
     steps:
-        - *cf_install
-        - attach_workspace:
-            at: .
-        - *cf_login
-        - run: make -C api deploy-celery
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make create-service-psql
+      - run: make api.deploy-dev
+
+  deploy-dev-celery:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make create-service-psql
+      - run: make api.deploy-dev-celery
+
+  deploy-prod-admin:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make admin.deploy
+
+  deploy-prod-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy
+
+  deploy-prod-celery:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery
+
+  deploy-statuspage:
+    docker:
+      - image: circleci/ruby:2.3-node
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make status.deploy
+
 
 workflows:
   version: 2
@@ -121,34 +177,62 @@ workflows:
       - build-admin:
           requires:
             - setup
+
       - build-api:
           requires:
             - setup
+
       - test-admin:
           requires:
             - setup
+
+      - test-api:
+          requires:
+            - setup
+
       - deploy-dev-admin:
-          <<: *not_master_branch
           requires:
             - build-admin
-      - deploy-admin:
-          <<: *master_branch
-          requires:
-            - build-admin
-      - deploy-api:
-          <<: *master_branch
+            - test-admin
+
+      - deploy-dev-api:
           requires:
             - build-api
-      - deploy-celery:
-          <<: *master_branch
+            - test-api
+
+      - deploy-dev-celery:
           requires:
             - build-api
+            - test-api
+
+      - cleanup-old-deploys:
+          requires:
+            - setup
+
       - unlock-prod-deploy:
+          <<: *master_branch
           type: approval
           requires:
-            - deploy-admin
-            - deploy-api
-            - deploy-celery
-      - deploy-notify:
+            - deploy-dev-admin
+            - deploy-dev-api
+            - deploy-dev-celery
+
+      - deploy-prod-admin:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-api:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-statuspage:
+          <<: *master_branch
           requires:
             - unlock-prod-deploy

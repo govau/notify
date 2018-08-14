@@ -1,0 +1,17 @@
+- @active_nav_item = :settings
+= content_for :page_header do
+  .pageHeader__button= link_to "Add New Service", new_admin_service_path, :class => 'button button--green button--small button--solid'
+  .pageHeader__heading= @page_title = 'Services'
+
+%table.dataTable.u-margin
+  %thead
+    %tr
+      %td Name
+      %td Status
+      %td
+  %tbody
+    - for service in @services
+      %tr
+        %td= link_to service.name, [:edit, :admin, service], :class => 'u-underline'
+        %td= service_status_tag service, :link_maintenance => :admin
+        %td.u-align-right= link_to "Edit", [:edit, :admin, service], :class => 'button button--small'

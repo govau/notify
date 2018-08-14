@@ -128,7 +128,7 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
     notification = Notification.query.filter_by(id=db_notification.id).one()
     assert notification.status == 'sending'
     assert notification.sent_at <= datetime.utcnow()
-    assert notification.sent_by == 'ses'
+    assert notification.sent_by == 'smtp'
     assert notification.personalisation == {"name": "Jo"}
 
 
@@ -363,7 +363,7 @@ def test_send_email_to_provider_should_call_research_mode_task_response_task_if_
     assert persisted_notification.status == 'sending'
     assert persisted_notification.sent_at <= datetime.utcnow()
     assert persisted_notification.created_at <= datetime.utcnow()
-    assert persisted_notification.sent_by == 'ses'
+    assert persisted_notification.sent_by == 'smtp'
     assert persisted_notification.reference == str(reference)
     assert persisted_notification.billable_units == 0
 

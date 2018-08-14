@@ -1,0 +1,21 @@
+---
+defaults: &defaults
+  buildpack: python_buildpack
+  instances: 1
+  memory: 1G
+  services:
+    - notify-shared
+    - notify-admin
+    - aws
+  env: &defaults_env
+    RUNNER: './vcapenvwrapper --root notify-shared --root notify-admin --root aws'
+    NOTIFY_ENVIRONMENT: production
+  command: make run-gunicorn
+
+applications:
+- name: notify
+  <<: *defaults
+  env:
+    <<: *defaults_env
+    ADMIN_BASE_URL: https://notify-((stg)).apps.y.cld.gov.au
+    API_HOST_NAME: https://notify-api-((stg)).apps.y.cld.gov.au
