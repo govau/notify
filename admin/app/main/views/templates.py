@@ -179,9 +179,7 @@ def view_template_version_preview(service_id, template_id, version, filetype):
 @user_has_permissions('manage_templates')
 def add_template_by_type(service_id):
 
-    form = ChooseTemplateType(
-        include_letters='letter' in current_service['permissions']
-    )
+    form = ChooseTemplateType()
 
     if form.validate_on_submit():
 

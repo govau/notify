@@ -783,7 +783,6 @@ class ChooseTemplateType(StripWhitespaceForm):
         self.template_type.choices = filter(None, [
             ('email', 'Email'),
             ('sms', 'Text message'),
-            ('letter', 'Letter') if include_letters else None
         ])
 
 
