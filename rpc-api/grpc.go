@@ -1,7 +1,5 @@
 package main
 
-//go:generate protoc --go_out=plugins=grpc:. defs/notify.proto
-
 import (
 	"bytes"
 	"context"
@@ -15,7 +13,7 @@ import (
 	"net/url"
 	"time"
 
-	notify "./defs"
+	notify "./notify"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	jose "gopkg.in/square/go-jose.v2"

@@ -1,4 +1,4 @@
-SRC    = src/index.js src/grpc.js
+SRC    = src/index.js
 YARN  ?= yarn
 NODE  ?= node
 
