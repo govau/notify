@@ -355,7 +355,7 @@ class Development(Config):
     NOTIFY_LOG_PATH = 'application.log'
     NOTIFICATION_QUEUE_PREFIX = 'development'
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/notification_api'
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/notification_api')
     REDIS_URL = 'redis://localhost:6379/0'
     BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
 
