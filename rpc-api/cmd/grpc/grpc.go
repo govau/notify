@@ -13,7 +13,7 @@ import (
 	"net/url"
 	"time"
 
-	notify "./notify"
+	"github.com/govau/notify/rpc-api/notify"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	jose "gopkg.in/square/go-jose.v2"
