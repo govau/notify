@@ -1,3 +1,6 @@
 */vendor
 */requirements.txt
 */pipenv-requirements.txt
+
+.idea/
+notify.iml
