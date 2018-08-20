@@ -1,23 +1,30 @@
-PROTOC?= protoc
-GO    ?= go
+PROTOC ?= protoc
+GO     ?= go
 
-PROTO  = ../proto
-SCHEMA = $(PROTO)/notify.proto
-SRC    = grpc.go $(SCHEMA)
+PROTO   = ../proto
+SCHEMA  = $(PROTO)/notify.proto
+SRC     = $(SCHEMA)
+CMDS    = grpc
 
 GENERATED = notify/notify.pb.go
+
+build: $(CMDS)
+
+setup:
+	@echo 'Install protoc through homebrew -- brew install protobuf'
 
 $(GENERATED): $(SCHEMA)
 	@mkdir -p $(@D)
 	$(PROTOC) -I $(PROTO) --go_out=plugins=grpc:notify $(SCHEMA)
 
-setup:
-	go get -u google.golang.org/grpc
-	go get -u gopkg.in/square/go-jose.v2
-	go get -u github.com/golang/protobuf/protoc-gen-go
-	@echo 'Install protoc through homebrew -- brew install protobuf'
+.SECONDEXPANSION:
+$(CMDS): %: $(SRC) $(GENERATED) $$(wildcard cmd/%/*.go)
+	$(GO) build ./cmd/$@
 
-run: $(SRC) $(GENERATED)
-	go run grpc.go
+$(CMDS:%=run-%): run-%: $(SRC) $(GENERATED)
+	$(GO) run cmd/$*/*.go
 
-.PHONY: setup run
+run:
+	$(MAKE) run-grpc
+
+.PHONY: setup $(CMDS:%=run-%) run
