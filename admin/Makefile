@@ -60,6 +60,8 @@ run-gunicorn: version-file ## Run a production server
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
+build: vendor
+
 vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 

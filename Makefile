@@ -59,7 +59,7 @@ cf-login-prod:
 	  cf-login
 
 DIRS        = api admin status rpc-api graphql-api
-TARGETS     = setup setup-dev vendor clean deploy deploy-dev
+TARGETS     = setup setup-dev build clean deploy deploy-dev
 API_TARGETS = deploy-celery deploy-dev-celery
 ANY_TARGETS = $(TARGETS) $(API_TARGETS)
 

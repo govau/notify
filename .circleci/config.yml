@@ -68,7 +68,7 @@ jobs:
     steps:
       - *attach_workspace
       - run: make admin.setup
-      - run: make admin.vendor
+      - run: make admin.build
       - persist_to_workspace:
           root: .
           paths:
@@ -95,7 +95,7 @@ jobs:
     steps:
       - *attach_workspace
       - run: make api.setup
-      - run: make api.vendor
+      - run: make api.build
       - persist_to_workspace:
           root: .
           paths:

@@ -24,7 +24,10 @@ $(CMDS): %: $(SRC) $(GENERATED) $$(wildcard cmd/%/*.go)
 $(CMDS:%=run-%): run-%: $(SRC) $(GENERATED)
 	$(GO) run cmd/$*/*.go
 
+clean:
+	-rm $(CMDS)
+
 run:
 	$(MAKE) run-grpc
 
-.PHONY: setup $(CMDS:%=run-%) run
+.PHONY: setup $(CMDS:%=run-%) run clean
