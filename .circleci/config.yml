@@ -62,6 +62,7 @@ jobs:
           paths:
             - Makefile
             - utils
+            - proto
             - api
             - graphql-api
             - rpc-api

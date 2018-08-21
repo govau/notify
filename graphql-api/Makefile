@@ -34,6 +34,7 @@ test:
 
 clean:
 	-rm -r proto
+	-rm manifest-vars-*.yml
 
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
