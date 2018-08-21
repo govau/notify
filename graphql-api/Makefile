@@ -7,6 +7,8 @@ CF      ?= cf
 APP     ?= notify-graphql-api
 STG     ?= dev
 
+build:
+
 yarn.lock node_modules: package.json
 	$(YARN)
 
