@@ -184,6 +184,14 @@ jobs:
       - *cf_login_prod
       - run: make api.deploy-celery
 
+  deploy-prod-graphql-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make graphql-api.dev
+
   deploy-statuspage:
     docker:
       - image: circleci/ruby:2.3-node
@@ -204,6 +212,10 @@ workflows:
             - setup
 
       - build-api:
+          requires:
+            - setup
+
+      - build-graphql-api:
           requires:
             - setup
 
@@ -257,6 +269,11 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-prod-celery:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-graphql-api:
           <<: *master_branch
           requires:
             - unlock-prod-deploy
