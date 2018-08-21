@@ -1,14 +1,22 @@
-SRC    = src/index.js
-YARN  ?= yarn
-NODE  ?= node
+MAIN     = src/index.js
+YARN    ?= yarn
+NODE    ?= node
+NODEMON ?= $(YARN) run nodemon
+RUNNER  ?= $(NODE)
 
-setup:
+yarn.lock node_modules: package.json
 	$(YARN)
 
-start:
-	ls $(SRC) | entr -rc $(MAKE) run
+setup: yarn.lock node_modules
 
 run:
-	$(NODE) src/index.js
+	$(RUNNER) $(MAIN)
 
-.PHONY: setup start run
+dev:
+	RUNNER="$(NODEMON)" $(MAKE) run
+
+test:
+
+clean:
+
+.PHONY: setup start run test clean

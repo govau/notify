@@ -13,6 +13,9 @@ build: $(CMDS)
 setup:
 	@echo 'Install protoc through homebrew -- brew install protobuf'
 
+test:
+	$(GO) test ./...
+
 $(GENERATED): $(SCHEMA)
 	@mkdir -p $(@D)
 	$(PROTOC) -I $(PROTO) --go_out=plugins=grpc:notify $(SCHEMA)
@@ -30,4 +33,4 @@ clean:
 run:
 	$(MAKE) run-grpc
 
-.PHONY: setup $(CMDS:%=run-%) run clean
+.PHONY: setup $(CMDS:%=run-%) run test clean
