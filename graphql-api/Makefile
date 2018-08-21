@@ -7,7 +7,17 @@ CF      ?= cf
 APP     ?= notify-graphql-api
 STG     ?= dev
 
-build:
+PROTO_SRC   = ../proto
+PROTO_DST   = proto
+SCHEMAS     = notify.proto
+
+build: $(SCHEMAS)
+
+$(SCHEMAS:%=$(PROTO_DST)/%): $(PROTO_DST)/%: $(PROTO_SRC)/%
+	@mkdir -p $(@D)
+	cp $< $@
+
+$(SCHEMAS): %: $(PROTO_DST)/%
 
 yarn.lock node_modules: package.json
 	$(YARN)
@@ -17,12 +27,13 @@ setup: yarn.lock node_modules
 run:
 	$(RUNNER) $(MAIN)
 
-dev:
+dev: build
 	RUNNER="$(NODEMON)" $(MAKE) run
 
 test:
 
 clean:
+	-rm -r proto
 
 manifest-vars-%.yml:
 	echo "stg: $*" > $@

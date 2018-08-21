@@ -1,6 +1,6 @@
 const { ApolloServer, gql } = require('apollo-server')
 const grpc = require('grpc')
-const notify = grpc.load('../proto/notify.proto')
+const notify = grpc.load({ root: __dirname, file: '../proto/notify.proto' })
 
 const client = new notify.Notify(
   'localhost:50051',
