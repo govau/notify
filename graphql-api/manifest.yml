@@ -1,0 +1,10 @@
+---
+defaults: &defaults
+  buildpack: nodejs_buildpack
+  instances: 1
+  memory: 1G
+  command: make run
+
+applications:
+- name: notify-graphql-api
+  <<: *defaults

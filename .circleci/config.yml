@@ -5,6 +5,10 @@ references:
     docker:
       - image: circleci/python:3.6.5-node
 
+  node_image: &node_image
+    docker:
+      - image: circleci/node:10
+
   deploy_image: &deploy_image
     docker:
       - image: circleci/python:3.6.5-node
@@ -59,6 +63,8 @@ jobs:
             - Makefile
             - utils
             - api
+            - graphql-api
+            - rpc-api
             - admin
             - status
             - ci
@@ -101,6 +107,17 @@ jobs:
           paths:
             - api
 
+  build-graphql-api:
+    <<: *node_image
+    steps:
+      - *attach_workspace
+      - run: make graphql-api.setup
+      - run: make graphql-api.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - graphql-api
+
   cleanup-old-deploys:
     <<: *undeploy_image
     steps:
@@ -134,6 +151,14 @@ jobs:
       - *cf_login
       - run: make create-service-psql
       - run: make api.deploy-dev-celery
+
+  deploy-dev-graphql-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make graphql-api.deploy-dev
 
   deploy-prod-admin:
     <<: *deploy_image
@@ -199,6 +224,10 @@ workflows:
           requires:
             - build-api
             - test-api
+
+      - deploy-dev-graphql-api:
+          requires:
+            - build-graphql-api
 
       - deploy-dev-celery:
           requires:

@@ -3,6 +3,9 @@ YARN    ?= yarn
 NODE    ?= node
 NODEMON ?= $(YARN) run nodemon
 RUNNER  ?= $(NODE)
+CF      ?= cf
+APP     ?= notify-graphql-api
+STG     ?= dev
 
 yarn.lock node_modules: package.json
 	$(YARN)
@@ -19,4 +22,13 @@ test:
 
 clean:
 
-.PHONY: setup start run test clean
+manifest-vars-%.yml:
+	echo "stg: $*" > $@
+
+deploy: $(MAIN)
+	$(CF) zero-downtime-push $(APP) -f manifest.yml
+
+deploy-dev: manifest-vars-$(STG).yml
+	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
+
+.PHONY: setup start run test clean deploy deploy-dev
