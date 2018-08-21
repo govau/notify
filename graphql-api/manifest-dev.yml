@@ -4,6 +4,8 @@ defaults: &defaults
   instances: 1
   memory: 1G
   command: make run
+  env:
+    NODE_ENV: development
 
 applications:
 - name: notify-graphql-api-((stg))
