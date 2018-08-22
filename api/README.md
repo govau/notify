@@ -40,7 +40,7 @@ Then, run `make setup` to install dependencies.
 , set up your environment, and
 initialise the database.
 
-You can run make `setup-db` whenever you need to update your database in response
+You can run `make setup-db` whenever you need to update your database in response
 to migrations.
 
 You need to run the api application and a local celery instance.
