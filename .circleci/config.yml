@@ -10,6 +10,7 @@ references:
       - image: circleci/node:10
 
   go_image: &go_image
+    working_directory: /go/src/github.com/govau/notify
     docker:
       - image: circleci/golang:1.10
 
