@@ -6,6 +6,8 @@ prefixes = [
     'notify-f-',
     'notify-api-f-',
     'notify-celery-f-',
+    'notify-rpc-api-f-',
+    'notify-graphql-api-f-',
     'notify-psql-f-',
 ]
 
