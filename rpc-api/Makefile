@@ -44,7 +44,7 @@ clean:
 	-rm manifest-vars-*.yml
 
 run:
-	$(MAKE) run-grpc
+	$(MAKE) run-notify-rpc-api
 
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
