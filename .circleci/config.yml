@@ -314,16 +314,6 @@ workflows:
           requires:
             - unlock-prod-deploy
 
-      - deploy-prod-graphql-api:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
-
-      - deploy-prod-rpc-api:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
-
       - deploy-statuspage:
           <<: *master_branch
           requires:
