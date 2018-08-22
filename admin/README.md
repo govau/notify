@@ -31,7 +31,7 @@ management
 Install dependencies and build the frontend assets:
 
 ```shell
-    make-setup
+    make setup
 ```
 
 ## Rebuilding the frontend assets
