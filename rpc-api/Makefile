@@ -32,10 +32,6 @@ $(GENERATED): $(SCHEMA)
 
 .SECONDEXPANSION:
 $(CMDS): %: $(SRC) $(GENERATED) $$(wildcard cmd/%/*.go)
-	echo $(CI)
-	echo $(DEPLOY)
-	echo $$GOOS
-	echo $$GOARCH
 	$(GO) build ./cmd/$@
 
 

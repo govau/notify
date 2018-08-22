@@ -9,6 +9,10 @@ references:
     docker:
       - image: circleci/node:10
 
+  go_image: &go_image
+    docker:
+      - image: circleci/golang:1.10
+
   deploy_image: &deploy_image
     docker:
       - image: circleci/python:3.6.5-node
@@ -119,6 +123,17 @@ jobs:
           paths:
             - graphql-api
 
+  build-rpc-api:
+    <<: *go_image
+    steps:
+      - *attach_workspace
+      - run: make rpc-api.setup
+      - run: make rpc-api.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - rpc-api
+
   cleanup-old-deploys:
     <<: *undeploy_image
     steps:
@@ -161,6 +176,14 @@ jobs:
       - *cf_login
       - run: make graphql-api.deploy-dev
 
+  deploy-dev-rpc-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make rpc-api.deploy-dev
+
   deploy-prod-admin:
     <<: *deploy_image
     steps:
@@ -191,7 +214,15 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
-      - run: make graphql-api.dev
+      - run: make graphql-api.deploy
+
+  deploy-prod-rpc-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make rpc-api.deploy
 
   deploy-statuspage:
     docker:
@@ -220,6 +251,10 @@ workflows:
           requires:
             - setup
 
+      - build-rpc-api:
+          requires:
+            - setup
+
       - test-admin:
           requires:
             - setup
@@ -241,6 +276,10 @@ workflows:
       - deploy-dev-graphql-api:
           requires:
             - build-graphql-api
+
+      - deploy-dev-rpc-api:
+          requires:
+            - build-rpc-api
 
       - deploy-dev-celery:
           requires:
@@ -275,6 +314,11 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-prod-graphql-api:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-rpc-api:
           <<: *master_branch
           requires:
             - unlock-prod-deploy
