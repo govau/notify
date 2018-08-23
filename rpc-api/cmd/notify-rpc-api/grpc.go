@@ -43,7 +43,6 @@ func CreateJWT(clientID, secret string) (string, error) {
 	}
 
 	return jwt.Signed(sig).Claims(cl).CompactSerialize()
-	return jwt.Signed(sig).Claims(cl).FullSerialize()
 }
 
 func (c Client) Do(req *http.Request) (*http.Response, error) {
@@ -75,8 +74,8 @@ func (c Client) Get(path string) (*http.Response, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode > 300 {
-		return resp, errors.New("bad status code")
+	if resp.StatusCode >= 300 {
+		return resp, fmt.Errorf("bad status code %d", resp.StatusCode)
 	}
 
 	return resp, nil
@@ -94,6 +93,7 @@ func (c Client) Post(path string, body io.Reader) (*http.Response, error) {
 	}
 
 	if resp.StatusCode > 300 {
+		defer resp.Body.Close()
 		var buf bytes.Buffer
 		io.Copy(&buf, resp.Body)
 
@@ -126,6 +126,7 @@ func (c Client) Users() (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	return JSONDataNested(resp.Body)
 }
@@ -135,6 +136,7 @@ func (c Client) User(userID string) (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	return JSONDataNested(resp.Body)
 }
@@ -144,6 +146,7 @@ func (c Client) Service(serviceID string) (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	return JSONDataNested(resp.Body)
 }
@@ -153,6 +156,7 @@ func (c Client) Services(userID string) (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	return JSONDataNested(resp.Body)
 }
@@ -160,6 +164,9 @@ func (c Client) Services(userID string) (json.RawMessage, error) {
 func (c Client) CreateTemplate(serviceID string, template Template) (json.RawMessage, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(template)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err := c.Post(
 		fmt.Sprintf("/service/%s/template", serviceID),
@@ -168,6 +175,7 @@ func (c Client) CreateTemplate(serviceID string, template Template) (json.RawMes
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	return JSONDataNested(resp.Body)
 }
@@ -177,6 +185,7 @@ func (c Client) Templates(serviceID string) (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	return JSONDataNested(resp.Body)
 }
