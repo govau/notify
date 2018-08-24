@@ -10,14 +10,12 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from notifications_python_client.errors import HTTPError
-from notifications_utils.clients import DeskproError
 from notifications_utils.field import Field
 from notifications_utils.formatters import formatted_list
 
 from app import (
     billing_api_client,
     current_service,
-    deskpro_client,
     email_branding_client,
     inbound_number_client,
     organisations_client,
@@ -191,43 +189,32 @@ def submit_request_to_go_live(service_id):
 
     if form.validate_on_submit():
         try:
-            deskpro_client.create_ticket(
-                subject='Request to go live - {}'.format(current_service['name']),
-                message=(
-                    'On behalf of {} ({})\n'
-                    '\n---'
-                    '\nOrganisation type: {}'
-                    '\nAgreement signed: {}'
-                    '\nChannel: {}\nStart date: {}\nStart volume: {}'
-                    '\nPeak volume: {}'
-                    '\nFeatures: {}'
-                ).format(
-                    current_service['name'],
-                    url_for('main.service_dashboard', service_id=current_service['id'], _external=True),
-                    current_service['organisation_type'],
-                    AgreementInfo.from_current_user().as_human_readable,
-                    formatted_list(filter(None, (
-                        'email' if form.channel_email.data else None,
-                        'text messages' if form.channel_sms.data else None,
-                        'letters' if form.channel_letter.data else None,
-                    )), before_each='', after_each=''),
-                    form.start_date.data,
-                    form.start_volume.data,
-                    form.peak_volume.data,
-                    formatted_list(filter(None, (
-                        'one off' if form.method_one_off.data else None,
-                        'file upload' if form.method_upload.data else None,
-                        'API' if form.method_api.data else None,
-                    )), before_each='', after_each='')
-                ),
-                user_email=current_user.email_address,
-                user_name=current_user.name
+            data = dict(
+                service_name=current_service['name'],
+                service_url=url_for('main.service_dashboard', service_id=current_service['id'], _external=True),
+                organisation_type=current_service['organisation_type'],
+                agreement_signed=AgreementInfo.from_current_user().as_human_readable,
+                channel=formatted_list(filter(None, (
+                    'email' if form.channel_email.data else None,
+                    'text messages' if form.channel_sms.data else None,
+                    'letters' if form.channel_letter.data else None,
+                )), before_each='', after_each=''),
+                start_date=form.start_date.data,
+                start_volume=form.start_volume.data,
+                peak_volume=form.peak_volume.data,
+                features=formatted_list(filter(None, (
+                    'one off' if form.method_one_off.data else None,
+                    'file upload' if form.method_upload.data else None,
+                    'API' if form.method_api.data else None,
+                )), before_each='', after_each='')
             )
-        except DeskproError:
-            abort(500, "Request to go live submission failed")
 
-        flash('We’ve received your request to go live', 'default')
-        return redirect(url_for('.service_settings', service_id=service_id))
+            service_api_client.request_to_go_live(service_id, data)
+        except HTTPError:
+            flash('Error processing your request. Please try again later.', 'error')
+        else:
+            flash('We’ve received your request to go live', 'default')
+            return redirect(url_for('.service_settings', service_id=service_id))
 
     return render_template('views/service-settings/submit-request-to-go-live.html', form=form)
 

@@ -77,7 +77,7 @@ from app.service.service_senders_schema import (
     add_service_sms_sender_request
 )
 from app.service.utils import get_whitelist_objects
-from app.service.sender import send_notification_to_service_users
+from app.service.sender import send_notification_to_service_users, send_notification_to_notify_support
 from app.service.send_notification import send_one_off_notification
 from app.schemas import (
     service_schema,
@@ -219,6 +219,15 @@ def update_service(service_id):
         )
 
     return jsonify(data=service_schema.dump(fetched_service).data), 200
+
+
+@service_blueprint.route('/<uuid:service_id>/go-live', methods=['PUT'])
+def request_to_go_live(service_id):
+    fetched_service = dao_fetch_service_by_id(service_id=service_id)
+
+    if fetched_service.restricted:
+        send_notification_to_notify_support(current_app.config['REQUEST_TO_GO_LIVE_TEMPLATE_ID'], request.get_json())
+    return jsonify(), 200
 
 
 @service_blueprint.route('/<uuid:service_id>/api-key', methods=['POST'])
