@@ -31,7 +31,7 @@
 	  {% endcall %}
 	</div>
   {{ page_footer(
-    secondary_link=url_for('.api_integration', service_id=current_service.id),
-    secondary_link_text='Back to API integration'
+    back_link=url_for('.api_integration', service_id=current_service.id),
+    back_link_text='Back to API integration'
   ) }}
 {% endblock %}
