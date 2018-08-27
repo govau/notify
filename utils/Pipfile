@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+notifications-utils = {editable = true, file = "file:///Users/peter/work/dto/notifications/utils"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
