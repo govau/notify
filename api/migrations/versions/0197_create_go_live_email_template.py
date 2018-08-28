@@ -18,7 +18,7 @@ content = """Hi Notify Support,
 The following service has requested to go live: 
 
 Name: ((service_name)) 
-Url: ((service_url))
+URL: ((service_url))
 
 Organisation type: ((organisation_type))
 Agreement signed: ((agreement_signed))
