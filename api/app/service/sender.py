@@ -5,7 +5,7 @@ from app.dao.services_dao import dao_fetch_service_by_id, dao_fetch_active_users
 from app.dao.templates_dao import dao_get_template_by_id
 from app.models import EMAIL_TYPE, KEY_TYPE_NORMAL
 from app.notifications.process_notifications import persist_notification, send_notification_to_queue
-
+from app.notifications.validators import validate_template
 
 def send_notification_to_service_users(service_id, template_id, personalisation=None, include_user_fields=None):
     personalisation = personalisation or {}
@@ -29,6 +29,27 @@ def send_notification_to_service_users(service_id, template_id, personalisation=
             reply_to_text=notify_service.get_default_reply_to_email_address()
         )
         send_notification_to_queue(notification, False, queue=QueueNames.NOTIFY)
+
+
+def send_notification_to_notify_support(template_id, personalisation=None):
+    personalisation = personalisation or {}
+    template = dao_get_template_by_id(template_id)
+    notify_service = dao_fetch_service_by_id(current_app.config['NOTIFY_SERVICE_ID'])
+
+    validate_template(template.id, personalisation, notify_service, template.template_type)
+
+    notification = persist_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=current_app.config['NOTIFY_SUPPORT_EMAIL'],
+        service=notify_service,
+        personalisation=personalisation,
+        notification_type=template.template_type,
+        api_key_id=None,
+        key_type=KEY_TYPE_NORMAL,
+        reply_to_text=notify_service.get_default_reply_to_email_address()
+    )
+    send_notification_to_queue(notification, False, queue=QueueNames.NOTIFY)
 
 
 def _add_user_fields(user, personalisation, fields):

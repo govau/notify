@@ -108,6 +108,9 @@ class ServiceAPIClient(NotifyAdminAPIClient):
         endpoint = "/service/{0}".format(service_id)
         return self.post(endpoint, data)
 
+    def request_to_go_live(self, service_id, data):
+        return self.put('/service/{}/go-live'.format(service_id), data)
+
     def update_service_with_properties(self, service_id, properties):
         return self.update_service(service_id, **properties)
 

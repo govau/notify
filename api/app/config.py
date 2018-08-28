@@ -103,6 +103,9 @@ class Config(object):
     PERFORMANCE_PLATFORM_ENABLED = False
     PERFORMANCE_PLATFORM_URL = 'https://www.performance.service.gov.uk/data/govuk-notify/'
 
+    # Notify support email
+    NOTIFY_SUPPORT_EMAIL = os.environ.get('NOTIFY_SUPPORT_EMAIL', 'notify-support-dev@digital.gov.au')
+
     # Deskpro
     DESKPRO_API_HOST = os.environ.get('DESKPRO_API_HOST')
     DESKPRO_API_KEY = os.environ.get('DESKPRO_API_KEY')
@@ -154,6 +157,7 @@ class Config(object):
     PASSWORD_RESET_TEMPLATE_ID = '474e9242-823b-4f99-813d-ed392e7f1201'
     ALREADY_REGISTERED_EMAIL_TEMPLATE_ID = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'
     CHANGE_EMAIL_CONFIRMATION_TEMPLATE_ID = 'eb4d9930-87ab-4aef-9bce-786762687884'
+    REQUEST_TO_GO_LIVE_TEMPLATE_ID = '831139ba-a984-11e8-814c-80e6501bb488'
     SERVICE_NOW_LIVE_TEMPLATE_ID = '618185c6-3636-49cd-b7d2-6f6f5eb3bdde'
     ORGANISATION_INVITATION_EMAIL_TEMPLATE_ID = '203566f0-d835-47c5-aa06-932439c86573'
 
@@ -444,6 +448,7 @@ class Live(Config):
     PERFORMANCE_PLATFORM_ENABLED = True
     API_RATE_LIMIT_ENABLED = True
     CHECK_PROXY_HEADER = True
+    NOTIFY_SUPPORT_EMAIL = 'notify-support@digital.gov.au'
 
 
 class CloudFoundryConfig(Config):
