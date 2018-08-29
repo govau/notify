@@ -47,12 +47,14 @@ class TwilioSMSClient(SmsClient):
         start_time = monotonic()
         from_number = random.choice(self._client.incoming_phone_numbers.list()).phone_number
 
+        print('TO: %s, FROM: %s, content: %s' % (to, from_number, content))
+
         try:
-            message = client.messages.create(
+            message = self._client.messages.create(
                 to=to,
                 from_=from_number,
                 body=content,
-                status_callback="{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference)
+                #status_callback="{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference)
             )
 
             self.logger.info("Twilio send SMS request for {} succeeded: {}".format(reference, message.sid))
