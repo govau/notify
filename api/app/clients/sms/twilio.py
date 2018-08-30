@@ -4,20 +4,28 @@ from app.clients.sms import SmsClient
 from twilio.rest import Client
 
 # https://www.twilio.com/docs/sms/api/message#sms-status-values
+# these are for inbound messages
+# 'receiving'
+# 'received'
+#
+# something super frustrating here. We define a 'sent' status in models.py, but
+# the text that shows in ui is "Sent internationally". It would make sense to
+# map the "sent" status here to "sent", but that ends up showing confusing
+# stuff on page.
+#
+# That's why we map sent -> sending.
 twilio_response_map = {
     'accepted': 'created',
     'queued': 'sending',
     'sending': 'sending',
-    'sent': 'sent',
+    'sent': 'sending',
     'delivered': 'delivered',
     'undelivered': 'permanent-failure',
     'failed': 'technical-failure',
 }
-# these are for inbound messages
-#'receiving':
-#'received':
 
-def get_twilio_status(status):
+
+def get_twilio_responses(status):
     return twilio_response_map[status]
 
 class TwilioSMSClient(SmsClient):
@@ -46,15 +54,13 @@ class TwilioSMSClient(SmsClient):
     def send_sms(self, to, content, reference, sender=None):
         start_time = monotonic()
         from_number = random.choice(self._client.incoming_phone_numbers.list()).phone_number
-
-        print('TO: %s, FROM: %s, content: %s' % (to, from_number, content))
-
+        callback_url="{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference)
         try:
             message = self._client.messages.create(
                 to=to,
                 from_=from_number,
                 body=content,
-                #status_callback="{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference)
+                status_callback=callback_url,
             )
 
             self.logger.info("Twilio send SMS request for {} succeeded: {}".format(reference, message.sid))

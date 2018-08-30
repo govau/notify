@@ -103,7 +103,6 @@ requirements.txt: pipenv-requirements.txt
 run-production: setup-db ## Apply migrations and run production server
 	$(MAKE) run-gunicorn
 
-
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
 
