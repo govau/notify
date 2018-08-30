@@ -28,7 +28,7 @@ ifneq ($(BRANCH), $(FEATURE))
 	PSQL_SVC_NAME ?= notify-psql-f-$(FEATURE)
 endif
 
-SERVICES     = notify-shared notify-api notify-admin aws smtp telstra
+SERVICES     = notify-shared notify-api notify-admin aws smtp telstra twilio
 SVC_APPLIED  = $(SERVICES:%=apply-service-%)
 SVC_CREATED  = $(SERVICES:%=create-service-%)
 APPLY_ACTION?= update
