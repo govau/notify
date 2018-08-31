@@ -9,9 +9,10 @@ if __name__ == '__main__':
 
     for tunnel in response.get('tunnels', []):
         if tunnel['proto'] != 'https':
-            pass
+            continue
 
         if tunnel['config']['addr'] != 'localhost:6011':
-            pass
+            continue
 
         sys.stdout.write(tunnel['public_url'])
+        break
