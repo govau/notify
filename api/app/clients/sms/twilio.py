@@ -52,8 +52,11 @@ class TwilioSMSClient(SmsClient):
         return self.name
 
     def send_sms(self, to, content, reference, sender=None):
+        # could potentially select from potential numbers like this
+        #from_number = random.choice(self._client.incoming_phone_numbers.list()).phone_number
+
         start_time = monotonic()
-        from_number = random.choice(self._client.incoming_phone_numbers.list()).phone_number
+        from_number = self._from_number
         callback_url="{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference)
         try:
             message = self._client.messages.create(
