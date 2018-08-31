@@ -1,0 +1,11 @@
+---
+defaults: &defaults
+  buildpack: binary_buildpack
+  instances: 1
+  memory: 256M
+  env:
+    NO_HTTP2: 'true'
+
+applications:
+- name: notify-rpc-api
+  <<: *defaults

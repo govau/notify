@@ -22,6 +22,8 @@ undeploy-%:
 	-$(CF) delete notify-f-$* -f
 	-$(CF) delete notify-api-f-$* -f
 	-$(CF) delete notify-celery-f-$* -f
+	-$(CF) delete notify-rpc-api-f-$* -f
+	-$(CF) delete notify-graphql-api-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 
 .PHONY: list-branches list-apps list-services list-deployed-features prune

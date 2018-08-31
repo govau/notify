@@ -5,6 +5,15 @@ references:
     docker:
       - image: circleci/python:3.6.5-node
 
+  node_image: &node_image
+    docker:
+      - image: circleci/node:10
+
+  go_image: &go_image
+    working_directory: /go/src/github.com/govau/notify
+    docker:
+      - image: circleci/golang:1.10
+
   deploy_image: &deploy_image
     docker:
       - image: circleci/python:3.6.5-node
@@ -58,7 +67,10 @@ jobs:
           paths:
             - Makefile
             - utils
+            - proto
             - api
+            - graphql-api
+            - rpc-api
             - admin
             - status
             - ci
@@ -68,7 +80,7 @@ jobs:
     steps:
       - *attach_workspace
       - run: make admin.setup
-      - run: make admin.vendor
+      - run: make admin.build
       - persist_to_workspace:
           root: .
           paths:
@@ -95,11 +107,33 @@ jobs:
     steps:
       - *attach_workspace
       - run: make api.setup
-      - run: make api.vendor
+      - run: make api.build
       - persist_to_workspace:
           root: .
           paths:
             - api
+
+  build-graphql-api:
+    <<: *node_image
+    steps:
+      - *attach_workspace
+      - run: make graphql-api.setup
+      - run: make graphql-api.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - graphql-api
+
+  build-rpc-api:
+    <<: *go_image
+    steps:
+      - *attach_workspace
+      - run: make rpc-api.setup
+      - run: make rpc-api.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - rpc-api
 
   cleanup-old-deploys:
     <<: *undeploy_image
@@ -135,6 +169,22 @@ jobs:
       - run: make create-service-psql
       - run: make api.deploy-dev-celery
 
+  deploy-dev-graphql-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make graphql-api.deploy-dev
+
+  deploy-dev-rpc-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make rpc-api.deploy-dev
+
   deploy-prod-admin:
     <<: *deploy_image
     steps:
@@ -159,6 +209,22 @@ jobs:
       - *cf_login_prod
       - run: make api.deploy-celery
 
+  deploy-prod-graphql-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make graphql-api.deploy
+
+  deploy-prod-rpc-api:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make rpc-api.deploy
+
   deploy-statuspage:
     docker:
       - image: circleci/ruby:2.3-node
@@ -182,6 +248,14 @@ workflows:
           requires:
             - setup
 
+      - build-graphql-api:
+          requires:
+            - setup
+
+      - build-rpc-api:
+          requires:
+            - setup
+
       - test-admin:
           requires:
             - setup
@@ -199,6 +273,14 @@ workflows:
           requires:
             - build-api
             - test-api
+
+      - deploy-dev-graphql-api:
+          requires:
+            - build-graphql-api
+
+      - deploy-dev-rpc-api:
+          requires:
+            - build-rpc-api
 
       - deploy-dev-celery:
           requires:
