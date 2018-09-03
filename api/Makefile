@@ -1,11 +1,14 @@
 GUNICORN ?= gunicorn
 PIPENV ?= pipenv
+TEST_PIPENV_DOTENV_LOCATION ?= $(shell pwd)/.env_test
 RUNNER ?= $(PIPENV) run
 PORT   ?= 6011
 WORKERS?= 4
 CF     ?= cf
 APP    ?= notify-api
 STG    ?= dev
+
+export PIPENV_DOTENV_LOCATION
 
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
@@ -16,10 +19,14 @@ GIT_COMMIT ?= $(shell git rev-parse HEAD)
 BUILD_NUMBER ?= 0
 BUILD_URL ?=
 
-APP_DIRS  = $(shell find tests/app -type d -d 1)
+DOCKER_CONTAINER_PREFIX = ${USER}-
+
+DOCKER_TEST_DB_PORT ?= 5420
+
+APP_DIRS  = $(shell find tests/app -d 1 -type d)
 APP_TESTS = $(APP_DIRS:tests/app/%=test-%)
 
-DAO_DIRS  = $(shell find tests/app/dao -type f -d 1)
+DAO_DIRS  = $(shell find tests/app/dao -d 1 -type f)
 DAO_TESTS = $(DAO_DIRS:tests/app/dao/%=test-dao-%)
 
 
@@ -55,23 +62,55 @@ setup-dev: ## Setup everything in dev mode for testing
 setup-db: version-file ## Run database migrations
 	$(RUNNER) flask db upgrade
 
+setup-test-db:
+	$(MAKE) setup-db
 
 test: lint tests
 
 lint:
 	$(RUNNER) flake8 .
 
+tests: PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 tests: version-file
+	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 tests
 
 $(APP_TESTS): test-%: version-file
+$(APP_TESTS): PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
+$(APP_TESTS):
+	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 tests/app/$*
 
 $(DAO_TESTS): test-dao-%: version-file
+$(DAO_TESTS): PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
+$(DAO_TESTS):
+	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 tests/app/dao/$*
 
+test-roots: PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 test-roots: version-file
+	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 tests/app/*.py
+
+wait-for-docker-test-db:
+	@number=1 ; while [[ $$number -le 10 ]] ; do \
+		nc -z localhost $(DOCKER_TEST_DB_PORT) && echo Success && exit 0 ; \
+		echo -n . ; \
+		sleep 1 ; \
+        ((number = number + 1)) ; \
+    done ; \
+	echo Failed waiting for Postgres && exit 1
+
+create-docker-test-db:
+	docker rm -f $(DOCKER_CONTAINER_PREFIX)notify-test-db 2> /dev/null || true
+	@docker run -d \
+		--name "$(DOCKER_CONTAINER_PREFIX)notify-test-db" \
+		-p $(DOCKER_TEST_DB_PORT):5432 \
+		-e POSTGRES_PASSWORD="" \
+		-e POSTGRES_DB="test_notification_api" \
+		postgres:9.6
+
+	$(MAKE) wait-for-docker-test-db;
 
 run: version-file ## Run a development server (reloading)
 	$(RUNNER) flask run -p $(PORT)
@@ -128,7 +167,7 @@ create-migration: ## Create an appropriately ordered migration stub
 
 .PHONY:
 	setup setup-dev setup-db \
-	test lint tests $(APP_TESTS) $(DAO_TESTS) test-roots \
+	setup-test-db test lint tests $(APP_TESTS) $(DAO_TESTS) test-roots \
 	run run-celery \
 	deploy deploy-api deploy-celery \
 	run-production \

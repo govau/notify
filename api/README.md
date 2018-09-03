@@ -18,10 +18,10 @@ help of a colleague. Pipenv will read from this file in development
 
 NOTES:
 
-* If you want to see delivery status updated locally or are testing provider webhooks, run [ngrok](https://ngrok.com) and set `API_HOST_NAME` to be the output of `pipenv run python scripts/export-ngrok.py`
-* Replace the placeholder key and prefix values as appropriate
-* The SECRET_KEY and DANGEROUS_SALT should match those in the [notifications-admin](https://github.com/alphagov/notifications-admin) app.
-* The unique prefix for the queue names prevents clashing with others' queues in shared amazon environment and enables filtering by queue name in the SQS interface.
+- If you want to see delivery status updated locally or are testing provider webhooks, run [ngrok](https://ngrok.com) and set `API_HOST_NAME` to be the output of `pipenv run python scripts/export-ngrok.py`
+- Replace the placeholder key and prefix values as appropriate
+- The SECRET_KEY and DANGEROUS_SALT should match those in the [notifications-admin](https://github.com/alphagov/notifications-admin) app.
+- The unique prefix for the queue names prevents clashing with others' queues in shared amazon environment and enables filtering by queue name in the SQS interface.
 
 ### Postgres
 
@@ -56,9 +56,19 @@ You need to run the api application and a local celery instance.
 
 ## To test the application
 
-First, ensure that `make setup` has been run, as it updates the test database
+First, create a test database in docker:
 
-Then simply run
+```shell
+    make create-docker-test-db
+```
+
+In development, create a `.env_test` file (equivalent to `.env`) and put your database connection string in it. For example:
+
+```
+SQLALCHEMY_DATABASE_URI="postgresql://postgres@localhost:5420/test_notification_api"
+```
+
+Then run:
 
 ```shell
     make test

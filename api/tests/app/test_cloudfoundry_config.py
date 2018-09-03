@@ -36,8 +36,6 @@ def test_extract_cloudfoundry_config_populates_other_vars():
     extract_cloudfoundry_config()
 
     assert os.environ['SQLALCHEMY_DATABASE_URI'] == 'postgres uri'
-    assert os.environ['NOTIFY_ENVIRONMENT'] == '🚀🌌'
-    assert os.environ['NOTIFY_LOG_PATH'] == '/home/vcap/logs/app.log'
 
 
 @pytest.mark.usefixtures('os_environ', 'cloudfoundry_environ')
