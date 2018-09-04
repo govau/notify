@@ -52,8 +52,8 @@ def process_twilio_response(notification_id):
         client_name=client_name
     )
 
-    redacted_data = data.copy()
-    redacted_data.pop('To')
+    redacted_data = dict(data.items())
+    redacted_data.pop('To', None)
     current_app.logger.debug(
         "Full delivery response from {} for notification: {}\n{}".format(client_name, notification_id, redacted_data))
     if errors:
