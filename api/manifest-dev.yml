@@ -9,9 +9,10 @@ defaults: &defaults
     - notify-api
     - aws
     - telstra
+    - twilio
     - smtp
   env:
-    RUNNER: './vcapenvwrapper --root notify-shared --root notify-api --root aws --root telstra --root smtp'
+    RUNNER: './vcapenvwrapper --root notify-shared --root notify-api --root aws --root telstra --root twilio --root smtp'
     FLASK_APP: application.py
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify-((stg)).apps.y.cld.gov.au

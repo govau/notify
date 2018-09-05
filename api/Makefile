@@ -82,6 +82,9 @@ run-gunicorn: version-file ## Run a production server
 run-celery: version-file ## Run background workers
 	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
 
+run-ngrok:
+	ngrok http 6011
+
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
@@ -102,7 +105,6 @@ requirements.txt: pipenv-requirements.txt
 
 run-production: setup-db ## Apply migrations and run production server
 	$(MAKE) run-gunicorn
-
 
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
