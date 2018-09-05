@@ -419,16 +419,16 @@ def gmt_timezones(date):
 
 
 def get_cdn_domain():
+    # TODO: create a real cdn for this
+
     parsed_uri = urlparse(current_app.config['ADMIN_BASE_URL'])
-
-    if parsed_uri.netloc.startswith('localhost'):
-        return 'static-logos.notify.tools'
-
-    subdomain = parsed_uri.hostname.split('.')[0]
-    domain = parsed_uri.netloc[len(subdomain + '.'):]
-
-    return "static-logos.{}".format(domain)
-
+    return parsed_uri._replace(
+        scheme='',
+        path='',
+        params='',
+        query='',
+        fragment=''
+    ).geturl()
 
 def parse_filter_args(filter_dict):
     if not isinstance(filter_dict, MultiDict):

@@ -4,9 +4,13 @@ import botocore
 from boto3 import resource
 from flask import current_app
 
+def s3upload(
+        filedata, region, bucket_name, file_location,
+        content_type='binary/octet-stream',
+        tags=None,
+        session=None):
 
-def s3upload(filedata, region, bucket_name, file_location, content_type='binary/octet-stream', tags=None):
-    _s3 = resource('s3')
+    _s3 = session.resource('s3') if session else resource('s3')
     contents = filedata
 
     exists = True

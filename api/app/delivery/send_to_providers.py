@@ -179,24 +179,15 @@ def provider_to_use(notification_type, notification_id, international=False):
 
 
 def get_logo_url(base_url, logo_file):
-    base_url = parse.urlparse(base_url)
-    netloc = base_url.netloc
+    # TODO: point this to our real cdn when we get one
 
-    if base_url.netloc.startswith('localhost'):
-        netloc = 'notify.tools'
-    elif base_url.netloc.startswith('www'):
-        # strip "www."
-        netloc = base_url.netloc[4:]
-
-    logo_url = parse.ParseResult(
-        scheme=base_url.scheme,
-        netloc='static-logos.' + netloc,
-        path=logo_file,
-        params=base_url.params,
-        query=base_url.query,
-        fragment=base_url.fragment
-    )
-    return parse.urlunparse(logo_url)
+    parsed_uri = parse.urlparse(base_url)
+    return parsed_uri._replace(
+        path='/static-logo/{}'.format(logo_file),
+        params='',
+        query='',
+        fragment=''
+    ).geturl()
 
 
 def get_html_email_options(service):

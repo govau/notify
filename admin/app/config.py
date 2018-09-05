@@ -26,6 +26,7 @@ class Config(object):
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')
 
     CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME', 'dta-notify-csv-upload-20180712070203208700000001')
+    LOGO_UPLOAD_BUCKET_NAME = os.getenv('LOGO_UPLOAD_BUCKET_NAME', 'public_logos-local')
 
     DESKPRO_DEPT_ID = 5
     DESKPRO_ASSIGNED_AGENT_TEAM_ID = 5
@@ -34,6 +35,8 @@ class Config(object):
     ASSETS_DEBUG = False
 
     AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-2')
+    AWS_LOGO_ACCESS_KEY_ID = os.getenv('AWS_LOGO_ACCESS_KEY_ID')
+    AWS_LOGO_SECRET_ACCESS_KEY = os.getenv('AWS_LOGO_SECRET_ACCESS_KEY')
 
     DEFAULT_SERVICE_LIMIT = 50
     DEFAULT_FREE_SMS_FRAGMENT_LIMITS = {
@@ -71,7 +74,6 @@ class Config(object):
     STATSD_HOST = "statsd.hostedgraphite.com"
     STATSD_PORT = 8125
     NOTIFY_ENVIRONMENT = 'development'
-    LOGO_UPLOAD_BUCKET_NAME = 'public-logos-local'
     MOU_BUCKET_NAME = 'local-mou'
     ROUTE_SECRET_KEY_1 = os.environ.get('ROUTE_SECRET_KEY_1', '')
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
@@ -84,7 +86,6 @@ class Development(Config):
     SESSION_COOKIE_SECURE = False
     SESSION_PROTECTION = None
     STATSD_ENABLED = False
-    LOGO_UPLOAD_BUCKET_NAME = 'public-logos-tools'
     MOU_BUCKET_NAME = 'notify.tools-mou'
 
     ADMIN_CLIENT_SECRET = 'dev-notify-secret-key'
@@ -100,7 +101,6 @@ class Test(Development):
     TESTING = True
     STATSD_ENABLED = False
     WTF_CSRF_ENABLED = False
-    LOGO_UPLOAD_BUCKET_NAME = 'public-logos-test'
     MOU_BUCKET_NAME = 'test-mou'
     NOTIFY_ENVIRONMENT = 'test'
     API_HOST_NAME = 'http://you-forgot-to-mock-an-api-call-to'
@@ -111,7 +111,6 @@ class Preview(Config):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
     STATSD_ENABLED = False
-    LOGO_UPLOAD_BUCKET_NAME = 'public-logos-preview'
     MOU_BUCKET_NAME = 'notify.works-mou'
     NOTIFY_ENVIRONMENT = 'preview'
     CHECK_PROXY_HEADER = True
@@ -122,7 +121,6 @@ class Staging(Config):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#6F72AF'  # $mauve
     STATSD_ENABLED = False
-    LOGO_UPLOAD_BUCKET_NAME = 'public-logos-staging'
     MOU_BUCKET_NAME = 'staging-notify.works-mou'
     NOTIFY_ENVIRONMENT = 'staging'
     CHECK_PROXY_HEADER = True
@@ -133,7 +131,6 @@ class Live(Config):
     HEADER_COLOUR = '#313131'  # DTA dark gray
     HTTP_PROTOCOL = 'https'
     STATSD_ENABLED = False
-    LOGO_UPLOAD_BUCKET_NAME = 'public-logos-production'
     MOU_BUCKET_NAME = 'notifications.service.gov.uk-mou'
     NOTIFY_ENVIRONMENT = 'live'
     CHECK_PROXY_HEADER = False
@@ -151,7 +148,6 @@ class Sandbox(CloudFoundryConfig):
     HTTP_PROTOCOL = 'https'
     HEADER_COLOUR = '#F499BE'  # $baby-pink
     STATSD_ENABLED = False
-    LOGO_UPLOAD_BUCKET_NAME = 'cf-sandbox-notifications-logo-upload'
     NOTIFY_ENVIRONMENT = 'sandbox'
 
 
