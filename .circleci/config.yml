@@ -110,6 +110,11 @@ jobs:
           command: |
             make -C api wait-for-docker-test-db
       - run:
+          name: test-aws
+          <<: *api_tests_environment
+          command: |
+            make -C api test-aws
+      - run:
           name: test-roots
           <<: *api_tests_environment
           command: |
