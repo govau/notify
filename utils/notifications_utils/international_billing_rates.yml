@@ -207,7 +207,7 @@
     sc: 'YES'
     sender_and_registration_info: null
     text_restrictions: null
-  billable_units: 1
+  billable_units: 2
   names:
   - Guernsey
   - Isle of Man
@@ -407,7 +407,7 @@
     sc: 'NO'
     sender_and_registration_info: Long numeric MUST NOT begin with "0" (zero)
     text_restrictions: null
-  billable_units: 2
+  billable_units: 1
   names:
   - Australia
 '62':

@@ -48,7 +48,7 @@ from app.dao.email_branding_dao import dao_create_email_branding
 from app.dao.organisation_dao import dao_create_organisation
 
 
-def create_user(mobile_number="+447700900986", email="notify@digital.cabinet-office.gov.uk", state='active', id_=None):
+def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-office.gov.uk", state='active', id_=None):
     data = {
         'id': id_ or uuid.uuid4(),
         'name': 'Test User',
@@ -130,7 +130,7 @@ def create_template(
     template_type=SMS_TYPE,
     template_name=None,
     subject='Template subject',
-    content='Dear Sir/Madam, Hello. Yours Truly, The Government.',
+    content='Dear Sir/Madam, Hello. Yours Truly, The Government.\n',
     reply_to=None,
     hidden=False
 ):

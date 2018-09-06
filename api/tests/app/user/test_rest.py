@@ -95,7 +95,7 @@ def test_post_user(client, notify_db, notify_db_session):
         "name": "Test User",
         "email_address": "user@digital.cabinet-office.gov.uk",
         "password": "password",
-        "mobile_number": "+447700900986",
+        "mobile_number": "+61412345678",
         "logged_in_at": None,
         "state": "active",
         "failed_login_count": 0,
@@ -122,7 +122,7 @@ def test_post_user_without_auth_type(admin_request, notify_db_session):
         "name": "Test User",
         "email_address": "user@digital.cabinet-office.gov.uk",
         "password": "password",
-        "mobile_number": "+447700900986",
+        "mobile_number": "+61412345678",
         "permissions": {},
     }
 
@@ -141,7 +141,7 @@ def test_post_user_missing_attribute_email(client, notify_db, notify_db_session)
     data = {
         "name": "Test User",
         "password": "password",
-        "mobile_number": "+447700900986",
+        "mobile_number": "+61412345678",
         "logged_in_at": None,
         "state": "active",
         "failed_login_count": 0,
@@ -167,7 +167,7 @@ def test_create_user_missing_attribute_password(client, notify_db, notify_db_ses
     data = {
         "name": "Test User",
         "email_address": "user@digital.cabinet-office.gov.uk",
-        "mobile_number": "+447700900986",
+        "mobile_number": "+61412345678",
         "logged_in_at": None,
         "state": "active",
         "failed_login_count": 0,

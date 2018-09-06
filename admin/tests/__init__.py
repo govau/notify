@@ -45,7 +45,7 @@ def user_json(
     id_='1234',
     name='Test User',
     email_address='test@gov.au',
-    mobile_number='+447700900986',
+    mobile_number='+61412345678',
     password_changed_at=None,
     permissions={generate_uuid(): [
         'view_activity',

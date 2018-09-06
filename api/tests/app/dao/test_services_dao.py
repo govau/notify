@@ -172,7 +172,7 @@ def test_should_add_user_to_service(sample_user):
         name='Test User',
         email_address='new_user@digital.cabinet-office.gov.uk',
         password='password',
-        mobile_number='+447700900986'
+        mobile_number='+61412345678'
     )
     save_model_user(new_user)
     dao_add_user_to_service(service, new_user)
@@ -190,7 +190,7 @@ def test_should_remove_user_from_service(sample_user):
         name='Test User',
         email_address='new_user@digital.cabinet-office.gov.uk',
         password='password',
-        mobile_number='+447700900986'
+        mobile_number='+61412345678'
     )
     save_model_user(new_user)
     dao_add_user_to_service(service, new_user)
@@ -243,7 +243,7 @@ def test_get_all_only_services_user_has_access_to(service_factory, sample_user):
         name='Test User',
         email_address='new_user@digital.cabinet-office.gov.uk',
         password='password',
-        mobile_number='+447700900986'
+        mobile_number='+61412345678'
     )
     save_model_user(new_user)
     dao_add_user_to_service(service_3, new_user)
