@@ -283,7 +283,7 @@ def sample_email_template(
         template_name="Email Template Name",
         template_type="email",
         user=None,
-        content="This is a template",
+        content="This is a template\n",
         subject_line='Email Subject',
         service=None,
         permissions=[EMAIL_TYPE, SMS_TYPE]):

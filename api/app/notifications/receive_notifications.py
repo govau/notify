@@ -40,7 +40,7 @@ def receive_mmg_sms():
         current_app.logger.warning("Inbound sms (MMG) incorrect username ({}) or password".format(auth.username))
         abort(403)
 
-    inbound_number = strip_leading_forty_four(post_data['Number'])
+    inbound_number = strip_leading_sixty_one(post_data['Number'])
 
     service = fetch_potential_service(inbound_number, 'mmg')
     if not service:
@@ -78,7 +78,7 @@ def receive_firetext_sms():
         current_app.logger.warning("Inbound sms (Firetext) incorrect username ({}) or password".format(auth.username))
         abort(403)
 
-    inbound_number = strip_leading_forty_four(post_data['destination'])
+    inbound_number = strip_leading_sixty_one(post_data['destination'])
 
     service = fetch_potential_service(inbound_number, 'firetext')
     if not service:
@@ -168,7 +168,7 @@ def has_inbound_sms_permissions(permissions):
     return set([INBOUND_SMS_TYPE, SMS_TYPE]).issubset(set(str_permissions))
 
 
-def strip_leading_forty_four(number):
-    if number.startswith('44'):
-        return number.replace('44', '0', 1)
+def strip_leading_sixty_one(number):
+    if number.startswith('61'):
+        return number.replace('61', '0', 1)
     return number

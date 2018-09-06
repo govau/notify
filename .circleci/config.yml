@@ -120,6 +120,11 @@ jobs:
           command: |
             make -C api test-accept_invite
       - run:
+          name: test-notifications
+          <<: *api_tests_environment
+          command: |
+            make -C api test-notifications
+      - run:
           name: test-organisation
           <<: *api_tests_environment
           command: |

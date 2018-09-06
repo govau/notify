@@ -9,7 +9,7 @@ from app.notifications.receive_notifications import (
     format_mmg_message,
     format_mmg_datetime,
     create_inbound_sms_object,
-    strip_leading_forty_four,
+    strip_leading_sixty_one,
     has_inbound_sms_permissions,
     unescape_string,
 )
@@ -222,7 +222,7 @@ def test_create_inbound_mmg_sms_object(sample_service_full_permissions):
     data = {
         'Message': 'hello+there+%F0%9F%93%A9',
         'Number': sample_service_full_permissions.get_inbound_number(),
-        'MSISDN': '07700 900 001',
+        'MSISDN': '0412 345 678',
         'DateRecieved': '2017-01-02+03%3A04%3A05',
         'ID': 'bar',
     }
@@ -232,7 +232,7 @@ def test_create_inbound_mmg_sms_object(sample_service_full_permissions):
 
     assert inbound_sms.service_id == sample_service_full_permissions.id
     assert inbound_sms.notify_number == sample_service_full_permissions.get_inbound_number()
-    assert inbound_sms.user_number == '447700900001'
+    assert inbound_sms.user_number == '61412345678'
     assert inbound_sms.provider_date == datetime(2017, 1, 2, 3, 4, 5)
     assert inbound_sms.provider_reference == 'bar'
     assert inbound_sms._content != 'hello there 📩'
@@ -319,21 +319,21 @@ def test_receive_notification_from_firetext_persists_message(notify_db_session, 
     mocker.patch('app.notifications.receive_notifications.statsd_client.incr')
 
     service = create_service_with_inbound_number(
-        inbound_number='07111111111',
+        inbound_number='0412345678',
         service_name='b',
         service_permissions=[EMAIL_TYPE, SMS_TYPE, INBOUND_SMS_TYPE])
 
-    data = "source=07999999999&destination=07111111111&message=this is a message&time=2017-01-01 12:00:00"
+    data = "source=0487654321&destination=0412345678&message=this is a message&time=2017-01-01 12:00:00"
 
     response = firetext_post(client, data)
 
     assert response.status_code == 200
     result = json.loads(response.get_data(as_text=True))
-
-    persisted = InboundSms.query.first()
     assert result['status'] == 'ok'
-    assert persisted.notify_number == '07111111111'
-    assert persisted.user_number == '447999999999'
+    persisted = InboundSms.query.first()
+    assert persisted != None
+    assert persisted.notify_number == '0412345678'
+    assert persisted.user_number == '61487654321'
     assert persisted.service == service
     assert persisted.content == 'this is a message'
     assert persisted.provider == 'firetext'
@@ -346,19 +346,18 @@ def test_receive_notification_from_firetext_persists_message_with_normalized_pho
     mocker.patch('app.notifications.receive_notifications.statsd_client.incr')
 
     create_service_with_inbound_number(
-        inbound_number='07111111111', service_name='b', service_permissions=[EMAIL_TYPE, SMS_TYPE, INBOUND_SMS_TYPE])
+        inbound_number='0412345678', service_name='b', service_permissions=[EMAIL_TYPE, SMS_TYPE, INBOUND_SMS_TYPE])
 
-    data = "source=(+44)7999999999&destination=07111111111&message=this is a message&time=2017-01-01 12:00:00"
+    data = "source=(+61)499999999&destination=0412345678&message=this is a message&time=2017-01-01 12:00:00"
 
     response = firetext_post(client, data)
 
     assert response.status_code == 200
     result = json.loads(response.get_data(as_text=True))
-
-    persisted = InboundSms.query.first()
-
     assert result['status'] == 'ok'
-    assert persisted.user_number == '447999999999'
+    persisted = InboundSms.query.first()
+    assert persisted != None
+    assert persisted.user_number == '61499999999'
 
 
 def test_returns_ok_to_firetext_if_mismatched_sms_sender(notify_db_session, client, mocker):
@@ -368,7 +367,7 @@ def test_returns_ok_to_firetext_if_mismatched_sms_sender(notify_db_session, clie
     create_service_with_inbound_number(
         inbound_number='07111111199', service_name='b', service_permissions=[EMAIL_TYPE, SMS_TYPE, INBOUND_SMS_TYPE])
 
-    data = "source=(+44)7999999999&destination=07111111111&message=this is a message&time=2017-01-01 12:00:00"
+    data = "source=(+61)499999999&destination=0412345678&message=this is a message&time=2017-01-01 12:00:00"
 
     response = firetext_post(client, data)
 
@@ -384,14 +383,14 @@ def test_returns_ok_to_firetext_if_mismatched_sms_sender(notify_db_session, clie
 @pytest.mark.parametrize(
     'number, expected',
     [
-        ('447123123123', '07123123123'),
-        ('447123123144', '07123123144'),
-        ('07123123123', '07123123123'),
-        ('447444444444', '07444444444')
+        ('61412345678', '0412345678'),
+        ('61412312314', '0412312314'),
+        ('0487654321', '0487654321'),
+        ('61411222333', '0411222333')
     ]
 )
 def test_strip_leading_country_code(number, expected):
-    assert strip_leading_forty_four(number) == expected
+    assert strip_leading_sixty_one(number) == expected
 
 
 @pytest.mark.parametrize("auth, keys, status_code", [

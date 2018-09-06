@@ -24,7 +24,7 @@ from tests.app.db import create_user
 
 
 @pytest.mark.parametrize('phone_number', [
-    '+447700900986',
+    '+61412345678',
     '+1-800-555-5555',
 ])
 def test_create_user(notify_db_session, phone_number):

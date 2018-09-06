@@ -370,7 +370,7 @@ def test_should_not_persist_or_send_notification_if_simulated_recipient(
 
 
 @pytest.mark.parametrize("notification_type, key_send_to, send_to",
-                         [("sms", "phone_number", "07700 900 855"),
+                         [("sms", "phone_number", "0412 345 678"),
                           ("email", "email_address", "sample@email.com")])
 def test_send_notification_uses_priority_queue_when_template_is_marked_as_priority(client, notify_db,
                                                                                    notify_db_session,
@@ -408,7 +408,7 @@ def test_send_notification_uses_priority_queue_when_template_is_marked_as_priori
 
 @pytest.mark.parametrize(
     "notification_type, key_send_to, send_to",
-    [("sms", "phone_number", "07700 900 855"), ("email", "email_address", "sample@email.com")]
+    [("sms", "phone_number", "0412 345 678"), ("email", "email_address", "sample@email.com")]
 )
 def test_returns_a_429_limit_exceeded_if_rate_limit_exceeded(
         client,
@@ -559,7 +559,7 @@ def test_post_sms_should_persist_supplied_sms_number(client, sample_template_wit
 
 
 @pytest.mark.parametrize("notification_type, key_send_to, send_to",
-                         [("sms", "phone_number", "07700 900 855"),
+                         [("sms", "phone_number", "0412 345 678"),
                           ("email", "email_address", "sample@email.com")])
 @freeze_time("2017-05-14 14:00:00")
 def test_post_notification_with_scheduled_for(client, notify_db, notify_db_session,
@@ -586,7 +586,7 @@ def test_post_notification_with_scheduled_for(client, notify_db, notify_db_sessi
 
 
 @pytest.mark.parametrize("notification_type, key_send_to, send_to",
-                         [("sms", "phone_number", "07700 900 855"),
+                         [("sms", "phone_number", "0412 345 678"),
                           ("email", "email_address", "sample@email.com")])
 @freeze_time("2017-05-14 14:00:00")
 def test_post_notification_raises_bad_request_if_service_not_invited_to_schedule(
