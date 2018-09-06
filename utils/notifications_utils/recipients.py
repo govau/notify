@@ -399,7 +399,7 @@ def get_billable_units_for_prefix(prefix):
     return INTERNATIONAL_BILLING_RATES[prefix]['billable_units']
 
 
-def validate_uk_phone_number(number, column=None):
+def validate_au_phone_number(number, column=None):
 
     number = normalise_phone_number(number).lstrip(au_prefix).lstrip('0')
 
@@ -418,7 +418,7 @@ def validate_uk_phone_number(number, column=None):
 def validate_phone_number(number, column=None, international=False):
 
     if (not international) or is_au_phone_number(number):
-        return validate_uk_phone_number(number)
+        return validate_au_phone_number(number)
 
     number = normalise_phone_number(number)
 

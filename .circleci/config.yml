@@ -115,6 +115,11 @@ jobs:
           command: |
             make -C api test-aws
       - run:
+          name: test-inbound_sms
+          <<: *api_tests_environment
+          command: |
+            make -C api test-inbound_sms
+      - run:
           name: test-roots
           <<: *api_tests_environment
           command: |
