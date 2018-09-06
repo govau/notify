@@ -120,10 +120,50 @@ jobs:
           command: |
             make -C api test-aws
       - run:
+          name: test-billing
+          <<: *api_tests_environment
+          command: |
+            make -C api test-billing
+      - run:
+          name: test-commands
+          <<: *api_tests_environment
+          command: |
+            make -C api test-commands
+      - run:
+          name: test-dvla_organisation
+          <<: *api_tests_environment
+          command: |
+            make -C api test-dvla_organisation
+      - run:
+          name: test-email_branding
+          <<: *api_tests_environment
+          command: |
+            make -C api test-email_branding
+      - run:
+          name: test-events
+          <<: *api_tests_environment
+          command: |
+            make -C api test-events
+      - run:
+          name: test-inbound_number
+          <<: *api_tests_environment
+          command: |
+            make -C api test-inbound_number
+      - run:
           name: test-inbound_sms
           <<: *api_tests_environment
           command: |
             make -C api test-inbound_sms
+      - run:
+          name: test-invite
+          <<: *api_tests_environment
+          command: |
+            make -C api test-invite
+      - run:
+          name: test-job
+          <<: *api_tests_environment
+          command: |
+            make -C api test-job
       - run:
           name: test-roots
           <<: *api_tests_environment
