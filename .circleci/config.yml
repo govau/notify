@@ -114,6 +114,11 @@ jobs:
           <<: *api_tests_environment
           command: |
             make -C api test-roots
+      - run:
+          name: test-accept_invite
+          <<: *api_tests_environment
+          command: |
+            make -C api test-accept_invite
 
   build-api:
     <<: *python_node_image
