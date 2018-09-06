@@ -73,24 +73,24 @@ lint:
 tests: PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 tests: version-file
 	$(MAKE) setup-test-db
-	$(RUNNER) py.test -n4 tests
+	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
 
 $(APP_TESTS): test-%: version-file
 $(APP_TESTS): PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 $(APP_TESTS):
 	$(MAKE) setup-test-db
-	$(RUNNER) py.test -n4 tests/app/$*
+	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/$*
 
 $(DAO_TESTS): test-dao-%: version-file
 $(DAO_TESTS): PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 $(DAO_TESTS):
 	$(MAKE) setup-test-db
-	$(RUNNER) py.test -n4 tests/app/dao/$*
+	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/dao/$*
 
 test-roots: PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 test-roots: version-file
 	$(MAKE) setup-test-db
-	$(RUNNER) py.test -n4 tests/app/*.py
+	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/*.py
 
 wait-for-docker-test-db:
 	@number=1 ; while [[ $$number -le 10 ]] ; do \
