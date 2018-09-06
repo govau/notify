@@ -23,10 +23,10 @@ DOCKER_CONTAINER_PREFIX = ${USER}-
 
 DOCKER_TEST_DB_PORT ?= 5420
 
-APP_DIRS  = $(shell find tests/app -d 1 -type d)
+APP_DIRS  = $(shell find tests/app/* -maxdepth 1 -type d)
 APP_TESTS = $(APP_DIRS:tests/app/%=test-%)
 
-DAO_DIRS  = $(shell find tests/app/dao -d 1 -type f)
+DAO_DIRS  = $(shell find tests/app/dao/* -maxdepth 1 -type f)
 DAO_TESTS = $(DAO_DIRS:tests/app/dao/%=test-dao-%)
 
 
