@@ -305,8 +305,7 @@ def test_should_attach_the_current_api_key_to_current_app(notify_api, sample_ser
         assert api_user == sample_api_key
 
 
-def test_should_return_403_when_token_is_expired(client,
-                                                 sample_api_key):
+def test_should_return_403_when_token_is_expired(client, sample_api_key):
     with freeze_time('2001-01-01T12:00:00'):
         token = __create_token(sample_api_key.service_id)
     with freeze_time('2001-01-01T12:00:40'):
@@ -346,6 +345,7 @@ def test_proxy_key_non_auth_endpoint(notify_api, check_proxy_header, header_valu
         assert response.status_code == expected_status
 
 
+@pytest.mark.skip(reason="Our architecture does not include an API Gateway for caching/rate limiting. We may include this in the future.")
 @pytest.mark.parametrize('check_proxy_header,header_value,expected_status', [
     (True, 'key_1', 200),
     (True, 'wrong_key', 403),
@@ -369,4 +369,4 @@ def test_proxy_key_on_admin_auth_endpoint(notify_api, check_proxy_header, header
                     ('Authorization', 'Bearer {}'.format(token))
                 ]
             )
-        assert response.status_code == expected_status
+        assert expected_status == response.status_code
