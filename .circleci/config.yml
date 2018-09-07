@@ -110,6 +110,11 @@ jobs:
           command: |
             make -C api wait-for-docker-test-db
       - run:
+          name: test-accept_invite
+          <<: *api_tests_environment
+          command: |
+            make -C api test-accept_invite
+      - run:
           name: test-authentication
           <<: *api_tests_environment
           command: |
@@ -120,25 +125,55 @@ jobs:
           command: |
             make -C api test-aws
       - run:
+          name: test-commands
+          <<: *api_tests_environment
+          command: |
+            make -C api test-commands
+      - run:
+          name: test-dvla_organisation
+          <<: *api_tests_environment
+          command: |
+            make -C api test-dvla_organisation
+      - run:
+          name: test-email_branding
+          <<: *api_tests_environment
+          command: |
+            make -C api test-email_branding
+      - run:
+          name: test-events
+          <<: *api_tests_environment
+          command: |
+            make -C api test-events
+      - run:
+          name: test-inbound_number
+          <<: *api_tests_environment
+          command: |
+            make -C api test-inbound_number
+      - run:
           name: test-inbound_sms
           <<: *api_tests_environment
           command: |
             make -C api test-inbound_sms
       - run:
-          name: test-roots
+          name: test-invite
           <<: *api_tests_environment
           command: |
-            make -C api test-roots
+            make -C api test-invite
       - run:
-          name: test-accept_invite
+          name: test-job
           <<: *api_tests_environment
           command: |
-            make -C api test-accept_invite
+            make -C api test-job
       - run:
           name: test-organisation
           <<: *api_tests_environment
           command: |
             make -C api test-organisation
+      - run:
+          name: test-roots
+          <<: *api_tests_environment
+          command: |
+            make -C api test-roots
 
   build-api:
     <<: *python_node_image
