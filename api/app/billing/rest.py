@@ -75,7 +75,6 @@ def _get_total_billable_units_and_rate_for_notification_type(billing_data, noti_
                 if entry.notification_type == EMAIL_TYPE:
                     total_sent += monthly_total['billing_units']
                     rate = monthly_total['rate']
-
                 elif entry.notification_type == SMS_TYPE:
                     total_sent += (monthly_total['billing_units'] * monthly_total['rate_multiplier'])
                     rate = monthly_total['rate']
