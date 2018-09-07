@@ -66,7 +66,7 @@ def test_get_yearly_billing_summary_returns_correct_breakdown(client, sample_tem
     _assert_dict_equals(resp_json[0], {
         'notification_type': SMS_TYPE,
         'billing_units': 8,
-        'rate': 0.12,
+        'rate': 0.0165,
         'letter_total': 0
     })
 
@@ -78,9 +78,9 @@ def test_get_yearly_billing_summary_returns_correct_breakdown(client, sample_tem
     })
     _assert_dict_equals(resp_json[2], {
         'notification_type': LETTER_TYPE,
-        'billing_units': 2,
+        'billing_units': 4,
         'rate': 0,
-        'letter_total': 0.72
+        'letter_total': 1.38
     })
 
 

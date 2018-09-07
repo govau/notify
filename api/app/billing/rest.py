@@ -54,6 +54,9 @@ def get_yearly_billing_usage_summary(service_id):
         year = int(request.args.get('year'))
         billing_data = get_billing_data_for_financial_year(service_id, year)
         notification_types = [SMS_TYPE, EMAIL_TYPE, LETTER_TYPE]
+
+        print('billing_data = ' + str(billing_data))
+
         response = [
             _get_total_billable_units_and_rate_for_notification_type(billing_data, notification_type)
             for notification_type in notification_types
@@ -69,19 +72,25 @@ def _get_total_billable_units_and_rate_for_notification_type(billing_data, noti_
     total_sent = 0
     rate = 0
     letter_total = 0
+    print('------------------------------------------------------------------------')
     for entry in billing_data:
         for monthly_total in entry.monthly_totals:
             if entry.notification_type == noti_type:
                 if entry.notification_type == EMAIL_TYPE:
                     total_sent += monthly_total['billing_units']
                     rate = monthly_total['rate']
+
                 elif entry.notification_type == SMS_TYPE:
                     total_sent += (monthly_total['billing_units'] * monthly_total['rate_multiplier'])
                     rate = monthly_total['rate']
+                    print('total_sent = ' + str(total_sent))
+                    print('rate = ' + str(rate))
+                    print('monthly_total = ' + str(monthly_total))
                 elif entry.notification_type == LETTER_TYPE:
                     total_sent += monthly_total['billing_units']
                     letter_total += (monthly_total['billing_units'] * monthly_total['rate'])
 
+    print('------------------------------------------------------------------------')
     return {
         "notification_type": noti_type,
         "billing_units": total_sent,
