@@ -110,6 +110,11 @@ jobs:
           command: |
             make -C api wait-for-docker-test-db
       - run:
+          name: test-accept_invite
+          <<: *api_tests_environment
+          command: |
+            make -C api test-accept_invite
+      - run:
           name: test-authentication
           <<: *api_tests_environment
           command: |
@@ -119,11 +124,6 @@ jobs:
           <<: *api_tests_environment
           command: |
             make -C api test-aws
-      # - run:
-      #     name: test-billing
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-billing
       - run:
           name: test-commands
           <<: *api_tests_environment
@@ -165,20 +165,15 @@ jobs:
           command: |
             make -C api test-job
       - run:
-          name: test-roots
-          <<: *api_tests_environment
-          command: |
-            make -C api test-roots
-      - run:
-          name: test-accept_invite
-          <<: *api_tests_environment
-          command: |
-            make -C api test-accept_invite
-      - run:
           name: test-organisation
           <<: *api_tests_environment
           command: |
             make -C api test-organisation
+      - run:
+          name: test-roots
+          <<: *api_tests_environment
+          command: |
+            make -C api test-roots
 
   build-api:
     <<: *python_node_image
