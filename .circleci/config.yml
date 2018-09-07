@@ -119,11 +119,11 @@ jobs:
           <<: *api_tests_environment
           command: |
             make -C api test-aws
-      - run:
-          name: test-billing
-          <<: *api_tests_environment
-          command: |
-            make -C api test-billing
+      # - run:
+      #     name: test-billing
+      #     <<: *api_tests_environment
+      #     command: |
+      #       make -C api test-billing
       - run:
           name: test-commands
           <<: *api_tests_environment
