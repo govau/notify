@@ -61,7 +61,7 @@ def test_persist_notification_creates_and_save_to_db(sample_template, sample_api
     notification = persist_notification(
         template_id=sample_template.id,
         template_version=sample_template.version,
-        recipient='+0412345678',
+        recipient='+61412345678',
         service=sample_template.service,
         personalisation={},
         notification_type='sms',
@@ -105,7 +105,7 @@ def test_persist_notification_throws_exception_when_missing_template(sample_api_
     with pytest.raises(SQLAlchemyError):
         persist_notification(template_id=None,
                              template_version=None,
-                             recipient='+0412345678',
+                             recipient='+61412345678',
                              service=sample_api_key.service,
                              personalisation=None,
                              notification_type='sms',
@@ -121,7 +121,7 @@ def test_cache_is_not_incremented_on_failure_to_persist_notification(sample_api_
     with pytest.raises(SQLAlchemyError):
         persist_notification(template_id=None,
                              template_version=None,
-                             recipient='+0412345678',
+                             recipient='+61412345678',
                              service=sample_api_key.service,
                              personalisation=None,
                              notification_type='sms',
@@ -146,7 +146,7 @@ def test_persist_notification_does_not_increment_cache_if_test_key(
     persist_notification(
         template_id=sample_template.id,
         template_version=sample_template.version,
-        recipient='+0412345678',
+        recipient='+61412345678',
         service=sample_template.service,
         personalisation={},
         notification_type='sms',
@@ -175,7 +175,7 @@ def test_persist_notification_with_optionals(sample_job, sample_api_key, mocker)
     persist_notification(
         template_id=sample_job.template.id,
         template_version=sample_job.template.version,
-        recipient='+0412345678',
+        recipient='+61412345678',
         service=sample_job.service,
         personalisation=None,
         notification_type='sms',
@@ -216,7 +216,7 @@ def test_persist_notification_doesnt_touch_cache_for_old_keys_that_dont_exist(sa
     persist_notification(
         template_id=sample_template.id,
         template_version=sample_template.version,
-        recipient='+0412345678',
+        recipient='+61412345678',
         service=sample_template.service,
         personalisation={},
         notification_type='sms',
