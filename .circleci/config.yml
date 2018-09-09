@@ -130,7 +130,7 @@ jobs:
           command: |
             make -C api test-billing
       - run:
-          name: test-roots
+          name: test-commands
           <<: *api_tests_environment
           command: |
             make -C api test-commands
