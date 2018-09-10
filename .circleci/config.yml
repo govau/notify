@@ -113,6 +113,7 @@ jobs:
       - run: make -C api test-template
       - run: make -C api test-template_statistics
       - run: make -C api test-user
+      - run: make -C api test-letters
 
   build-api:
     <<: *python_node_image
