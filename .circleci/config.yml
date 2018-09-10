@@ -10,7 +10,7 @@ references:
       - image: circleci/python:3.6.5-node
       - image: circleci/postgres:9.6-alpine
         environment:
-          POSTGRES_USER: postgres
+          POSTGRES_USER: circleci
           POSTGRES_DB: test_notification_api
 
   deploy_image: &deploy_image
@@ -56,14 +56,6 @@ references:
         ignore:
           - master
 
-  api_tests_environment: &api_tests_environment
-    environment:
-      TEST_PIPENV_DOTENV_LOCATION: ""
-      FLASK_APP: "application.py"
-      NOTIFY_ENVIRONMENT: "test"
-      TWILIO_ACCOUNT_SID: "twilio-account-sid"
-      TWILIO_AUTH_TOKEN: "twilio-auth-token"
-
 jobs:
   setup:
     <<: *python_node_image
@@ -103,82 +95,20 @@ jobs:
     steps:
       - *attach_workspace
       - run: make api.setup-dev
-      - run:
-          name: Wait for Postgres to be ready
-          environment:
-            DOCKER_TEST_DB_PORT: "5432"
-          command: |
-            make -C api wait-for-docker-test-db
-      - run:
-          name: test-accept_invite
-          <<: *api_tests_environment
-          command: |
-            make -C api test-accept_invite
-      - run:
-          name: test-authentication
-          <<: *api_tests_environment
-          command: |
-            make -C api test-authentication
-      - run:
-          name: test-aws
-          <<: *api_tests_environment
-          command: |
-            make -C api test-aws
-      - run:
-          name: test-commands
-          <<: *api_tests_environment
-          command: |
-            make -C api test-commands
-      - run:
-          name: test-dvla_organisation
-          <<: *api_tests_environment
-          command: |
-            make -C api test-dvla_organisation
-      - run:
-          name: test-email_branding
-          <<: *api_tests_environment
-          command: |
-            make -C api test-email_branding
-      - run:
-          name: test-events
-          <<: *api_tests_environment
-          command: |
-            make -C api test-events
-      - run:
-          name: test-inbound_number
-          <<: *api_tests_environment
-          command: |
-            make -C api test-inbound_number
-      - run:
-          name: test-inbound_sms
-          <<: *api_tests_environment
-          command: |
-            make -C api test-inbound_sms
-      - run:
-          name: test-invite
-          <<: *api_tests_environment
-          command: |
-            make -C api test-invite
-      - run:
-          name: test-job
-          <<: *api_tests_environment
-          command: |
-            make -C api test-job
-      - run:
-          name: test-notifications
-          <<: *api_tests_environment
-          command: |
-            make -C api test-notifications
-      - run:
-          name: test-organisation
-          <<: *api_tests_environment
-          command: |
-            make -C api test-organisation
-      - run:
-          name: test-roots
-          <<: *api_tests_environment
-          command: |
-            make -C api test-roots
+      - run: make -C api test-accept_invite
+      - run: make -C api test-authentication
+      - run: make -C api test-aws
+      - run: make -C api test-commands
+      - run: make -C api test-dvla_organisation
+      - run: make -C api test-email_branding
+      - run: make -C api test-events
+      - run: make -C api test-inbound_number
+      - run: make -C api test-inbound_sms
+      - run: make -C api test-invite
+      - run: make -C api test-job
+      - run: make -C api test-notifications
+      - run: make -C api test-organisation
+      - run: make -C api test-roots
 
   build-api:
     <<: *python_node_image
@@ -282,17 +212,14 @@ workflows:
       - deploy-dev-admin:
           requires:
             - build-admin
-            - test-admin
 
       - deploy-dev-api:
           requires:
             - build-api
-            - test-api
 
       - deploy-dev-celery:
           requires:
             - build-api
-            - test-api
 
       - cleanup-old-deploys:
           requires:
@@ -303,6 +230,8 @@ workflows:
           type: approval
           requires:
             - deploy-dev-admin
+            - test-api
+            - test-admin
             - deploy-dev-api
             - deploy-dev-celery
 

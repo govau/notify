@@ -2,7 +2,7 @@ import json
 from tests import create_authorization_header
 
 
-def test_create_event(notify_api):
+def test_create_event(notify_db, notify_api):
     with notify_api.test_request_context():
         with notify_api.test_client() as client:
             data = {
