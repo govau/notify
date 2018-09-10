@@ -13,11 +13,16 @@ def test_get_email_branding_options(admin_request, notify_db, notify_db_session)
         'email_branding.get_email_branding_options'
     )['email_branding']
 
-    assert len(email_branding) == 2
+    assert 6 == len(email_branding)
     assert {
         email_branding['id'] for email_branding in email_branding
     } == {
-        str(email_branding1.id), str(email_branding2.id)
+        '9d25d02d-2915-4e98-874b-974e123e8536',
+        '123496d4-44cb-4324-8e0a-4187101f4bdc',
+        '1d70f564-919b-4c68-8bdf-b8520d92516e',
+        '89ce468b-fb29-4d5d-bd3f-d468fb6f7c36',
+        str(email_branding1.id),
+        str(email_branding2.id)
     }
 
 
