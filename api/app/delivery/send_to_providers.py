@@ -170,10 +170,13 @@ def provider_to_use(notification_type, notification_id, international=False):
     ]
 
     if not active_providers_in_order:
+        kind = "{} providers".format(notification_type)
+        if international:
+            kind = "international {}".format(kind)
         current_app.logger.error(
-            "{} {} failed as no active providers".format(notification_type, notification_id)
+            "{} failed as no active {}".format(notification_id, kind)
         )
-        raise Exception("No active {} providers".format(notification_type))
+        raise Exception("No active {}".format(kind))
 
     return clients.get_client_by_name_and_type(active_providers_in_order[0].identifier, notification_type)
 

@@ -99,6 +99,7 @@ jobs:
       - run: make -C api test-authentication
       - run: make -C api test-aws
       - run: make -C api test-commands
+      - run: make -C api test-delivery
       - run: make -C api test-dvla_organisation
       - run: make -C api test-email_branding
       - run: make -C api test-events
