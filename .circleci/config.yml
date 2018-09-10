@@ -109,76 +109,76 @@ jobs:
             DOCKER_TEST_DB_PORT: "5432"
           command: |
             make -C api wait-for-docker-test-db
-      # - run:
-      #     name: test-accept_invite
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-accept_invite
-      # - run:
-      #     name: test-authentication
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-authentication
-      # - run:
-      #     name: test-aws
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-aws
-      # - run:
-      #     name: test-commands
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-commands
-      # - run:
-      #     name: test-dvla_organisation
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-dvla_organisation
-      # - run:
-      #     name: test-email_branding
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-email_branding
-      # - run:
-      #     name: test-events
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-events
-      # - run:
-      #     name: test-inbound_number
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-inbound_number
-      # - run:
-      #     name: test-inbound_sms
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-inbound_sms
-      # - run:
-      #     name: test-invite
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-invite
-      # - run:
-      #     name: test-job
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-job
-      # - run:
-      #     name: test-notifications
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-notifications
-      # - run:
-      #     name: test-organisation
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-organisation
-      # - run:
-      #     name: test-roots
-      #     <<: *api_tests_environment
-      #     command: |
-      #       make -C api test-roots
+      - run:
+          name: test-accept_invite
+          <<: *api_tests_environment
+          command: |
+            make -C api test-accept_invite
+      - run:
+          name: test-authentication
+          <<: *api_tests_environment
+          command: |
+            make -C api test-authentication
+      - run:
+          name: test-aws
+          <<: *api_tests_environment
+          command: |
+            make -C api test-aws
+      - run:
+          name: test-commands
+          <<: *api_tests_environment
+          command: |
+            make -C api test-commands
+      - run:
+          name: test-dvla_organisation
+          <<: *api_tests_environment
+          command: |
+            make -C api test-dvla_organisation
+      - run:
+          name: test-email_branding
+          <<: *api_tests_environment
+          command: |
+            make -C api test-email_branding
+      - run:
+          name: test-events
+          <<: *api_tests_environment
+          command: |
+            make -C api test-events
+      - run:
+          name: test-inbound_number
+          <<: *api_tests_environment
+          command: |
+            make -C api test-inbound_number
+      - run:
+          name: test-inbound_sms
+          <<: *api_tests_environment
+          command: |
+            make -C api test-inbound_sms
+      - run:
+          name: test-invite
+          <<: *api_tests_environment
+          command: |
+            make -C api test-invite
+      - run:
+          name: test-job
+          <<: *api_tests_environment
+          command: |
+            make -C api test-job
+      - run:
+          name: test-notifications
+          <<: *api_tests_environment
+          command: |
+            make -C api test-notifications
+      - run:
+          name: test-organisation
+          <<: *api_tests_environment
+          command: |
+            make -C api test-organisation
+      - run:
+          name: test-roots
+          <<: *api_tests_environment
+          command: |
+            make -C api test-roots
       - run:
           name: test-status
           <<: *api_tests_environment
@@ -268,65 +268,65 @@ workflows:
   build-and-deploy:
     jobs:
       - setup
-      # - build-admin:
-      #     requires:
-      #       - setup
+      - build-admin:
+          requires:
+            - setup
 
-      # - build-api:
-      #     requires:
-      #       - setup
+      - build-api:
+          requires:
+            - setup
 
-      # - test-admin:
-      #     requires:
-      #       - setup
+      - test-admin:
+          requires:
+            - setup
 
       - test-api:
           requires:
             - setup
 
-      # - deploy-dev-admin:
-      #     requires:
-      #       - build-admin
-      #       - test-admin
+      - deploy-dev-admin:
+          requires:
+            - build-admin
+            - test-admin
 
-      # - deploy-dev-api:
-      #     requires:
-      #       - build-api
-      #       - test-api
+      - deploy-dev-api:
+          requires:
+            - build-api
+            - test-api
 
-      # - deploy-dev-celery:
-      #     requires:
-      #       - build-api
-      #       - test-api
+      - deploy-dev-celery:
+          requires:
+            - build-api
+            - test-api
 
-      # - cleanup-old-deploys:
-      #     requires:
-      #       - setup
+      - cleanup-old-deploys:
+          requires:
+            - setup
 
-      # - unlock-prod-deploy:
-      #     <<: *master_branch
-      #     type: approval
-      #     requires:
-      #       - deploy-dev-admin
-      #       - deploy-dev-api
-      #       - deploy-dev-celery
+      - unlock-prod-deploy:
+          <<: *master_branch
+          type: approval
+          requires:
+            - deploy-dev-admin
+            - deploy-dev-api
+            - deploy-dev-celery
 
-      # - deploy-prod-admin:
-      #     <<: *master_branch
-      #     requires:
-      #       - unlock-prod-deploy
+      - deploy-prod-admin:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
 
-      # - deploy-prod-api:
-      #     <<: *master_branch
-      #     requires:
-      #       - unlock-prod-deploy
+      - deploy-prod-api:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
 
-      # - deploy-prod-celery:
-      #     <<: *master_branch
-      #     requires:
-      #       - unlock-prod-deploy
+      - deploy-prod-celery:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
 
-      # - deploy-statuspage:
-      #     <<: *master_branch
-      #     requires:
-      #       - unlock-prod-deploy
+      - deploy-statuspage:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
