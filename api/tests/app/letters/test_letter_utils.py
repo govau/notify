@@ -19,6 +19,9 @@ from app.variables import Retention
 FROZEN_DATE_TIME = "2018-03-14 17:00:00"
 
 
+pytest.skip("we no longer support sending letters", allow_module_level=True)
+
+
 @pytest.fixture()
 @freeze_time(FROZEN_DATE_TIME)
 def sample_precompiled_letter_notification_using_test_key(sample_letter_notification):

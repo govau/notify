@@ -1,3 +1,4 @@
+import pytest
 from flask import json
 
 from app.variables import LETTER_TEST_API_FILENAME
@@ -5,6 +6,7 @@ from app.variables import LETTER_TEST_API_FILENAME
 from tests import create_authorization_header
 from tests.app.db import create_job
 
+pytest.skip("we no longer support sending letters", allow_module_level=True)
 
 def test_send_letter_jobs(client, mocker, sample_letter_template):
     mock_celery = mocker.patch("app.letters.rest.notify_celery.send_task")
