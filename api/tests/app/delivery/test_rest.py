@@ -25,7 +25,7 @@ def test_should_reject_if_invalid_uuid(notify_api):
         assert body['result'] == 'error'
 
 
-def test_should_reject_if_notification_id_cannot_be_found(notify_api):
+def test_should_reject_if_notification_id_cannot_be_found(notify_db, notify_api):
     with notify_api.test_request_context():
         with notify_api.test_client() as client:
             auth = create_authorization_header()
