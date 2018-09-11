@@ -99,6 +99,7 @@ jobs:
       - run: make -C api test-authentication
       - run: make -C api test-aws
       - run: make -C api test-billing
+      - run: make -C api test-celery
       - run: make -C api test-commands
       - run: make -C api test-dvla_organisation
       - run: make -C api test-email_branding
@@ -116,6 +117,7 @@ jobs:
       - run: make -C api test-user
       - run: make -C api test-letters
       - run: make -C api test-provider_details
+      - run: make -C api test-public_contracts
 
   build-api:
     <<: *python_node_image
