@@ -116,6 +116,7 @@ jobs:
       - run: make -C api test-letters
       - run: make -C api test-provider_details
       - run: make -C api test-public_contracts
+      - run: make -C api test-service
 
   build-api:
     <<: *python_node_image
