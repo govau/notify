@@ -1,7 +1,7 @@
 from flask import json
 
 
-def test_get_status_all_ok(client):
+def test_get_status_all_ok(client, notify_db):
     path = '/_status'
     response = client.get(path)
     assert response.status_code == 200
