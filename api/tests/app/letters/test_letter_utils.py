@@ -19,7 +19,7 @@ from app.variables import Retention
 FROZEN_DATE_TIME = "2018-03-14 17:00:00"
 
 
-pytest.skip("we no longer support sending letters", allow_module_level=True)
+pytest.skip("we do not support sending letters", allow_module_level=True)
 
 
 @pytest.fixture()
