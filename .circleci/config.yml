@@ -109,6 +109,7 @@ jobs:
       - run: make -C api test-notifications
       - run: make -C api test-organisation
       - run: make -C api test-roots
+      - run: make -C api test-template
 
   build-api:
     <<: *python_node_image
