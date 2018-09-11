@@ -380,7 +380,7 @@ def test_should_get_a_single_template(
             'hello user we’ve received your thing',
             '/service/{}/template/{}/preview',
             'about your thing',
-            'hello user we’ve received your thing',
+            'hello user we’ve received your thing\n',
             None
         ),
         (
@@ -388,7 +388,7 @@ def test_should_get_a_single_template(
             'hello ((name)) we’ve received your ((thing))',
             '/service/{}/template/{}/preview?name=Amala&thing=document',
             'about your document',
-            'hello Amala we’ve received your document',
+            'hello Amala we’ve received your document\n',
             None
         ),
         (
@@ -403,7 +403,7 @@ def test_should_get_a_single_template(
             'hello ((name)) we’ve received your ((thing))',
             '/service/{}/template/{}/preview?name=Amala&thing=document&foo=bar',
             'about your document',
-            'hello Amala we’ve received your document',
+            'hello Amala we’ve received your document\n',
             None,
         )
     ]
