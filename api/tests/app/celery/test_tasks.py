@@ -455,10 +455,10 @@ def test_should_put_save_sms_task_in_research_mode_queue_if_research_mode_servic
 
 
 def test_should_save_sms_if_restricted_service_and_valid_number(notify_db, notify_db_session, mocker):
-    user = create_user(mobile_number="07700 900890")
+    user = create_user(mobile_number="0412345678")
     service = create_sample_service(notify_db, notify_db_session, user=user, restricted=True)
     template = create_sample_template(notify_db, notify_db_session, service=service)
-    notification = _notification_json(template, "+447700900890")  # The user’s own number, but in a different format
+    notification = _notification_json(template, "+61412345678")  # The user’s own number, but in a different format
 
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
@@ -471,7 +471,7 @@ def test_should_save_sms_if_restricted_service_and_valid_number(notify_db, notif
     )
 
     persisted_notification = Notification.query.one()
-    assert persisted_notification.to == '+447700900890'
+    assert persisted_notification.to == '+61412345678'
     assert persisted_notification.template_id == template.id
     assert persisted_notification.template_version == template.version
     assert persisted_notification.status == 'created'
@@ -1073,10 +1073,10 @@ def test_save_letter_uses_template_reply_to_text(mocker, notify_db_session):
 
 
 def test_save_sms_uses_sms_sender_reply_to_text(mocker, notify_db_session):
-    service = create_service_with_defined_sms_sender(sms_sender_value='07123123123')
+    service = create_service_with_defined_sms_sender(sms_sender_value='0412345678')
     template = create_template(service=service)
 
-    notification = _notification_json(template, to="07700 900205")
+    notification = _notification_json(template, to="0412 345 678")
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     notification_id = uuid.uuid4()
@@ -1088,7 +1088,7 @@ def test_save_sms_uses_sms_sender_reply_to_text(mocker, notify_db_session):
     )
 
     persisted_notification = Notification.query.one()
-    assert persisted_notification.reply_to_text == '447123123123'
+    assert persisted_notification.reply_to_text == '61412345678'
 
 
 @pytest.mark.parametrize('env', ['staging', 'live'])

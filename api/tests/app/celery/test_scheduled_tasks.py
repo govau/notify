@@ -383,6 +383,7 @@ def test_switch_current_sms_provider_on_slow_delivery_does_not_run_if_config_uns
     assert toggle_sms_mock.called is False
 
 
+@pytest.mark.skip(reason="We currently do not support sms fallback functionality")
 def test_switch_providers_on_slow_delivery_runs_if_config_set(
     notify_api,
     mocker,
@@ -401,7 +402,7 @@ def test_switch_providers_on_slow_delivery_runs_if_config_set(
 
     assert get_notifications_mock.called is True
 
-
+@pytest.mark.skip(reason="We currently do not support sms fallback functionality")
 def test_switch_providers_triggers_on_slow_notification_delivery(
     notify_api,
     mocker,
@@ -424,6 +425,7 @@ def test_switch_providers_triggers_on_slow_notification_delivery(
     assert new_provider.priority < starting_provider.priority
 
 
+@pytest.mark.skip(reason="We currently do not support sms fallback functionality")
 def test_switch_providers_on_slow_delivery_does_not_switch_if_already_switched(
     notify_api,
     mocker,
@@ -448,6 +450,7 @@ def test_switch_providers_on_slow_delivery_does_not_switch_if_already_switched(
     assert new_provider.priority < starting_provider.priority
 
 
+@pytest.mark.skip(reason="We currently do not support sms fallback functionality")
 def test_switch_providers_on_slow_delivery_does_not_switch_based_on_older_notifications(
     notify_api,
     mocker,
