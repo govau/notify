@@ -3,7 +3,10 @@ from app.dao.inbound_numbers_dao import dao_get_inbound_number_for_service
 from tests.app.db import create_service, create_inbound_number
 
 
-def test_rest_get_inbound_numbers_when_none_set_returns_empty_list(admin_request):
+def test_rest_get_inbound_numbers_when_none_set_returns_empty_list(
+        admin_request,
+        notify_db
+    ):
     result = admin_request.get('inbound_number.get_inbound_numbers')
 
     assert result['data'] == []

@@ -1,14 +1,11 @@
 GUNICORN ?= gunicorn
 PIPENV ?= pipenv
-TEST_PIPENV_DOTENV_LOCATION ?= $(shell pwd)/.env_test
 RUNNER ?= $(PIPENV) run
 PORT   ?= 6011
 WORKERS?= 4
 CF     ?= cf
 APP    ?= notify-api
 STG    ?= dev
-
-export PIPENV_DOTENV_LOCATION
 
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
@@ -20,7 +17,6 @@ BUILD_NUMBER ?= 0
 BUILD_URL ?=
 
 DOCKER_CONTAINER_PREFIX = ${USER}-
-
 DOCKER_TEST_DB_PORT ?= 5420
 
 APP_DIRS  = $(shell find tests/app/* -maxdepth 1 -type d)
@@ -70,26 +66,16 @@ test: lint tests
 lint:
 	$(RUNNER) flake8 .
 
-tests: PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 tests: version-file
-	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
 
 $(APP_TESTS): test-%: version-file
-$(APP_TESTS): PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
-$(APP_TESTS):
-	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/$*
 
 $(DAO_TESTS): test-dao-%: version-file
-$(DAO_TESTS): PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
-$(DAO_TESTS):
-	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/dao/$*
 
-test-roots: PIPENV_DOTENV_LOCATION := $(TEST_PIPENV_DOTENV_LOCATION)
 test-roots: version-file
-	$(MAKE) setup-test-db
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/*.py
 
 wait-for-docker-test-db:

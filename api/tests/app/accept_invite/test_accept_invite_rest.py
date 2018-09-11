@@ -50,7 +50,11 @@ def test_validate_invitation_token_returns_200_when_token_valid(
 
 
 @pytest.mark.parametrize('invitation_type', ['service', 'organisation'])
-def test_validate_invitation_token_returns_400_when_invited_user_does_not_exist(client, invitation_type):
+def test_validate_invitation_token_returns_400_when_invited_user_does_not_exist(
+        client,
+        notify_db,
+        invitation_type
+    ):
     token = generate_token(str(uuid.uuid4()), current_app.config['SECRET_KEY'],
                            current_app.config['DANGEROUS_SALT'])
     url = '/invite/{}/{}'.format(invitation_type, token)
