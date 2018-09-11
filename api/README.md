@@ -32,9 +32,12 @@ Install postgres. this can be done easily through homebrew
     brew services start postgresql
 ```
 
+Then create a working database with the command `createdb notification_api`.
+
+
+
 ## To run the application
 
-First, create a postgres database with the command `createdb notification_api`.
 
 Then, run `make setup` to install dependencies.
 
@@ -56,25 +59,38 @@ You need to run the api application and a local celery instance.
 
 ## To test the application
 
-First, create a test database in docker:
+First, run `make setup-dev` to get an environment ready for testing.
 
-```shell
-    make create-docker-test-db
-```
-
-In development, create a `.env_test` file (equivalent to `.env`) and put your database connection string in it. For example:
-
-```
-SQLALCHEMY_DATABASE_URI="postgresql://postgres@localhost:5420/test_notification_api"
-```
-
-Then run:
+Then issue the following command to run code analysis using flake8 and our
+entire test suite:
 
 ```shell
     make test
 ```
 
-That will run flake8 for code analysis and our unit test suite.
+## Using docker for your database
+
+If you prefer using docker to isolate your database, you can
+specify its connection string in your `.env` file by using the variable 
+
+```
+SQLALCHEMY_DATABASE_URI="postgresql://postgres@localhost:5420/notification_api"
+```
+
+Similarly, if you prefer to use postgres for testing, you can specify that
+by setting the following environment variable
+
+```
+SQLALCHEMY_TEST_DATABASE_URI="postgresql://postgres@localhost:5420/test_notification_api"
+```
+
+and then running the docker container and tests
+
+```
+    make create-docker-test-db
+    make test
+```
+
 
 ## To run one off tasks
 

@@ -3,7 +3,7 @@ from flask import json
 from tests import create_authorization_header
 
 
-def test_get_dvla_organisations(client):
+def test_get_dvla_organisations(client, notify_db):
     auth_header = create_authorization_header()
 
     response = client.get('/dvla_organisations', headers=[auth_header])

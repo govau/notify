@@ -389,7 +389,7 @@ class Test(Development):
     LETTERS_SCAN_BUCKET_NAME = 'test-letters-scan'
 
     # this is overriden in jenkins and on cloudfoundry
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://postgres@localhost:5432/test_notification_api')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_TEST_DATABASE_URI', 'postgresql://localhost/test_notification_api')
 
     BROKER_URL = 'you-forgot-to-mock-celery-in-your-tests://'
 
