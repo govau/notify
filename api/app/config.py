@@ -378,13 +378,14 @@ class Development(Config):
 
 
 class Test(Development):
+    NOTIFY_EMAIL_DOMAIN = 'notifytest.gov.au'
     FROM_NUMBER = 'testing'
     NOTIFY_ENVIRONMENT = 'test'
     TESTING = True
 
     LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'test-test-letters'
-    DVLA_RESPONSE_BUCKET_NAME = 'test.notify.com-ftp'
+    DVLA_RESPONSE_BUCKET_NAME = 'notifytest.gov.au-ftp'
     LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
     LETTERS_SCAN_BUCKET_NAME = 'test-letters-scan'
 

@@ -17,6 +17,7 @@ from werkzeug.local import LocalProxy
 from app.celery.celery import NotifyCelery
 from app.clients import Clients
 from app.clients.email.smtp import SMTPClient
+from app.clients.email.aws_ses import AwsSesClient
 from app.clients.sms.telstra import TelstraSMSClient
 from app.clients.sms.twilio import TwilioSMSClient
 from app.clients.performance_platform.performance_platform_client import PerformancePlatformClient
@@ -43,6 +44,7 @@ smtp_client = SMTPClient(
     user=os.getenv('SMTP_USER'),
     password=os.getenv('SMTP_PASSWORD'),
 )
+aws_ses_client = AwsSesClient()
 encryption = Encryption()
 deskpro_client = DeskproClient()
 statsd_client = StatsdClient()

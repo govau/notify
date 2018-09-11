@@ -30,9 +30,9 @@ def get_twilio_responses(status):
 
 class TwilioSMSClient(SmsClient):
     def __init__(self,
-            account_sid = None, 
-            auth_token = None, 
-            from_number = None, 
+            account_sid = None,
+            auth_token = None,
+            from_number = None,
             *args, **kwargs):
         super(TwilioSMSClient, self).__init__(*args, **kwargs)
         self._account_sid = account_sid
