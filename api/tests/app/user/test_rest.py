@@ -90,7 +90,7 @@ def test_post_user(client, notify_db, notify_db_session):
     """
     Tests POST endpoint '/' to create a user.
     """
-    assert User.query.count() == 0
+    assert User.query.count() == 1
     data = {
         "name": "Test User",
         "email_address": "user@digital.cabinet-office.gov.uk",

@@ -98,6 +98,7 @@ jobs:
       - run: make -C api test-accept_invite
       - run: make -C api test-authentication
       - run: make -C api test-aws
+      - run: make -C api test-billing
       - run: make -C api test-celery
       - run: make -C api test-commands
       - run: make -C api test-dvla_organisation
