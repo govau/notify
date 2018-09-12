@@ -100,6 +100,7 @@ jobs:
       - run: make -C api test-aws
       - run: make -C api test-billing
       - run: make -C api test-celery
+      - run: make -C api test-clients
       - run: make -C api test-commands
       - run: make -C api test-delivery
       - run: make -C api test-dvla_organisation
