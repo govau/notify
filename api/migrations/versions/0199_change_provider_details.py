@@ -12,12 +12,10 @@ import sqlalchemy as sa
 revision = '0199'
 down_revision = '0198'
 
-notify_service_user_id = '6af522d0-2915-4e52-83a3-3690455a5fe6'
-
 def make_provider_details_upgrade_sql(identifier, priority, supports_international, active):
     return """
         UPDATE provider_details
-        SET priority={1}, supports_international={2}, active={3}, created_by_id='{4}', updated_at=now(), version=(
+        SET priority={1}, supports_international={2}, active={3}, updated_at=now(), version=(
             SELECT version from provider_details WHERE identifier = '{0}'
         ) + 1
         WHERE identifier='{0}'
@@ -26,7 +24,6 @@ def make_provider_details_upgrade_sql(identifier, priority, supports_internation
         priority,
         supports_international,
         active,
-        notify_service_user_id,
     )
 
 def make_provider_details_history_upgrade_sql(identifier):

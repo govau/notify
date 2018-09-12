@@ -99,9 +99,11 @@ def notify_db_session(notify_db):
     notify_db.session.remove()
 
     keep_tables = [
+        "provider_details",
         "key_types",
         "branding_type",
         "job_status",
+        "provider_details_history",
         "template_process_type",
         "dvla_organisation",
         "notification_status_types",
