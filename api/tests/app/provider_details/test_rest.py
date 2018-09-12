@@ -16,9 +16,9 @@ def test_get_provider_details_in_type_and_identifier_order(client, notify_db):
     assert len(json_resp) == 7
 
     assert json_resp[0]['identifier'] == 'smtp'
-    assert json_resp[1]['identifier'] == 'mmg'
+    assert json_resp[1]['identifier'] == 'twilio'
     assert json_resp[2]['identifier'] == 'telstra'
-    assert json_resp[3]['identifier'] == 'twilio'
+    assert json_resp[3]['identifier'] == 'mmg'
     assert json_resp[4]['identifier'] == 'firetext'
     assert json_resp[5]['identifier'] == 'loadtesting'
     assert json_resp[6]['identifier'] == 'dvla'
