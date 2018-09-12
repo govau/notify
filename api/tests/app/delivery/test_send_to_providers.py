@@ -540,6 +540,7 @@ def test_should_update_billable_units_according_to_research_mode_and_key_type(
 
 
 def test_should_send_sms_to_international_providers(
+    notify_db,
     restore_provider_details,
     sample_sms_template_with_html,
     sample_user,
@@ -653,12 +654,12 @@ def test_should_set_international_phone_number_to_sent_status(
     ('testing', 'testing', False, 'bar'),
 ])
 def test_should_handle_sms_sender_and_prefix_message(
+    notify_db_session,
     mocker,
     sms_sender,
     prefix_sms,
     expected_sender,
     expected_content,
-    notify_db_session
 ):
     mocker.patch('app.twilio_sms_client.send_sms')
     service = create_service_with_defined_sms_sender(sms_sender_value=sms_sender, prefix_sms=prefix_sms)
@@ -676,8 +677,10 @@ def test_should_handle_sms_sender_and_prefix_message(
 
 
 def test_send_email_to_provider_uses_reply_to_from_notification(
-        sample_email_template,
-        mocker):
+    notify_db,
+    sample_email_template,
+    mocker,
+):
     mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
 
     db_notification = create_notification(template=sample_email_template, reply_to_text="test@test.com")
@@ -697,8 +700,10 @@ def test_send_email_to_provider_uses_reply_to_from_notification(
 
 
 def test_send_email_to_provider_should_format_reply_to_email_address(
-        sample_email_template,
-        mocker):
+    notify_db,
+    sample_email_template,
+    mocker,
+):
     mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
 
     db_notification = create_notification(template=sample_email_template, reply_to_text="test@test.com\t")
@@ -717,7 +722,11 @@ def test_send_email_to_provider_should_format_reply_to_email_address(
     )
 
 
-def test_send_sms_to_provider_should_format_phone_number(sample_notification, mocker):
+def test_send_sms_to_provider_should_format_phone_number(
+    notify_db,
+    sample_notification,
+    mocker,
+):
     sample_notification.to = '+61 (412) 345-678'
     send_mock = mocker.patch('app.twilio_sms_client.send_sms')
 
@@ -726,7 +735,11 @@ def test_send_sms_to_provider_should_format_phone_number(sample_notification, mo
     assert send_mock.call_args[1]['to'] == '61412345678'
 
 
-def test_send_email_to_provider_should_format_email_address(sample_email_notification, mocker):
+def test_send_email_to_provider_should_format_email_address(
+    notify_db,
+    sample_email_notification,
+    mocker,
+):
     sample_email_notification.to = 'test@example.com\t'
     send_mock = mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
 

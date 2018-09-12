@@ -97,18 +97,21 @@ def notify_db_session(notify_db):
     yield notify_db
 
     notify_db.session.remove()
+
+    keep_tables = [
+        "key_types",
+        "branding_type",
+        "job_status",
+        "template_process_type",
+        "dvla_organisation",
+        "notification_status_types",
+        "service_permission_types",
+        "auth_type",
+        "invite_status_type",
+    ]
+
     for tbl in reversed(notify_db.metadata.sorted_tables):
-        if tbl.name not in ["provider_details",
-                            "key_types",
-                            "branding_type",
-                            "job_status",
-                            "provider_details_history",
-                            "template_process_type",
-                            "dvla_organisation",
-                            "notification_status_types",
-                            "service_permission_types",
-                            "auth_type",
-                            "invite_status_type"]:
+        if tbl.name not in keep_tables:
             notify_db.engine.execute(tbl.delete())
     notify_db.session.commit()
 
