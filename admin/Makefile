@@ -36,7 +36,7 @@ setup-frontend: ## Setup and build css
 	$(NPM) install
 	$(NPM) run build -- --production
 
-setup: setup-frontend ## Setup virtualenv, install python deps, build css
+setup: setup-frontend version-file ## Setup virtualenv, install python deps, build css
 	$(PIPENV) install
 
 setup-dev: setup-frontend ## Setup everything in dev mode
