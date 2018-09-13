@@ -173,8 +173,8 @@ def test_post_sms_schema_with_personalisation_that_is_not_a_dict():
 
 
 @pytest.mark.parametrize('invalid_phone_number, err_msg', [
-    ('08515111111', 'phone_number Not a UK mobile number'),
-    ('07515111*11', 'phone_number Must not contain letters or symbols'),
+    ('61515111111', 'phone_number Not an AU mobile number'),
+    ('61415111*11', 'phone_number Must not contain letters or symbols'),
     ('notaphoneumber', 'phone_number Must not contain letters or symbols'),
     (7700900001, 'phone_number 7700900001 is not of type string'),
     (None, 'phone_number None is not of type string'),
@@ -193,13 +193,13 @@ def test_post_sms_request_schema_invalid_phone_number(invalid_phone_number, err_
 
 
 def test_post_sms_request_schema_invalid_phone_number_and_missing_template():
-    j = {"phone_number": '08515111111',
+    j = {"phone_number": '61515111111',
          }
     with pytest.raises(ValidationError) as e:
         validate(j, post_sms_request_schema)
     errors = json.loads(str(e.value)).get('errors')
     assert len(errors) == 2
-    assert {"error": "ValidationError", "message": "phone_number Not a UK mobile number"} in errors
+    assert {"error": "ValidationError", "message": "phone_number Not an AU mobile number"} in errors
     assert {"error": "ValidationError", "message": "template_id is a required property"} in errors
 
 
