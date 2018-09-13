@@ -37,7 +37,7 @@ setup(
         'smartypants',
         'monotonic',
         'pypdf2',
-        'boto3'
+        'boto3~=1.8'
     ],
     setup_requires=[
         'pytest-runner'

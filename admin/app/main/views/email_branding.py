@@ -55,6 +55,7 @@ def update_email_branding(branding_id, logo=None):
 
     logo = logo if logo else email_branding.get('logo') if email_branding else None
 
+
     if form.validate_on_submit():
         if form.file.data:
             upload_filename = upload_logo(
