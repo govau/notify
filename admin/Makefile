@@ -25,7 +25,7 @@ help: ## List common commands and their usage
 		{printf "\033[36m%-30s\033[0m  %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 app/version.py:
-	@echo -e "__travis_commit__ = \"${GIT_COMMIT}\"\n__time__ = \"${DATE}\"\n__travis_job_number__ = \"${BUILD_NUMBER}\"\n__travis_job_url__ = \"${BUILD_URL}\"" > $@
+	@echo -e "__commit_sha__ = \"${CIRCLE_SHA1}\"\n__time__ = \"${DATE}\"\n__build_number__ = \"${CIRCLE_BUILD_NUM}\"\n__build_job_url__ = \"${CIRCLE_BUILD_URL}\"" > $@
 
 version-file: app/version.py
 
@@ -36,10 +36,10 @@ setup-frontend: ## Setup and build css
 	$(NPM) install
 	$(NPM) run build -- --production
 
-setup: setup-frontend ## Setup virtualenv, install python deps, build css
+setup: setup-frontend version-file ## Setup virtualenv, install python deps, build css
 	$(PIPENV) install
 
-setup-dev: setup-frontend ## Setup everything in dev mode
+setup-dev: setup-frontend version-file ## Setup everything in dev mode
 	$(PIPENV) install --dev
 
 test: version-file ## Run linter, python tests, node tests
@@ -79,10 +79,10 @@ build-linux-wheels: pipenv-requirements.txt native-vendor
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
 
-deploy: vendor requirements.txt version-file ## Deploy admin to cloudfoundry
+deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
-deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt version-file ## Deploy admin to cloudfoundry
+deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 .PHONY: help test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
