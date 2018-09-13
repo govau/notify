@@ -36,7 +36,7 @@ setup-frontend: ## Setup and build css
 	$(NPM) install
 	$(NPM) run build -- --production
 
-setup: setup-frontend version-file ## Setup virtualenv, install python deps, build css
+setup: setup-frontend ## Setup virtualenv, install python deps, build css
 	$(PIPENV) install
 
 setup-dev: setup-frontend ## Setup everything in dev mode
@@ -79,10 +79,10 @@ build-linux-wheels: pipenv-requirements.txt native-vendor
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
 
-deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
+deploy: vendor requirements.txt version-file ## Deploy admin to cloudfoundry
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
-deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
+deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt version-file ## Deploy admin to cloudfoundry
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 .PHONY: help test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
