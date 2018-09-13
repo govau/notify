@@ -123,6 +123,7 @@ jobs:
       - run: make -C api test-public_contracts
       - run: make -C api test-service
       - run: make -C api test-v2
+      - run: make -C api test-dao
 
   build-api:
     <<: *python_node_image
