@@ -58,7 +58,7 @@ from app.models import (
     LETTER_TYPE,
     SMS_TYPE
 )
-from app.utils import get_london_midnight_in_utc
+from app.utils import get_sydney_midnight_in_utc
 from app.celery.service_callback_tasks import create_encrypted_callback_data
 from app.v2.errors import JobIncompleteError
 from tests.app.db import (
@@ -359,8 +359,8 @@ def test_send_total_sent_notifications_to_performance_platform_calls_with_correc
         send_total_sent_notifications_to_performance_platform(yesterday)
 
         perf_mock.assert_has_calls([
-            call(get_london_midnight_in_utc(yesterday), 'sms', 2),
-            call(get_london_midnight_in_utc(yesterday), 'email', 3)
+            call(get_sydney_midnight_in_utc(yesterday), 'sms', 2),
+            call(get_sydney_midnight_in_utc(yesterday), 'email', 3)
         ])
 
 
@@ -726,7 +726,7 @@ def test_monday_alert_if_letter_notifications_still_sending_reports_friday_lette
 def test_populate_monthly_billing_populates_correctly(sample_template):
     yesterday = datetime(2017, 7, 11, 13, 30)
     jul_month_start = datetime(2017, 6, 30, 23)
-    jul_month_end = datetime(2017, 7, 31, 22, 59, 59, 99999)
+    jul_month_end = datetime(2017, 7, 31, 22, 59, 59, 999999)
     create_rate(datetime(2016, 1, 1), 0.0123, 'sms')
 
     create_notification(template=sample_template, status='delivered', created_at=yesterday)
@@ -769,10 +769,10 @@ def test_populate_monthly_billing_populates_correctly(sample_template):
 
 
 @freeze_time("2016-04-01 23:00:00")
-def test_populate_monthly_billing_updates_correct_month_in_bst(sample_template):
+def test_populate_monthly_billing_updates_correct_month_in_aest(sample_template):
     yesterday = datetime.utcnow() - timedelta(days=1)
-    apr_month_start = datetime(2016, 3, 31, 23)
-    apr_month_end = datetime(2016, 4, 30, 22, 59, 59, 99999)
+    apr_month_start = datetime(2016, 3, 31, 13, 00, 00)
+    apr_month_end = datetime(2016, 4, 30, 13, 59, 59, 999999)
     create_rate(datetime(2016, 1, 1), 0.0123, 'sms')
     create_notification(template=sample_template, status='delivered', created_at=yesterday)
     populate_monthly_billing()

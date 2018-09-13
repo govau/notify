@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from functools import partial
 
@@ -20,23 +19,23 @@ from tests.app.db import (
     create_monthly_billing_entry,
     create_letter_rate)
 
-FEB_2016_MONTH_START = datetime(2016, 2, 1)
-FEB_2016_MONTH_END = datetime(2016, 2, 29, 23, 59, 59, 99999)
+FEB_2016_MONTH_START = datetime(2016, 1, 31, 13, 00, 00)
+FEB_2016_MONTH_END = datetime(2016, 2, 29, 12, 59, 59, 999999)
 
-MAR_2016_MONTH_START = datetime(2016, 3, 1)
-MAR_2016_MONTH_END = datetime(2016, 3, 31, 22, 59, 59, 99999)
+MAR_2016_MONTH_START = datetime(2016, 2, 29, 13, 00, 00)
+MAR_2016_MONTH_END = datetime(2016, 3, 31, 12, 59, 59, 999999)
 
-APR_2016_MONTH_START = datetime(2016, 3, 31, 23, 00, 00)
-APR_2016_MONTH_END = datetime(2016, 4, 30, 22, 59, 59, 99999)
+APR_2016_MONTH_START = datetime(2016, 3, 31, 13, 00, 00)
+APR_2016_MONTH_END = datetime(2016, 4, 30, 13, 59, 59, 999999)
 
-MAY_2016_MONTH_START = datetime(2016, 5, 31, 23, 00, 00)
-MAY_2016_MONTH_END = MAY_2016_MONTH_START + relativedelta(months=1, seconds=-1)
+MAY_2016_MONTH_START = datetime(2016, 4, 30, 14, 00, 00)
+MAY_2016_MONTH_END = datetime(2016, 5, 31, 13, 59, 59, 999999)
 
-APR_2017_MONTH_START = datetime(2017, 3, 31, 23, 00, 00)
-APR_2017_MONTH_END = datetime(2017, 4, 30, 23, 59, 59, 99999)
+APR_2017_MONTH_START = datetime(2017, 3, 31, 13, 00, 00)
+APR_2017_MONTH_END = datetime(2017, 4, 30, 13, 59, 59, 999999)
 
-JAN_2017_MONTH_START = datetime(2017, 1, 1)
-JAN_2017_MONTH_END = datetime(2017, 1, 31, 23, 59, 59, 99999)
+JAN_2017_MONTH_START = datetime(2016, 12, 31, 13, 00, 00)
+JAN_2017_MONTH_END = datetime(2017, 1, 31, 12, 59, 59, 999999)
 
 FEB_2017 = datetime(2017, 2, 15)
 APR_2016 = datetime(2016, 4, 10)

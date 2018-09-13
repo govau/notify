@@ -18,7 +18,7 @@ from app.models import (
 )
 from app.celery.tasks import (
     check_billable_units,
-    get_billing_date_in_bst_from_filename,
+    get_billing_date_in_aest_from_filename,
     persist_daily_sorted_letter_counts,
     process_updates_from_file,
     update_dvla_job_to_error,
@@ -323,9 +323,9 @@ def test_check_billable_units_when_billable_units_does_not_match_page_count(
     ('20170820230000', date(2017, 8, 21)),
     ('20170120230000', date(2017, 1, 20))
 ])
-def test_get_billing_date_in_bst_from_filename(filename_date, billing_date):
+def test_get_billing_date_in_aest_from_filename(filename_date, billing_date):
     filename = 'NOTIFY-{}-RSP.TXT'.format(filename_date)
-    result = get_billing_date_in_bst_from_filename(filename)
+    result = get_billing_date_in_aest_from_filename(filename)
 
     assert result == billing_date
 

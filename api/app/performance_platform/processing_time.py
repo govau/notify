@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from app.utils import get_midnight_for_day_before, get_london_midnight_in_utc
+from app.utils import get_midnight_for_day_before, get_sydney_midnight_in_utc
 from app.dao.notifications_dao import dao_get_total_notifications_sent_per_day_for_performance_platform
 from app import performance_platform_client
 
@@ -10,7 +10,7 @@ from app import performance_platform_client
 def send_processing_time_to_performance_platform():
     today = datetime.utcnow()
     start_date = get_midnight_for_day_before(today)
-    end_date = get_london_midnight_in_utc(today)
+    end_date = get_sydney_midnight_in_utc(today)
 
     send_processing_time_for_start_and_end(start_date, end_date)
 

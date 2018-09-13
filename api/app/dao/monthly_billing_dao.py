@@ -13,7 +13,7 @@ from app.models import (
     MonthlyBilling,
     NotificationHistory
 )
-from app.utils import convert_utc_to_bst
+from app.utils import convert_utc_to_aest
 
 
 def get_service_ids_that_need_billing_populated(start_date, end_date):
@@ -108,15 +108,15 @@ def get_yearly_billing_data_for_date_range(
 
 @statsd(namespace="dao")
 def get_monthly_billing_by_notification_type(service_id, billing_month, notification_type):
-    billing_month_in_bst = convert_utc_to_bst(billing_month)
-    start_date, _ = get_month_start_and_end_date_in_utc(billing_month_in_bst)
+    billing_month_in_aest = convert_utc_to_aest(billing_month)
+    start_date, _ = get_month_start_and_end_date_in_utc(billing_month_in_aest)
     return get_monthly_billing_entry(service_id, start_date, notification_type)
 
 
 @statsd(namespace="dao")
 def get_billing_data_for_financial_year(service_id, year, notification_types=[SMS_TYPE, EMAIL_TYPE, LETTER_TYPE]):
     # Update totals to the latest so we include data for today
-    now = convert_utc_to_bst(datetime.utcnow())
+    now = convert_utc_to_aest(datetime.utcnow())
     create_or_update_monthly_billing(service_id=service_id, billing_month=now)
 
     start_date, end_date = get_financial_year(year)

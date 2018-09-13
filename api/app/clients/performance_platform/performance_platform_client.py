@@ -4,7 +4,7 @@ import json
 from flask import current_app
 import requests
 
-from app.utils import convert_utc_to_bst
+from app.utils import convert_utc_to_aest
 
 
 class PerformancePlatformClient:
@@ -56,7 +56,7 @@ class PerformancePlatformClient:
         :param period - the period that this data covers - "day", "week", "month", "quarter".
         """
         payload = {
-            '_timestamp': convert_utc_to_bst(date).isoformat(),
+            '_timestamp': convert_utc_to_aest(date).isoformat(),
             'service': 'govuk-notify',
             'dataType': dataset,
             'period': period,

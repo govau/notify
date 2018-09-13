@@ -13,7 +13,7 @@ from sqlalchemy import func, desc, case
 from notifications_utils.statsd_decorators import statsd
 from app import notify_celery
 from flask import current_app
-from app.utils import convert_bst_to_utc
+from app.utils import convert_aest_to_utc
 
 
 def get_rate(non_letter_rates, letter_rates, notification_type, date, crown=None, rate_multiplier=None):
@@ -41,8 +41,8 @@ def create_nightly_billing(day_start=None):
 
     for i in range(0, 3):
         process_day = day_start - timedelta(days=i)
-        ds = convert_bst_to_utc(datetime.combine(process_day, time.min))
-        de = convert_bst_to_utc(datetime.combine(process_day + timedelta(days=1), time.min))
+        ds = convert_aest_to_utc(datetime.combine(process_day, time.min))
+        de = convert_aest_to_utc(datetime.combine(process_day + timedelta(days=1), time.min))
 
         transit_data = db.session.query(
             Notification.template_id,

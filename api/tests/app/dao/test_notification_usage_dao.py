@@ -96,7 +96,7 @@ def test_get_rates_for_daterange_where_daterange_is_one_month_that_falls_between
     set_up_rate(notify_db, datetime(2017, 1, 1), 0.175)
     set_up_rate(notify_db, datetime(2017, 3, 31), 0.123)
     start_date = datetime(2017, 2, 1, 00, 00, 00)
-    end_date = datetime(2017, 2, 28, 23, 59, 59, 99999)
+    end_date = datetime(2017, 2, 28, 23, 59, 59, 999999)
     rates = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
     assert len(rates) == 1
     assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2017-01-01 00:00:00"

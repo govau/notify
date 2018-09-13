@@ -18,7 +18,7 @@ def test_send_total_notifications_sent_for_day_stats_stats_creates_correct_call(
     send_stats = mocker.patch('app.performance_platform.total_sent_notifications.performance_platform_client.send_stats_to_performance_platform')  # noqa
 
     send_total_notifications_sent_for_day_stats(
-        date=datetime(2016, 10, 15, 23, 0, 0),
+        date=datetime(2016, 10, 15, 13, 0, 0),
         notification_type='sms',
         count=142
     )

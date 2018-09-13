@@ -5,7 +5,7 @@ from flask import url_for
 from sqlalchemy import func
 from notifications_utils.template import SMSMessageTemplate, PlainTextEmailTemplate
 
-local_timezone = pytz.timezone("Europe/London")
+local_timezone = pytz.timezone("Australia/Sydney")
 
 
 def pagination_links(pagination, endpoint, **kwargs):
@@ -34,12 +34,14 @@ def get_template_instance(template, values):
     }[template['template_type']](template, values)
 
 
-def get_london_midnight_in_utc(date):
+def get_sydney_midnight_in_utc(date):
     """
-     This function converts date to midnight as BST (British Standard Time) to UTC,
-     the tzinfo is lastly removed from the datetime because the database stores the timestamps without timezone.
-     :param date: the day to calculate the London midnight in UTC for
-     :return: the datetime of London midnight in UTC, for example 2016-06-17 = 2016-06-17 23:00:00
+     This function takes in a date, converts it to midnight (sets time to
+     00:00), then localizes to local_timezone. Finally, it converts it to UTC.
+     It drops the timezone information information because the database stores
+     the timestamps without timezone.
+     :param date: the day to calculate the Sydney midnight in UTC for
+     :return: the datetime of Sydney midnight in UTC, for example 2016-11-26 = 2016-11-25 13:00:00 (because this date is during daylight savings time)
     """
     return local_timezone.localize(datetime.combine(date, datetime.min.time())).astimezone(
         pytz.UTC).replace(
@@ -48,30 +50,30 @@ def get_london_midnight_in_utc(date):
 
 def get_midnight_for_day_before(date):
     day_before = date - timedelta(1)
-    return get_london_midnight_in_utc(day_before)
+    return get_sydney_midnight_in_utc(day_before)
 
 
-def convert_utc_to_bst(utc_dt):
+def convert_utc_to_aest(utc_dt):
     return pytz.utc.localize(utc_dt).astimezone(local_timezone).replace(tzinfo=None)
 
 
-def convert_bst_to_utc(date):
+def convert_aest_to_utc(date):
     return local_timezone.localize(date).astimezone(pytz.UTC).replace(tzinfo=None)
 
 
-def get_london_month_from_utc_column(column):
+def get_sydney_month_from_utc_column(column):
     """
      Where queries need to count notifications by month it needs to be
-     the month in BST (British Summer Time).
+     the month in AEST.
      The database stores all timestamps as UTC without the timezone.
       - First set the timezone on created_at to UTC
-      - then convert the timezone to BST (or Europe/London)
+      - then convert the timezone to AEST (or Australia/Sydney)
       - lastly truncate the datetime to month with which we can group
         queries
     """
     return func.date_trunc(
         "month",
-        func.timezone("Europe/London", func.timezone("UTC", column))
+        func.timezone("Australia/Sydney", func.timezone("UTC", column))
     )
 
 

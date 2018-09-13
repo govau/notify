@@ -11,7 +11,7 @@ from app.dao.services_dao import dao_fetch_service_by_inbound_number
 from app.dao.inbound_sms_dao import dao_create_inbound_sms
 from app.models import InboundSms, INBOUND_SMS_TYPE, SMS_TYPE
 from app.errors import register_errors
-from app.utils import convert_bst_to_utc
+from app.utils import convert_aest_to_utc
 
 receive_notifications_blueprint = Blueprint('receive_notifications', __name__)
 register_errors(receive_notifications_blueprint)
@@ -118,7 +118,7 @@ def format_mmg_datetime(date):
     """
     orig_date = format_mmg_message(date)
     parsed_datetime = iso8601.parse_date(orig_date).replace(tzinfo=None)
-    return convert_bst_to_utc(parsed_datetime)
+    return convert_aest_to_utc(parsed_datetime)
 
 
 def create_inbound_sms_object(service, content, from_number, provider_ref, date_received, provider_name):

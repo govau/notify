@@ -40,7 +40,7 @@ from app.models import (
     TEMPLATE_TYPES,
     LETTER_TYPE,
 )
-from app.utils import get_london_month_from_utc_column, get_london_midnight_in_utc
+from app.utils import get_sydney_month_from_utc_column, get_sydney_midnight_in_utc
 
 DEFAULT_SERVICE_PERMISSIONS = [
     SMS_TYPE,
@@ -292,7 +292,7 @@ def _stats_for_service_query(service_id):
 
 @statsd(namespace="dao")
 def dao_fetch_monthly_historical_stats_for_service(service_id, year):
-    month = get_london_month_from_utc_column(NotificationHistory.created_at)
+    month = get_sydney_month_from_utc_column(NotificationHistory.created_at)
 
     start_date, end_date = get_financial_year(year)
     rows = db.session.query(
@@ -320,9 +320,9 @@ def dao_fetch_monthly_historical_stats_for_service(service_id, year):
             for template_type in TEMPLATE_TYPES
         }
         for created_date in [
-            datetime(year, month, 1) for month in range(4, 13)
+            datetime(year, month, 1) for month in range(7, 13)
         ] + [
-            datetime(year + 1, month, 1) for month in range(1, 4)
+            datetime(year + 1, month, 1) for month in range(1, 7)
         ]
     }
 
@@ -335,8 +335,8 @@ def dao_fetch_monthly_historical_stats_for_service(service_id, year):
 @statsd(namespace='dao')
 def dao_fetch_todays_stats_for_all_services(include_from_test_key=True, only_active=True):
     today = date.today()
-    start_date = get_london_midnight_in_utc(today)
-    end_date = get_london_midnight_in_utc(today + timedelta(days=1))
+    start_date = get_sydney_midnight_in_utc(today)
+    end_date = get_sydney_midnight_in_utc(today + timedelta(days=1))
 
     subquery = db.session.query(
         Notification.notification_type,
@@ -380,8 +380,8 @@ def dao_fetch_todays_stats_for_all_services(include_from_test_key=True, only_act
 
 @statsd(namespace='dao')
 def fetch_stats_by_date_range_for_all_services(start_date, end_date, include_from_test_key=True, only_active=True):
-    start_date = get_london_midnight_in_utc(start_date)
-    end_date = get_london_midnight_in_utc(end_date + timedelta(days=1))
+    start_date = get_sydney_midnight_in_utc(start_date)
+    end_date = get_sydney_midnight_in_utc(end_date + timedelta(days=1))
     table = NotificationHistory
 
     if start_date >= datetime.utcnow() - timedelta(days=7):
@@ -425,8 +425,8 @@ def fetch_stats_by_date_range_for_all_services(start_date, end_date, include_fro
 
 @statsd(namespace='dao')
 def fetch_aggregate_stats_by_date_range_for_all_services(start_date, end_date, include_from_test_key=True):
-    start_date = get_london_midnight_in_utc(start_date)
-    end_date = get_london_midnight_in_utc(end_date + timedelta(days=1))
+    start_date = get_sydney_midnight_in_utc(start_date)
+    end_date = get_sydney_midnight_in_utc(end_date + timedelta(days=1))
     table = NotificationHistory
 
     if start_date >= datetime.utcnow() - timedelta(days=7):
@@ -487,7 +487,7 @@ def dao_fetch_active_users_for_service(service_id):
 
 @statsd(namespace="dao")
 def dao_fetch_monthly_historical_stats_by_template():
-    month = get_london_month_from_utc_column(NotificationHistory.created_at)
+    month = get_sydney_month_from_utc_column(NotificationHistory.created_at)
     year = func.date_trunc("year", NotificationHistory.created_at)
     end_date = datetime.combine(date.today(), time.min)
 
@@ -525,7 +525,7 @@ def dao_fetch_monthly_historical_usage_by_template_for_service(service_id, year)
         stat.is_precompiled_letter = result.is_precompiled_letter
         stats.append(stat)
 
-    month = get_london_month_from_utc_column(Notification.created_at)
+    month = get_sydney_month_from_utc_column(Notification.created_at)
     year_func = func.date_trunc("year", Notification.created_at)
     start_date = datetime.combine(date.today(), time.min)
 

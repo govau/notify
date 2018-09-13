@@ -64,7 +64,7 @@ from app.celery.tasks import (
 )
 from app.config import QueueNames, TaskNames
 from app.utils import (
-    convert_utc_to_bst
+    convert_utc_to_aest
 )
 from app.v2.errors import JobIncompleteError
 from app.dao.service_callback_api_dao import get_service_callback_api_for_service
@@ -395,8 +395,8 @@ def populate_monthly_billing():
     # for every service with billable units this month update billing totals for yesterday
     # this will overwrite the existing amount.
     yesterday = datetime.utcnow() - timedelta(days=1)
-    yesterday_in_bst = convert_utc_to_bst(yesterday)
-    start_date, end_date = get_month_start_and_end_date_in_utc(yesterday_in_bst)
+    yesterday_in_aest = convert_utc_to_aest(yesterday)
+    start_date, end_date = get_month_start_and_end_date_in_utc(yesterday_in_aest)
     services = get_service_ids_that_need_billing_populated(start_date=start_date, end_date=end_date)
     [create_or_update_monthly_billing(service_id=s.service_id, billing_month=end_date) for s in services]
 
