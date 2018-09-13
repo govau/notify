@@ -392,9 +392,8 @@ button:focus {
 #global-header #logo img {
   border-right: 1px solid #a9a9a9;
   margin-right: 2rem;
-  padding-right: 2rem;
-  padding-left: 14px; // ALZ MAGIC NUMBERS
-  height: 64px;
+  padding: 0.25rem 2rem 0.25rem 14px; // 14px is ALZ MAGIC NUMBERS
+  height: 74px;
 }
 
 #global-header #logo .header-badge {

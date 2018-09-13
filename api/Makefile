@@ -49,7 +49,7 @@ version-file: ${APP_VERSION_FILE}
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
-setup: ## Setup virtualenv and install python dependencies
+setup: version-file ## Setup virtualenv and install python dependencies
 	$(PIPENV) install
 
 setup-dev: ## Setup everything in dev mode for testing
