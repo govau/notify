@@ -47,7 +47,7 @@ def test_send_one_off_notification_calls_celery_correctly(persist_mock, celery_m
 
     post_data = {
         'template_id': str(template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'created_by': str(service.created_by_id)
     }
 
@@ -74,7 +74,7 @@ def test_send_one_off_notification_calls_persist_correctly(
 
     post_data = {
         'template_id': str(template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'personalisation': {'name': 'foo'},
         'created_by': str(service.created_by_id)
     }
@@ -101,7 +101,7 @@ def test_send_one_off_notification_honors_research_mode(notify_db_session, persi
 
     post_data = {
         'template_id': str(template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'created_by': str(service.created_by_id)
     }
 
@@ -117,7 +117,7 @@ def test_send_one_off_notification_honors_priority(notify_db_session, persist_mo
 
     post_data = {
         'template_id': str(template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'created_by': str(service.created_by_id)
     }
 
@@ -140,19 +140,22 @@ def test_send_one_off_notification_raises_if_invalid_recipient(notify_db_session
         send_one_off_notification(service.id, post_data)
 
 
+# we use a different phone number than usual here to distinguish from the
+# default user that exists in database and whitelist for this service
 @pytest.mark.parametrize('recipient', [
-    '07700 900 001',  # not in team or whitelist
-    '07700900123',  # in whitelist
-    '+447700-900-123',  # in whitelist in different format
+    '0412 345 001',  # not in team or whitelist
+    '0400300123',  # in whitelist
+    '+61400-300-123',  # in whitelist in different format
 ])
 def test_send_one_off_notification_raises_if_cant_send_to_recipient(
     notify_db_session,
+    celery_mock,
     recipient,
 ):
     service = create_service(restricted=True)
     template = create_template(service=service)
     dao_add_and_commit_whitelisted_contacts([
-        ServiceWhitelist.from_string(service.id, MOBILE_TYPE, '07700900123'),
+        ServiceWhitelist.from_string(service.id, MOBILE_TYPE, '0400300123'),
     ])
 
     post_data = {
@@ -177,7 +180,7 @@ def test_send_one_off_notification_raises_if_over_limit(notify_db_session, mocke
 
     post_data = {
         'template_id': str(template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'created_by': str(service.created_by_id)
     }
 
@@ -191,7 +194,7 @@ def test_send_one_off_notification_raises_if_message_too_long(persist_mock, noti
 
     post_data = {
         'template_id': str(template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'personalisation': {'name': '🚫' * 500},
         'created_by': str(service.created_by_id)
     }
@@ -207,7 +210,7 @@ def test_send_one_off_notification_fails_if_created_by_other_service(sample_temp
 
     post_data = {
         'template_id': str(sample_template.id),
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'created_by': str(user_not_in_service.id)
     }
 
@@ -261,12 +264,12 @@ def test_send_one_off_sms_notification_should_use_sms_sender_reply_to_text(sampl
     template = create_template(service=sample_service, template_type=SMS_TYPE)
     sms_sender = create_service_sms_sender(
         service=sample_service,
-        sms_sender='07123123123',
+        sms_sender='0412345678',
         is_default=False
     )
 
     data = {
-        'to': '07111111111',
+        'to': '0412345679',
         'template_id': str(template.id),
         'created_by': str(sample_service.created_by_id),
         'sender_id': str(sms_sender.id),
@@ -280,7 +283,7 @@ def test_send_one_off_sms_notification_should_use_sms_sender_reply_to_text(sampl
         queue=None
     )
 
-    assert notification.reply_to_text == "447123123123"
+    assert notification.reply_to_text == "61412345678"
 
 
 def test_send_one_off_sms_notification_should_use_default_service_reply_to_text(sample_service, celery_mock):
@@ -288,12 +291,12 @@ def test_send_one_off_sms_notification_should_use_default_service_reply_to_text(
     sample_service.service_sms_senders[0].is_default = False
     create_service_sms_sender(
         service=sample_service,
-        sms_sender='07123123456',
+        sms_sender='0412345678',
         is_default=True
     )
 
     data = {
-        'to': '07111111111',
+        'to': '0412345679',
         'template_id': str(template.id),
         'created_by': str(sample_service.created_by_id),
     }
@@ -306,7 +309,7 @@ def test_send_one_off_sms_notification_should_use_default_service_reply_to_text(
         queue=None
     )
 
-    assert notification.reply_to_text == "447123123456"
+    assert notification.reply_to_text == "61412345678"
 
 
 def test_send_one_off_notification_should_throw_exception_if_reply_to_id_doesnot_exist(
@@ -327,7 +330,7 @@ def test_send_one_off_notification_should_throw_exception_if_sms_sender_id_doesn
         sample_template
 ):
     data = {
-        'to': '07700 900 001',
+        'to': '0412 345 678',
         'template_id': str(sample_template.id),
         'sender_id': str(uuid.uuid4()),
         'created_by': str(sample_template.service.created_by_id)
