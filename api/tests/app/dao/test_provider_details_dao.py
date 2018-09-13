@@ -32,12 +32,12 @@ def set_primary_sms_provider(identifier):
 
 
 def test_can_get_all_providers(restore_provider_details):
-    assert len(get_provider_details()) == 5
+    assert len(get_provider_details()) == 7
 
 
 def test_can_get_sms_non_international_providers(restore_provider_details):
     sms_providers = get_provider_details_by_notification_type('sms')
-    assert len(sms_providers) == 3
+    assert len(sms_providers) == 5
     assert all('sms' == prov.notification_type for prov in sms_providers)
 
 
@@ -104,7 +104,7 @@ def test_update_adds_history(restore_provider_details):
 
 
 def test_update_sms_provider_to_inactive_sets_inactive(restore_provider_details):
-    set_primary_sms_provider('mmg')
+    set_primary_sms_provider('twilio')
     primary_provider = get_current_provider('sms')
     primary_provider.active = False
 
@@ -114,14 +114,14 @@ def test_update_sms_provider_to_inactive_sets_inactive(restore_provider_details)
 
 
 def test_get_current_sms_provider_returns_correct_provider(restore_provider_details):
-    set_primary_sms_provider('mmg')
+    set_primary_sms_provider('twilio')
 
     provider = get_current_provider('sms')
 
-    assert provider.identifier == 'mmg'
+    assert provider.identifier == 'twilio'
 
 
-@pytest.mark.parametrize('provider_identifier', ['firetext', 'mmg'])
+@pytest.mark.parametrize('provider_identifier', ['twilio', 'telstra'])
 def test_get_alternative_sms_provider_returns_expected_provider(notify_db, provider_identifier):
     provider = get_alternative_sms_provider(provider_identifier)
     assert provider.identifier != provider
@@ -262,7 +262,7 @@ def test_toggle_sms_provider_switches_provider_stores_notify_user_id_in_history(
 
 
 def test_can_get_all_provider_history(current_sms_provider):
-    assert len(dao_get_provider_versions(current_sms_provider.id)) == 1
+    assert len(dao_get_provider_versions(current_sms_provider.id)) == 2
 
 
 def test_get_sms_provider_with_equal_priority_returns_provider(
