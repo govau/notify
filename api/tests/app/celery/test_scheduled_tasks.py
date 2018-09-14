@@ -402,6 +402,7 @@ def test_switch_providers_on_slow_delivery_runs_if_config_set(
 
     assert get_notifications_mock.called is True
 
+
 @pytest.mark.skip(reason="We currently do not support sms fallback functionality")
 def test_switch_providers_triggers_on_slow_notification_delivery(
     notify_api,

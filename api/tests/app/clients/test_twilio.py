@@ -1,13 +1,11 @@
 import pytest
 import requests_mock
-from requests import HTTPError
-from requests.exceptions import ConnectTimeout, ReadTimeout
-from urllib.parse import urlencode, parse_qsl
+from urllib.parse import parse_qsl
 
 from app import twilio_sms_client
-from app.clients.sms import SmsClientResponseException
 from app.clients.sms.twilio import get_twilio_responses
 from twilio.base.exceptions import TwilioRestException
+
 
 def make_twilio_message_response_dict():
     return {
@@ -29,11 +27,13 @@ def make_twilio_message_response_dict():
         "sid": "MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         "status": "sent",
         "subresource_uris": {
-            "media": "/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages/SMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/Media.json"
+            "media": "/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages"
+                     "/SMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/Media.json"
         },
         "to": "+14155552345",
         "uri": "/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages/SMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.json",
     }
+
 
 @pytest.mark.parametrize('status', ['queued', 'sending', 'sent'])
 def test_should_return_correct_details_for_sending(status):
@@ -66,7 +66,8 @@ def test_send_sms_calls_twilio_correctly(notify_api, mocker):
     response_dict = make_twilio_message_response_dict()
 
     with requests_mock.Mocker() as request_mock:
-        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json', json=response_dict, status_code=200)
+        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json',
+                          json=response_dict, status_code=200)
         twilio_sms_client.send_sms(to, content, reference)
 
     assert request_mock.call_count == 1
@@ -87,7 +88,8 @@ def test_send_sms_sends_from_hardcoded_number(notify_api, mocker):
     response_dict = make_twilio_message_response_dict()
 
     with requests_mock.Mocker() as request_mock:
-        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json', json=response_dict, status_code=200)
+        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json',
+                          json=response_dict, status_code=200)
         twilio_sms_client.send_sms(to, content, reference)
 
     req = request_mock.request_history[0]
@@ -107,7 +109,8 @@ def test_send_sms_raises_if_twilio_rejects(notify_api, mocker):
     }
 
     with pytest.raises(TwilioRestException) as exc, requests_mock.Mocker() as request_mock:
-        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json', json=response_dict, status_code=400)
+        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json',
+                          json=response_dict, status_code=400)
         twilio_sms_client.send_sms(to, content, reference)
 
     assert exc.value.status == 400
@@ -123,5 +126,6 @@ def test_send_sms_raises_if_twilio_fails_to_return_json(notify_api, mocker):
     response_dict = 'not JSON'
 
     with pytest.raises(ValueError), requests_mock.Mocker() as request_mock:
-        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json', text=response_dict, status_code=200)
+        request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json',
+                          text=response_dict, status_code=200)
         twilio_sms_client.send_sms(to, content, reference)

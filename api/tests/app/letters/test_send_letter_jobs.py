@@ -8,6 +8,7 @@ from tests.app.db import create_job
 
 pytest.skip("we do not support sending letters", allow_module_level=True)
 
+
 def test_send_letter_jobs(client, mocker, sample_letter_template):
     mock_celery = mocker.patch("app.letters.rest.notify_celery.send_task")
     job_1 = create_job(sample_letter_template)

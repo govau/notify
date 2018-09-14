@@ -345,7 +345,8 @@ def test_proxy_key_non_auth_endpoint(notify_api, check_proxy_header, header_valu
         assert response.status_code == expected_status
 
 
-@pytest.mark.skip(reason="Our architecture does not include an API Gateway for caching/rate limiting. We may include this in the future.")
+@pytest.mark.skip(reason="Our architecture does not include an API Gateway for caching/rate limiting."
+                         "We may include this in the future.")
 @pytest.mark.parametrize('check_proxy_header,header_value,expected_status', [
     (True, 'key_1', 200),
     (True, 'wrong_key', 403),

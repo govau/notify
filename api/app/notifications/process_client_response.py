@@ -25,6 +25,7 @@ sms_response_mapper = {
     'Firetext': get_firetext_responses
 }
 
+
 def validate_callback_data(data, fields, client_name):
     errors = []
     for f in fields:
