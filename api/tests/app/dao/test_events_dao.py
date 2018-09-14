@@ -8,7 +8,7 @@ def test_create_event(notify_db, notify_db_session):
     assert Event.query.count() == 0
     data = {
         'event_type': 'sucessful_login',
-        'data': {'something': 'random', 'in_fact': 'could be anything'}
+        'data': {'something': 'random', 'in_fact': 'could be anything'},
     }
 
     event = Event(**data)

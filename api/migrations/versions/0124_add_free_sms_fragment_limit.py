@@ -14,8 +14,13 @@ down_revision = '0123_add_noti_to_email_reply'
 
 
 def upgrade():
-    op.add_column('services_history', sa.Column('free_sms_fragment_limit', sa.BigInteger(), nullable=True))
-    op.add_column('services', sa.Column('free_sms_fragment_limit', sa.BigInteger(), nullable=True))
+    op.add_column(
+        'services_history',
+        sa.Column('free_sms_fragment_limit', sa.BigInteger(), nullable=True),
+    )
+    op.add_column(
+        'services', sa.Column('free_sms_fragment_limit', sa.BigInteger(), nullable=True)
+    )
 
 
 def downgrade():

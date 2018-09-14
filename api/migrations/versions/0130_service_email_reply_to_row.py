@@ -18,16 +18,24 @@ EMAIL_REPLY_TO_ID = 'b3a58d57-2337-662a-4cba-40792a9322f2'
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO service_email_reply_to
         (id, service_id, email_address, is_default, created_at)
         VALUES
         ('{}','{}', 'notify+1@digital.cabinet-office.gov.uk', 'f', NOW())
-    """.format(EMAIL_REPLY_TO_ID, NOTIFY_SERVICE_ID))
+    """.format(
+            EMAIL_REPLY_TO_ID, NOTIFY_SERVICE_ID
+        )
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM service_email_reply_to
         WHERE id = '{}'
-    """.format(EMAIL_REPLY_TO_ID))
+    """.format(
+            EMAIL_REPLY_TO_ID
+        )
+    )

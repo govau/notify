@@ -7,9 +7,9 @@ from app.utils import convert_bst_to_utc
 
 def get_months_for_financial_year(year):
     return [
-        convert_bst_to_utc(month) for month in (
-            get_months_for_year(4, 13, year) +
-            get_months_for_year(1, 4, year + 1)
+        convert_bst_to_utc(month)
+        for month in (
+            get_months_for_year(4, 13, year) + get_months_for_year(1, 4, year + 1)
         )
         if month < datetime.now()
     ]
@@ -30,8 +30,12 @@ def get_april_fools(year):
      :param year: the year to calculate the April 1, 00:00 BST for
      :return: the datetime of April 1 for the given year, for example 2016 = 2016-03-31 23:00:00
     """
-    return pytz.timezone('Europe/London').localize(datetime(year, 4, 1, 0, 0, 0)).astimezone(pytz.UTC).replace(
-        tzinfo=None)
+    return (
+        pytz.timezone('Europe/London')
+        .localize(datetime(year, 4, 1, 0, 0, 0))
+        .astimezone(pytz.UTC)
+        .replace(tzinfo=None)
+    )
 
 
 def get_month_start_and_end_date_in_utc(month_year):
@@ -41,6 +45,7 @@ def get_month_start_and_end_date_in_utc(month_year):
      :return: start_date, end_date, month
     """
     import calendar
+
     _, num_days = calendar.monthrange(month_year.year, month_year.month)
     first_day = datetime(month_year.year, month_year.month, 1, 0, 0, 0)
     last_day = datetime(month_year.year, month_year.month, num_days, 23, 59, 59, 99999)

@@ -15,7 +15,9 @@ from alembic import op
 
 def upgrade():
     op.execute("UPDATE services SET sms_sender = 'GOVUK' where sms_sender is null")
-    op.execute("UPDATE services_history SET sms_sender = 'GOVUK' where sms_sender is null")
+    op.execute(
+        "UPDATE services_history SET sms_sender = 'GOVUK' where sms_sender is null"
+    )
     op.alter_column('services', 'sms_sender', nullable=False)
     op.alter_column('services_history', 'sms_sender', nullable=False)
 

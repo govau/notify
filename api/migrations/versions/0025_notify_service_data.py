@@ -13,11 +13,12 @@ from alembic import op
 
 from app.encryption import hashpw
 import uuid
+
 revision = '0025_notify_service_data'
 down_revision = '0024_add_research_mode_defaults'
 
 
-user_id= '6af522d0-2915-4e52-83a3-3690455a5fe6'
+user_id = '6af522d0-2915-4e52-83a3-3690455a5fe6'
 service_id = 'd6aa2c68-a2d9-4437-ab19-3ae8eb202553'
 
 
@@ -39,7 +40,9 @@ def upgrade():
                         '{}', 'notify@digital.cabinet-office.gov.uk', 1)
                     """
     op.execute(service_insert.format(service_id, datetime.utcnow(), user_id))
-    user_to_service_insert = """INSERT INTO user_to_service (user_id, service_id) VALUES ('{}', '{}')"""
+    user_to_service_insert = (
+        """INSERT INTO user_to_service (user_id, service_id) VALUES ('{}', '{}')"""
+    )
     op.execute(user_to_service_insert.format(user_id, service_id))
 
     template_history_insert = """INSERT INTO templates_history (id, name, template_type, created_at,
@@ -51,14 +54,31 @@ def upgrade():
                                                 content, archived, service_id, subject, created_by_id, version)
                                  VALUES ('{}', '{}', '{}', '{}', '{}', False, '{}', '{}', '{}', 1)
                               """
-    email_verification_content = \
-        """Hi ((name)),\n\nTo complete your registration for GOV.UK Notify please click the link below\n\n((url))"""
-    op.execute(template_history_insert.format(uuid.uuid4(), 'Notify email verification code', 'email',
-                                              datetime.utcnow(), email_verification_content, service_id,
-                                              'Confirm GOV.UK Notify registration', user_id))
-    op.execute(template_insert.format('ece42649-22a8-4d06-b87f-d52d5d3f0a27', 'Notify email verification code', 'email',
-                                      datetime.utcnow(), email_verification_content, service_id,
-                                      'Confirm GOV.UK Notify registration', user_id))
+    email_verification_content = """Hi ((name)),\n\nTo complete your registration for GOV.UK Notify please click the link below\n\n((url))"""
+    op.execute(
+        template_history_insert.format(
+            uuid.uuid4(),
+            'Notify email verification code',
+            'email',
+            datetime.utcnow(),
+            email_verification_content,
+            service_id,
+            'Confirm GOV.UK Notify registration',
+            user_id,
+        )
+    )
+    op.execute(
+        template_insert.format(
+            'ece42649-22a8-4d06-b87f-d52d5d3f0a27',
+            'Notify email verification code',
+            'email',
+            datetime.utcnow(),
+            email_verification_content,
+            service_id,
+            'Confirm GOV.UK Notify registration',
+            user_id,
+        )
+    )
 
     invitation_subject = "((user_name)) has invited you to collaborate on ((service_name)) on GOV.UK Notify"
     invitation_content = """((user_name)) has invited you to collaborate on ((service_name)) on GOV.UK Notify.\n\n
@@ -66,41 +86,93 @@ def upgrade():
         Click this link to create an account on GOV.UK Notify:\n((url))\n\n
         This invitation will stop working at midnight tomorrow. This is to keep ((service_name)) secure.
         """
-    op.execute(template_history_insert.format('4f46df42-f795-4cc4-83bb-65ca312f49cc', 'Notify invitation email',
-                                              'email', datetime.utcnow(), invitation_content, service_id,
-                                              invitation_subject, user_id))
-    op.execute(template_insert.format('4f46df42-f795-4cc4-83bb-65ca312f49cc', 'Notify invitation email',
-                                      'email', datetime.utcnow(), invitation_content, service_id,
-                                      invitation_subject, user_id))
+    op.execute(
+        template_history_insert.format(
+            '4f46df42-f795-4cc4-83bb-65ca312f49cc',
+            'Notify invitation email',
+            'email',
+            datetime.utcnow(),
+            invitation_content,
+            service_id,
+            invitation_subject,
+            user_id,
+        )
+    )
+    op.execute(
+        template_insert.format(
+            '4f46df42-f795-4cc4-83bb-65ca312f49cc',
+            'Notify invitation email',
+            'email',
+            datetime.utcnow(),
+            invitation_content,
+            service_id,
+            invitation_subject,
+            user_id,
+        )
+    )
 
     sms_code_content = '((verify_code)) is your Notify authentication code'
-    op.execute(template_history_insert.format('36fb0730-6259-4da1-8a80-c8de22ad4246', 'Notify SMS verify code',
-                                              'sms', datetime.utcnow(), sms_code_content, service_id, None, user_id))
+    op.execute(
+        template_history_insert.format(
+            '36fb0730-6259-4da1-8a80-c8de22ad4246',
+            'Notify SMS verify code',
+            'sms',
+            datetime.utcnow(),
+            sms_code_content,
+            service_id,
+            None,
+            user_id,
+        )
+    )
 
-    op.execute(template_insert.format('36fb0730-6259-4da1-8a80-c8de22ad4246', 'Notify SMS verify code',
-                                      'sms', datetime.utcnow(), sms_code_content, service_id, None, user_id))
+    op.execute(
+        template_insert.format(
+            '36fb0730-6259-4da1-8a80-c8de22ad4246',
+            'Notify SMS verify code',
+            'sms',
+            datetime.utcnow(),
+            sms_code_content,
+            service_id,
+            None,
+            user_id,
+        )
+    )
 
-    password_reset_content = "Hi ((user_name)),\n\n" \
-                             "We received a request to reset your password on GOV.UK Notify.\n\n" \
-                             "If you didn''t request this email, you can ignore it – " \
-                             "your password has not been changed.\n\n" \
-                             "To reset your password, click this link:\n\n" \
-                             "((url))"
+    password_reset_content = "Hi ((user_name)),\n\n" "We received a request to reset your password on GOV.UK Notify.\n\n" "If you didn''t request this email, you can ignore it – " "your password has not been changed.\n\n" "To reset your password, click this link:\n\n" "((url))"
 
-    op.execute(template_history_insert.format('474e9242-823b-4f99-813d-ed392e7f1201', 'Notify password reset email',
-                                              'email', datetime.utcnow(), password_reset_content, service_id,
-                                              'Reset your GOV.UK Notify password', user_id))
-    op.execute(template_insert.format('474e9242-823b-4f99-813d-ed392e7f1201', 'Notify password reset email',
-                                      'email', datetime.utcnow(), password_reset_content, service_id,
-                                      'Reset your GOV.UK Notify password', user_id))
+    op.execute(
+        template_history_insert.format(
+            '474e9242-823b-4f99-813d-ed392e7f1201',
+            'Notify password reset email',
+            'email',
+            datetime.utcnow(),
+            password_reset_content,
+            service_id,
+            'Reset your GOV.UK Notify password',
+            user_id,
+        )
+    )
+    op.execute(
+        template_insert.format(
+            '474e9242-823b-4f99-813d-ed392e7f1201',
+            'Notify password reset email',
+            'email',
+            datetime.utcnow(),
+            password_reset_content,
+            service_id,
+            'Reset your GOV.UK Notify password',
+            user_id,
+        )
+    )
 
 
 def downgrade():
     op.get_bind()
     op.execute("delete from templates where service_id = '{}'".format(service_id))
-    op.execute("delete from templates_history where service_id = '{}'".format(service_id))
+    op.execute(
+        "delete from templates_history where service_id = '{}'".format(service_id)
+    )
     op.execute("delete from user_to_service where service_id = '{}'".format(service_id))
     op.execute("delete from services_history where id = '{}'".format(service_id))
     op.execute("delete from services where id = '{}'".format(service_id))
     op.execute("delete from users where id = '{}'".format(user_id))
-

@@ -3,9 +3,13 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 from iso8601 import iso8601, ParseError
-from jsonschema import (Draft4Validator, ValidationError, FormatChecker)
-from notifications_utils.recipients import (validate_phone_number, validate_email_address, InvalidPhoneError,
-                                            InvalidEmailError)
+from jsonschema import Draft4Validator, ValidationError, FormatChecker
+from notifications_utils.recipients import (
+    validate_phone_number,
+    validate_email_address,
+    InvalidPhoneError,
+    InvalidEmailError,
+)
 
 
 def validate(json_to_validate, schema):
@@ -39,8 +43,10 @@ def validate(json_to_validate, schema):
                 if dt > datetime.utcnow() + timedelta(hours=24):
                     raise ValidationError("datetime can only be 24 hours in the future")
             except ParseError:
-                raise ValidationError("datetime format is invalid. It must be a valid ISO8601 date time format, "
-                                      "https://en.wikipedia.org/wiki/ISO_8601")
+                raise ValidationError(
+                    "datetime format is invalid. It must be a valid ISO8601 date time format, "
+                    "https://en.wikipedia.org/wiki/ISO_8601"
+                )
         return True
 
     validator = Draft4Validator(schema, format_checker=format_checker)
@@ -55,13 +61,11 @@ def build_error_message(errors):
     for e in errors:
         field = (
             "{} {}".format(e.path[0], e.schema['validationMessage'])
-            if 'validationMessage' in e.schema else __format_message(e)
+            if 'validationMessage' in e.schema
+            else __format_message(e)
         )
         fields.append({"error": "ValidationError", "message": field})
-    message = {
-        "status_code": 400,
-        "errors": unique_errors(fields)
-    }
+    message = {"status_code": 400, "errors": unique_errors(fields)}
 
     return json.dumps(message)
 

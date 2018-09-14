@@ -1,8 +1,4 @@
-from flask import (
-    jsonify,
-    Blueprint,
-    request
-)
+from flask import jsonify, Blueprint, request
 
 from app import db, version
 
@@ -14,12 +10,16 @@ def show_status():
     if request.args.get('elb', None):
         return jsonify(status="ok"), 200
     else:
-        return jsonify(
-            status="ok",  # This should be considered part of the public API
-            commit_sha=version.__commit_sha__,
-            build_number=version.__build_job_number__,
-            build_time=version.__time__,
-            db_version=get_db_version()), 200
+        return (
+            jsonify(
+                status="ok",  # This should be considered part of the public API
+                commit_sha=version.__commit_sha__,
+                build_number=version.__build_job_number__,
+                build_time=version.__time__,
+                db_version=get_db_version(),
+            ),
+            200,
+        )
 
 
 def get_db_version():

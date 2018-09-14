@@ -13,8 +13,12 @@ down_revision = '0141_remove_unused'
 
 
 def upgrade():
-    op.execute('ALTER TABLE notifications VALIDATE CONSTRAINT "notifications_templates_history_fkey"')
-    op.execute('ALTER TABLE notification_history VALIDATE CONSTRAINT "notification_history_templates_history_fkey"')
+    op.execute(
+        'ALTER TABLE notifications VALIDATE CONSTRAINT "notifications_templates_history_fkey"'
+    )
+    op.execute(
+        'ALTER TABLE notification_history VALIDATE CONSTRAINT "notification_history_templates_history_fkey"'
+    )
 
 
 def downgrade():

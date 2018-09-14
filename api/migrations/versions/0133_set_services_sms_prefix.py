@@ -1,5 +1,6 @@
 import os
 from app import config
+
 """
 
 Revision ID: 0133_set_services_sms_prefix
@@ -20,23 +21,33 @@ default_sms_sender = config.FROM_NUMBER
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         update services set prefix_sms = True
         where id in (
             select service_id from service_sms_senders
             where is_default = True and sms_sender = '{}'
         )
-    """.format(default_sms_sender))
-    op.execute("""
+    """.format(
+            default_sms_sender
+        )
+    )
+    op.execute(
+        """
         update services set prefix_sms = False
         where id in (
             select service_id from service_sms_senders
             where is_default = True and sms_sender != '{}'
         )
-    """.format(default_sms_sender))
+    """.format(
+            default_sms_sender
+        )
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         UPDATE services set prefix_sms = null
-    """)
+    """
+    )

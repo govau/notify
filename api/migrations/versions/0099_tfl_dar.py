@@ -18,15 +18,23 @@ TFL_DAR_ID = '1d70f564-919b-4c68-8bdf-b8520d92516e'
 
 
 def upgrade():
-    op.execute("""INSERT INTO organisation VALUES (
+    op.execute(
+        """INSERT INTO organisation VALUES (
         '{}',
         '',
         'tfl_dar_x2.png',
         ''
-    )""".format(TFL_DAR_ID))
+    )""".format(
+            TFL_DAR_ID
+        )
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM organisation WHERE "id" = '{}'
-    """.format(TFL_DAR_ID))
+    """.format(
+            TFL_DAR_ID
+        )
+    )

@@ -50,10 +50,32 @@ def upgrade():
                     false)
             """
 
-    op.execute(generic_insert_statement.format(table='templates', template_id=template_id, created_at=datetime.utcnow(), content=content))
-    op.execute(generic_insert_statement.format(table='templates_history', template_id=template_id, created_at=datetime.utcnow(), content=content))
+    op.execute(
+        generic_insert_statement.format(
+            table='templates',
+            template_id=template_id,
+            created_at=datetime.utcnow(),
+            content=content,
+        )
+    )
+    op.execute(
+        generic_insert_statement.format(
+            table='templates_history',
+            template_id=template_id,
+            created_at=datetime.utcnow(),
+            content=content,
+        )
+    )
 
 
 def downgrade():
-    op.execute("""DELETE from templates WHERE id = '{template_id}'""".format(template_id=template_id))
-    op.execute("""DELETE from templates_history WHERE id = '{template_id}'""".format(template_id=template_id))
+    op.execute(
+        """DELETE from templates WHERE id = '{template_id}'""".format(
+            template_id=template_id
+        )
+    )
+    op.execute(
+        """DELETE from templates_history WHERE id = '{template_id}'""".format(
+            template_id=template_id
+        )
+    )

@@ -2,9 +2,7 @@ import logging
 
 from flask import current_app
 
-from app.clients.sms.firetext import (
-    FiretextClient
-)
+from app.clients.sms.firetext import FiretextClient
 
 logger = logging.getLogger(__name__)
 

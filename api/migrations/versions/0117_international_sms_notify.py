@@ -18,16 +18,24 @@ NOTIFY_SERVICE_ID = 'd6aa2c68-a2d9-4437-ab19-3ae8eb202553'
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO service_permissions VALUES
         ('{}', 'international_sms', '{}')
-    """.format(NOTIFY_SERVICE_ID, datetime.utcnow()))
+    """.format(
+            NOTIFY_SERVICE_ID, datetime.utcnow()
+        )
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM service_permissions
             WHERE
                 service_id = '{}' AND
                 permission = 'international_sms'
-    """.format(NOTIFY_SERVICE_ID))
+    """.format(
+            NOTIFY_SERVICE_ID
+        )
+    )

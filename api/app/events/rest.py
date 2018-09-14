@@ -1,8 +1,4 @@
-from flask import (
-    Blueprint,
-    jsonify,
-    request
-)
+from flask import Blueprint, jsonify, request
 
 from app.errors import register_errors
 

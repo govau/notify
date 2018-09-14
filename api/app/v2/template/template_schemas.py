@@ -6,10 +6,7 @@ get_template_by_id_request = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "schema for parameters allowed when getting template by id",
     "type": "object",
-    "properties": {
-        "id": uuid,
-        "version": {"type": ["integer", "null"], "minimum": 1}
-    },
+    "properties": {"id": uuid, "version": {"type": ["integer", "null"], "minimum": 1}},
     "required": ["id"],
     "additionalProperties": False,
 }
@@ -25,12 +22,12 @@ get_template_by_id_response = {
         "created_at": {
             "format": "date-time",
             "type": "string",
-            "description": "Date+time created"
+            "description": "Date+time created",
         },
         "updated_at": {
             "format": "date-time",
             "type": ["string", "null"],
-            "description": "Date+time updated"
+            "description": "Date+time updated",
         },
         "created_by": {"type": "string"},
         "version": {"type": "integer"},
@@ -38,7 +35,16 @@ get_template_by_id_response = {
         "subject": {"type": ["string", "null"]},
         "name": {"type": "string"},
     },
-    "required": ["id", "type", "created_at", "updated_at", "version", "created_by", "body", "name"],
+    "required": [
+        "id",
+        "type",
+        "created_at",
+        "updated_at",
+        "version",
+        "created_by",
+        "body",
+        "name",
+    ],
 }
 
 post_template_preview_request = {
@@ -46,11 +52,8 @@ post_template_preview_request = {
     "description": "POST template schema",
     "type": "object",
     "title": "POST v2/template/{id}/preview",
-    "properties": {
-        "id": uuid,
-        "personalisation": personalisation
-    },
-    "required": ["id"]
+    "properties": {"id": uuid, "personalisation": personalisation},
+    "required": ["id"],
 }
 
 post_template_preview_response = {
@@ -63,9 +66,9 @@ post_template_preview_response = {
         "type": {"enum": TEMPLATE_TYPES},
         "version": {"type": "integer"},
         "body": {"type": "string"},
-        "subject": {"type": ["string", "null"]}
+        "subject": {"type": ["string", "null"]},
     },
-    "required": ["id", "type", "version", "body"]
+    "required": ["id", "type", "version", "body"],
 }
 
 
@@ -77,5 +80,5 @@ def create_post_template_preview_response(template, template_object):
         "type": template.template_type,
         "version": template.version,
         "body": str(template_object),
-        "subject": subject
+        "subject": subject,
     }

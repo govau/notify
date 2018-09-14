@@ -17,20 +17,28 @@ user_ids = [
     '19e3a347-1c1a-45bf-bd44-8cb4903c8307',
 ]
 
+
 def upgrade():
     for user_id in user_ids:
-        op.execute("""
+        op.execute(
+            """
         UPDATE users SET
               platform_admin = true
         WHERE id = '{user_id}'
-        """.format(user_id=user_id)
+        """.format(
+                user_id=user_id
+            )
         )
+
 
 def downgrade():
     for user_id in user_ids:
-        op.execute("""
+        op.execute(
+            """
         UPDATE users SET
               platform_admin = false
         WHERE id = '{user_id}'
-        """.format(user_id=user_id)
+        """.format(
+                user_id=user_id
+            )
         )

@@ -15,12 +15,25 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('notification_history', sa.Column('international', sa.Boolean(), nullable=True))
-    op.add_column('notification_history', sa.Column('phone_prefix', sa.String(), nullable=True))
-    op.add_column('notification_history', sa.Column('rate_multiplier', sa.Numeric(), nullable=True))
-    op.add_column('notifications', sa.Column('international', sa.Boolean(), nullable=True))
-    op.add_column('notifications', sa.Column('phone_prefix', sa.String(), nullable=True))
-    op.add_column('notifications', sa.Column('rate_multiplier', sa.Numeric(), nullable=True))
+    op.add_column(
+        'notification_history', sa.Column('international', sa.Boolean(), nullable=True)
+    )
+    op.add_column(
+        'notification_history', sa.Column('phone_prefix', sa.String(), nullable=True)
+    )
+    op.add_column(
+        'notification_history',
+        sa.Column('rate_multiplier', sa.Numeric(), nullable=True),
+    )
+    op.add_column(
+        'notifications', sa.Column('international', sa.Boolean(), nullable=True)
+    )
+    op.add_column(
+        'notifications', sa.Column('phone_prefix', sa.String(), nullable=True)
+    )
+    op.add_column(
+        'notifications', sa.Column('rate_multiplier', sa.Numeric(), nullable=True)
+    )
 
 
 def downgrade():

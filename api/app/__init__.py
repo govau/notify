@@ -20,7 +20,9 @@ from app.clients.email.smtp import SMTPClient
 from app.clients.email.aws_ses import AwsSesClient
 from app.clients.sms.telstra import TelstraSMSClient
 from app.clients.sms.twilio import TwilioSMSClient
-from app.clients.performance_platform.performance_platform_client import PerformancePlatformClient
+from app.clients.performance_platform.performance_platform_client import (
+    PerformancePlatformClient
+)
 from app.encryption import Encryption
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -76,11 +78,11 @@ def create_app(application):
     logging.init_app(application, statsd_client)
     telstra_sms_client.init_app(
         logger=application.logger,
-        callback_notify_url_host=application.config["API_HOST_NAME"]
+        callback_notify_url_host=application.config["API_HOST_NAME"],
     )
     twilio_sms_client.init_app(
         logger=application.logger,
-        callback_notify_url_host=application.config["API_HOST_NAME"]
+        callback_notify_url_host=application.config["API_HOST_NAME"],
     )
     smtp_client.init_app(application, statsd_client=statsd_client)
     notify_celery.init_app(application)
@@ -88,8 +90,7 @@ def create_app(application):
     redis_store.init_app(application)
     performance_platform_client.init_app(application)
     clients.init_app(
-        sms_clients=[twilio_sms_client, telstra_sms_client],
-        email_clients=[smtp_client]
+        sms_clients=[twilio_sms_client, telstra_sms_client], email_clients=[smtp_client]
     )
 
     register_blueprint(application)
@@ -97,6 +98,7 @@ def create_app(application):
 
     # avoid circular imports by importing this file later
     from app.commands import setup_commands
+
     setup_commands(application)
 
     return application
@@ -112,7 +114,9 @@ def register_blueprint(application):
     from app.notifications.rest import notifications as notifications_blueprint
     from app.invite.rest import invite as invite_blueprint
     from app.accept_invite.rest import accept_invite
-    from app.template_statistics.rest import template_statistics as template_statistics_blueprint
+    from app.template_statistics.rest import (
+        template_statistics as template_statistics_blueprint
+    )
     from app.events.rest import events as events_blueprint
     from app.provider_details.rest import provider_details as provider_details_blueprint
     from app.email_branding.rest import email_branding_blueprint
@@ -122,8 +126,14 @@ def register_blueprint(application):
     from app.inbound_sms.rest import inbound_sms as inbound_sms_blueprint
     from app.notifications.receive_notifications import receive_notifications_blueprint
     from app.notifications.notifications_sms_callback import sms_callback_blueprint
-    from app.notifications.notifications_letter_callback import letter_callback_blueprint
-    from app.authentication.auth import requires_admin_auth, requires_auth, requires_no_auth
+    from app.notifications.notifications_letter_callback import (
+        letter_callback_blueprint
+    )
+    from app.authentication.auth import (
+        requires_admin_auth,
+        requires_auth,
+        requires_no_auth,
+    )
     from app.letters.rest import letter_job
     from app.billing.rest import billing_blueprint
     from app.organisation.rest import organisation_blueprint
@@ -178,13 +188,19 @@ def register_blueprint(application):
     application.register_blueprint(events_blueprint)
 
     provider_details_blueprint.before_request(requires_admin_auth)
-    application.register_blueprint(provider_details_blueprint, url_prefix='/provider-details')
+    application.register_blueprint(
+        provider_details_blueprint, url_prefix='/provider-details'
+    )
 
     email_branding_blueprint.before_request(requires_admin_auth)
-    application.register_blueprint(email_branding_blueprint, url_prefix='/email-branding')
+    application.register_blueprint(
+        email_branding_blueprint, url_prefix='/email-branding'
+    )
 
     dvla_organisation_blueprint.before_request(requires_admin_auth)
-    application.register_blueprint(dvla_organisation_blueprint, url_prefix='/dvla_organisations')
+    application.register_blueprint(
+        dvla_organisation_blueprint, url_prefix='/dvla_organisations'
+    )
 
     letter_job.before_request(requires_admin_auth)
     application.register_blueprint(letter_job)
@@ -206,9 +222,15 @@ def register_blueprint(application):
 
 
 def register_v2_blueprints(application):
-    from app.v2.inbound_sms.get_inbound_sms import v2_inbound_sms_blueprint as get_inbound_sms
-    from app.v2.notifications.post_notifications import v2_notification_blueprint as post_notifications
-    from app.v2.notifications.get_notifications import v2_notification_blueprint as get_notifications
+    from app.v2.inbound_sms.get_inbound_sms import (
+        v2_inbound_sms_blueprint as get_inbound_sms
+    )
+    from app.v2.notifications.post_notifications import (
+        v2_notification_blueprint as post_notifications
+    )
+    from app.v2.notifications.get_notifications import (
+        v2_notification_blueprint as get_notifications
+    )
     from app.v2.template.get_template import v2_template_blueprint as get_template
     from app.v2.templates.get_templates import v2_templates_blueprint as get_templates
     from app.v2.template.post_template import v2_template_blueprint as post_template
@@ -236,7 +258,11 @@ def register_v2_blueprints(application):
 def init_app(app):
     @app.before_request
     def record_user_agent():
-        statsd_client.incr("user-agent.{}".format(process_user_agent(request.headers.get('User-Agent', None))))
+        statsd_client.incr(
+            "user-agent.{}".format(
+                process_user_agent(request.headers.get('User-Agent', None))
+            )
+        )
 
     @app.before_request
     def record_request_details():
@@ -246,7 +272,9 @@ def init_app(app):
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add(
+            'Access-Control-Allow-Headers', 'Content-Type,Authorization'
+        )
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
         return response
 
@@ -267,7 +295,9 @@ def create_uuid():
 
 
 def create_random_identifier():
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+    return ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(16)
+    )
 
 
 def process_user_agent(user_agent_string):

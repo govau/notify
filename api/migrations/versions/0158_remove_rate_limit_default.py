@@ -17,6 +17,7 @@ def upgrade():
     op.execute("ALTER TABLE services ALTER rate_limit DROP DEFAULT")
     op.execute("ALTER TABLE services_history ALTER rate_limit DROP DEFAULT")
 
+
 def downgrade():
     op.execute("ALTER TABLE services ALTER rate_limit SET DEFAULT '3000'")
     op.execute("ALTER TABLE services_history ALTER rate_limit SET DEFAULT '3000'")

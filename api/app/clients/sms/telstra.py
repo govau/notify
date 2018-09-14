@@ -7,15 +7,17 @@ telstra_response_map = {
     'PEND': 'pending',
     'SENT': 'sending',
     'DELIVRD': 'delivered',
-    'EXPIRED': 'permanent-failure', # TODO: assuming this is permanent
-    'DELETED': 'permanent-failure', # TODO: assuming this is permanent
-    'UNDVBL': 'permanent-failure', # TODO: assuming this is permanent
-    'REJECTED': 'temporary-failure', # TODO: assuming this is temporary
-    'READ': 'delivered' # TODO: can we add a new status 'read'?
+    'EXPIRED': 'permanent-failure',  # TODO: assuming this is permanent
+    'DELETED': 'permanent-failure',  # TODO: assuming this is permanent
+    'UNDVBL': 'permanent-failure',  # TODO: assuming this is permanent
+    'REJECTED': 'temporary-failure',  # TODO: assuming this is temporary
+    'READ': 'delivered',  # TODO: can we add a new status 'read'?
 }
+
 
 def get_telstra_responses(status):
     return telstra_response_map[status]
+
 
 class TelstraSMSClient(SmsClient):
     def __init__(self, client_id=None, client_secret=None, *args, **kwargs):
@@ -41,19 +43,29 @@ class TelstraSMSClient(SmsClient):
         payload = Telstra_Messaging.SendSMSRequest(
             to=to,
             body=content,
-            notify_url="{}/notifications/sms/telstra/{}".format(self._callback_notify_url_host, reference)
+            notify_url="{}/notifications/sms/telstra/{}".format(
+                self._callback_notify_url_host, reference
+            ),
         )
 
         start_time = monotonic()
         try:
             resp = api_instance.send_sms(payload)
-            self.logger.info("Telstra send SMS request for {} succeeded: {}".format(reference, resp))
+            self.logger.info(
+                "Telstra send SMS request for {} succeeded: {}".format(reference, resp)
+            )
         except Exception as e:
-            self.logger.error("Telstra send SMS request for {} failed".format(reference))
+            self.logger.error(
+                "Telstra send SMS request for {} failed".format(reference)
+            )
             raise e
         finally:
             elapsed_time = monotonic() - start_time
-            self.logger.info("Telstra send SMS request for {} finished in {}".format(reference, elapsed_time))
+            self.logger.info(
+                "Telstra send SMS request for {} finished in {}".format(
+                    reference, elapsed_time
+                )
+            )
 
     def auth(self):
         grant_type = 'client_credentials'
@@ -62,7 +74,9 @@ class TelstraSMSClient(SmsClient):
 
         start_time = monotonic()
         try:
-            resp = api_instance.auth_token(self._client_id, self._client_secret, grant_type)
+            resp = api_instance.auth_token(
+                self._client_id, self._client_secret, grant_type
+            )
 
             self.logger.info("Telstra auth request succeeded")
 

@@ -54,12 +54,16 @@ def create_test_db(database_uri):
         postgres_db_uri,
         echo=False,
         isolation_level='AUTOCOMMIT',
-        client_encoding='utf8'
+        client_encoding='utf8',
     )
     try:
         # Need to drop db before running tests so rows inserted via migration script exist when running tests
-        postgres_db.execute(sqlalchemy.sql.text('DROP DATABASE IF EXISTS {}'.format(db_uri_parts[-1])))
-        result = postgres_db.execute(sqlalchemy.sql.text('CREATE DATABASE {}'.format(db_uri_parts[-1])))
+        postgres_db.execute(
+            sqlalchemy.sql.text('DROP DATABASE IF EXISTS {}'.format(db_uri_parts[-1]))
+        )
+        result = postgres_db.execute(
+            sqlalchemy.sql.text('CREATE DATABASE {}'.format(db_uri_parts[-1]))
+        )
         result.close()
     except sqlalchemy.exc.ProgrammingError:
         # database "test_notification_api_master" already exists
@@ -70,7 +74,11 @@ def create_test_db(database_uri):
 
 @pytest.fixture(scope='session')
 def notify_db(notify_api, worker_id):
-    assert 'test_notification_api' in db.engine.url.database, 'dont run tests against main db: {}'.format(db.engine.url.database)
+    assert (
+        'test_notification_api' in db.engine.url.database
+    ), 'dont run tests against main db: {}'.format(
+        db.engine.url.database
+    )
 
     # create a database for this worker thread -
     from flask import current_app

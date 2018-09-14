@@ -14,7 +14,9 @@ down_revision = '0144_template_service_letter'
 
 
 def upgrade():
-    op.add_column('notifications', sa.Column('reply_to_text', sa.String(), nullable=True))
+    op.add_column(
+        'notifications', sa.Column('reply_to_text', sa.String(), nullable=True)
+    )
 
 
 def downgrade():

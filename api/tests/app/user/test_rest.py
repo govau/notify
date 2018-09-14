@@ -11,7 +11,7 @@ from app.models import (
     MANAGE_TEMPLATES,
     Notification,
     SMS_AUTH_TYPE,
-    EMAIL_AUTH_TYPE
+    EMAIL_AUTH_TYPE,
 )
 from app.dao.permissions_dao import default_service_permissions
 from tests import create_authorization_header
@@ -34,7 +34,9 @@ def test_get_user_list(admin_request, sample_service):
     assert sample_user.mobile_number == fetched['mobile_number']
     assert sample_user.email_address == fetched['email_address']
     assert sample_user.state == fetched['state']
-    assert sorted(expected_permissions) == sorted(fetched['permissions'][str(sample_service.id)])
+    assert sorted(expected_permissions) == sorted(
+        fetched['permissions'][str(sample_service.id)]
+    )
 
 
 def test_get_user(admin_request, sample_service, sample_organisation):
@@ -43,10 +45,7 @@ def test_get_user(admin_request, sample_service, sample_organisation):
     """
     sample_user = sample_service.users[0]
     sample_user.organisations = [sample_organisation]
-    json_resp = admin_request.get(
-        'user.get_user',
-        user_id=sample_user.id
-    )
+    json_resp = admin_request.get('user.get_user', user_id=sample_user.id)
 
     expected_permissions = default_service_permissions
     fetched = json_resp['data']
@@ -60,10 +59,14 @@ def test_get_user(admin_request, sample_service, sample_organisation):
     assert fetched['permissions'].keys() == {str(sample_service.id)}
     assert fetched['services'] == [str(sample_service.id)]
     assert fetched['organisations'] == [str(sample_organisation.id)]
-    assert sorted(fetched['permissions'][str(sample_service.id)]) == sorted(expected_permissions)
+    assert sorted(fetched['permissions'][str(sample_service.id)]) == sorted(
+        expected_permissions
+    )
 
 
-def test_get_user_doesnt_return_inactive_services_and_orgs(admin_request, sample_service, sample_organisation):
+def test_get_user_doesnt_return_inactive_services_and_orgs(
+    admin_request, sample_service, sample_organisation
+):
     """
     Tests GET endpoint '/<user_id>' to retrieve a single service.
     """
@@ -73,10 +76,7 @@ def test_get_user_doesnt_return_inactive_services_and_orgs(admin_request, sample
     sample_user = sample_service.users[0]
     sample_user.organisations = [sample_organisation]
 
-    json_resp = admin_request.get(
-        'user.get_user',
-        user_id=sample_user.id
-    )
+    json_resp = admin_request.get('user.get_user', user_id=sample_user.id)
 
     fetched = json_resp['data']
 
@@ -100,16 +100,17 @@ def test_post_user(client, notify_db, notify_db_session):
         "state": "active",
         "failed_login_count": 0,
         "permissions": {},
-        "auth_type": EMAIL_AUTH_TYPE
+        "auth_type": EMAIL_AUTH_TYPE,
     }
     auth_header = create_authorization_header()
     headers = [('Content-Type', 'application/json'), auth_header]
     resp = client.post(
-        url_for('user.create_user'),
-        data=json.dumps(data),
-        headers=headers)
+        url_for('user.create_user'), data=json.dumps(data), headers=headers
+    )
     assert resp.status_code == 201
-    user = User.query.filter_by(email_address='user@digital.cabinet-office.gov.uk').first()
+    user = User.query.filter_by(
+        email_address='user@digital.cabinet-office.gov.uk'
+    ).first()
     json_resp = json.loads(resp.get_data(as_text=True))
     assert json_resp['data']['email_address'] == user.email_address
     assert json_resp['data']['id'] == str(user.id)
@@ -128,7 +129,9 @@ def test_post_user_without_auth_type(admin_request, notify_db_session):
 
     json_resp = admin_request.post('user.create_user', _data=data, _expected_status=201)
 
-    user = User.query.filter_by(email_address='user@digital.cabinet-office.gov.uk').first()
+    user = User.query.filter_by(
+        email_address='user@digital.cabinet-office.gov.uk'
+    ).first()
     assert json_resp['data']['id'] == str(user.id)
     assert user.auth_type == SMS_AUTH_TYPE
 
@@ -145,18 +148,19 @@ def test_post_user_missing_attribute_email(client, notify_db, notify_db_session)
         "logged_in_at": None,
         "state": "active",
         "failed_login_count": 0,
-        "permissions": {}
+        "permissions": {},
     }
     auth_header = create_authorization_header()
     headers = [('Content-Type', 'application/json'), auth_header]
     resp = client.post(
-        url_for('user.create_user'),
-        data=json.dumps(data),
-        headers=headers)
+        url_for('user.create_user'), data=json.dumps(data), headers=headers
+    )
     assert resp.status_code == 400
     assert User.query.count() == 0
     json_resp = json.loads(resp.get_data(as_text=True))
-    assert {'email_address': ['Missing data for required field.']} == json_resp['message']
+    assert {'email_address': ['Missing data for required field.']} == json_resp[
+        'message'
+    ]
 
 
 def test_create_user_missing_attribute_password(client, notify_db, notify_db_session):
@@ -171,27 +175,28 @@ def test_create_user_missing_attribute_password(client, notify_db, notify_db_ses
         "logged_in_at": None,
         "state": "active",
         "failed_login_count": 0,
-        "permissions": {}
+        "permissions": {},
     }
     auth_header = create_authorization_header()
     headers = [('Content-Type', 'application/json'), auth_header]
     resp = client.post(
-        url_for('user.create_user'),
-        data=json.dumps(data),
-        headers=headers)
+        url_for('user.create_user'), data=json.dumps(data), headers=headers
+    )
     assert resp.status_code == 400
     assert User.query.count() == 0
     json_resp = json.loads(resp.get_data(as_text=True))
     assert {'password': ['Missing data for required field.']} == json_resp['message']
 
 
-def test_can_create_user_with_email_auth_and_no_mobile(admin_request, notify_db_session):
+def test_can_create_user_with_email_auth_and_no_mobile(
+    admin_request, notify_db_session
+):
     data = {
         'name': 'Test User',
         'email_address': 'user@digital.cabinet-office.gov.uk',
         'password': 'password',
         'mobile_number': None,
-        'auth_type': EMAIL_AUTH_TYPE
+        'auth_type': EMAIL_AUTH_TYPE,
     }
 
     json_resp = admin_request.post('user.create_user', _data=data, _expected_status=201)
@@ -200,18 +205,23 @@ def test_can_create_user_with_email_auth_and_no_mobile(admin_request, notify_db_
     assert json_resp['data']['mobile_number'] is None
 
 
-def test_cannot_create_user_with_sms_auth_and_no_mobile(admin_request, notify_db_session):
+def test_cannot_create_user_with_sms_auth_and_no_mobile(
+    admin_request, notify_db_session
+):
     data = {
         'name': 'Test User',
         'email_address': 'user@digital.cabinet-office.gov.uk',
         'password': 'password',
         'mobile_number': None,
-        'auth_type': SMS_AUTH_TYPE
+        'auth_type': SMS_AUTH_TYPE,
     }
 
     json_resp = admin_request.post('user.create_user', _data=data, _expected_status=400)
 
-    assert json_resp['message'] == 'Mobile number must be set if auth_type is set to sms_auth'
+    assert (
+        json_resp['message']
+        == 'Mobile number must be set if auth_type is set to sms_auth'
+    )
 
 
 def test_cannot_create_user_with_empty_strings(admin_request, notify_db_session):
@@ -220,37 +230,35 @@ def test_cannot_create_user_with_empty_strings(admin_request, notify_db_session)
         'email_address': '',
         'password': 'password',
         'mobile_number': '',
-        'auth_type': EMAIL_AUTH_TYPE
+        'auth_type': EMAIL_AUTH_TYPE,
     }
-    resp = admin_request.post(
-        'user.create_user',
-        _data=data,
-        _expected_status=400
-    )
+    resp = admin_request.post('user.create_user', _data=data, _expected_status=400)
     assert resp['message'] == {
         'email_address': ['Not a valid email address'],
         'mobile_number': ['Invalid phone number: Not enough digits'],
-        'name': ['Invalid name']
+        'name': ['Invalid name'],
     }
 
 
-@pytest.mark.parametrize('user_attribute, user_value', [
-    ('name', 'New User'),
-    ('email_address', 'newuser@mail.com'),
-    ('mobile_number', '+4407700900460')
-])
+@pytest.mark.parametrize(
+    'user_attribute, user_value',
+    [
+        ('name', 'New User'),
+        ('email_address', 'newuser@mail.com'),
+        ('mobile_number', '+4407700900460'),
+    ],
+)
 def test_post_user_attribute(client, sample_user, user_attribute, user_value):
     assert getattr(sample_user, user_attribute) != user_value
-    update_dict = {
-        user_attribute: user_value
-    }
+    update_dict = {user_attribute: user_value}
     auth_header = create_authorization_header()
     headers = [('Content-Type', 'application/json'), auth_header]
 
     resp = client.post(
         url_for('user.update_user_attribute', user_id=sample_user.id),
         data=json.dumps(update_dict),
-        headers=headers)
+        headers=headers,
+    )
 
     assert resp.status_code == 200
     json_resp = json.loads(resp.get_data(as_text=True))
@@ -273,7 +281,9 @@ def test_get_user_by_email(client, sample_service):
     assert sample_user.mobile_number == fetched['mobile_number']
     assert sample_user.email_address == fetched['email_address']
     assert sample_user.state == fetched['state']
-    assert sorted(expected_permissions) == sorted(fetched['permissions'][str(sample_service.id)])
+    assert sorted(expected_permissions) == sorted(
+        fetched['permissions'][str(sample_service.id)]
+    )
 
 
 def test_get_user_by_email_not_found_returns_404(client, sample_user):
@@ -298,11 +308,16 @@ def test_get_user_by_email_bad_url_returns_404(client, sample_user):
 
 def test_get_user_with_permissions(client, sample_user_service_permission):
     header = create_authorization_header()
-    response = client.get(url_for('user.get_user', user_id=str(sample_user_service_permission.user.id)),
-                          headers=[header])
+    response = client.get(
+        url_for('user.get_user', user_id=str(sample_user_service_permission.user.id)),
+        headers=[header],
+    )
     assert response.status_code == 200
     permissions = json.loads(response.get_data(as_text=True))['data']['permissions']
-    assert sample_user_service_permission.permission in permissions[str(sample_user_service_permission.service.id)]
+    assert (
+        sample_user_service_permission.permission
+        in permissions[str(sample_user_service_permission.service.id)]
+    )
 
 
 def test_set_user_permissions(client, sample_user, sample_service):
@@ -313,9 +328,11 @@ def test_set_user_permissions(client, sample_user, sample_service):
         url_for(
             'user.set_permissions',
             user_id=str(sample_user.id),
-            service_id=str(sample_service.id)),
+            service_id=str(sample_service.id),
+        ),
         headers=headers,
-        data=data)
+        data=data,
+    )
 
     assert response.status_code == 204
     permission = Permission.query.filter_by(permission=MANAGE_SETTINGS).first()
@@ -325,16 +342,20 @@ def test_set_user_permissions(client, sample_user, sample_service):
 
 
 def test_set_user_permissions_multiple(client, sample_user, sample_service):
-    data = json.dumps([{'permission': MANAGE_SETTINGS}, {'permission': MANAGE_TEMPLATES}])
+    data = json.dumps(
+        [{'permission': MANAGE_SETTINGS}, {'permission': MANAGE_TEMPLATES}]
+    )
     header = create_authorization_header()
     headers = [('Content-Type', 'application/json'), header]
     response = client.post(
         url_for(
             'user.set_permissions',
             user_id=str(sample_user.id),
-            service_id=str(sample_service.id)),
+            service_id=str(sample_service.id),
+        ),
         headers=headers,
-        data=data)
+        data=data,
+    )
 
     assert response.status_code == 204
     permission = Permission.query.filter_by(permission=MANAGE_SETTINGS).first()
@@ -355,9 +376,11 @@ def test_set_user_permissions_remove_old(client, sample_user, sample_service):
         url_for(
             'user.set_permissions',
             user_id=str(sample_user.id),
-            service_id=str(sample_service.id)),
+            service_id=str(sample_service.id),
+        ),
         headers=headers,
-        data=data)
+        data=data,
+    )
 
     assert response.status_code == 204
     query = Permission.query.filter_by(user=sample_user)
@@ -366,10 +389,9 @@ def test_set_user_permissions_remove_old(client, sample_user, sample_service):
 
 
 @freeze_time("2016-01-01 11:09:00.061258")
-def test_send_user_reset_password_should_send_reset_password_link(client,
-                                                                  sample_user,
-                                                                  mocker,
-                                                                  password_reset_email_template):
+def test_send_user_reset_password_should_send_reset_password_link(
+    client, sample_user, mocker, password_reset_email_template
+):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
     data = json.dumps({'email': sample_user.email_address})
     auth_header = create_authorization_header()
@@ -377,15 +399,23 @@ def test_send_user_reset_password_should_send_reset_password_link(client,
     resp = client.post(
         url_for('user.send_user_reset_password'),
         data=data,
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert resp.status_code == 204
     notification = Notification.query.first()
-    mocked.assert_called_once_with([str(notification.id)], queue="notify-internal-tasks")
-    assert notification.reply_to_text == notify_service.get_default_reply_to_email_address()
+    mocked.assert_called_once_with(
+        [str(notification.id)], queue="notify-internal-tasks"
+    )
+    assert (
+        notification.reply_to_text
+        == notify_service.get_default_reply_to_email_address()
+    )
 
 
-def test_send_user_reset_password_should_return_400_when_email_is_missing(client, mocker):
+def test_send_user_reset_password_should_return_400_when_email_is_missing(
+    client, mocker
+):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
     data = json.dumps({})
     auth_header = create_authorization_header()
@@ -393,14 +423,19 @@ def test_send_user_reset_password_should_return_400_when_email_is_missing(client
     resp = client.post(
         url_for('user.send_user_reset_password'),
         data=data,
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert resp.status_code == 400
-    assert json.loads(resp.get_data(as_text=True))['message'] == {'email': ['Missing data for required field.']}
+    assert json.loads(resp.get_data(as_text=True))['message'] == {
+        'email': ['Missing data for required field.']
+    }
     assert mocked.call_count == 0
 
 
-def test_send_user_reset_password_should_return_400_when_user_doesnot_exist(client, mocker):
+def test_send_user_reset_password_should_return_400_when_user_doesnot_exist(
+    client, mocker
+):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
     bad_email_address = 'bad@email.gov.uk'
     data = json.dumps({'email': bad_email_address})
@@ -409,14 +444,17 @@ def test_send_user_reset_password_should_return_400_when_user_doesnot_exist(clie
     resp = client.post(
         url_for('user.send_user_reset_password'),
         data=data,
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert resp.status_code == 404
     assert json.loads(resp.get_data(as_text=True))['message'] == 'No result found'
     assert mocked.call_count == 0
 
 
-def test_send_user_reset_password_should_return_400_when_data_is_not_email_address(client, mocker):
+def test_send_user_reset_password_should_return_400_when_data_is_not_email_address(
+    client, mocker
+):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
     bad_email_address = 'bad.email.gov.uk'
     data = json.dumps({'email': bad_email_address})
@@ -425,14 +463,19 @@ def test_send_user_reset_password_should_return_400_when_data_is_not_email_addre
     resp = client.post(
         url_for('user.send_user_reset_password'),
         data=data,
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert resp.status_code == 400
-    assert json.loads(resp.get_data(as_text=True))['message'] == {'email': ['Not a valid email address']}
+    assert json.loads(resp.get_data(as_text=True))['message'] == {
+        'email': ['Not a valid email address']
+    }
     assert mocked.call_count == 0
 
 
-def test_send_already_registered_email(client, sample_user, already_registered_template, mocker):
+def test_send_already_registered_email(
+    client, sample_user, already_registered_template, mocker
+):
     data = json.dumps({'email': sample_user.email_address})
     auth_header = create_authorization_header()
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
@@ -441,68 +484,91 @@ def test_send_already_registered_email(client, sample_user, already_registered_t
     resp = client.post(
         url_for('user.send_already_registered_email', user_id=str(sample_user.id)),
         data=data,
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
     assert resp.status_code == 204
 
     notification = Notification.query.first()
-    mocked.assert_called_once_with(([str(notification.id)]), queue="notify-internal-tasks")
-    assert notification.reply_to_text == notify_service.get_default_reply_to_email_address()
+    mocked.assert_called_once_with(
+        ([str(notification.id)]), queue="notify-internal-tasks"
+    )
+    assert (
+        notification.reply_to_text
+        == notify_service.get_default_reply_to_email_address()
+    )
 
 
-def test_send_already_registered_email_returns_400_when_data_is_missing(client, sample_user):
+def test_send_already_registered_email_returns_400_when_data_is_missing(
+    client, sample_user
+):
     data = json.dumps({})
     auth_header = create_authorization_header()
 
     resp = client.post(
         url_for('user.send_already_registered_email', user_id=str(sample_user.id)),
         data=data,
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
     assert resp.status_code == 400
-    assert json.loads(resp.get_data(as_text=True))['message'] == {'email': ['Missing data for required field.']}
+    assert json.loads(resp.get_data(as_text=True))['message'] == {
+        'email': ['Missing data for required field.']
+    }
 
 
-def test_send_user_confirm_new_email_returns_204(client, sample_user, change_email_confirmation_template, mocker):
+def test_send_user_confirm_new_email_returns_204(
+    client, sample_user, change_email_confirmation_template, mocker
+):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
     new_email = 'new_address@dig.gov.uk'
     data = json.dumps({'email': new_email})
     auth_header = create_authorization_header()
     notify_service = change_email_confirmation_template.service
 
-    resp = client.post(url_for('user.send_user_confirm_new_email', user_id=str(sample_user.id)),
-                       data=data,
-                       headers=[('Content-Type', 'application/json'), auth_header])
+    resp = client.post(
+        url_for('user.send_user_confirm_new_email', user_id=str(sample_user.id)),
+        data=data,
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
     assert resp.status_code == 204
     notification = Notification.query.first()
     mocked.assert_called_once_with(
-        ([str(notification.id)]),
-        queue="notify-internal-tasks")
-    assert notification.reply_to_text == notify_service.get_default_reply_to_email_address()
+        ([str(notification.id)]), queue="notify-internal-tasks"
+    )
+    assert (
+        notification.reply_to_text
+        == notify_service.get_default_reply_to_email_address()
+    )
 
 
-def test_send_user_confirm_new_email_returns_400_when_email_missing(client, sample_user, mocker):
+def test_send_user_confirm_new_email_returns_400_when_email_missing(
+    client, sample_user, mocker
+):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
     data = json.dumps({})
     auth_header = create_authorization_header()
-    resp = client.post(url_for('user.send_user_confirm_new_email', user_id=str(sample_user.id)),
-                       data=data,
-                       headers=[('Content-Type', 'application/json'), auth_header])
+    resp = client.post(
+        url_for('user.send_user_confirm_new_email', user_id=str(sample_user.id)),
+        data=data,
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
     assert resp.status_code == 400
-    assert json.loads(resp.get_data(as_text=True))['message'] == {'email': ['Missing data for required field.']}
+    assert json.loads(resp.get_data(as_text=True))['message'] == {
+        'email': ['Missing data for required field.']
+    }
     mocked.assert_not_called()
 
 
 def test_update_user_password_saves_correctly(client, sample_service):
     sample_user = sample_service.users[0]
     new_password = '1234567890'
-    data = {
-        '_password': new_password
-    }
+    data = {'_password': new_password}
     auth_header = create_authorization_header()
     headers = [('Content-Type', 'application/json'), auth_header]
     resp = client.post(
         url_for('user.update_password', user_id=sample_user.id),
         data=json.dumps(data),
-        headers=headers)
+        headers=headers,
+    )
     assert resp.status_code == 200
 
     json_resp = json.loads(resp.get_data(as_text=True))
@@ -513,7 +579,8 @@ def test_update_user_password_saves_correctly(client, sample_service):
     resp = client.post(
         url_for('user.verify_user_password', user_id=str(sample_user.id)),
         data=json.dumps(data),
-        headers=headers)
+        headers=headers,
+    )
     assert resp.status_code == 204
 
 
@@ -528,7 +595,9 @@ def test_activate_user(admin_request, sample_user):
 
 
 def test_activate_user_fails_if_already_active(admin_request, sample_user):
-    resp = admin_request.post('user.activate_user', user_id=sample_user.id, _expected_status=400)
+    resp = admin_request.post(
+        'user.activate_user', user_id=sample_user.id, _expected_status=400
+    )
     assert resp['message'] == 'User already active'
     assert sample_user.state == 'active'
 
@@ -551,10 +620,7 @@ def test_can_set_email_auth_and_remove_mobile_at_same_time(admin_request, sample
     admin_request.post(
         'user.update_user_attribute',
         user_id=sample_user.id,
-        _data={
-            'mobile_number': None,
-            'auth_type': EMAIL_AUTH_TYPE,
-        }
+        _data={'mobile_number': None, 'auth_type': EMAIL_AUTH_TYPE},
     )
 
     assert sample_user.mobile_number is None
@@ -568,10 +634,13 @@ def test_cannot_remove_mobile_if_sms_auth(admin_request, sample_user):
         'user.update_user_attribute',
         user_id=sample_user.id,
         _data={'mobile_number': None},
-        _expected_status=400
+        _expected_status=400,
     )
 
-    assert json_resp['message'] == 'Mobile number must be set if auth_type is set to sms_auth'
+    assert (
+        json_resp['message']
+        == 'Mobile number must be set if auth_type is set to sms_auth'
+    )
 
 
 def test_can_remove_mobile_if_email_auth(admin_request, sample_user):
@@ -586,24 +655,30 @@ def test_can_remove_mobile_if_email_auth(admin_request, sample_user):
     assert sample_user.mobile_number is None
 
 
-def test_cannot_update_user_with_mobile_number_as_empty_string(admin_request, sample_user):
+def test_cannot_update_user_with_mobile_number_as_empty_string(
+    admin_request, sample_user
+):
     sample_user.auth_type = EMAIL_AUTH_TYPE
 
     resp = admin_request.post(
         'user.update_user_attribute',
         user_id=sample_user.id,
         _data={'mobile_number': ''},
-        _expected_status=400
+        _expected_status=400,
     )
-    assert resp['message']['mobile_number'] == ['Invalid phone number: Not enough digits']
+    assert resp['message']['mobile_number'] == [
+        'Invalid phone number: Not enough digits'
+    ]
 
 
-def test_cannot_update_user_password_using_attributes_method(admin_request, sample_user):
+def test_cannot_update_user_password_using_attributes_method(
+    admin_request, sample_user
+):
     resp = admin_request.post(
         'user.update_user_attribute',
         user_id=sample_user.id,
         _data={'password': 'foo'},
-        _expected_status=400
+        _expected_status=400,
     )
     assert resp['message']['_schema'] == ['Unknown field name password']
 
@@ -621,7 +696,9 @@ def test_get_orgs_and_services_nests_services(admin_request, sample_user):
     sample_user.organisations = [org1, org2]
     sample_user.services = [service1, service2, service3]
 
-    resp = admin_request.get('user.get_organisations_and_services_for_user', user_id=sample_user.id)
+    resp = admin_request.get(
+        'user.get_organisations_and_services_for_user', user_id=sample_user.id
+    )
 
     assert resp == {
         'organisations': [
@@ -629,28 +706,15 @@ def test_get_orgs_and_services_nests_services(admin_request, sample_user):
                 'name': org1.name,
                 'id': str(org1.id),
                 'services': [
-                    {
-                        'name': service1.name,
-                        'id': str(service1.id)
-                    },
-                    {
-                        'name': service2.name,
-                        'id': str(service2.id)
-                    }
-                ]
+                    {'name': service1.name, 'id': str(service1.id)},
+                    {'name': service2.name, 'id': str(service2.id)},
+                ],
             },
-            {
-                'name': org2.name,
-                'id': str(org2.id),
-                'services': []
-            }
+            {'name': org2.name, 'id': str(org2.id), 'services': []},
         ],
         'services_without_organisations': [
-            {
-                'name': service3.name,
-                'id': str(service3.id)
-            }
-        ]
+            {'name': service3.name, 'id': str(service3.id)}
+        ],
     }
 
 
@@ -673,31 +737,27 @@ def test_get_orgs_and_services_only_returns_active(admin_request, sample_user):
     sample_user.organisations = [org1, org2]
     sample_user.services = [service1, service2, service3, service4, service5]
 
-    resp = admin_request.get('user.get_organisations_and_services_for_user', user_id=sample_user.id)
+    resp = admin_request.get(
+        'user.get_organisations_and_services_for_user', user_id=sample_user.id
+    )
 
     assert resp == {
         'organisations': [
             {
                 'name': org1.name,
                 'id': str(org1.id),
-                'services': [
-                    {
-                        'name': service1.name,
-                        'id': str(service1.id)
-                    }
-                ]
+                'services': [{'name': service1.name, 'id': str(service1.id)}],
             }
         ],
         'services_without_organisations': [
-            {
-                'name': service4.name,
-                'id': str(service4.id)
-            }
-        ]
+            {'name': service4.name, 'id': str(service4.id)}
+        ],
     }
 
 
-def test_get_orgs_and_services_only_shows_users_orgs_and_services(admin_request, sample_user):
+def test_get_orgs_and_services_only_shows_users_orgs_and_services(
+    admin_request, sample_user
+):
     other_user = create_user(email='other@user.com')
 
     org1 = create_organisation(name='org1')
@@ -713,21 +773,14 @@ def test_get_orgs_and_services_only_shows_users_orgs_and_services(admin_request,
     other_user.organisations = [org1, org2]
     other_user.services = [service1, service2]
 
-    resp = admin_request.get('user.get_organisations_and_services_for_user', user_id=sample_user.id)
+    resp = admin_request.get(
+        'user.get_organisations_and_services_for_user', user_id=sample_user.id
+    )
 
     assert resp == {
-        'organisations': [
-            {
-                'name': org2.name,
-                'id': str(org2.id),
-                'services': []
-            }
-        ],
+        'organisations': [{'name': org2.name, 'id': str(org2.id), 'services': []}],
         # service1 belongs to org1, but the user doesn't know about org1
         'services_without_organisations': [
-            {
-                'name': service1.name,
-                'id': str(service1.id)
-            }
-        ]
+            {'name': service1.name, 'id': str(service1.id)}
+        ],
     }

@@ -18,13 +18,22 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 def upgrade():
-    status_type = sa.Enum('sending', 'delivered', 'failed',
-                          'technical-failure', 'temporary-failure', 'permanent-failure',
-                          name='notification_status_type')
+    status_type = sa.Enum(
+        'sending',
+        'delivered',
+        'failed',
+        'technical-failure',
+        'temporary-failure',
+        'permanent-failure',
+        name='notification_status_type',
+    )
     status_type.create(op.get_bind())
     op.add_column('notifications', sa.Column('new_status', status_type, nullable=True))
-    op.execute('update notifications set new_status = CAST(CAST(status as text) as notification_status_type)')
+    op.execute(
+        'update notifications set new_status = CAST(CAST(status as text) as notification_status_type)'
+    )
     op.alter_column('notifications', 'status', new_column_name='old_status')
     op.alter_column('notifications', 'new_status', new_column_name='status')
     op.drop_column('notifications', 'old_status')
@@ -34,13 +43,18 @@ def upgrade():
 
 
 def downgrade():
-    status_type = sa.Enum('sending', 'delivered', 'failed',
-                          name='notification_status_types')
+    status_type = sa.Enum(
+        'sending', 'delivered', 'failed', name='notification_status_types'
+    )
     status_type.create(op.get_bind())
     op.add_column('notifications', sa.Column('old_status', status_type, nullable=True))
 
-    op.execute("update notifications set status = 'failed' where status in ('technical-failure', 'temporary-failure', 'permanent-failure')")
-    op.execute('update notifications set old_status = CAST(CAST(status as text) as notification_status_types)')
+    op.execute(
+        "update notifications set status = 'failed' where status in ('technical-failure', 'temporary-failure', 'permanent-failure')"
+    )
+    op.execute(
+        'update notifications set old_status = CAST(CAST(status as text) as notification_status_types)'
+    )
     op.alter_column('notifications', 'status', new_column_name='new_status')
     op.alter_column('notifications', 'old_status', new_column_name='status')
     op.drop_column('notifications', 'new_status')

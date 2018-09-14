@@ -20,4 +20,18 @@ def upgrade():
 
 
 def downgrade():
-    op.add_column('jobs', sa.Column('status', postgresql.ENUM('pending', 'in progress', 'finished', 'sending limits exceeded', name='job_status_types'), autoincrement=False, nullable=True))
+    op.add_column(
+        'jobs',
+        sa.Column(
+            'status',
+            postgresql.ENUM(
+                'pending',
+                'in progress',
+                'finished',
+                'sending limits exceeded',
+                name='job_status_types',
+            ),
+            autoincrement=False,
+            nullable=True,
+        ),
+    )

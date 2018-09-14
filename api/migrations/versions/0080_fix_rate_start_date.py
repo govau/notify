@@ -16,9 +16,13 @@ import sqlalchemy as sa
 
 def upgrade():
     op.get_bind()
-    op.execute("UPDATE RATES SET valid_from = '2017-03-31 23:00:00' WHERE valid_from = '2017-04-01 00:00:00'")
+    op.execute(
+        "UPDATE RATES SET valid_from = '2017-03-31 23:00:00' WHERE valid_from = '2017-04-01 00:00:00'"
+    )
 
 
 def downgrade():
     op.get_bind()
-    op.execute("UPDATE RATES SET valid_from = '2017-03-31 23:00:00' WHERE valid_from = '2017-04-01 00:00:00'")
+    op.execute(
+        "UPDATE RATES SET valid_from = '2017-03-31 23:00:00' WHERE valid_from = '2017-04-01 00:00:00'"
+    )

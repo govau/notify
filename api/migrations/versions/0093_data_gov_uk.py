@@ -18,15 +18,23 @@ DATA_GOV_UK_ID = '123496d4-44cb-4324-8e0a-4187101f4bdc'
 
 
 def upgrade():
-    op.execute("""INSERT INTO organisation VALUES (
+    op.execute(
+        """INSERT INTO organisation VALUES (
         '{}',
         '',
         'data_gov_uk_x2.png',
         ''
-    )""".format(DATA_GOV_UK_ID))
+    )""".format(
+            DATA_GOV_UK_ID
+        )
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM organisation WHERE "id" = '{}'
-    """.format(DATA_GOV_UK_ID))
+    """.format(
+            DATA_GOV_UK_ID
+        )
+    )

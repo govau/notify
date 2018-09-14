@@ -8,7 +8,6 @@ from app.utils import convert_utc_to_bst
 
 
 class PerformancePlatformClient:
-
     @property
     def active(self):
         return self._active
@@ -17,30 +16,33 @@ class PerformancePlatformClient:
         self._active = app.config.get('PERFORMANCE_PLATFORM_ENABLED')
         if self.active:
             self.performance_platform_url = app.config.get('PERFORMANCE_PLATFORM_URL')
-            self.performance_platform_endpoints = app.config.get('PERFORMANCE_PLATFORM_ENDPOINTS')
+            self.performance_platform_endpoints = app.config.get(
+                'PERFORMANCE_PLATFORM_ENDPOINTS'
+            )
 
     def send_stats_to_performance_platform(self, payload):
         if self.active:
             bearer_token = self.performance_platform_endpoints[payload['dataType']]
             headers = {
                 'Content-Type': "application/json",
-                'Authorization': 'Bearer {}'.format(bearer_token)
+                'Authorization': 'Bearer {}'.format(bearer_token),
             }
             resp = requests.post(
                 self.performance_platform_url + payload['dataType'],
                 json=payload,
-                headers=headers
+                headers=headers,
             )
 
             if resp.status_code == 200:
                 current_app.logger.info(
-                    "Updated performance platform successfully with payload {}".format(json.dumps(payload))
+                    "Updated performance platform successfully with payload {}".format(
+                        json.dumps(payload)
+                    )
                 )
             else:
                 current_app.logger.error(
                     "Performance platform update request failed for payload with response details: {} '{}'".format(
-                        json.dumps(payload),
-                        resp.status_code
+                        json.dumps(payload), resp.status_code
                     )
                 )
                 resp.raise_for_status()
@@ -63,7 +65,9 @@ class PerformancePlatformClient:
             'count': count,
             group_name: group_value,
         }
-        payload['_id'] = PerformancePlatformClient.generate_payload_id(payload, group_name)
+        payload['_id'] = PerformancePlatformClient.generate_payload_id(
+            payload, group_name
+        )
         return payload
 
     @staticmethod
@@ -76,7 +80,7 @@ class PerformancePlatformClient:
             payload['service'],
             payload[group_name],
             payload['dataType'],
-            payload['period']
+            payload['period'],
         )
         _id = base64.b64encode(payload_string.encode('utf-8'))
         return _id.decode('utf-8')

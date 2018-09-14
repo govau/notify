@@ -8,14 +8,14 @@ uuid = {
     "format": "validate_uuid",
     "validationMessage": "is not a valid UUID",
     "code": "1001",  # yet to be implemented
-    "link": "link to our error documentation not yet implemented"
+    "link": "link to our error documentation not yet implemented",
 }
 
 
 personalisation = {
     "type": "object",
     "code": "1001",  # yet to be implemented
-    "link": "link to our error documentation not yet implemented"
+    "link": "link to our error documentation not yet implemented",
 }
 
 
@@ -25,17 +25,17 @@ letter_personalisation = dict(
         "address_line_1": {
             "type": "string",
             "minLength": 1,
-            "validationMessage": "address_line_1 is required"
+            "validationMessage": "address_line_1 is required",
         },
         "address_line_2": {
             "type": "string",
             "minLength": 1,
-            "validationMessage": "address_line_2 is required"
+            "validationMessage": "address_line_2 is required",
         },
         "postcode": {
             "type": "string",
             "minLength": 1,
-            "validationMessage": "postcode is required"
+            "validationMessage": "postcode is required",
         },
     },
     required=["address_line_1", "address_line_2", "postcode"],
@@ -48,5 +48,5 @@ https_url = {
     "pattern": "^https.*",
     "validationMessage": "is not a valid https url",
     "code": "1001",  # yet to be implemented
-    "link": "link to our error documentation not yet implemented"
+    "link": "link to our error documentation not yet implemented",
 }

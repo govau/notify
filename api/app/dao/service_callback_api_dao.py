@@ -15,7 +15,9 @@ def save_service_callback_api(service_callback_api):
 
 @transactional
 @version_class(ServiceCallbackApi)
-def reset_service_callback_api(service_callback_api, updated_by_id, url=None, bearer_token=None):
+def reset_service_callback_api(
+    service_callback_api, updated_by_id, url=None, bearer_token=None
+):
     if url:
         service_callback_api.url = url
     if bearer_token:
@@ -27,7 +29,9 @@ def reset_service_callback_api(service_callback_api, updated_by_id, url=None, be
 
 
 def get_service_callback_api(service_callback_api_id, service_id):
-    return ServiceCallbackApi.query.filter_by(id=service_callback_api_id, service_id=service_id).first()
+    return ServiceCallbackApi.query.filter_by(
+        id=service_callback_api_id, service_id=service_id
+    ).first()
 
 
 def get_service_callback_api_for_service(service_id):

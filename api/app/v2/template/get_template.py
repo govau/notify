@@ -17,5 +17,6 @@ def get_template_by_id(template_id, version=None):
     data = validate(_data, get_template_by_id_request)
 
     template = templates_dao.dao_get_template_by_id_and_service_id(
-        template_id, authenticated_service.id, data.get('version'))
+        template_id, authenticated_service.id, data.get('version')
+    )
     return jsonify(template.serialize()), 200

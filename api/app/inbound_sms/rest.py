@@ -1,8 +1,4 @@
-from flask import (
-    Blueprint,
-    jsonify,
-    request
-)
+from flask import Blueprint, jsonify, request
 
 from notifications_utils.recipients import try_validate_and_format_phone_number
 
@@ -10,7 +6,7 @@ from app.dao.inbound_sms_dao import (
     dao_get_inbound_sms_for_service,
     dao_count_inbound_sms_for_service,
     dao_get_inbound_sms_by_id,
-    dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service
+    dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service,
 )
 from app.errors import register_errors
 from app.schema_validation import validate
@@ -18,9 +14,7 @@ from app.schema_validation import validate
 from app.inbound_sms.inbound_sms_schemas import get_inbound_sms_for_service_schema
 
 inbound_sms = Blueprint(
-    'inbound_sms',
-    __name__,
-    url_prefix='/service/<uuid:service_id>/inbound-sms'
+    'inbound_sms', __name__, url_prefix='/service/<uuid:service_id>/inbound-sms'
 )
 
 register_errors(inbound_sms)
@@ -31,10 +25,14 @@ def post_query_inbound_sms_for_service(service_id):
     form = validate(request.get_json(), get_inbound_sms_for_service_schema)
     if 'phone_number' in form:
         # we use this to normalise to an international phone number - but this may fail if it's an alphanumeric
-        user_number = try_validate_and_format_phone_number(form['phone_number'], international=True)
+        user_number = try_validate_and_format_phone_number(
+            form['phone_number'], international=True
+        )
     else:
         user_number = None
-    results = dao_get_inbound_sms_for_service(service_id, form.get('limit'), user_number)
+    results = dao_get_inbound_sms_for_service(
+        service_id, form.get('limit'), user_number
+    )
 
     return jsonify(data=[row.serialize() for row in results])
 
@@ -45,7 +43,9 @@ def get_inbound_sms_for_service(service_id):
 
     if user_number:
         # we use this to normalise to an international phone number - but this may fail if it's an alphanumeric
-        user_number = try_validate_and_format_phone_number(user_number, international=True)
+        user_number = try_validate_and_format_phone_number(
+            user_number, international=True
+        )
 
     results = dao_get_inbound_sms_for_service(service_id, user_number=user_number)
     return jsonify(data=[row.serialize() for row in results])
@@ -57,10 +57,11 @@ def get_most_recent_inbound_sms_for_service(service_id):
     page = request.args.get('page', 1)
     # get most recent message for each user for service
 
-    results = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(service_id, int(page))
+    results = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(
+        service_id, int(page)
+    )
     return jsonify(
-        data=[row.serialize() for row in results.items],
-        has_next=results.has_next
+        data=[row.serialize() for row in results.items], has_next=results.has_next
     )
 
 
@@ -71,7 +72,7 @@ def get_inbound_sms_summary_for_service(service_id):
 
     return jsonify(
         count=count,
-        most_recent=most_recent[0].created_at.isoformat() if most_recent else None
+        most_recent=most_recent[0].created_at.isoformat() if most_recent else None,
     )
 
 

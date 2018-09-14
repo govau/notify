@@ -9,7 +9,7 @@ from app.dao.organisation_dao import (
     dao_update_organisation,
     dao_add_service_to_organisation,
     dao_get_users_for_organisation,
-    dao_add_user_to_organisation
+    dao_add_user_to_organisation,
 )
 from app.dao.services_dao import dao_fetch_service_by_id
 from app.errors import register_errors, InvalidRequest
@@ -31,8 +31,7 @@ def handle_integrity_error(exc):
     Handle integrity errors caused by the unique constraint on ix_organisation_name
     """
     if 'ix_organisation_name' in str(exc):
-        return jsonify(result="error",
-                       message="Organisation name already exists"), 400
+        return jsonify(result="error", message="Organisation name already exists"), 400
 
     current_app.logger.exception(exc)
     return jsonify(result='error', message="Internal server error"), 500
@@ -40,9 +39,7 @@ def handle_integrity_error(exc):
 
 @organisation_blueprint.route('', methods=['GET'])
 def get_organisations():
-    organisations = [
-        org.serialize() for org in dao_get_organisations()
-    ]
+    organisations = [org.serialize() for org in dao_get_organisations()]
 
     return jsonify(organisations)
 
@@ -94,7 +91,9 @@ def get_organisation_services(organisation_id):
     return jsonify([s.serialize_for_org_dashboard() for s in sorted_services])
 
 
-@organisation_blueprint.route('/<uuid:organisation_id>/users/<uuid:user_id>', methods=['POST'])
+@organisation_blueprint.route(
+    '/<uuid:organisation_id>/users/<uuid:user_id>', methods=['POST']
+)
 def add_user_to_organisation(organisation_id, user_id):
     new_org_user = dao_add_user_to_organisation(organisation_id, user_id)
     return jsonify(data=new_org_user.serialize())

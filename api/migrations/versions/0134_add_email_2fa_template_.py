@@ -27,12 +27,14 @@ def upgrade():
         VALUES ('{}', '{}', '{}', '{}', '{}', False, '{}', '{}', '{}', 1, '{}')
     """
 
-    template_content = '\n'.join([
-        'Hi ((name)),',
-        '',
-        'To sign in to GOV.​UK Notify please open this link:',
-        '((url))',
-    ])
+    template_content = '\n'.join(
+        [
+            'Hi ((name)),',
+            '',
+            'To sign in to GOV.​UK Notify please open this link:',
+            '((url))',
+        ]
+    )
 
     template_name = "Notify email verify code"
     template_subject = 'Sign in to GOV.UK Notify'
@@ -47,7 +49,7 @@ def upgrade():
             current_app.config['NOTIFY_SERVICE_ID'],
             template_subject,
             current_app.config['NOTIFY_USER_ID'],
-            'normal'
+            'normal',
         )
     )
 
@@ -61,11 +63,11 @@ def upgrade():
             current_app.config['NOTIFY_SERVICE_ID'],
             template_subject,
             current_app.config['NOTIFY_USER_ID'],
-            'normal'
+            'normal',
         )
     )
 
 
 def downgrade():
-   op.execute("DELETE FROM templates_history WHERE id = '{}'".format(template_id))
-   op.execute("DELETE FROM templates WHERE id = '{}'".format(template_id))
+    op.execute("DELETE FROM templates_history WHERE id = '{}'".format(template_id))
+    op.execute("DELETE FROM templates WHERE id = '{}'".format(template_id))

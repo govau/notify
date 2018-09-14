@@ -8,6 +8,7 @@ from tests.app.db import create_job
 
 pytest.skip("we do not support sending letters", allow_module_level=True)
 
+
 def test_send_letter_jobs(client, mocker, sample_letter_template):
     mock_celery = mocker.patch("app.letters.rest.notify_celery.send_task")
     job_1 = create_job(sample_letter_template)
@@ -20,14 +21,17 @@ def test_send_letter_jobs(client, mocker, sample_letter_template):
     response = client.post(
         path='/send-letter-jobs',
         data=json.dumps(job_ids),
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert response.status_code == 201
-    assert json.loads(response.get_data())['data'] == {'response': "Task created to send files to DVLA"}
+    assert json.loads(response.get_data())['data'] == {
+        'response': "Task created to send files to DVLA"
+    }
 
-    mock_celery.assert_called_once_with(name="send-jobs-to-dvla",
-                                        args=(job_ids['job_ids'],),
-                                        queue="process-ftp-tasks")
+    mock_celery.assert_called_once_with(
+        name="send-jobs-to-dvla", args=(job_ids['job_ids'],), queue="process-ftp-tasks"
+    )
 
 
 def test_send_letter_jobs_throws_validation_error(client, mocker):
@@ -40,24 +44,29 @@ def test_send_letter_jobs_throws_validation_error(client, mocker):
     response = client.post(
         path='/send-letter-jobs',
         data=json.dumps(job_ids),
-        headers=[('Content-Type', 'application/json'), auth_header])
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert response.status_code == 400
 
     assert not mock_celery.called
 
 
-def test_get_letter_jobs_excludes_non_letter_jobs(client, sample_letter_job, sample_job):
+def test_get_letter_jobs_excludes_non_letter_jobs(
+    client, sample_letter_job, sample_job
+):
     auth_header = create_authorization_header()
     response = client.get(
-        path='/letter-jobs',
-        headers=[('Content-Type', 'application/json'), auth_header])
+        path='/letter-jobs', headers=[('Content-Type', 'application/json'), auth_header]
+    )
 
     assert response.status_code == 200
     json_resp = json.loads(response.get_data(as_text=True))
     assert len(json_resp['data']) == 1
     assert json_resp['data'][0]['id'] == str(sample_letter_job.id)
-    assert json_resp['data'][0]['service_name']['name'] == sample_letter_job.service.name
+    assert (
+        json_resp['data'][0]['service_name']['name'] == sample_letter_job.service.name
+    )
     assert json_resp['data'][0]['job_status'] == 'pending'
 
 

@@ -15,12 +15,15 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from flask import current_app
 
+
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO dvla_organisation VALUES
         ('003', 'Department for Work and Pensions'),
         ('004', 'Government Equalities Office')
-    """)
+    """
+    )
 
 
 def downgrade():

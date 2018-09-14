@@ -48,26 +48,21 @@ def test_should_be_none_if_unrecognised_status_code():
 @pytest.mark.parametrize(
     'reply_to_address, expected_value',
     [(None, []), ('foo@bar.com', ['foo@bar.com'])],
-    ids=['empty', 'single_email']
+    ids=['empty', 'single_email'],
 )
-def test_send_email_handles_reply_to_address(notify_api, mocker, reply_to_address, expected_value):
+def test_send_email_handles_reply_to_address(
+    notify_api, mocker, reply_to_address, expected_value
+):
     boto_mock = mocker.patch.object(aws_ses_client, '_client', create=True)
     mocker.patch.object(aws_ses_client, 'statsd_client', create=True)
 
     with notify_api.app_context():
         aws_ses_client.send_email(
-            Mock(),
-            Mock(),
-            Mock(),
-            Mock(),
-            reply_to_address=reply_to_address
+            Mock(), Mock(), Mock(), Mock(), reply_to_address=reply_to_address
         )
 
     boto_mock.send_email.assert_called_once_with(
-        Source=ANY,
-        Destination=ANY,
-        Message=ANY,
-        ReplyToAddresses=expected_value
+        Source=ANY, Destination=ANY, Message=ANY, ReplyToAddresses=expected_value
     )
 
 
@@ -78,10 +73,12 @@ def test_send_email_raises_bad_email_as_InvalidEmailError(mocker):
         'Error': {
             'Code': 'InvalidParameterValue',
             'Message': 'some error message from amazon',
-            'Type': 'Sender'
+            'Type': 'Sender',
         }
     }
-    boto_mock.send_email.side_effect = botocore.exceptions.ClientError(error_response, 'opname')
+    boto_mock.send_email.side_effect = botocore.exceptions.ClientError(
+        error_response, 'opname'
+    )
     mocker.patch.object(aws_ses_client, 'statsd_client', create=True)
 
     with pytest.raises(InvalidEmailError) as excinfo:
@@ -89,7 +86,7 @@ def test_send_email_raises_bad_email_as_InvalidEmailError(mocker):
             source=Mock(),
             to_addresses='clearly@invalid@email.com',
             subject=Mock(),
-            body=Mock()
+            body=Mock(),
         )
 
     assert 'some error message from amazon' in str(excinfo.value)
@@ -103,18 +100,17 @@ def test_send_email_raises_other_errs_as_AwsSesClientException(mocker):
         'Error': {
             'Code': 'ServiceUnavailable',
             'Message': 'some error message from amazon',
-            'Type': 'Sender'
+            'Type': 'Sender',
         }
     }
-    boto_mock.send_email.side_effect = botocore.exceptions.ClientError(error_response, 'opname')
+    boto_mock.send_email.side_effect = botocore.exceptions.ClientError(
+        error_response, 'opname'
+    )
     mocker.patch.object(aws_ses_client, 'statsd_client', create=True)
 
     with pytest.raises(AwsSesClientException) as excinfo:
         aws_ses_client.send_email(
-            source=Mock(),
-            to_addresses=Mock(),
-            subject=Mock(),
-            body=Mock()
+            source=Mock(), to_addresses=Mock(), subject=Mock(), body=Mock()
         )
 
     assert 'some error message from amazon' in str(excinfo.value)

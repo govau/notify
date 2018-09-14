@@ -1,18 +1,17 @@
-from flask import (
-    Blueprint,
-    request,
-    jsonify,
-    current_app)
+from flask import Blueprint, request, jsonify, current_app
 
 from app.config import QueueNames
 from app.dao.invited_user_dao import (
     save_invited_user,
     get_invited_user,
-    get_invited_users_for_service
+    get_invited_users_for_service,
 )
 from app.dao.templates_dao import dao_get_template_by_id
 from app.models import EMAIL_TYPE, KEY_TYPE_NORMAL, Service
-from app.notifications.process_notifications import persist_notification, send_notification_to_queue
+from app.notifications.process_notifications import (
+    persist_notification,
+    send_notification_to_queue,
+)
 from app.schemas import invited_user_schema
 from app.errors import register_errors
 
@@ -27,7 +26,9 @@ def create_invited_user(service_id):
     invited_user, errors = invited_user_schema.load(request_json)
     save_invited_user(invited_user)
 
-    template = dao_get_template_by_id(current_app.config['INVITATION_EMAIL_TEMPLATE_ID'])
+    template = dao_get_template_by_id(
+        current_app.config['INVITATION_EMAIL_TEMPLATE_ID']
+    )
     service = Service.query.get(current_app.config['NOTIFY_SERVICE_ID'])
 
     saved_notification = persist_notification(
@@ -39,14 +40,13 @@ def create_invited_user(service_id):
             'user_name': invited_user.from_user.name,
             'service_name': invited_user.service.name,
             'url': invited_user_url(
-                invited_user.id,
-                request_json.get('invite_link_host'),
+                invited_user.id, request_json.get('invite_link_host')
             ),
         },
         notification_type=EMAIL_TYPE,
         api_key_id=None,
         key_type=KEY_TYPE_NORMAL,
-        reply_to_text=invited_user.from_user.email_address
+        reply_to_text=invited_user.from_user.email_address,
     )
 
     send_notification_to_queue(saved_notification, False, queue=QueueNames.NOTIFY)
@@ -73,7 +73,12 @@ def update_invited_user(service_id, invited_user_id):
 
 def invited_user_url(invited_user_id, invite_link_host=None):
     from notifications_utils.url_safe_token import generate_token
-    token = generate_token(str(invited_user_id), current_app.config['SECRET_KEY'], current_app.config['DANGEROUS_SALT'])
+
+    token = generate_token(
+        str(invited_user_id),
+        current_app.config['SECRET_KEY'],
+        current_app.config['DANGEROUS_SALT'],
+    )
 
     if invite_link_host is None:
         invite_link_host = current_app.config['ADMIN_BASE_URL']

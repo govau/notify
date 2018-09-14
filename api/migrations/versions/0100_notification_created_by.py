@@ -14,12 +14,21 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 def upgrade():
-    op.add_column('notifications', sa.Column('created_by_id', postgresql.UUID(as_uuid=True), nullable=True))
+    op.add_column(
+        'notifications',
+        sa.Column('created_by_id', postgresql.UUID(as_uuid=True), nullable=True),
+    )
     op.create_foreign_key(None, 'notifications', 'users', ['created_by_id'], ['id'])
 
-    op.add_column('notification_history', sa.Column('created_by_id', postgresql.UUID(as_uuid=True), nullable=True))
-    op.create_foreign_key(None, 'notification_history', 'users', ['created_by_id'], ['id'])
+    op.add_column(
+        'notification_history',
+        sa.Column('created_by_id', postgresql.UUID(as_uuid=True), nullable=True),
+    )
+    op.create_foreign_key(
+        None, 'notification_history', 'users', ['created_by_id'], ['id']
+    )
 
 
 def downgrade():

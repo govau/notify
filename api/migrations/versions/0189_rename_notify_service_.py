@@ -13,9 +13,14 @@ down_revision = '0188_change_templates_to_dta'
 
 service_id = 'd6aa2c68-a2d9-4437-ab19-3ae8eb202553'
 
+
 def upgrade():
-    op.execute("update services set name = 'Notify system' where id = '{}'".format(service_id))
+    op.execute(
+        "update services set name = 'Notify system' where id = '{}'".format(service_id)
+    )
 
 
 def downgrade():
-    op.execute("update services set name = 'GOV.UK Notify' where id = '{}'".format(service_id))
+    op.execute(
+        "update services set name = 'GOV.UK Notify' where id = '{}'".format(service_id)
+    )

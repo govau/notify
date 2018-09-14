@@ -18,5 +18,6 @@ def upgrade():
     op.execute('update services set research_mode = false')
     op.execute('update services_history set research_mode = false')
 
+
 def downgrade():
     pass

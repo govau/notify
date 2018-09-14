@@ -1,13 +1,13 @@
 import json
 from monotonic import monotonic
-from requests import (request, RequestException)
-from app.clients.sms import (SmsClient, SmsClientResponseException)
+from requests import request, RequestException
+from app.clients.sms import SmsClient, SmsClientResponseException
 
 mmg_response_map = {
     '2': 'permanent-failure',
     '3': 'delivered',
     '4': 'temporary-failure',
-    '5': 'permanent-failure'
+    '5': 'permanent-failure',
 }
 
 
@@ -25,7 +25,9 @@ class MMGClientResponseException(SmsClientResponseException):
         self.exception = exception
 
     def __str__(self):
-        return "Code {} text {} exception {}".format(self.status_code, self.text, str(self.exception))
+        return "Code {} text {} exception {}".format(
+            self.status_code, self.text, str(self.exception)
+        )
 
 
 class MMGClient(SmsClient):
@@ -45,10 +47,7 @@ class MMGClient(SmsClient):
     def record_outcome(self, success, response):
         status_code = response.status_code if response else 503
         log_message = "API {} request {} on {} response status_code {}".format(
-            "POST",
-            "succeeded" if success else "failed",
-            self.mmg_url,
-            status_code
+            "POST", "succeeded" if success else "failed", self.mmg_url, status_code
         )
 
         if success:
@@ -68,7 +67,7 @@ class MMGClient(SmsClient):
             "msg": content,
             "sender": self.from_number if sender is None else sender,
             "cid": reference,
-            "multi": multi
+            "multi": multi,
         }
 
         start_time = monotonic()
@@ -79,9 +78,9 @@ class MMGClient(SmsClient):
                 data=json.dumps(data),
                 headers={
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic {}'.format(self.api_key)
+                    'Authorization': 'Basic {}'.format(self.api_key),
                 },
-                timeout=60
+                timeout=60,
             )
 
             response.raise_for_status()
@@ -97,6 +96,8 @@ class MMGClient(SmsClient):
         finally:
             elapsed_time = monotonic() - start_time
             self.statsd_client.timing("clients.mmg.request-time", elapsed_time)
-            self.current_app.logger.info("MMG request for {} finished in {}".format(reference, elapsed_time))
+            self.current_app.logger.info(
+                "MMG request for {} finished in {}".format(reference, elapsed_time)
+            )
 
         return response

@@ -17,7 +17,7 @@ def validate_v0(json_to_validate, schema_filename):
             json_to_validate,
             json.load(schema),
             format_checker=jsonschema.FormatChecker(),
-            resolver=resolver
+            resolver=resolver,
         )
 
 

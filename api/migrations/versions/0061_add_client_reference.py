@@ -15,8 +15,14 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('notifications', sa.Column('client_reference', sa.String(), index=True, nullable=True))
-    op.add_column('notification_history', sa.Column('client_reference', sa.String(), nullable=True))
+    op.add_column(
+        'notifications',
+        sa.Column('client_reference', sa.String(), index=True, nullable=True),
+    )
+    op.add_column(
+        'notification_history',
+        sa.Column('client_reference', sa.String(), nullable=True),
+    )
 
 
 def downgrade():

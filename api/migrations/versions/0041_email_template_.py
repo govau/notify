@@ -38,19 +38,45 @@ If you’ve forgotten your password, you can reset it here: ((forgot_password_ur
 If you didn’t try to register for a GOV.UK Notify account recently, please let us know here: ((feedback_url))"""
 
     op.get_bind()
-    op.execute(template_history_insert.format('0880fbb1-a0c6-46f0-9a8e-36c986381ceb',
-                                              'Your GOV.UK Notify account', 'email',
-                                              datetime.utcnow(), content, service_id,
-                                              'Your GOV.UK Notify account', user_id))
     op.execute(
-        template_insert.format('0880fbb1-a0c6-46f0-9a8e-36c986381ceb', 'Your GOV.UK Notify account', 'email',
-                               datetime.utcnow(), content, service_id,
-                               'Your GOV.UK Notify account', user_id))
+        template_history_insert.format(
+            '0880fbb1-a0c6-46f0-9a8e-36c986381ceb',
+            'Your GOV.UK Notify account',
+            'email',
+            datetime.utcnow(),
+            content,
+            service_id,
+            'Your GOV.UK Notify account',
+            user_id,
+        )
+    )
+    op.execute(
+        template_insert.format(
+            '0880fbb1-a0c6-46f0-9a8e-36c986381ceb',
+            'Your GOV.UK Notify account',
+            'email',
+            datetime.utcnow(),
+            content,
+            service_id,
+            'Your GOV.UK Notify account',
+            user_id,
+        )
+    )
 
 
 def downgrade():
-    op.execute("delete from notifications where template_id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'")
-    op.execute("delete from jobs where template_id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'")
-    op.execute("delete from template_statistics where template_id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'")
-    op.execute("delete from templates_history where id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'")
-    op.execute("delete from templates where id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'")
+    op.execute(
+        "delete from notifications where template_id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'"
+    )
+    op.execute(
+        "delete from jobs where template_id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'"
+    )
+    op.execute(
+        "delete from template_statistics where template_id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'"
+    )
+    op.execute(
+        "delete from templates_history where id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'"
+    )
+    op.execute(
+        "delete from templates where id = '0880fbb1-a0c6-46f0-9a8e-36c986381ceb'"
+    )

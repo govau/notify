@@ -1,11 +1,11 @@
-from random import (SystemRandom)
-from datetime import (datetime, timedelta)
+from random import SystemRandom
+from datetime import datetime, timedelta
 
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from app import db
-from app.models import (User, VerifyCode)
+from app.models import User, VerifyCode
 
 
 def _remove_values_for_keys_if_present(dict, keys):
@@ -35,9 +35,11 @@ def save_model_user(usr, update_dict={}, pwd=None):
 
 
 def create_user_code(user, code, code_type):
-    verify_code = VerifyCode(code_type=code_type,
-                             expiry_datetime=datetime.utcnow() + timedelta(minutes=30),
-                             user=user)
+    verify_code = VerifyCode(
+        code_type=code_type,
+        expiry_datetime=datetime.utcnow() + timedelta(minutes=30),
+        user=user,
+    )
     verify_code.code = code
     db.session.add(verify_code)
     db.session.commit()
@@ -47,16 +49,18 @@ def create_user_code(user, code, code_type):
 def get_user_code(user, code, code_type):
     # Get the most recent codes to try and reduce the
     # time searching for the correct code.
-    codes = VerifyCode.query.filter_by(
-        user=user, code_type=code_type).order_by(
-        VerifyCode.created_at.desc())
+    codes = VerifyCode.query.filter_by(user=user, code_type=code_type).order_by(
+        VerifyCode.created_at.desc()
+    )
     return next((x for x in codes if x.check_code(code)), None)
 
 
 def delete_codes_older_created_more_than_a_day_ago():
-    deleted = db.session.query(VerifyCode).filter(
-        VerifyCode.created_at < datetime.utcnow() - timedelta(hours=24)
-    ).delete()
+    deleted = (
+        db.session.query(VerifyCode)
+        .filter(VerifyCode.created_at < datetime.utcnow() - timedelta(hours=24))
+        .delete()
+    )
     db.session.commit()
     return deleted
 
@@ -82,7 +86,7 @@ def count_user_verify_codes(user):
     query = VerifyCode.query.filter(
         VerifyCode.user == user,
         VerifyCode.expiry_datetime > datetime.utcnow(),
-        VerifyCode.code_used.is_(False)
+        VerifyCode.code_used.is_(False),
     )
     return query.count()
 
@@ -119,13 +123,15 @@ def update_user_password(user, password):
 
 
 def get_user_and_accounts(user_id):
-    return User.query.filter(
-        User.id == user_id
-    ).options(
-        # eagerly load the user's services and organisations, and also the service's org and vice versa
-        # (so we can see if the user knows about it)
-        joinedload('services'),
-        joinedload('organisations'),
-        joinedload('organisations.services'),
-        joinedload('services.organisation'),
-    ).one()
+    return (
+        User.query.filter(User.id == user_id)
+        .options(
+            # eagerly load the user's services and organisations, and also the service's org and vice versa
+            # (so we can see if the user knows about it)
+            joinedload('services'),
+            joinedload('organisations'),
+            joinedload('organisations.services'),
+            joinedload('services.organisation'),
+        )
+        .one()
+    )

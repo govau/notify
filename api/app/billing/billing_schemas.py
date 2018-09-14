@@ -3,8 +3,6 @@ create_or_update_free_sms_fragment_limit_schema = {
     "description": "POST annual billing schema",
     "type": "object",
     "title": "Create",
-    "properties": {
-        "free_sms_fragment_limit": {"type": "integer", "minimum": 1},
-    },
-    "required": ["free_sms_fragment_limit"]
+    "properties": {"free_sms_fragment_limit": {"type": "integer", "minimum": 1}},
+    "required": ["free_sms_fragment_limit"],
 }

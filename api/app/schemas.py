@@ -1,7 +1,4 @@
-from datetime import (
-    datetime,
-    date,
-    timedelta)
+from datetime import datetime, date, timedelta
 from flask_marshmallow.fields import fields
 from marshmallow import (
     post_load,
@@ -10,7 +7,7 @@ from marshmallow import (
     validates_schema,
     pre_load,
     pre_dump,
-    post_dump
+    post_dump,
 )
 from marshmallow_sqlalchemy import field_for
 
@@ -19,7 +16,7 @@ from notifications_utils.recipients import (
     InvalidEmailError,
     validate_phone_number,
     InvalidPhoneError,
-    validate_and_format_phone_number
+    validate_and_format_phone_number,
 )
 
 from app import ma
@@ -38,7 +35,9 @@ def _validate_positive_number(value, msg="Not a positive integer"):
         raise ValidationError(msg)
 
 
-def _validate_datetime_not_more_than_96_hours_in_future(dte, msg="Date cannot be more than 96hrs in the future"):
+def _validate_datetime_not_more_than_96_hours_in_future(
+    dte, msg="Date cannot be more than 96hrs in the future"
+):
     if dte > datetime.utcnow() + timedelta(hours=96):
         raise ValidationError(msg)
 
@@ -64,7 +63,6 @@ def _validate_datetime_not_in_past(dte, msg="Date cannot be in the past"):
 
 
 class BaseSchema(ma.ModelSchema):
-
     def __init__(self, load_json=False, *args, **kwargs):
         self.load_json = load_json
         super(BaseSchema, self).__init__(*args, **kwargs)
@@ -84,7 +82,9 @@ class BaseSchema(ma.ModelSchema):
 class UserSchema(BaseSchema):
 
     permissions = fields.Method("user_permissions", dump_only=True)
-    password_changed_at = field_for(models.User, 'password_changed_at', format='%Y-%m-%d %H:%M:%S.%f')
+    password_changed_at = field_for(
+        models.User, 'password_changed_at', format='%Y-%m-%d %H:%M:%S.%f'
+    )
     created_at = field_for(models.User, 'created_at', format='%Y-%m-%d %H:%M:%S.%f')
     auth_type = field_for(models.User, 'auth_type')
 
@@ -105,7 +105,7 @@ class UserSchema(BaseSchema):
             "user_to_service",
             "user_to_organisation",
             "_password",
-            "verify_codes"
+            "verify_codes",
         )
         strict = True
 
@@ -136,9 +136,18 @@ class UserUpdateAttributeSchema(BaseSchema):
     class Meta:
         model = models.User
         exclude = (
-            'id', 'updated_at', 'created_at', 'user_to_service',
-            '_password', 'verify_codes', 'logged_in_at', 'password_changed_at',
-            'failed_login_count', 'state', 'platform_admin')
+            'id',
+            'updated_at',
+            'created_at',
+            'user_to_service',
+            '_password',
+            'verify_codes',
+            'logged_in_at',
+            'password_changed_at',
+            'failed_login_count',
+            'state',
+            'platform_admin',
+        )
         strict = True
 
     @validates('name')
@@ -169,10 +178,9 @@ class UserUpdateAttributeSchema(BaseSchema):
 
 
 class UserUpdatePasswordSchema(BaseSchema):
-
     class Meta:
         model = models.User
-        only = ('password')
+        only = 'password'
         strict = True
 
     @validates_schema(pass_original=True)
@@ -183,7 +191,9 @@ class UserUpdatePasswordSchema(BaseSchema):
 
 
 class ProviderDetailsSchema(BaseSchema):
-    created_by = fields.Nested(UserSchema, only=['id', 'name', 'email_address'], dump_only=True)
+    created_by = fields.Nested(
+        UserSchema, only=['id', 'name', 'email_address'], dump_only=True
+    )
 
     class Meta:
         model = models.ProviderDetails
@@ -192,7 +202,9 @@ class ProviderDetailsSchema(BaseSchema):
 
 
 class ProviderDetailsHistorySchema(BaseSchema):
-    created_by = fields.Nested(UserSchema, only=['id', 'name', 'email_address'], dump_only=True)
+    created_by = fields.Nested(
+        UserSchema, only=['id', 'name', 'email_address'], dump_only=True
+    )
 
     class Meta:
         model = models.ProviderDetailsHistory
@@ -289,7 +301,7 @@ class DetailedServiceSchema(BaseSchema):
             'sms_sender',
             'permissions',
             'inbound_number',
-            'inbound_sms'
+            'inbound_sms',
         )
 
 
@@ -297,7 +309,7 @@ class NotificationModelSchema(BaseSchema):
     class Meta:
         model = models.Notification
         strict = True
-        exclude = ('_personalisation', 'job', 'service', 'template', 'api_key',)
+        exclude = ('_personalisation', 'job', 'service', 'template', 'api_key')
 
     status = fields.String(required=False)
 
@@ -340,7 +352,9 @@ class TemplateHistorySchema(BaseSchema):
     reply_to = fields.Method("get_reply_to", allow_none=True)
     reply_to_text = fields.Method("get_reply_to_text", allow_none=True)
 
-    created_by = fields.Nested(UserSchema, only=['id', 'name', 'email_address'], dump_only=True)
+    created_by = fields.Nested(
+        UserSchema, only=['id', 'name', 'email_address'], dump_only=True
+    )
     created_at = field_for(models.Template, 'created_at', format='%Y-%m-%d %H:%M:%S.%f')
 
     def get_reply_to(self, template):
@@ -365,15 +379,25 @@ class ApiKeySchema(BaseSchema):
 
 
 class JobSchema(BaseSchema):
-    created_by_user = fields.Nested(UserSchema, attribute="created_by",
-                                    dump_to="created_by", only=["id", "name"], dump_only=True)
+    created_by_user = fields.Nested(
+        UserSchema,
+        attribute="created_by",
+        dump_to="created_by",
+        only=["id", "name"],
+        dump_only=True,
+    )
     created_by = field_for(models.Job, 'created_by', required=True, load_only=True)
 
     job_status = field_for(models.JobStatus, 'name', required=False)
 
     scheduled_for = fields.DateTime()
     service_name = fields.Nested(
-        ServiceSchema, attribute="service", dump_to="service_name", only=["name"], dump_only=True)
+        ServiceSchema,
+        attribute="service",
+        dump_to="service_name",
+        only=["name"],
+        dump_only=True,
+    )
 
     @validates('scheduled_for')
     def validate_scheduled_for(self, value):
@@ -386,12 +410,12 @@ class JobSchema(BaseSchema):
             'notifications',
             'notifications_sent',
             'notifications_delivered',
-            'notifications_failed')
+            'notifications_failed',
+        )
         strict = True
 
 
 class NotificationSchema(ma.Schema):
-
     class Meta:
         strict = True
 
@@ -450,7 +474,7 @@ class NotificationWithTemplateSchema(BaseSchema):
     class Meta:
         model = models.Notification
         strict = True
-        exclude = ('_personalisation', )
+        exclude = ('_personalisation',)
 
     template = fields.Nested(
         TemplateSchema,
@@ -462,12 +486,14 @@ class NotificationWithTemplateSchema(BaseSchema):
             'content',
             'subject',
             'redact_personalisation',
-            'is_precompiled_letter'
+            'is_precompiled_letter',
         ],
-        dump_only=True
+        dump_only=True,
     )
     job = fields.Nested(JobSchema, only=["id", "original_file_name"], dump_only=True)
-    created_by = fields.Nested(UserSchema, only=['id', 'name', 'email_address'], dump_only=True)
+    created_by = fields.Nested(
+        UserSchema, only=['id', 'name', 'email_address'], dump_only=True
+    )
     status = fields.String(required=False)
     personalisation = fields.Dict(required=False)
     key_type = field_for(models.Notification, 'key_type', required=True)
@@ -483,9 +509,12 @@ class NotificationWithTemplateSchema(BaseSchema):
 
 
 class NotificationWithPersonalisationSchema(NotificationWithTemplateSchema):
-    template_history = fields.Nested(TemplateHistorySchema, attribute="template",
-                                     only=['id', 'name', 'template_type', 'content', 'subject', 'version'],
-                                     dump_only=True)
+    template_history = fields.Nested(
+        TemplateHistorySchema,
+        attribute="template",
+        only=['id', 'name', 'template_type', 'content', 'subject', 'version'],
+        dump_only=True,
+    )
 
     class Meta(NotificationWithTemplateSchema.Meta):
         # mark as many fields as possible as required since this is a public api.
@@ -493,12 +522,25 @@ class NotificationWithPersonalisationSchema(NotificationWithTemplateSchema):
         # 'body', 'subject' [for emails], and 'content_char_count'
         fields = (
             # db rows
-            'id', 'to', 'job_row_number', 'template_version', 'billable_units', 'notification_type', 'created_at',
-            'sent_at', 'sent_by', 'updated_at', 'status', 'reference',
+            'id',
+            'to',
+            'job_row_number',
+            'template_version',
+            'billable_units',
+            'notification_type',
+            'created_at',
+            'sent_at',
+            'sent_by',
+            'updated_at',
+            'status',
+            'reference',
             # computed fields
             'personalisation',
             # relationships
-            'service', 'job', 'api_key', 'template_history'
+            'service',
+            'job',
+            'api_key',
+            'template_history',
         )
 
     @pre_dump
@@ -509,7 +551,9 @@ class NotificationWithPersonalisationSchema(NotificationWithTemplateSchema):
     @post_dump
     def handle_template_merge(self, in_data):
         in_data['template'] = in_data.pop('template_history')
-        template = get_template_instance(in_data['template'], in_data['personalisation'])
+        template = get_template_instance(
+            in_data['template'], in_data['personalisation']
+        )
         in_data['body'] = str(template)
         if in_data['template']['template_type'] != models.SMS_TYPE:
             in_data['subject'] = template.subject
@@ -545,10 +589,7 @@ class PermissionSchema(BaseSchema):
     service = field_for(models.Permission, 'service', dump_only=True)
     permission = field_for(models.Permission, 'permission')
 
-    __envelope__ = {
-        'single': 'permission',
-        'many': 'permissions',
-    }
+    __envelope__ = {'single': 'permission', 'many': 'permissions'}
 
     class Meta:
         model = models.Permission
@@ -557,7 +598,6 @@ class PermissionSchema(BaseSchema):
 
 
 class EmailDataSchema(ma.Schema):
-
     class Meta:
         strict = True
 
@@ -572,7 +612,6 @@ class EmailDataSchema(ma.Schema):
 
 
 class NotificationsFilterSchema(ma.Schema):
-
     class Meta:
         strict = True
 
@@ -592,7 +631,9 @@ class NotificationsFilterSchema(ma.Schema):
         if isinstance(in_data, dict) and hasattr(in_data, 'getlist'):
             out_data = dict([(k, in_data.get(k)) for k in in_data.keys()])
             if 'template_type' in in_data:
-                out_data['template_type'] = [{'template_type': x} for x in in_data.getlist('template_type')]
+                out_data['template_type'] = [
+                    {'template_type': x} for x in in_data.getlist('template_type')
+                ]
             if 'status' in in_data:
                 out_data['status'] = [{"status": x} for x in in_data.getlist('status')]
 
@@ -601,7 +642,9 @@ class NotificationsFilterSchema(ma.Schema):
     @post_load
     def convert_schema_object_to_field(self, in_data):
         if 'template_type' in in_data:
-            in_data['template_type'] = [x.template_type for x in in_data['template_type']]
+            in_data['template_type'] = [
+                x.template_type for x in in_data['template_type']
+            ]
         if 'status' in in_data:
             in_data['status'] = [x.status for x in in_data['status']]
         return in_data
@@ -645,7 +688,6 @@ class EventSchema(BaseSchema):
 
 
 class DaySchema(ma.Schema):
-
     class Meta:
         strict = True
 
@@ -668,7 +710,9 @@ class UnarchivedTemplateSchema(BaseSchema):
 # should not be used on its own for dumping - only for loading
 create_user_schema = UserSchema()
 user_update_schema_load_json = UserUpdateAttributeSchema(load_json=True, partial=True)
-user_update_password_schema_load_json = UserUpdatePasswordSchema(load_json=True, partial=True)
+user_update_password_schema_load_json = UserUpdatePasswordSchema(
+    load_json=True, partial=True
+)
 service_schema = ServiceSchema()
 detailed_service_schema = DetailedServiceSchema()
 template_schema = TemplateSchema()

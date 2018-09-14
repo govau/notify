@@ -13,24 +13,30 @@ down_revision = '0159_add_historical_redact'
 from alembic import op
 
 
-NEW_ORGANISATIONS = [
-    ('501', 'Environment Agency (PDF letters ONLY)'),
-]
+NEW_ORGANISATIONS = [('501', 'Environment Agency (PDF letters ONLY)')]
 
 
 def upgrade():
     for numeric_id, name in NEW_ORGANISATIONS:
-        op.execute("""
+        op.execute(
+            """
             INSERT
                 INTO dvla_organisation
                 VALUES ('{}', '{}')
-        """.format(numeric_id, name))
+        """.format(
+                numeric_id, name
+            )
+        )
 
 
 def downgrade():
     for numeric_id, _ in NEW_ORGANISATIONS:
-        op.execute("""
+        op.execute(
+            """
             DELETE
                 FROM dvla_organisation
                 WHERE id = '{}'
-        """.format(numeric_id))
+        """.format(
+                numeric_id
+            )
+        )

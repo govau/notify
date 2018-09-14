@@ -11,7 +11,7 @@ from tests.app.conftest import (
     sample_template as create_sample_template,
     sample_notification,
     sample_notification_history,
-    sample_email_template
+    sample_email_template,
 )
 
 
@@ -21,7 +21,7 @@ def test_get_all_template_statistics_with_bad_arg_returns_400(client, sample_ser
     response = client.get(
         '/service/{}/template-statistics'.format(sample_service.id),
         headers=[('Content-Type', 'application/json'), auth_header],
-        query_string={'limit_days': 'blurk'}
+        query_string={'limit_days': 'blurk'},
     )
 
     assert response.status_code == 400
@@ -31,7 +31,9 @@ def test_get_all_template_statistics_with_bad_arg_returns_400(client, sample_ser
 
 
 @freeze_time('2016-08-18')
-def test_get_template_statistics_for_service(notify_db, notify_db_session, client, mocker):
+def test_get_template_statistics_for_service(
+    notify_db, notify_db_session, client, mocker
+):
     email, sms = set_up_notifications(notify_db, notify_db_session)
 
     mocked_redis = mocker.patch('app.redis_store.get_all_from_hash')
@@ -40,7 +42,7 @@ def test_get_template_statistics_for_service(notify_db, notify_db_session, clien
 
     response = client.get(
         '/service/{}/template-statistics'.format(email.service_id),
-        headers=[('Content-Type', 'application/json'), auth_header]
+        headers=[('Content-Type', 'application/json'), auth_header],
     )
 
     assert response.status_code == 200
@@ -59,8 +61,9 @@ def test_get_template_statistics_for_service(notify_db, notify_db_session, clien
 
 
 @freeze_time('2016-08-18')
-def test_get_template_statistics_for_service_limited_1_day(notify_db, notify_db_session, client,
-                                                           mocker):
+def test_get_template_statistics_for_service_limited_1_day(
+    notify_db, notify_db_session, client, mocker
+):
     email, sms = set_up_notifications(notify_db, notify_db_session)
     mock_redis = mocker.patch('app.redis_store.get_all_from_hash')
 
@@ -69,7 +72,7 @@ def test_get_template_statistics_for_service_limited_1_day(notify_db, notify_db_
     response = client.get(
         '/service/{}/template-statistics'.format(email.service_id),
         headers=[('Content-Type', 'application/json'), auth_header],
-        query_string={'limit_days': 1}
+        query_string={'limit_days': 1},
     )
 
     assert response.status_code == 200
@@ -90,20 +93,28 @@ def test_get_template_statistics_for_service_limited_1_day(notify_db, notify_db_
 
 @pytest.mark.parametrize("cache_values", [False, True])
 @freeze_time('2016-08-18')
-def test_get_template_statistics_for_service_limit_7_days(notify_db, notify_db_session, client,
-                                                          mocker,
-                                                          cache_values):
+def test_get_template_statistics_for_service_limit_7_days(
+    notify_db, notify_db_session, client, mocker, cache_values
+):
     email, sms = set_up_notifications(notify_db, notify_db_session)
-    mock_cache_values = {str.encode(str(sms.id)): str.encode('3'),
-                         str.encode(str(email.id)): str.encode('3')} if cache_values else None
-    mocked_redis_get = mocker.patch('app.redis_store.get_all_from_hash', return_value=mock_cache_values)
+    mock_cache_values = (
+        {
+            str.encode(str(sms.id)): str.encode('3'),
+            str.encode(str(email.id)): str.encode('3'),
+        }
+        if cache_values
+        else None
+    )
+    mocked_redis_get = mocker.patch(
+        'app.redis_store.get_all_from_hash', return_value=mock_cache_values
+    )
     mocked_redis_set = mocker.patch('app.redis_store.set_hash_and_expire')
 
     auth_header = create_authorization_header()
     response_for_a_week = client.get(
         '/service/{}/template-statistics'.format(email.service_id),
         headers=[('Content-Type', 'application/json'), auth_header],
-        query_string={'limit_days': 7}
+        query_string={'limit_days': 7},
     )
 
     assert response_for_a_week.status_code == 200
@@ -114,17 +125,23 @@ def test_get_template_statistics_for_service_limit_7_days(notify_db, notify_db_s
     assert json_resp['data'][1]['count'] == 3
     assert json_resp['data'][1]['template_name'] == 'New SMS Template Name'
 
-    mocked_redis_get.assert_called_once_with("{}-template-counter-limit-7-days".format(email.service_id))
+    mocked_redis_get.assert_called_once_with(
+        "{}-template-counter-limit-7-days".format(email.service_id)
+    )
     if cache_values:
         mocked_redis_set.assert_not_called()
     else:
-        mocked_redis_set.assert_called_once_with("{}-template-counter-limit-7-days".format(email.service_id),
-                                                 {sms.id: 3, email.id: 3}, 600)
+        mocked_redis_set.assert_called_once_with(
+            "{}-template-counter-limit-7-days".format(email.service_id),
+            {sms.id: 3, email.id: 3},
+            600,
+        )
 
 
 @freeze_time('2016-08-18')
-def test_get_template_statistics_for_service_limit_30_days(notify_db, notify_db_session, client,
-                                                           mocker):
+def test_get_template_statistics_for_service_limit_30_days(
+    notify_db, notify_db_session, client, mocker
+):
     email, sms = set_up_notifications(notify_db, notify_db_session)
     mock_redis = mocker.patch('app.redis_store.get_all_from_hash')
 
@@ -133,7 +150,7 @@ def test_get_template_statistics_for_service_limit_30_days(notify_db, notify_db_
     response_for_a_month = client.get(
         '/service/{}/template-statistics'.format(email.service_id),
         headers=[('Content-Type', 'application/json'), auth_header],
-        query_string={'limit_days': 30}
+        query_string={'limit_days': 30},
     )
 
     assert response_for_a_month.status_code == 200
@@ -148,14 +165,15 @@ def test_get_template_statistics_for_service_limit_30_days(notify_db, notify_db_
 
 
 @freeze_time('2016-08-18')
-def test_get_template_statistics_for_service_no_limit(notify_db, notify_db_session, client,
-                                                      mocker):
+def test_get_template_statistics_for_service_no_limit(
+    notify_db, notify_db_session, client, mocker
+):
     email, sms = set_up_notifications(notify_db, notify_db_session)
     mock_redis = mocker.patch('app.redis_store.get_all_from_hash')
     auth_header = create_authorization_header()
     response_for_all = client.get(
         '/service/{}/template-statistics'.format(email.service_id),
-        headers=[('Content-Type', 'application/json'), auth_header]
+        headers=[('Content-Type', 'application/json'), auth_header],
     )
     assert response_for_all.status_code == 200
     json_resp = json.loads(response_for_all.get_data(as_text=True))
@@ -174,14 +192,22 @@ def set_up_notifications(notify_db, notify_db_session):
     today = datetime.now()
     a_week_ago = datetime.now() - timedelta(days=7)
     a_month_ago = datetime.now() - timedelta(days=30)
-    sample_notification(notify_db, notify_db_session, created_at=a_month_ago, template=sms)
-    sample_notification(notify_db, notify_db_session, created_at=a_month_ago, template=email)
+    sample_notification(
+        notify_db, notify_db_session, created_at=a_month_ago, template=sms
+    )
+    sample_notification(
+        notify_db, notify_db_session, created_at=a_month_ago, template=email
+    )
     email.name = 'Updated Email Template Name'
     dao_update_template(email)
     sms.name = 'Updated SMS Template Name'
     dao_update_template(sms)
-    sample_notification(notify_db, notify_db_session, created_at=a_week_ago, template=sms)
-    sample_notification(notify_db, notify_db_session, created_at=a_week_ago, template=email)
+    sample_notification(
+        notify_db, notify_db_session, created_at=a_week_ago, template=sms
+    )
+    sample_notification(
+        notify_db, notify_db_session, created_at=a_week_ago, template=email
+    )
     email.name = 'New Email Template Name'
     dao_update_template(email)
     sms.name = 'New SMS Template Name'
@@ -198,7 +224,7 @@ def test_returns_empty_list_if_no_templates_used(client, sample_service, mocker)
 
     response = client.get(
         '/service/{}/template-statistics'.format(sample_service.id),
-        headers=[('Content-Type', 'application/json'), auth_header]
+        headers=[('Content-Type', 'application/json'), auth_header],
     )
 
     assert response.status_code == 200
@@ -208,9 +234,8 @@ def test_returns_empty_list_if_no_templates_used(client, sample_service, mocker)
 
 
 def test_get_template_statistics_by_id_returns_last_notification(
-        notify_db,
-        notify_db_session,
-        client):
+    notify_db, notify_db_session, client
+):
     sample_notification(notify_db, notify_db_session)
     sample_notification(notify_db, notify_db_session)
     notification_3 = sample_notification(notify_db, notify_db_session)
@@ -218,7 +243,9 @@ def test_get_template_statistics_by_id_returns_last_notification(
     auth_header = create_authorization_header()
 
     response = client.get(
-        '/service/{}/template-statistics/{}'.format(notification_3.service_id, notification_3.template_id),
+        '/service/{}/template-statistics/{}'.format(
+            notification_3.service_id, notification_3.template_id
+        ),
         headers=[('Content-Type', 'application/json'), auth_header],
     )
 
@@ -228,13 +255,14 @@ def test_get_template_statistics_by_id_returns_last_notification(
 
 
 def test_get_template_statistics_for_template_returns_empty_if_no_statistics(
-    client,
-    sample_template,
+    client, sample_template
 ):
     auth_header = create_authorization_header()
 
     response = client.get(
-        '/service/{}/template-statistics/{}'.format(sample_template.service_id, sample_template.id),
+        '/service/{}/template-statistics/{}'.format(
+            sample_template.service_id, sample_template.id
+        ),
         headers=[('Content-Type', 'application/json'), auth_header],
     )
 
@@ -244,9 +272,7 @@ def test_get_template_statistics_for_template_returns_empty_if_no_statistics(
 
 
 def test_get_template_statistics_raises_error_for_nonexistent_template(
-    client,
-    sample_service,
-    fake_uuid
+    client, sample_service, fake_uuid
 ):
     auth_header = create_authorization_header()
 
@@ -262,17 +288,16 @@ def test_get_template_statistics_raises_error_for_nonexistent_template(
 
 
 def test_get_template_statistics_by_id_returns_empty_for_old_notification(
-    notify_db,
-    notify_db_session,
-    client,
-    sample_template
+    notify_db, notify_db_session, client, sample_template
 ):
     sample_notification_history(notify_db, notify_db_session, sample_template)
 
     auth_header = create_authorization_header()
 
     response = client.get(
-        '/service/{}/template-statistics/{}'.format(sample_template.service.id, sample_template.id),
+        '/service/{}/template-statistics/{}'.format(
+            sample_template.service.id, sample_template.id
+        ),
         headers=[('Content-Type', 'application/json'), auth_header],
     )
 

@@ -7,21 +7,27 @@ from app.models import ServiceEmailReplyTo
 
 
 def dao_get_reply_to_by_service_id(service_id):
-    reply_to = db.session.query(
-        ServiceEmailReplyTo
-    ).filter(
-        ServiceEmailReplyTo.service_id == service_id
-    ).order_by(desc(ServiceEmailReplyTo.is_default), desc(ServiceEmailReplyTo.created_at)).all()
+    reply_to = (
+        db.session.query(ServiceEmailReplyTo)
+        .filter(ServiceEmailReplyTo.service_id == service_id)
+        .order_by(
+            desc(ServiceEmailReplyTo.is_default), desc(ServiceEmailReplyTo.created_at)
+        )
+        .all()
+    )
     return reply_to
 
 
 def dao_get_reply_to_by_id(service_id, reply_to_id):
-    reply_to = db.session.query(
-        ServiceEmailReplyTo
-    ).filter(
-        ServiceEmailReplyTo.service_id == service_id,
-        ServiceEmailReplyTo.id == reply_to_id
-    ).order_by(ServiceEmailReplyTo.created_at).one()
+    reply_to = (
+        db.session.query(ServiceEmailReplyTo)
+        .filter(
+            ServiceEmailReplyTo.service_id == service_id,
+            ServiceEmailReplyTo.id == reply_to_id,
+        )
+        .order_by(ServiceEmailReplyTo.created_at)
+        .one()
+    )
     return reply_to
 
 
@@ -33,7 +39,9 @@ def add_reply_to_email_address_for_service(service_id, email_address, is_default
     else:
         _raise_when_no_default(old_default)
 
-    new_reply_to = ServiceEmailReplyTo(service_id=service_id, email_address=email_address, is_default=is_default)
+    new_reply_to = ServiceEmailReplyTo(
+        service_id=service_id, email_address=email_address, is_default=is_default
+    )
     db.session.add(new_reply_to)
     return new_reply_to
 
@@ -45,7 +53,9 @@ def update_reply_to_email_address(service_id, reply_to_id, email_address, is_def
         _reset_old_default_to_false(old_default)
     else:
         if old_default.id == reply_to_id:
-            raise InvalidRequest("You must have at least one reply to email address as the default.", 400)
+            raise InvalidRequest(
+                "You must have at least one reply to email address as the default.", 400
+            )
 
     reply_to_update = ServiceEmailReplyTo.query.get(reply_to_id)
     reply_to_update.email_address = email_address
@@ -63,7 +73,9 @@ def _get_existing_default(service_id):
         else:
             raise Exception(
                 "There should only be one default reply to email for each service. Service {} has {}".format(
-                    service_id, len(old_default)))
+                    service_id, len(old_default)
+                )
+            )
     return None
 
 
@@ -76,4 +88,6 @@ def _reset_old_default_to_false(old_default):
 def _raise_when_no_default(old_default):
     # check that the update is not updating the only default to false
     if not old_default:
-        raise InvalidRequest("You must have at least one reply to email address as the default.", 400)
+        raise InvalidRequest(
+            "You must have at least one reply to email address as the default.", 400
+        )

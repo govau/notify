@@ -26,11 +26,15 @@ def downgrade():
         """
         INSERT INTO provider_details_history (id, display_name, identifier, priority, notification_type, active, version)
         VALUES ('{}', 'AWS SES', 'ses', 10, 'email', true, 1)
-        """.format(id)
+        """.format(
+            id
+        )
     )
     op.execute(
         """
         INSERT INTO provider_details (id, display_name, identifier, priority, notification_type, active, version)
         VALUES ('{}', 'AWS SES', 'ses', 10, 'email', true, 1)
-        """.format(id)
+        """.format(
+            id
+        )
     )

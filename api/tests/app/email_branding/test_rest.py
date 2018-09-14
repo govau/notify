@@ -4,37 +4,41 @@ from app.models import EmailBranding
 
 
 def test_get_email_branding_options(admin_request, notify_db, notify_db_session):
-    email_branding1 = EmailBranding(colour='#FFFFFF', logo='/path/image.png', name='Org1')
-    email_branding2 = EmailBranding(colour='#000000', logo='/path/other.png', name='Org2')
+    email_branding1 = EmailBranding(
+        colour='#FFFFFF', logo='/path/image.png', name='Org1'
+    )
+    email_branding2 = EmailBranding(
+        colour='#000000', logo='/path/other.png', name='Org2'
+    )
     notify_db.session.add_all([email_branding1, email_branding2])
     notify_db.session.commit()
 
-    email_branding = admin_request.get(
-        'email_branding.get_email_branding_options'
-    )['email_branding']
+    email_branding = admin_request.get('email_branding.get_email_branding_options')[
+        'email_branding'
+    ]
 
     assert len(email_branding) == 6
-    assert {
-        email_branding['id'] for email_branding in email_branding
-    } == {
+    assert {email_branding['id'] for email_branding in email_branding} == {
         '9d25d02d-2915-4e98-874b-974e123e8536',
         '123496d4-44cb-4324-8e0a-4187101f4bdc',
         '1d70f564-919b-4c68-8bdf-b8520d92516e',
         '89ce468b-fb29-4d5d-bd3f-d468fb6f7c36',
         str(email_branding1.id),
-        str(email_branding2.id)
+        str(email_branding2.id),
     }
 
 
 def test_get_email_branding_by_id(admin_request, notify_db, notify_db_session):
-    email_branding = EmailBranding(colour='#FFFFFF', logo='/path/image.png', name='My Org')
+    email_branding = EmailBranding(
+        colour='#FFFFFF', logo='/path/image.png', name='My Org'
+    )
     notify_db.session.add(email_branding)
     notify_db.session.commit()
 
     response = admin_request.get(
         'email_branding.get_email_branding_by_id',
         _expected_status=200,
-        email_branding_id=email_branding.id
+        email_branding_id=email_branding.id,
     )
 
     assert set(response['email_branding'].keys()) == {'colour', 'logo', 'name', 'id'}
@@ -48,38 +52,31 @@ def test_post_create_email_branding(admin_request, notify_db_session):
     data = {
         'name': 'test email_branding',
         'colour': '#0000ff',
-        'logo': '/images/test_x2.png'
+        'logo': '/images/test_x2.png',
     }
     response = admin_request.post(
-        'email_branding.create_email_branding',
-        _data=data,
-        _expected_status=201
+        'email_branding.create_email_branding', _data=data, _expected_status=201
     )
     assert data['name'] == response['data']['name']
     assert data['colour'] == response['data']['colour']
     assert data['logo'] == response['data']['logo']
 
 
-def test_post_create_email_branding_without_logo_is_ok(admin_request, notify_db_session):
-    data = {
-        'name': 'test email_branding',
-        'colour': '#0000ff',
-    }
+def test_post_create_email_branding_without_logo_is_ok(
+    admin_request, notify_db_session
+):
+    data = {'name': 'test email_branding', 'colour': '#0000ff'}
     admin_request.post(
-        'email_branding.create_email_branding',
-        _data=data,
-        _expected_status=201,
+        'email_branding.create_email_branding', _data=data, _expected_status=201
     )
 
 
-def test_post_create_email_branding_without_name_or_colour_is_valid(admin_request, notify_db_session):
-    data = {
-        'logo': 'images/text_x2.png'
-    }
+def test_post_create_email_branding_without_name_or_colour_is_valid(
+    admin_request, notify_db_session
+):
+    data = {'logo': 'images/text_x2.png'}
     response = admin_request.post(
-        'email_branding.create_email_branding',
-        _data=data,
-        _expected_status=201
+        'email_branding.create_email_branding', _data=data, _expected_status=201
     )
 
     assert response['data']['logo'] == data['logo']
@@ -87,19 +84,19 @@ def test_post_create_email_branding_without_name_or_colour_is_valid(admin_reques
     assert response['data']['colour'] is None
 
 
-@pytest.mark.parametrize('data_update', [
-    ({'name': 'test email_branding 1'}),
-    ({'logo': 'images/text_x3.png', 'colour': '#ffffff'}),
-])
-def test_post_update_email_branding_updates_field(admin_request, notify_db_session, data_update):
-    data = {
-        'name': 'test email_branding',
-        'logo': 'images/text_x2.png'
-    }
+@pytest.mark.parametrize(
+    'data_update',
+    [
+        ({'name': 'test email_branding 1'}),
+        ({'logo': 'images/text_x3.png', 'colour': '#ffffff'}),
+    ],
+)
+def test_post_update_email_branding_updates_field(
+    admin_request, notify_db_session, data_update
+):
+    data = {'name': 'test email_branding', 'logo': 'images/text_x2.png'}
     response = admin_request.post(
-        'email_branding.create_email_branding',
-        _data=data,
-        _expected_status=201
+        'email_branding.create_email_branding', _data=data, _expected_status=201
     )
 
     email_branding_id = response['data']['id']
@@ -107,7 +104,7 @@ def test_post_update_email_branding_updates_field(admin_request, notify_db_sessi
     response = admin_request.post(
         'email_branding.update_email_branding',
         _data=data_update,
-        email_branding_id=email_branding_id
+        email_branding_id=email_branding_id,
     )
 
     email_branding = EmailBranding.query.all()

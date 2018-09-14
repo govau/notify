@@ -16,12 +16,12 @@ from sqlalchemy.dialects import postgresql
 
 
 def upgrade():
-    op.alter_column('organisation', 'logo',
-               existing_type=sa.VARCHAR(length=255),
-               nullable=False)
+    op.alter_column(
+        'organisation', 'logo', existing_type=sa.VARCHAR(length=255), nullable=False
+    )
 
 
 def downgrade():
-    op.alter_column('organisation', 'logo',
-               existing_type=sa.VARCHAR(length=255),
-               nullable=True)
+    op.alter_column(
+        'organisation', 'logo', existing_type=sa.VARCHAR(length=255), nullable=True
+    )

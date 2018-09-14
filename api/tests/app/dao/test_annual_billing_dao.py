@@ -36,8 +36,26 @@ def test_dao_update_annual_billing_for_future_years(notify_db_session, sample_se
 
     dao_update_annual_billing_for_future_years(sample_service.id, 9999, current_year)
 
-    assert dao_get_free_sms_fragment_limit_for_year(sample_service.id, current_year - 1).free_sms_fragment_limit == 1
+    assert (
+        dao_get_free_sms_fragment_limit_for_year(
+            sample_service.id, current_year - 1
+        ).free_sms_fragment_limit
+        == 1
+    )
     # current year is not created
-    assert dao_get_free_sms_fragment_limit_for_year(sample_service.id, current_year) is None
-    assert dao_get_free_sms_fragment_limit_for_year(sample_service.id, current_year + 1).free_sms_fragment_limit == 9999
-    assert dao_get_free_sms_fragment_limit_for_year(sample_service.id, current_year + 2).free_sms_fragment_limit == 9999
+    assert (
+        dao_get_free_sms_fragment_limit_for_year(sample_service.id, current_year)
+        is None
+    )
+    assert (
+        dao_get_free_sms_fragment_limit_for_year(
+            sample_service.id, current_year + 1
+        ).free_sms_fragment_limit
+        == 9999
+    )
+    assert (
+        dao_get_free_sms_fragment_limit_for_year(
+            sample_service.id, current_year + 2
+        ).free_sms_fragment_limit
+        == 9999
+    )

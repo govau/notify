@@ -24,7 +24,7 @@ old_options = (
     'failed',
     'technical-failure',
     'temporary-failure',
-    'permanent-failure'
+    'permanent-failure',
 )
 new_options = old_options + ('sent',)
 
@@ -33,8 +33,13 @@ new_type = sa.Enum(*new_options, name=enum_name)
 
 alter_str = 'ALTER TABLE {table} ALTER COLUMN status TYPE {enum} USING status::text::notify_status_type '
 
+
 def upgrade():
-    op.execute('ALTER TYPE {enum} RENAME TO {tmp_name}'.format(enum=enum_name, tmp_name=tmp_name))
+    op.execute(
+        'ALTER TYPE {enum} RENAME TO {tmp_name}'.format(
+            enum=enum_name, tmp_name=tmp_name
+        )
+    )
 
     new_type.create(op.get_bind())
     op.execute(alter_str.format(table='notifications', enum=enum_name))
@@ -44,7 +49,11 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('ALTER TYPE {enum} RENAME TO {tmp_name}'.format(enum=enum_name, tmp_name=tmp_name))
+    op.execute(
+        'ALTER TYPE {enum} RENAME TO {tmp_name}'.format(
+            enum=enum_name, tmp_name=tmp_name
+        )
+    )
 
     # Convert 'sent' template into 'sending'
     update_str = "UPDATE {table} SET status='sending' where status='sent'"

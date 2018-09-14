@@ -17,11 +17,8 @@ def format_statistics(statistics):
 def format_monthly_template_notification_stats(year, rows):
     stats = {
         datetime.strftime(date, '%Y-%m'): {}
-        for date in [
-            datetime(year, month, 1) for month in range(4, 13)
-        ] + [
-            datetime(year + 1, month, 1) for month in range(1, 4)
-        ]
+        for date in [datetime(year, month, 1) for month in range(4, 13)]
+        + [datetime(year + 1, month, 1) for month in range(1, 4)]
     }
 
     for row in rows:
@@ -30,7 +27,7 @@ def format_monthly_template_notification_stats(year, rows):
             stats[formatted_month][str(row.template_id)] = {
                 "name": row.name,
                 "type": row.template_type,
-                "counts": dict.fromkeys(NOTIFICATION_STATUS_TYPES, 0)
+                "counts": dict.fromkeys(NOTIFICATION_STATUS_TYPES, 0),
             }
         stats[formatted_month][str(row.template_id)]["counts"][row.status] += row.count
 
@@ -39,9 +36,8 @@ def format_monthly_template_notification_stats(year, rows):
 
 def create_zeroed_stats_dicts():
     return {
-        template_type: {
-            status: 0 for status in ('requested', 'delivered', 'failed')
-        } for template_type in TEMPLATE_TYPES
+        template_type: {status: 0 for status in ('requested', 'delivered', 'failed')}
+        for template_type in TEMPLATE_TYPES
     }
 
 
@@ -49,5 +45,10 @@ def _update_statuses_from_row(update_dict, row):
     update_dict['requested'] += row.count
     if row.status in ('delivered', 'sent'):
         update_dict['delivered'] += row.count
-    elif row.status in ('failed', 'technical-failure', 'temporary-failure', 'permanent-failure'):
+    elif row.status in (
+        'failed',
+        'technical-failure',
+        'temporary-failure',
+        'permanent-failure',
+    ):
         update_dict['failed'] += row.count

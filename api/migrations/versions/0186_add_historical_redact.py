@@ -12,6 +12,7 @@ from flask import current_app
 revision = '0186'
 down_revision = '0185'
 
+
 def upgrade():
     op.execute(
         """
@@ -31,7 +32,9 @@ def upgrade():
             templates
         LEFT JOIN template_redacted on template_redacted.template_id = templates.id
         WHERE template_redacted.template_id IS NULL
-        """.format(notify_user=current_app.config['NOTIFY_USER_ID'])
+        """.format(
+            notify_user=current_app.config['NOTIFY_USER_ID']
+        )
     )
 
 

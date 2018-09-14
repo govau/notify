@@ -18,7 +18,8 @@ def upgrade():
     op.execute(
         """
         delete from dm_datetime where 1=1;
-        """)
+        """
+    )
 
     op.execute(
         """
@@ -58,21 +59,26 @@ def upgrade():
 
     op.drop_constraint('ft_billing_pkey', 'ft_billing', type_='primary')
 
-    op.create_primary_key('ft_billing_pkey', 'ft_billing', ['bst_date',
-                                                            'template_id',
-                                                            'service_id',
-                                                            'rate_multiplier',
-                                                            'provider',
-                                                            'notification_type'])
+    op.create_primary_key(
+        'ft_billing_pkey',
+        'ft_billing',
+        [
+            'bst_date',
+            'template_id',
+            'service_id',
+            'rate_multiplier',
+            'provider',
+            'notification_type',
+        ],
+    )
 
 
 def downgrade():
     # We don't downgrade populated data
     op.drop_constraint('ft_billing_pkey', 'ft_billing', type_='primary')
 
-    op.create_primary_key('ft_billing_pkey', 'ft_billing', ['bst_date',
-                                                            'template_id',
-                                                            'rate_multiplier',
-                                                            'provider',
-                                                            'notification_type'])
-
+    op.create_primary_key(
+        'ft_billing_pkey',
+        'ft_billing',
+        ['bst_date', 'template_id', 'rate_multiplier', 'provider', 'notification_type'],
+    )

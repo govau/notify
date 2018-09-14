@@ -18,7 +18,9 @@ def test_url_for_get_service_by_id(notify_api):
         url = url_for('service.get_service_by_id', service_id=service_id)
         assert str(url) == '/service/{}'.format(service_id)
 
-        url_with_user_id = url_for('service.get_service_by_id', service_id=service_id, user_id=1)
+        url_with_user_id = url_for(
+            'service.get_service_by_id', service_id=service_id, user_id=1
+        )
         assert str(url_with_user_id) == '/service/{0}?user_id={1}'.format(service_id, 1)
 
 

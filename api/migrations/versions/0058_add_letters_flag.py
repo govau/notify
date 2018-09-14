@@ -15,8 +15,18 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('services', sa.Column('can_send_letters', sa.Boolean(), nullable=False, server_default=sa.false()))
-    op.add_column('services_history', sa.Column('can_send_letters', sa.Boolean(), nullable=False, server_default=sa.false()))
+    op.add_column(
+        'services',
+        sa.Column(
+            'can_send_letters', sa.Boolean(), nullable=False, server_default=sa.false()
+        ),
+    )
+    op.add_column(
+        'services_history',
+        sa.Column(
+            'can_send_letters', sa.Boolean(), nullable=False, server_default=sa.false()
+        ),
+    )
 
 
 def downgrade():

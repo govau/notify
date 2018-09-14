@@ -14,8 +14,14 @@ down_revision = '0156_set_temp_letter_contact'
 
 
 def upgrade():
-    op.add_column('services', sa.Column('rate_limit', sa.Integer(), nullable=False, server_default='3000'))
-    op.add_column('services_history', sa.Column('rate_limit', sa.Integer(), nullable=False, server_default='3000'))
+    op.add_column(
+        'services',
+        sa.Column('rate_limit', sa.Integer(), nullable=False, server_default='3000'),
+    )
+    op.add_column(
+        'services_history',
+        sa.Column('rate_limit', sa.Integer(), nullable=False, server_default='3000'),
+    )
 
 
 def downgrade():

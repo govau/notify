@@ -22,6 +22,7 @@ def pagination_links(pagination, endpoint, **kwargs):
 
 def url_with_token(data, url, config, base_url=None):
     from notifications_utils.url_safe_token import generate_token
+
     token = generate_token(data, config['SECRET_KEY'], config['DANGEROUS_SALT'])
     base_url = (base_url or config['ADMIN_BASE_URL']) + url
     return base_url + token
@@ -29,8 +30,11 @@ def url_with_token(data, url, config, base_url=None):
 
 def get_template_instance(template, values):
     from app.models import SMS_TYPE, EMAIL_TYPE, LETTER_TYPE
+
     return {
-        SMS_TYPE: SMSMessageTemplate, EMAIL_TYPE: PlainTextEmailTemplate, LETTER_TYPE: PlainTextEmailTemplate
+        SMS_TYPE: SMSMessageTemplate,
+        EMAIL_TYPE: PlainTextEmailTemplate,
+        LETTER_TYPE: PlainTextEmailTemplate,
     }[template['template_type']](template, values)
 
 
@@ -41,9 +45,11 @@ def get_london_midnight_in_utc(date):
      :param date: the day to calculate the London midnight in UTC for
      :return: the datetime of London midnight in UTC, for example 2016-06-17 = 2016-06-17 23:00:00
     """
-    return local_timezone.localize(datetime.combine(date, datetime.min.time())).astimezone(
-        pytz.UTC).replace(
-        tzinfo=None)
+    return (
+        local_timezone.localize(datetime.combine(date, datetime.min.time()))
+        .astimezone(pytz.UTC)
+        .replace(tzinfo=None)
+    )
 
 
 def get_midnight_for_day_before(date):
@@ -70,8 +76,7 @@ def get_london_month_from_utc_column(column):
         queries
     """
     return func.date_trunc(
-        "month",
-        func.timezone("Europe/London", func.timezone("UTC", column))
+        "month", func.timezone("Europe/London", func.timezone("UTC", column))
     )
 
 
@@ -80,11 +85,14 @@ def cache_key_for_service_template_counter(service_id, limit_days=7):
 
 
 def cache_key_for_service_template_usage_per_day(service_id, datetime):
-    return "service-{}-template-usage-{}".format(service_id, datetime.date().isoformat())
+    return "service-{}-template-usage-{}".format(
+        service_id, datetime.date().isoformat()
+    )
 
 
 def get_public_notify_type_text(notify_type, plural=False):
     from app.models import SMS_TYPE
+
     notify_type_text = notify_type
     if notify_type == SMS_TYPE:
         notify_type_text = 'text message'

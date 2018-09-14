@@ -16,7 +16,7 @@ from app.models import (
     EMAIL_TYPE,
     LETTER_TYPE,
     LetterRate,
-    Service
+    Service,
 )
 from app.utils import get_london_month_from_utc_column
 
@@ -26,7 +26,9 @@ def get_billing_data_for_month(service_id, start_date, end_date, notification_ty
     results = []
 
     if notification_type == EMAIL_TYPE:
-        return billing_data_per_month_query(0, service_id, start_date, end_date, EMAIL_TYPE)
+        return billing_data_per_month_query(
+            0, service_id, start_date, end_date, EMAIL_TYPE
+        )
 
     elif notification_type == SMS_TYPE:
         rates = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
@@ -39,18 +41,26 @@ def get_billing_data_for_month(service_id, start_date, end_date, notification_ty
         for r, n in zip(rates, rates[1:]):
             results.extend(
                 billing_data_per_month_query(
-                    r.rate, service_id, max(r.valid_from, start_date),
-                    min(n.valid_from, end_date), SMS_TYPE
+                    r.rate,
+                    service_id,
+                    max(r.valid_from, start_date),
+                    min(n.valid_from, end_date),
+                    SMS_TYPE,
                 )
             )
         results.extend(
             billing_data_per_month_query(
-                rates[-1].rate, service_id, max(rates[-1].valid_from, start_date),
-                end_date, SMS_TYPE
+                rates[-1].rate,
+                service_id,
+                max(rates[-1].valid_from, start_date),
+                end_date,
+                SMS_TYPE,
             )
         )
     elif notification_type == LETTER_TYPE:
-        results.extend(billing_letter_data_per_month_query(service_id, start_date, end_date))
+        results.extend(
+            billing_letter_data_per_month_query(service_id, start_date, end_date)
+        )
 
     return results
 
@@ -65,10 +75,20 @@ def get_monthly_billing_data(service_id, year):
 
     result = []
     for r, n in zip(rates, rates[1:]):
-        result.extend(billing_data_per_month_query(r.rate, service_id, r.valid_from, n.valid_from, SMS_TYPE))
-    result.extend(billing_data_per_month_query(rates[-1].rate, service_id, rates[-1].valid_from, end_date, SMS_TYPE))
+        result.extend(
+            billing_data_per_month_query(
+                r.rate, service_id, r.valid_from, n.valid_from, SMS_TYPE
+            )
+        )
+    result.extend(
+        billing_data_per_month_query(
+            rates[-1].rate, service_id, rates[-1].valid_from, end_date, SMS_TYPE
+        )
+    )
 
-    return [(datetime.strftime(x[0], "%B"), x[1], x[2], x[3], x[4], x[5]) for x in result]
+    return [
+        (datetime.strftime(x[0], "%B"), x[1], x[2], x[3], x[4], x[5]) for x in result
+    ]
 
 
 def billing_data_filter(notification_type, start_date, end_date, service_id):
@@ -77,20 +97,27 @@ def billing_data_filter(notification_type, start_date, end_date, service_id):
         NotificationHistory.created_at.between(start_date, end_date),
         NotificationHistory.service_id == service_id,
         NotificationHistory.status.in_(NOTIFICATION_STATUS_TYPES_BILLABLE),
-        NotificationHistory.key_type != KEY_TYPE_TEST
+        NotificationHistory.key_type != KEY_TYPE_TEST,
     ]
 
 
 def get_rates_for_daterange(start_date, end_date, notification_type):
-    rates = Rate.query.filter(Rate.notification_type == notification_type).order_by(Rate.valid_from).all()
+    rates = (
+        Rate.query.filter(Rate.notification_type == notification_type)
+        .order_by(Rate.valid_from)
+        .all()
+    )
 
     if not rates:
         return []
 
     results = []
     for current_rate, current_rate_expiry_date in zip(rates, rates[1:]):
-        if is_between(current_rate.valid_from, start_date, end_date) or \
-                is_between(current_rate_expiry_date.valid_from - timedelta(microseconds=1), start_date, end_date):
+        if is_between(current_rate.valid_from, start_date, end_date) or is_between(
+            current_rate_expiry_date.valid_from - timedelta(microseconds=1),
+            start_date,
+            end_date,
+        ):
             results.append(current_rate)
 
     if is_between(rates[-1].valid_from, start_date, end_date):
@@ -110,71 +137,95 @@ def is_between(date, start_date, end_date):
 
 
 @statsd(namespace="dao")
-def billing_data_per_month_query(rate, service_id, start_date, end_date, notification_type):
+def billing_data_per_month_query(
+    rate, service_id, start_date, end_date, notification_type
+):
     month = get_london_month_from_utc_column(NotificationHistory.created_at)
     if notification_type == SMS_TYPE:
-        filter_subq = func.sum(NotificationHistory.billable_units).label('billing_units')
+        filter_subq = func.sum(NotificationHistory.billable_units).label(
+            'billing_units'
+        )
     elif notification_type == EMAIL_TYPE:
-        filter_subq = func.count(NotificationHistory.billable_units).label('billing_units')
+        filter_subq = func.count(NotificationHistory.billable_units).label(
+            'billing_units'
+        )
 
-    results = db.session.query(
-        month.label('month'),
-        filter_subq,
-        rate_multiplier().label('rate_multiplier'),
-        NotificationHistory.international,
-        NotificationHistory.notification_type,
-        cast(rate, Float()).label('rate')
-    ).filter(
-        *billing_data_filter(notification_type, start_date, end_date, service_id)
-    ).group_by(
-        NotificationHistory.notification_type,
-        month,
-        NotificationHistory.rate_multiplier,
-        NotificationHistory.international
-    ).order_by(
-        month,
-        rate_multiplier()
+    results = (
+        db.session.query(
+            month.label('month'),
+            filter_subq,
+            rate_multiplier().label('rate_multiplier'),
+            NotificationHistory.international,
+            NotificationHistory.notification_type,
+            cast(rate, Float()).label('rate'),
+        )
+        .filter(
+            *billing_data_filter(notification_type, start_date, end_date, service_id)
+        )
+        .group_by(
+            NotificationHistory.notification_type,
+            month,
+            NotificationHistory.rate_multiplier,
+            NotificationHistory.international,
+        )
+        .order_by(month, rate_multiplier())
     )
     return results.all()
 
 
 def rate_multiplier():
-    return cast(case([
-        (NotificationHistory.rate_multiplier == None, literal_column("'1'")),  # noqa
-        (NotificationHistory.rate_multiplier != None, NotificationHistory.rate_multiplier),  # noqa
-    ]), Integer())
+    return cast(
+        case(
+            [
+                (
+                    NotificationHistory.rate_multiplier == None,
+                    literal_column("'1'"),
+                ),  # noqa
+                (
+                    NotificationHistory.rate_multiplier != None,
+                    NotificationHistory.rate_multiplier,
+                ),  # noqa
+            ]
+        ),
+        Integer(),
+    )
 
 
 @statsd(namespace="dao")
 def billing_letter_data_per_month_query(service_id, start_date, end_date):
     month = get_london_month_from_utc_column(NotificationHistory.created_at)
     crown = Service.query.get(service_id).crown
-    results = db.session.query(
-        month.label('month'),
-        func.count(NotificationHistory.billable_units).label('billing_units'),
-        rate_multiplier().label('rate_multiplier'),
-        NotificationHistory.international,
-        NotificationHistory.notification_type,
-        cast(LetterRate.rate, Float()).label('rate')
-    ).join(
-        LetterRate,
-        and_(NotificationHistory.created_at >= LetterRate.start_date,
-        (LetterRate.end_date == None) |  # noqa
-        (LetterRate.end_date > NotificationHistory.created_at))
-    ).filter(
-        LetterRate.sheet_count == NotificationHistory.billable_units,
-        LetterRate.crown == crown,
-        LetterRate.post_class == 'second',
-        NotificationHistory.created_at < end_date,
-        *billing_data_filter(LETTER_TYPE, start_date, end_date, service_id)
-    ).group_by(
-        NotificationHistory.notification_type,
-        month,
-        NotificationHistory.rate_multiplier,
-        NotificationHistory.international,
-        LetterRate.rate
-    ).order_by(
-        month,
-        rate_multiplier()
+    results = (
+        db.session.query(
+            month.label('month'),
+            func.count(NotificationHistory.billable_units).label('billing_units'),
+            rate_multiplier().label('rate_multiplier'),
+            NotificationHistory.international,
+            NotificationHistory.notification_type,
+            cast(LetterRate.rate, Float()).label('rate'),
+        )
+        .join(
+            LetterRate,
+            and_(
+                NotificationHistory.created_at >= LetterRate.start_date,
+                (LetterRate.end_date == None)
+                | (LetterRate.end_date > NotificationHistory.created_at),  # noqa
+            ),
+        )
+        .filter(
+            LetterRate.sheet_count == NotificationHistory.billable_units,
+            LetterRate.crown == crown,
+            LetterRate.post_class == 'second',
+            NotificationHistory.created_at < end_date,
+            *billing_data_filter(LETTER_TYPE, start_date, end_date, service_id)
+        )
+        .group_by(
+            NotificationHistory.notification_type,
+            month,
+            NotificationHistory.rate_multiplier,
+            NotificationHistory.international,
+            LetterRate.rate,
+        )
+        .order_by(month, rate_multiplier())
     )
     return results.all()
