@@ -1,8 +1,10 @@
 import yaml
+import pytest
 
 from app.config import QueueNames
 
 
+@pytest.mark.skip(reason="no longer using these manifests")
 def test_queue_names_set_in_manifest_delivery_base_correctly():
     with open("manifest-delivery-base.yml", 'r') as stream:
         search = ' -Q '

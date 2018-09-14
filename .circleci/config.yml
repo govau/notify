@@ -124,6 +124,7 @@ jobs:
       - run: make -C api test-service
       - run: make -C api test-v2
       - run: make -C api test-dao
+      - run: make -C api tests
 
   build-api:
     <<: *python_node_image
