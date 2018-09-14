@@ -331,7 +331,7 @@ def test_receive_notification_from_firetext_persists_message(notify_db_session, 
     result = json.loads(response.get_data(as_text=True))
     assert result['status'] == 'ok'
     persisted = InboundSms.query.first()
-    assert persisted != None
+    assert persisted is not None
     assert persisted.notify_number == '0412345678'
     assert persisted.user_number == '61487654321'
     assert persisted.service == service
@@ -356,7 +356,7 @@ def test_receive_notification_from_firetext_persists_message_with_normalized_pho
     result = json.loads(response.get_data(as_text=True))
     assert result['status'] == 'ok'
     persisted = InboundSms.query.first()
-    assert persisted != None
+    assert persisted is not None
     assert persisted.user_number == '61499999999'
 
 

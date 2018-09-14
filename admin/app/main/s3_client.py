@@ -1,7 +1,7 @@
 import uuid
 
 import botocore
-from boto3 import resource
+from boto3 import resource, Session
 from flask import current_app
 from notifications_utils.s3 import s3upload as utils_s3upload
 
@@ -9,65 +9,113 @@ FILE_LOCATION_STRUCTURE = 'service-{}-notify/{}.csv'
 TEMP_TAG = 'temp-{user_id}_'
 LOGO_LOCATION_STRUCTURE = '{temp}{unique_id}-{filename}'
 
-def get_s3_object(bucket_name, filename):
-    s3 = resource('s3')
-    return s3.Object(bucket_name, filename)
+class S3Client(object):
+    def __init__(self, bucket_name, session=None):
+        self._bucket_name = bucket_name
+        self._session = session
+
+    @property
+    def session(self):
+        return self._session if self._session else Session()
+
+    @property
+    def bucket_name(self):
+        return self._bucket_name
+
+    def resource(self, *args, **kwargs):
+        return self.session.resource(*args, **kwargs)
+
+    @property
+    def s3(self):
+        return self.resource('s3')
+
+    @property
+    def bucket(self):
+        return self.s3.Bucket(self._bucket_name)
+
+    def get_object(self, filename):
+        return self.s3.Object(self._bucket_name, filename)
+
+    def delete_object(self, filename):
+        return self.get_object(filename).delete()
+
+    def copy_object(self, old_name, new_name):
+        self.get_object(new_name).copy_from(
+            CopySource='{}/{}'.format(self._bucket_name, old_name))
 
 
-def delete_s3_object(filename):
-    bucket_name = current_app.config['LOGO_UPLOAD_BUCKET_NAME']
-    get_s3_object(bucket_name, filename).delete()
+class Clients(object):
+    @property
+    def logo(self):
+        return S3Client(
+            current_app.config['LOGO_UPLOAD_BUCKET_NAME'],
+            Session(
+                current_app.config['AWS_LOGO_ACCESS_KEY_ID'],
+                current_app.config['AWS_LOGO_SECRET_ACCESS_KEY']
+            )
+        )
 
+    @property
+    def csv(self):
+        return S3Client(current_app.config['CSV_UPLOAD_BUCKET_NAME'])
 
-def rename_s3_object(old_name, new_name):
-    bucket_name = current_app.config['LOGO_UPLOAD_BUCKET_NAME']
-    get_s3_object(bucket_name, new_name).copy_from(
-        CopySource='{}/{}'.format(bucket_name, old_name))
-    delete_s3_object(old_name)
+    @property
+    def mou(self):
+        return S3Client(current_app.config['MOU_BUCKET_NAME'])
 
+clients = Clients()
 
-def get_s3_objects_filter_by_prefix(prefix):
-    bucket_name = current_app.config['LOGO_UPLOAD_BUCKET_NAME']
-    s3 = resource('s3')
-    return s3.Bucket(bucket_name).objects.filter(Prefix=prefix)
+def rename_s3_object(client, old_name, new_name):
+    client.copy_object(old_name, new_name)
+    client.delete_object(old_name)
 
+def get_s3_objects_filter_by_prefix(client, prefix):
+    return client.bucket.objects.filter(Prefix=prefix)
 
 def get_temp_truncated_filename(filename, user_id):
     return filename[len(TEMP_TAG.format(user_id=user_id)):]
 
-
 def s3upload(service_id, filedata, region):
+    client = clients.csv
+
     upload_id = str(uuid.uuid4())
     upload_file_name = FILE_LOCATION_STRUCTURE.format(service_id, upload_id)
-    utils_s3upload(filedata=filedata['data'],
-                   region=region,
-                   bucket_name=current_app.config['CSV_UPLOAD_BUCKET_NAME'],
-                   file_location=upload_file_name)
+    utils_s3upload(
+        filedata=filedata['data'],
+        region=region,
+        bucket_name=client.bucket_name,
+        file_location=upload_file_name,
+        session=client.session
+    )
     return upload_id
 
 
 def s3download(service_id, upload_id):
+    client = clients.csv
+
     contents = ''
     try:
-        bucket_name = current_app.config['CSV_UPLOAD_BUCKET_NAME']
         upload_file_name = FILE_LOCATION_STRUCTURE.format(service_id, upload_id)
-        key = get_s3_object(bucket_name, upload_file_name)
+        key = client.get_object(upload_file_name)
         contents = key.get()['Body'].read().decode('utf-8')
     except botocore.exceptions.ClientError as e:
         current_app.logger.error("Unable to download s3 file {}".format(
             FILE_LOCATION_STRUCTURE.format(service_id, upload_id)))
         raise e
+
     return contents
 
 
 def get_mou(organisation_is_crown):
-    bucket = current_app.config['MOU_BUCKET_NAME']
+    client = clients.mou
+
+    bucket = client.bucket_name
     filename = 'crown.pdf' if organisation_is_crown else 'non-crown.pdf'
     attachment_filename = 'GOV.AU Notify data sharing and financial agreement{}.pdf'.format(
         '' if organisation_is_crown else ' (non-crown)'
     )
     try:
-        key = get_s3_object(bucket, filename)
+        key = client.get_object(filename)
         return {
             'filename_or_fp': key.get()['Body'],
             'attachment_filename': attachment_filename,
@@ -75,24 +123,27 @@ def get_mou(organisation_is_crown):
         }
     except botocore.exceptions.ClientError as exception:
         current_app.logger.error("Unable to download s3 file {}/{}".format(
-            bucket, filename
+            client.bucket_name, filename
         ))
         raise exception
 
 
 def upload_logo(filename, filedata, region, user_id):
+    client = clients.logo
+
     upload_file_name = LOGO_LOCATION_STRUCTURE.format(
         temp=TEMP_TAG.format(user_id=user_id),
         unique_id=str(uuid.uuid4()),
         filename=filename
     )
-    bucket_name = current_app.config['LOGO_UPLOAD_BUCKET_NAME']
+
     utils_s3upload(
         filedata=filedata,
         region=region,
-        bucket_name=bucket_name,
+        bucket_name=client.bucket_name,
         file_location=upload_file_name,
-        content_type='image/png'
+        content_type='image/png',
+        session=client.session
     )
 
     return upload_file_name
@@ -105,18 +156,19 @@ def persist_logo(filename, user_id):
     else:
         return filename
 
-    rename_s3_object(filename, persisted_filename)
-
+    rename_s3_object(clients.logo, filename, persisted_filename)
     return persisted_filename
 
 
 def delete_temp_files_created_by(user_id):
-    for obj in get_s3_objects_filter_by_prefix(TEMP_TAG.format(user_id=user_id)):
-        delete_s3_object(obj.key)
+    client = clients.logo
+
+    for obj in get_s3_objects_filter_by_prefix(client, TEMP_TAG.format(user_id=user_id)):
+        client.delete_object(obj.key)
 
 
 def delete_temp_file(filename):
     if not filename.startswith(TEMP_TAG[:5]):
         raise ValueError('Not a temp file: {}'.format(filename))
 
-    delete_s3_object(filename)
+    clients.logo.delete_object(filename)
