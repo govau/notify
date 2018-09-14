@@ -17,10 +17,12 @@ from flask import current_app
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO dvla_organisation VALUES
         ('002', 'Office of the Public Guardian')
-    """)
+    """
+    )
 
 
 def downgrade():

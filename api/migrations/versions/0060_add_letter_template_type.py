@@ -23,10 +23,7 @@ new_options = old_options + ('letter',)
 new_type = sa.Enum(*new_options, name=name)
 old_type = sa.Enum(*old_options, name=name)
 
-tcr = sa.sql.table(
-    'templates',
-    sa.Column('template_type', new_type, nullable=False)
-)
+tcr = sa.sql.table('templates', sa.Column('template_type', new_type, nullable=False))
 
 
 def upgrade():
@@ -34,8 +31,11 @@ def upgrade():
 
     new_type.create(op.get_bind())
     op.execute(
-        'ALTER TABLE templates ALTER COLUMN template_type ' +
-        'TYPE ' + name + ' USING template_type::text::' + name
+        'ALTER TABLE templates ALTER COLUMN template_type '
+        + 'TYPE '
+        + name
+        + ' USING template_type::text::'
+        + name
     )
     op.execute('DROP TYPE ' + tmp_name)
 
@@ -43,14 +43,19 @@ def upgrade():
 def downgrade():
     # Convert 'letter' template into 'email'
     op.execute(
-        tcr.update().where(tcr.c.template_type=='letter').values(template_type='email')
+        tcr.update()
+        .where(tcr.c.template_type == 'letter')
+        .values(template_type='email')
     )
 
     op.execute('ALTER TYPE ' + name + ' RENAME TO ' + tmp_name)
 
     old_type.create(op.get_bind())
     op.execute(
-        'ALTER TABLE templates ALTER COLUMN template_type ' +
-        'TYPE ' + name + ' USING template_type::text::' + name
+        'ALTER TABLE templates ALTER COLUMN template_type '
+        + 'TYPE '
+        + name
+        + ' USING template_type::text::'
+        + name
     )
     op.execute('DROP TYPE ' + tmp_name)

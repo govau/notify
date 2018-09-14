@@ -4,10 +4,7 @@ from datetime import datetime, timedelta
 from app import db
 from app.models import ApiKey
 
-from app.dao.dao_utils import (
-    transactional,
-    version_class
-)
+from app.dao.dao_utils import transactional, version_class
 
 from sqlalchemy import or_, func
 
@@ -16,7 +13,9 @@ from sqlalchemy import or_, func
 @version_class(ApiKey)
 def save_model_api_key(api_key):
     if not api_key.id:
-        api_key.id = uuid.uuid4()  # must be set now so version history model can use same id
+        api_key.id = (
+            uuid.uuid4()
+        )  # must be set now so version history model can use same id
     api_key.secret = uuid.uuid4()
     db.session.add(api_key)
 
@@ -31,11 +30,15 @@ def expire_api_key(service_id, api_key_id):
 
 def get_model_api_keys(service_id, id=None):
     if id:
-        return ApiKey.query.filter_by(id=id, service_id=service_id, expiry_date=None).one()
+        return ApiKey.query.filter_by(
+            id=id, service_id=service_id, expiry_date=None
+        ).one()
     seven_days_ago = datetime.utcnow() - timedelta(days=7)
     return ApiKey.query.filter(
-        or_(ApiKey.expiry_date == None, func.date(ApiKey.expiry_date) > seven_days_ago),  # noqa
-        ApiKey.service_id == service_id
+        or_(
+            ApiKey.expiry_date == None, func.date(ApiKey.expiry_date) > seven_days_ago
+        ),  # noqa
+        ApiKey.service_id == service_id,
     ).all()
 
 

@@ -21,8 +21,27 @@ def upgrade():
 
 
 def downgrade():
-    op.add_column('services_history', sa.Column('reply_to_email_address', sa.TEXT(),
-                                                autoincrement=False, nullable=True))
-    op.add_column('services_history', sa.Column('letter_contact_block', sa.TEXT(), autoincrement=False, nullable=True))
-    op.add_column('services', sa.Column('reply_to_email_address', sa.TEXT(), autoincrement=False, nullable=True))
-    op.add_column('services', sa.Column('letter_contact_block', sa.TEXT(), autoincrement=False, nullable=True))
+    op.add_column(
+        'services_history',
+        sa.Column(
+            'reply_to_email_address', sa.TEXT(), autoincrement=False, nullable=True
+        ),
+    )
+    op.add_column(
+        'services_history',
+        sa.Column(
+            'letter_contact_block', sa.TEXT(), autoincrement=False, nullable=True
+        ),
+    )
+    op.add_column(
+        'services',
+        sa.Column(
+            'reply_to_email_address', sa.TEXT(), autoincrement=False, nullable=True
+        ),
+    )
+    op.add_column(
+        'services',
+        sa.Column(
+            'letter_contact_block', sa.TEXT(), autoincrement=False, nullable=True
+        ),
+    )

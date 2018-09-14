@@ -25,19 +25,30 @@ def upgrade():
     res = results.fetchall()
     for x in res:
         start_date, end_date = get_month_start_and_end_date_in_utc(
-            datetime(int(x.year), datetime.strptime(x.month, '%B').month, 1))
-        conn.execute("update monthly_billing set start_date = '{}', end_date = '{}' where id = '{}'".format(start_date,
-                                                                                                            end_date,
-                                                                                                            x.id))
+            datetime(int(x.year), datetime.strptime(x.month, '%B').month, 1)
+        )
+        conn.execute(
+            "update monthly_billing set start_date = '{}', end_date = '{}' where id = '{}'".format(
+                start_date, end_date, x.id
+            )
+        )
     op.alter_column('monthly_billing', 'start_date', nullable=False)
     op.alter_column('monthly_billing', 'end_date', nullable=False)
-    op.create_index(op.f('uix_monthly_billing'), 'monthly_billing', ['service_id', 'start_date', 'notification_type'],
-                    unique=True)
+    op.create_index(
+        op.f('uix_monthly_billing'),
+        'monthly_billing',
+        ['service_id', 'start_date', 'notification_type'],
+        unique=True,
+    )
 
 
 def downgrade():
     op.drop_column('monthly_billing', 'start_date')
     op.drop_column('monthly_billing', 'end_date')
 
-    op.create_index(op.f('uix_monthly_billing'), 'monthly_billing',
-                    ['service_id', 'month', 'year', 'notification_type'], unique=True)
+    op.create_index(
+        op.f('uix_monthly_billing'),
+        'monthly_billing',
+        ['service_id', 'month', 'year', 'notification_type'],
+        unique=True,
+    )

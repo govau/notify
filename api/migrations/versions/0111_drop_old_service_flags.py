@@ -14,6 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 def upgrade():
     op.drop_column('services', 'can_send_letters')
     op.drop_column('services', 'can_send_international_sms')
@@ -22,7 +23,43 @@ def upgrade():
 
 
 def downgrade():
-    op.add_column('services_history', sa.Column('can_send_international_sms', sa.BOOLEAN(), server_default=sa.text('false'), autoincrement=False, nullable=False))
-    op.add_column('services_history', sa.Column('can_send_letters', sa.BOOLEAN(), server_default=sa.text('false'), autoincrement=False, nullable=False))
-    op.add_column('services', sa.Column('can_send_international_sms', sa.BOOLEAN(), server_default=sa.text('false'), autoincrement=False, nullable=False))
-    op.add_column('services', sa.Column('can_send_letters', sa.BOOLEAN(), server_default=sa.text('false'), autoincrement=False, nullable=False))
+    op.add_column(
+        'services_history',
+        sa.Column(
+            'can_send_international_sms',
+            sa.BOOLEAN(),
+            server_default=sa.text('false'),
+            autoincrement=False,
+            nullable=False,
+        ),
+    )
+    op.add_column(
+        'services_history',
+        sa.Column(
+            'can_send_letters',
+            sa.BOOLEAN(),
+            server_default=sa.text('false'),
+            autoincrement=False,
+            nullable=False,
+        ),
+    )
+    op.add_column(
+        'services',
+        sa.Column(
+            'can_send_international_sms',
+            sa.BOOLEAN(),
+            server_default=sa.text('false'),
+            autoincrement=False,
+            nullable=False,
+        ),
+    )
+    op.add_column(
+        'services',
+        sa.Column(
+            'can_send_letters',
+            sa.BOOLEAN(),
+            server_default=sa.text('false'),
+            autoincrement=False,
+            nullable=False,
+        ),
+    )

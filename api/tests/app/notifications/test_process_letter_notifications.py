@@ -4,7 +4,9 @@ from app.models import NOTIFICATION_CREATED
 from app.notifications.process_letter_notifications import create_letter_notification
 
 
-def test_create_letter_notification_creates_notification(sample_letter_template, sample_api_key):
+def test_create_letter_notification_creates_notification(
+    sample_letter_template, sample_api_key
+):
     data = {
         'personalisation': {
             'address_line_1': 'The Queen',
@@ -13,7 +15,9 @@ def test_create_letter_notification_creates_notification(sample_letter_template,
         }
     }
 
-    notification = create_letter_notification(data, sample_letter_template, sample_api_key, NOTIFICATION_CREATED)
+    notification = create_letter_notification(
+        data, sample_letter_template, sample_api_key, NOTIFICATION_CREATED
+    )
 
     assert notification == Notification.query.one()
     assert notification.job is None
@@ -27,16 +31,20 @@ def test_create_letter_notification_creates_notification(sample_letter_template,
     assert notification.client_reference is None
 
 
-def test_create_letter_notification_sets_reference(sample_letter_template, sample_api_key):
+def test_create_letter_notification_sets_reference(
+    sample_letter_template, sample_api_key
+):
     data = {
         'personalisation': {
             'address_line_1': 'The Queen',
             'address_line_2': 'Buckingham Palace',
             'postcode': 'SW1 1AA',
         },
-        'reference': 'foo'
+        'reference': 'foo',
     }
 
-    notification = create_letter_notification(data, sample_letter_template, sample_api_key, NOTIFICATION_CREATED)
+    notification = create_letter_notification(
+        data, sample_letter_template, sample_api_key, NOTIFICATION_CREATED
+    )
 
     assert notification.client_reference == 'foo'

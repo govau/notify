@@ -22,7 +22,9 @@ def upgrade():
     # Step 1: update the column free_sms_fragment_limit in service table if it is empty
     update_service_table = """
         UPDATE services SET free_sms_fragment_limit = {} where free_sms_fragment_limit is null
-    """.format(default_limit)
+    """.format(
+        default_limit
+    )
 
     op.execute(update_service_table)
 
@@ -33,7 +35,9 @@ def upgrade():
          SELECT uuid_in(md5(random()::text)::cstring), id, {}, {}, '{}', '{}' 
          FROM services WHERE id NOT IN 
         (select service_id from annual_billing)
-    """.format(current_year, default_limit, datetime.utcnow(), datetime.utcnow())
+    """.format(
+        current_year, default_limit, datetime.utcnow(), datetime.utcnow()
+    )
     op.execute(insert_row_if_not_exist)
 
     # Step 3: copy the free_sms_fragment_limit data from the services table across to annual_billing table.

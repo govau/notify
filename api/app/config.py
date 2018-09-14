@@ -5,14 +5,13 @@ import json
 from celery.schedules import crontab
 from kombu import Exchange, Queue
 
-from app.models import (
-    EMAIL_TYPE, SMS_TYPE, LETTER_TYPE,
-)
+from app.models import EMAIL_TYPE, SMS_TYPE, LETTER_TYPE
 
 if os.environ.get('VCAP_SERVICES'):
     # on cloudfoundry, config is a json blob in VCAP_SERVICES - unpack it, and populate
     # standard environment variables from it
     from app.cloudfoundry_config import extract_cloudfoundry_config
+
     extract_cloudfoundry_config()
 
 
@@ -101,10 +100,14 @@ class Config(object):
 
     # Performance platform
     PERFORMANCE_PLATFORM_ENABLED = False
-    PERFORMANCE_PLATFORM_URL = 'https://www.performance.service.gov.uk/data/govuk-notify/'
+    PERFORMANCE_PLATFORM_URL = (
+        'https://www.performance.service.gov.uk/data/govuk-notify/'
+    )
 
     # Notify support email
-    NOTIFY_SUPPORT_EMAIL = os.environ.get('NOTIFY_SUPPORT_EMAIL', 'notify-support-dev@digital.gov.au')
+    NOTIFY_SUPPORT_EMAIL = os.environ.get(
+        'NOTIFY_SUPPORT_EMAIL', 'notify-support-dev@digital.gov.au'
+    )
 
     # Deskpro
     DESKPRO_API_HOST = os.environ.get('DESKPRO_API_HOST')
@@ -118,7 +121,9 @@ class Config(object):
     DEBUG = False
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')
 
-    CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME', 'dta-notify-csv-upload-20180712070203208700000001')
+    CSV_UPLOAD_BUCKET_NAME = os.getenv(
+        'CSV_UPLOAD_BUCKET_NAME', 'dta-notify-csv-upload-20180712070203208700000001'
+    )
 
     ###########################
     # Default config values ###
@@ -178,115 +183,119 @@ class Config(object):
     CELERY_TIMEZONE = 'Europe/London'
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
-    CELERY_IMPORTS = ('app.celery.tasks', 'app.celery.scheduled_tasks', 'app.celery.reporting_tasks')
+    CELERY_IMPORTS = (
+        'app.celery.tasks',
+        'app.celery.scheduled_tasks',
+        'app.celery.reporting_tasks',
+    )
     CELERYBEAT_SCHEDULE = {
         'run-scheduled-jobs': {
             'task': 'run-scheduled-jobs',
             'schedule': crontab(minute=1),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'delete-verify-codes': {
             'task': 'delete-verify-codes',
             'schedule': timedelta(minutes=63),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'delete-invitations': {
             'task': 'delete-invitations',
             'schedule': timedelta(minutes=66),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'delete-sms-notifications': {
             'task': 'delete-sms-notifications',
             'schedule': crontab(hour=0, minute=0),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'delete-email-notifications': {
             'task': 'delete-email-notifications',
             'schedule': crontab(hour=0, minute=20),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'delete-letter-notifications': {
             'task': 'delete-letter-notifications',
             'schedule': crontab(hour=0, minute=40),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'delete-inbound-sms': {
             'task': 'delete-inbound-sms',
             'schedule': crontab(hour=1, minute=0),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'send-daily-performance-platform-stats': {
             'task': 'send-daily-performance-platform-stats',
             'schedule': crontab(hour=2, minute=0),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'switch-current-sms-provider-on-slow-delivery': {
             'task': 'switch-current-sms-provider-on-slow-delivery',
             'schedule': crontab(),  # Every minute
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'timeout-sending-notifications': {
             'task': 'timeout-sending-notifications',
             'schedule': crontab(hour=3, minute=0),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'create-nightly-billing': {
             'task': 'create-nightly-billing',
             'schedule': crontab(hour=3, minute=30),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'remove_sms_email_jobs': {
             'task': 'remove_csv_files',
             'schedule': crontab(hour=4, minute=0),
             'options': {'queue': QueueNames.PERIODIC},
-            'kwargs': {'job_types': [EMAIL_TYPE, SMS_TYPE]}
+            'kwargs': {'job_types': [EMAIL_TYPE, SMS_TYPE]},
         },
         'remove_letter_jobs': {
             'task': 'remove_csv_files',
             'schedule': crontab(hour=4, minute=20),
             'options': {'queue': QueueNames.PERIODIC},
-            'kwargs': {'job_types': [LETTER_TYPE]}
+            'kwargs': {'job_types': [LETTER_TYPE]},
         },
         'remove_transformed_dvla_files': {
             'task': 'remove_transformed_dvla_files',
             'schedule': crontab(hour=4, minute=40),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'populate_monthly_billing': {
             'task': 'populate_monthly_billing',
             'schedule': crontab(hour=5, minute=10),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'raise-alert-if-letter-notifications-still-sending': {
             'task': 'raise-alert-if-letter-notifications-still-sending',
             'schedule': crontab(hour=16, minute=30),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'trigger-letter-pdfs-for-day': {
             'task': 'trigger-letter-pdfs-for-day',
             'schedule': crontab(hour=17, minute=50),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'raise-alert-if-no-letter-ack-file': {
             'task': 'raise-alert-if-no-letter-ack-file',
             'schedule': crontab(hour=23, minute=00),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'check-job-status': {
             'task': 'check-job-status',
             'schedule': crontab(),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'daily-stats-template-usage-by-month': {
             'task': 'daily-stats-template-usage-by-month',
             'schedule': crontab(hour=0, minute=5),
-            'options': {'queue': QueueNames.PERIODIC}
+            'options': {'queue': QueueNames.PERIODIC},
         },
         'replay-created-notifications': {
             'task': 'replay-created-notifications',
             'schedule': crontab(minute='0, 15, 30, 45'),
-            'options': {'queue': QueueNames.PERIODIC}
-        }
+            'options': {'queue': QueueNames.PERIODIC},
+        },
     }
     CELERY_QUEUES = []
 
@@ -312,25 +321,37 @@ class Config(object):
 
     DVLA_BUCKETS = {
         'job': '{}-dvla-file-per-job'.format(os.getenv('NOTIFY_ENVIRONMENT')),
-        'notification': '{}-dvla-letter-api-files'.format(os.getenv('NOTIFY_ENVIRONMENT'))
+        'notification': '{}-dvla-letter-api-files'.format(
+            os.getenv('NOTIFY_ENVIRONMENT')
+        ),
     }
 
     FREE_SMS_TIER_FRAGMENT_COUNT = 250000
 
     SMS_INBOUND_WHITELIST = json.loads(os.environ.get('SMS_INBOUND_WHITELIST', '[]'))
-    FIRETEXT_INBOUND_SMS_AUTH = json.loads(os.environ.get('FIRETEXT_INBOUND_SMS_AUTH', '[]'))
+    FIRETEXT_INBOUND_SMS_AUTH = json.loads(
+        os.environ.get('FIRETEXT_INBOUND_SMS_AUTH', '[]')
+    )
     MMG_INBOUND_SMS_AUTH = json.loads(os.environ.get('MMG_INBOUND_SMS_AUTH', '[]'))
-    MMG_INBOUND_SMS_USERNAME = json.loads(os.environ.get('MMG_INBOUND_SMS_USERNAME', '[]'))
+    MMG_INBOUND_SMS_USERNAME = json.loads(
+        os.environ.get('MMG_INBOUND_SMS_USERNAME', '[]')
+    )
 
     ROUTE_SECRET_KEY_1 = os.environ.get('ROUTE_SECRET_KEY_1', '')
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
 
     # Format is as follows:
     # {"dataset_1": "token_1", ...}
-    PERFORMANCE_PLATFORM_ENDPOINTS = json.loads(os.environ.get('PERFORMANCE_PLATFORM_ENDPOINTS', '{}'))
+    PERFORMANCE_PLATFORM_ENDPOINTS = json.loads(
+        os.environ.get('PERFORMANCE_PLATFORM_ENDPOINTS', '{}')
+    )
 
-    TEMPLATE_PREVIEW_API_HOST = os.environ.get('TEMPLATE_PREVIEW_API_HOST', 'http://localhost:6013')
-    TEMPLATE_PREVIEW_API_KEY = os.environ.get('TEMPLATE_PREVIEW_API_KEY', 'my-secret-key')
+    TEMPLATE_PREVIEW_API_HOST = os.environ.get(
+        'TEMPLATE_PREVIEW_API_HOST', 'http://localhost:6013'
+    )
+    TEMPLATE_PREVIEW_API_KEY = os.environ.get(
+        'TEMPLATE_PREVIEW_API_KEY', 'my-secret-key'
+    )
 
     LETTER_PROCESSING_DEADLINE = time(17, 30)
 
@@ -340,6 +361,7 @@ class Config(object):
 ######################
 # Config overrides ###
 ######################
+
 
 class Development(Config):
     DEBUG = True
@@ -359,7 +381,9 @@ class Development(Config):
     NOTIFY_LOG_PATH = 'application.log'
     NOTIFICATION_QUEUE_PREFIX = 'development'
 
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/notification_api')
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/notification_api'
+    )
     REDIS_URL = 'redis://localhost:6379/0'
     BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
 
@@ -390,7 +414,9 @@ class Test(Development):
     LETTERS_SCAN_BUCKET_NAME = 'test-letters-scan'
 
     # this is overriden in jenkins and on cloudfoundry
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_TEST_DATABASE_URI', 'postgresql://localhost/test_notification_api')
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'SQLALCHEMY_TEST_DATABASE_URI', 'postgresql://localhost/test_notification_api'
+    )
 
     BROKER_URL = 'you-forgot-to-mock-celery-in-your-tests://'
 
@@ -474,5 +500,5 @@ configs = {
     'production': Live,
     'staging': Staging,
     'preview': Preview,
-    'sandbox': Sandbox
+    'sandbox': Sandbox,
 }

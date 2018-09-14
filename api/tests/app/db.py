@@ -5,7 +5,10 @@ from app import db
 from app.dao.jobs_dao import dao_create_job
 from app.dao.service_inbound_api_dao import save_service_inbound_api
 from app.dao.service_callback_api_dao import save_service_callback_api
-from app.dao.service_sms_sender_dao import update_existing_sms_sender_with_inbound_number, dao_update_service_sms_sender
+from app.dao.service_sms_sender_dao import (
+    update_existing_sms_sender_with_inbound_number,
+    dao_update_service_sms_sender,
+)
 from app.dao.invited_org_user_dao import save_invited_org_user
 from app.models import (
     ApiKey,
@@ -38,7 +41,7 @@ from app.models import (
 from app.dao.users_dao import save_model_user
 from app.dao.notifications_dao import (
     dao_create_notification,
-    dao_created_scheduled_notification
+    dao_created_scheduled_notification,
 )
 from app.dao.templates_dao import dao_create_template
 from app.dao.services_dao import dao_create_service
@@ -48,14 +51,19 @@ from app.dao.email_branding_dao import dao_create_email_branding
 from app.dao.organisation_dao import dao_create_organisation
 
 
-def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-office.gov.uk", state='active', id_=None):
+def create_user(
+    mobile_number="+61412345678",
+    email="notify@digital.cabinet-office.gov.uk",
+    state='active',
+    id_=None,
+):
     data = {
         'id': id_ or uuid.uuid4(),
         'name': 'Test User',
         'email_address': email,
         'password': 'password',
         'mobile_number': mobile_number,
-        'state': state
+        'state': state,
     }
     user = User.query.filter_by(email_address=email).first()
     if not user:
@@ -75,19 +83,22 @@ def create_service(
     email_from=None,
     prefix_sms=True,
     message_limit=1000,
-    organisation_type='central'
+    organisation_type='central',
 ):
     service = Service(
         name=service_name,
         message_limit=message_limit,
         restricted=restricted,
         email_from=email_from if email_from else service_name.lower().replace(' ', '.'),
-        created_by=user or create_user(email='{}@digital.cabinet-office.gov.uk'.format(uuid.uuid4())),
+        created_by=user
+        or create_user(email='{}@digital.cabinet-office.gov.uk'.format(uuid.uuid4())),
         prefix_sms=prefix_sms,
-        organisation_type=organisation_type
+        organisation_type=organisation_type,
     )
 
-    dao_create_service(service, service.created_by, service_id, service_permissions=service_permissions)
+    dao_create_service(
+        service, service.created_by, service_id, service_permissions=service_permissions
+    )
 
     service.active = active
     service.research_mode = research_mode
@@ -95,32 +106,30 @@ def create_service(
     return service
 
 
-def create_service_with_inbound_number(
-    inbound_number='1234567',
-    *args, **kwargs
-):
+def create_service_with_inbound_number(inbound_number='1234567', *args, **kwargs):
     service = create_service(*args, **kwargs)
 
     sms_sender = ServiceSmsSender.query.filter_by(service_id=service.id).first()
     inbound = create_inbound_number(number=inbound_number, service_id=service.id)
-    update_existing_sms_sender_with_inbound_number(service_sms_sender=sms_sender,
-                                                   sms_sender=inbound_number,
-                                                   inbound_number_id=inbound.id)
+    update_existing_sms_sender_with_inbound_number(
+        service_sms_sender=sms_sender,
+        sms_sender=inbound_number,
+        inbound_number_id=inbound.id,
+    )
 
     return service
 
 
-def create_service_with_defined_sms_sender(
-    sms_sender_value='1234567',
-    *args, **kwargs
-):
+def create_service_with_defined_sms_sender(sms_sender_value='1234567', *args, **kwargs):
     service = create_service(*args, **kwargs)
 
     sms_sender = ServiceSmsSender.query.filter_by(service_id=service.id).first()
-    dao_update_service_sms_sender(service_id=service.id,
-                                  service_sms_sender_id=sms_sender.id,
-                                  is_default=True,
-                                  sms_sender=sms_sender_value)
+    dao_update_service_sms_sender(
+        service_id=service.id,
+        service_sms_sender_id=sms_sender.id,
+        is_default=True,
+        sms_sender=sms_sender_value,
+    )
 
     return service
 
@@ -132,7 +141,7 @@ def create_template(
     subject='Template subject',
     content='Dear Sir/Madam, Hello. Yours Truly, The Government.\n',
     reply_to=None,
-    hidden=False
+    hidden=False,
 ):
     data = {
         'name': template_name or '{} Template Name'.format(template_type),
@@ -141,7 +150,7 @@ def create_template(
         'service': service,
         'created_by': service.created_by,
         'reply_to': reply_to,
-        'hidden': hidden
+        'hidden': hidden,
     }
     if template_type != SMS_TYPE:
         data['subject'] = subject
@@ -173,13 +182,15 @@ def create_notification(
     normalised_to=None,
     one_off=False,
     sms_sender_id=None,
-    reply_to_text=None
+    reply_to_text=None,
 ):
     if created_at is None:
         created_at = datetime.utcnow()
 
     if to_field is None:
-        to_field = '+61412345678' if template.template_type == SMS_TYPE else 'test@example.com'
+        to_field = (
+            '+61412345678' if template.template_type == SMS_TYPE else 'test@example.com'
+        )
 
     if status != 'created':
         sent_at = sent_at or datetime.utcnow()
@@ -187,7 +198,9 @@ def create_notification(
 
     if not one_off and (job is None and api_key is None):
         # we didn't specify in test - lets create it
-        api_key = ApiKey.query.filter(ApiKey.service == template.service, ApiKey.key_type == key_type).first()
+        api_key = ApiKey.query.filter(
+            ApiKey.service == template.service, ApiKey.key_type == key_type
+        ).first()
         if not api_key:
             api_key = create_api_key(template.service, key_type=key_type)
 
@@ -218,15 +231,16 @@ def create_notification(
         'international': international,
         'phone_prefix': phone_prefix,
         'normalised_to': normalised_to,
-        'reply_to_text': reply_to_text
+        'reply_to_text': reply_to_text,
     }
     notification = Notification(**data)
     dao_create_notification(notification)
     if scheduled_for:
-        scheduled_notification = ScheduledNotification(id=uuid.uuid4(),
-                                                       notification_id=notification.id,
-                                                       scheduled_for=datetime.strptime(scheduled_for,
-                                                                                       "%Y-%m-%d %H:%M"))
+        scheduled_notification = ScheduledNotification(
+            id=uuid.uuid4(),
+            notification_id=notification.id,
+            scheduled_for=datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M"),
+        )
         if status != 'created':
             scheduled_notification.pending = False
         dao_created_scheduled_notification(scheduled_notification)
@@ -241,7 +255,7 @@ def create_job(
     job_status='pending',
     scheduled_for=None,
     processing_started=None,
-    original_file_name='some.csv'
+    original_file_name='some.csv',
 ):
     data = {
         'id': uuid.uuid4(),
@@ -255,7 +269,7 @@ def create_job(
         'created_by': template.created_by,
         'job_status': job_status,
         'scheduled_for': scheduled_for,
-        'processing_started': processing_started
+        'processing_started': processing_started,
     }
     job = Job(**data)
     dao_create_job(job)
@@ -264,7 +278,8 @@ def create_job(
 
 def create_service_permission(service_id, permission=EMAIL_TYPE):
     dao_add_service_permission(
-        service_id if service_id else create_service().id, permission)
+        service_id if service_id else create_service().id, permission
+    )
 
     service_permissions = ServicePermission.query.all()
 
@@ -279,7 +294,7 @@ def create_inbound_sms(
     provider_reference=None,
     content='Hello',
     provider="mmg",
-    created_at=None
+    created_at=None,
 ):
     inbound = InboundSms(
         service=service,
@@ -289,46 +304,40 @@ def create_inbound_sms(
         provider_date=provider_date or datetime.utcnow(),
         provider_reference=provider_reference or 'foo',
         content=content,
-        provider=provider
+        provider=provider,
     )
     dao_create_inbound_sms(inbound)
     return inbound
 
 
 def create_service_inbound_api(
-    service,
-    url="https://something.com",
-    bearer_token="some_super_secret",
+    service, url="https://something.com", bearer_token="some_super_secret"
 ):
-    service_inbound_api = ServiceInboundApi(service_id=service.id,
-                                            url=url,
-                                            bearer_token=bearer_token,
-                                            updated_by_id=service.users[0].id
-                                            )
+    service_inbound_api = ServiceInboundApi(
+        service_id=service.id,
+        url=url,
+        bearer_token=bearer_token,
+        updated_by_id=service.users[0].id,
+    )
     save_service_inbound_api(service_inbound_api)
     return service_inbound_api
 
 
 def create_service_callback_api(
-    service,
-    url="https://something.com",
-    bearer_token="some_super_secret",
+    service, url="https://something.com", bearer_token="some_super_secret"
 ):
-    service_callback_api = ServiceCallbackApi(service_id=service.id,
-                                              url=url,
-                                              bearer_token=bearer_token,
-                                              updated_by_id=service.users[0].id
-                                              )
+    service_callback_api = ServiceCallbackApi(
+        service_id=service.id,
+        url=url,
+        bearer_token=bearer_token,
+        updated_by_id=service.users[0].id,
+    )
     save_service_callback_api(service_callback_api)
     return service_callback_api
 
 
 def create_email_branding(colour='blue', logo='test_x2.png', name='test_org_1'):
-    data = {
-        'colour': colour,
-        'logo': logo,
-        'name': name
-    }
+    data = {'colour': colour, 'logo': logo, 'name': name}
     email_branding = EmailBranding(**data)
     dao_create_email_branding(email_branding)
 
@@ -340,7 +349,7 @@ def create_rate(start_date, value, notification_type):
         id=uuid.uuid4(),
         valid_from=start_date,
         rate=value,
-        notification_type=notification_type
+        notification_type=notification_type,
     )
     db.session.add(rate)
     db.session.commit()
@@ -355,7 +364,7 @@ def create_api_key(service, key_type=KEY_TYPE_NORMAL):
         created_by=service.created_by,
         key_type=key_type,
         id=id_,
-        secret=uuid.uuid4()
+        secret=uuid.uuid4(),
     )
     db.session.add(api_key)
     db.session.commit()
@@ -368,7 +377,7 @@ def create_inbound_number(number, provider='mmg', active=True, service_id=None):
         number=number,
         provider=provider,
         active=active,
-        service_id=service_id
+        service_id=service_id,
     )
     db.session.add(inbound_number)
     db.session.commit()
@@ -376,18 +385,14 @@ def create_inbound_number(number, provider='mmg', active=True, service_id=None):
 
 
 def create_monthly_billing_entry(
-    service,
-    start_date,
-    end_date,
-    notification_type,
-    monthly_totals=[]
+    service, start_date, end_date, notification_type, monthly_totals=[]
 ):
     entry = MonthlyBilling(
         service_id=service.id,
         notification_type=notification_type,
         monthly_totals=monthly_totals,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
     )
 
     db.session.add(entry)
@@ -396,11 +401,7 @@ def create_monthly_billing_entry(
     return entry
 
 
-def create_reply_to_email(
-    service,
-    email_address,
-    is_default=True
-):
+def create_reply_to_email(service, email_address, is_default=True):
     data = {
         'service': service,
         'email_address': email_address,
@@ -415,16 +416,13 @@ def create_reply_to_email(
 
 
 def create_service_sms_sender(
-    service,
-    sms_sender,
-    is_default=True,
-    inbound_number_id=None
+    service, sms_sender, is_default=True, inbound_number_id=None
 ):
     data = {
         'service_id': service.id,
         'sms_sender': sms_sender,
         'is_default': is_default,
-        'inbound_number_id': inbound_number_id
+        'inbound_number_id': inbound_number_id,
     }
     service_sms_sender = ServiceSmsSender(**data)
 
@@ -434,11 +432,7 @@ def create_service_sms_sender(
     return service_sms_sender
 
 
-def create_letter_contact(
-    service,
-    contact_block,
-    is_default=True
-):
+def create_letter_contact(service, contact_block, is_default=True):
     data = {
         'service': service,
         'contact_block': contact_block,
@@ -452,13 +446,11 @@ def create_letter_contact(
     return letter_content
 
 
-def create_annual_billing(
-    service_id, free_sms_fragment_limit, financial_year_start
-):
+def create_annual_billing(service_id, free_sms_fragment_limit, financial_year_start):
     annual_billing = AnnualBilling(
         service_id=service_id,
         free_sms_fragment_limit=free_sms_fragment_limit,
-        financial_year_start=financial_year_start
+        financial_year_start=financial_year_start,
     )
     db.session.add(annual_billing)
     db.session.commit()
@@ -472,7 +464,7 @@ def create_letter_rate(
     sheet_count=1,
     rate=0.31,
     crown=True,
-    post_class='second'
+    post_class='second',
 ):
     rate = LetterRate(
         start_date=start_date,
@@ -480,7 +472,7 @@ def create_letter_rate(
         sheet_count=sheet_count,
         rate=rate,
         crown=crown,
-        post_class=post_class
+        post_class=post_class,
     )
     db.session.add(rate)
     db.session.commit()
@@ -489,35 +481,34 @@ def create_letter_rate(
 
 
 def create_organisation(name='test_org_1', active=True):
-    data = {
-        'name': name,
-        'active': active
-    }
+    data = {'name': name, 'active': active}
     organisation = Organisation(**data)
     dao_create_organisation(organisation)
 
     return organisation
 
 
-def create_invited_org_user(organisation, invited_by, email_address='invite@example.com'):
+def create_invited_org_user(
+    organisation, invited_by, email_address='invite@example.com'
+):
     invited_org_user = InvitedOrganisationUser(
-        email_address=email_address,
-        invited_by=invited_by,
-        organisation=organisation,
+        email_address=email_address, invited_by=invited_by, organisation=organisation
     )
     save_invited_org_user(invited_org_user)
     return invited_org_user
 
 
-def create_daily_sorted_letter(billing_day=date(2018, 1, 18),
-                               file_name="Notify-20180118123.rs.txt",
-                               unsorted_count=0,
-                               sorted_count=0):
+def create_daily_sorted_letter(
+    billing_day=date(2018, 1, 18),
+    file_name="Notify-20180118123.rs.txt",
+    unsorted_count=0,
+    sorted_count=0,
+):
     daily_sorted_letter = DailySortedLetter(
         billing_day=billing_day,
         file_name=file_name,
         unsorted_count=unsorted_count,
-        sorted_count=sorted_count
+        sorted_count=sorted_count,
     )
 
     db.session.add(daily_sorted_letter)

@@ -1,5 +1,5 @@
 import json
-from datetime import (datetime, date)
+from datetime import datetime, date
 from flask import url_for
 from app.dao.templates_dao import dao_update_template
 from tests import create_authorization_header
@@ -14,10 +14,10 @@ def test_template_history_version(notify_api, sample_user, sample_template):
                 'template.get_template_version',
                 service_id=sample_template.service.id,
                 template_id=sample_template.id,
-                version=1)
+                version=1,
+            )
             resp = client.get(
-                endpoint,
-                headers=[('Content-Type', 'application/json'), auth_header]
+                endpoint, headers=[('Content-Type', 'application/json'), auth_header]
             )
             assert resp.status_code == 200
             json_resp = json.loads(resp.get_data(as_text=True))
@@ -25,7 +25,12 @@ def test_template_history_version(notify_api, sample_user, sample_template):
             assert json_resp['data']['content'] == sample_template.content
             assert json_resp['data']['version'] == 1
             assert json_resp['data']['created_by']['name'] == sample_user.name
-            assert datetime.strptime(json_resp['data']['created_at'], '%Y-%m-%d %H:%M:%S.%f').date() == date.today()
+            assert (
+                datetime.strptime(
+                    json_resp['data']['created_at'], '%Y-%m-%d %H:%M:%S.%f'
+                ).date()
+                == date.today()
+            )
 
 
 def test_previous_template_history_version(notify_api, sample_template):
@@ -39,10 +44,10 @@ def test_previous_template_history_version(notify_api, sample_template):
                 'template.get_template_version',
                 service_id=sample_template.service.id,
                 template_id=sample_template.id,
-                version=1)
+                version=1,
+            )
             resp = client.get(
-                endpoint,
-                headers=[('Content-Type', 'application/json'), auth_header]
+                endpoint, headers=[('Content-Type', 'application/json'), auth_header]
             )
             assert resp.status_code == 200
             json_resp = json.loads(resp.get_data(as_text=True))
@@ -59,10 +64,10 @@ def test_404_missing_template_version(notify_api, sample_template):
                 'template.get_template_version',
                 service_id=sample_template.service.id,
                 template_id=sample_template.id,
-                version=2)
+                version=2,
+            )
             resp = client.get(
-                endpoint,
-                headers=[('Content-Type', 'application/json'), auth_header]
+                endpoint, headers=[('Content-Type', 'application/json'), auth_header]
             )
             assert resp.status_code == 404
 
@@ -81,11 +86,10 @@ def test_all_versions_of_template(notify_api, sample_template):
             endpoint = url_for(
                 'template.get_template_versions',
                 service_id=sample_template.service.id,
-                template_id=sample_template.id
+                template_id=sample_template.id,
             )
             resp = client.get(
-                endpoint,
-                headers=[('Content-Type', 'application/json'), auth_header]
+                endpoint, headers=[('Content-Type', 'application/json'), auth_header]
             )
             json_resp = json.loads(resp.get_data(as_text=True))
             assert len(json_resp['data']) == 3
@@ -98,14 +102,18 @@ def test_all_versions_of_template(notify_api, sample_template):
 
 def test_update_template_reply_to_updates_history(client, sample_letter_template):
     auth_header = create_authorization_header()
-    letter_contact = create_letter_contact(sample_letter_template.service, "Edinburgh, ED1 1AA")
+    letter_contact = create_letter_contact(
+        sample_letter_template.service, "Edinburgh, ED1 1AA"
+    )
 
     sample_letter_template.reply_to = letter_contact.id
     dao_update_template(sample_letter_template)
 
     resp = client.get(
-        '/service/{}/template/{}/version/2'.format(sample_letter_template.service_id, sample_letter_template.id),
-        headers=[auth_header]
+        '/service/{}/template/{}/version/2'.format(
+            sample_letter_template.service_id, sample_letter_template.id
+        ),
+        headers=[auth_header],
     )
     assert resp.status_code == 200
 

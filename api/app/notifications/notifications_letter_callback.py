@@ -2,12 +2,7 @@ import json
 
 from functools import wraps
 
-from flask import (
-    Blueprint,
-    jsonify,
-    request,
-    current_app
-)
+from flask import Blueprint, jsonify, request, current_app
 
 from app.celery.tasks import update_letter_notifications_statuses
 from app.v2.errors import register_errors
@@ -27,9 +22,9 @@ dvla_sns_callback_schema = {
     "properties": {
         "Type": {"enum": ["Notification", "SubscriptionConfirmation"]},
         "MessageId": {"type": "string"},
-        "Message": {"type": ["string", "object"]}
+        "Message": {"type": ["string", "object"]},
     },
-    "required": ["Type", "MessageId", "Message"]
+    "required": ["Type", "MessageId", "Message"],
 }
 
 
@@ -39,7 +34,9 @@ def validate_schema(schema):
         def wrapper(*args, **kw):
             validate(request.get_json(force=True), schema)
             return f(*args, **kw)
+
         return wrapper
+
     return decorator
 
 
@@ -55,9 +52,11 @@ def process_letter_response():
         current_app.logger.info('Received file from DVLA: {}'.format(filename))
 
         if filename.lower().endswith('rs.txt') or filename.lower().endswith('rsp.txt'):
-            current_app.logger.info('DVLA callback: Calling task to update letter notifications')
-            update_letter_notifications_statuses.apply_async([filename], queue=QueueNames.NOTIFY)
+            current_app.logger.info(
+                'DVLA callback: Calling task to update letter notifications'
+            )
+            update_letter_notifications_statuses.apply_async(
+                [filename], queue=QueueNames.NOTIFY
+            )
 
-    return jsonify(
-        result="success", message="DVLA callback succeeded"
-    ), 200
+    return jsonify(result="success", message="DVLA callback succeeded"), 200

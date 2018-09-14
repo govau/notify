@@ -16,24 +16,22 @@ from app.dao.users_dao import (
     get_user_by_email,
     delete_codes_older_created_more_than_a_day_ago,
     update_user_password,
-    count_user_verify_codes)
+    count_user_verify_codes,
+)
 
 from app.models import User, VerifyCode
 
 from tests.app.db import create_user
 
 
-@pytest.mark.parametrize('phone_number', [
-    '+61412345678',
-    '+1-800-555-5555',
-])
+@pytest.mark.parametrize('phone_number', ['+61412345678', '+1-800-555-5555'])
 def test_create_user(notify_db_session, phone_number):
     email = 'notify@digital.cabinet-office.gov.uk'
     data = {
         'name': 'Test User',
         'email_address': email,
         'password': 'password',
-        'mobile_number': phone_number
+        'mobile_number': phone_number,
     }
     user = User(**data)
     save_model_user(user)
@@ -107,7 +105,9 @@ def test_should_delete_all_verification_codes_more_than_one_day_old(sample_user)
 
 
 def test_should_not_delete_verification_codes_less_than_one_day_old(sample_user):
-    make_verify_code(sample_user, age=timedelta(hours=23, minutes=59, seconds=59), code="12345")
+    make_verify_code(
+        sample_user, age=timedelta(hours=23, minutes=59, seconds=59), code="12345"
+    )
     make_verify_code(sample_user, age=timedelta(hours=24), code="54321")
 
     assert VerifyCode.query.count() == 2
@@ -115,29 +115,32 @@ def test_should_not_delete_verification_codes_less_than_one_day_old(sample_user)
     assert VerifyCode.query.one()._code == "12345"
 
 
-def make_verify_code(user, age=timedelta(hours=0), expiry_age=timedelta(0), code="12335", code_used=False):
+def make_verify_code(
+    user, age=timedelta(hours=0), expiry_age=timedelta(0), code="12335", code_used=False
+):
     verify_code = VerifyCode(
         code_type='sms',
         _code=code,
         created_at=datetime.utcnow() - age,
         expiry_datetime=datetime.utcnow() - expiry_age,
         user=user,
-        code_used=code_used
+        code_used=code_used,
     )
     db.session.add(verify_code)
     db.session.commit()
 
 
-@pytest.mark.parametrize('user_attribute, user_value', [
-    ('name', 'New User'),
-    ('email_address', 'newuser@mail.com'),
-    ('mobile_number', '+4407700900460')
-])
+@pytest.mark.parametrize(
+    'user_attribute, user_value',
+    [
+        ('name', 'New User'),
+        ('email_address', 'newuser@mail.com'),
+        ('mobile_number', '+4407700900460'),
+    ],
+)
 def test_update_user_attribute(client, sample_user, user_attribute, user_value):
     assert getattr(sample_user, user_attribute) != user_value
-    update_dict = {
-        user_attribute: user_value
-    }
+    update_dict = {user_attribute: user_value}
     save_user_attribute(sample_user, update_dict)
     assert getattr(sample_user, user_attribute) == user_value
 

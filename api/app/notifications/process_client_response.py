@@ -22,8 +22,9 @@ sms_response_mapper = {
     'Telstra': get_telstra_responses,
     'Twilio': get_twilio_responses,
     'MMG': get_mmg_responses,
-    'Firetext': get_firetext_responses
+    'Firetext': get_firetext_responses,
 }
+
 
 def validate_callback_data(data, fields, client_name):
     errors = []
@@ -45,7 +46,9 @@ def process_sms_client_response(status, provider_reference, client_name):
     try:
         uuid.UUID(provider_reference, version=4)
     except ValueError:
-        errors = "{} callback with invalid reference {}".format(client_name, provider_reference)
+        errors = "{} callback with invalid reference {}".format(
+            client_name, provider_reference
+        )
         return success, errors
 
     try:
@@ -56,36 +59,46 @@ def process_sms_client_response(status, provider_reference, client_name):
     # validate  status
     try:
         notification_status = response_parser(status)
-        current_app.logger.info('{} callback return status of {} for reference: {}'.format(
-            client_name, status, provider_reference)
+        current_app.logger.info(
+            '{} callback return status of {} for reference: {}'.format(
+                client_name, status, provider_reference
+            )
         )
     except KeyError:
         _process_for_status(
             notification_status='technical-failure',
             client_name=client_name,
-            provider_reference=provider_reference
+            provider_reference=provider_reference,
         )
-        raise ClientException("{} callback failed: status {} not found.".format(client_name, status))
+        raise ClientException(
+            "{} callback failed: status {} not found.".format(client_name, status)
+        )
 
     success = _process_for_status(
         notification_status=notification_status,
         client_name=client_name,
-        provider_reference=provider_reference
+        provider_reference=provider_reference,
     )
     return success, errors
 
 
 def _process_for_status(notification_status, client_name, provider_reference):
     # record stats
-    notification = notifications_dao.update_notification_status_by_id(provider_reference, notification_status)
+    notification = notifications_dao.update_notification_status_by_id(
+        provider_reference, notification_status
+    )
     if not notification:
-        current_app.logger.warning("{} callback failed: notification {} either not found or already updated "
-                                   "from sending. Status {}".format(client_name,
-                                                                    provider_reference,
-                                                                    notification_status))
+        current_app.logger.warning(
+            "{} callback failed: notification {} either not found or already updated "
+            "from sending. Status {}".format(
+                client_name, provider_reference, notification_status
+            )
+        )
         return
 
-    statsd_client.incr('callback.{}.{}'.format(client_name.lower(), notification_status))
+    statsd_client.incr(
+        'callback.{}.{}'.format(client_name.lower(), notification_status)
+    )
 
     if not notification.sent_by:
         set_notification_sent_by(notification, client_name.lower())
@@ -94,18 +107,25 @@ def _process_for_status(notification_status, client_name, provider_reference):
         statsd_client.timing_with_dates(
             'callback.{}.elapsed-time'.format(client_name.lower()),
             datetime.utcnow(),
-            notification.sent_at
+            notification.sent_at,
         )
 
     # queue callback task only if the service_callback_api exists
-    service_callback_api = get_service_callback_api_for_service(service_id=notification.service_id)
+    service_callback_api = get_service_callback_api_for_service(
+        service_id=notification.service_id
+    )
 
     if service_callback_api:
-        encrypted_notification = create_encrypted_callback_data(notification, service_callback_api)
-        send_delivery_status_to_service.apply_async([str(notification.id), encrypted_notification],
-                                                    queue=QueueNames.CALLBACKS)
+        encrypted_notification = create_encrypted_callback_data(
+            notification, service_callback_api
+        )
+        send_delivery_status_to_service.apply_async(
+            [str(notification.id), encrypted_notification], queue=QueueNames.CALLBACKS
+        )
 
-    success = "{} callback succeeded. reference {} updated".format(client_name, provider_reference)
+    success = "{} callback succeeded. reference {} updated".format(
+        client_name, provider_reference
+    )
     return success
 
 

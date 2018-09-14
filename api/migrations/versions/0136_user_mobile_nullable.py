@@ -20,8 +20,9 @@ def upgrade():
     op.create_check_constraint(
         'ck_users_mobile_or_email_auth',
         'users',
-        "auth_type = 'email_auth' or mobile_number is not null"
+        "auth_type = 'email_auth' or mobile_number is not null",
     )
+
 
 def downgrade():
     op.alter_column('users', 'mobile_number', nullable=False)

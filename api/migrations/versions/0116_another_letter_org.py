@@ -14,10 +14,12 @@ from alembic import op
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO dvla_organisation VALUES
         ('005', 'Companies House')
-    """)
+    """
+    )
 
 
 def downgrade():

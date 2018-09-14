@@ -8,7 +8,6 @@ class DAOException(SQLAlchemyError):
 
 
 class DAOClass(object):
-
     class Meta:
         model = None
 
@@ -32,4 +31,5 @@ class DAOClass(object):
 
 def days_ago(number_of_days):
     from datetime import date, timedelta
+
     return date.today() - timedelta(days=number_of_days)

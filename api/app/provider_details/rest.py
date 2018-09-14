@@ -5,13 +5,10 @@ from app.dao.provider_details_dao import (
     get_provider_details,
     get_provider_details_by_id,
     dao_update_provider_details,
-    dao_get_provider_versions
+    dao_get_provider_versions,
 )
 from app.dao.users_dao import get_user_by_id
-from app.errors import (
-    register_errors,
-    InvalidRequest
-)
+from app.errors import register_errors, InvalidRequest
 
 provider_details = Blueprint('provider_details', __name__)
 register_errors(provider_details)
@@ -25,17 +22,16 @@ def get_providers():
 
 @provider_details.route('/<uuid:provider_details_id>', methods=['GET'])
 def get_provider_by_id(provider_details_id):
-    data = provider_details_schema.dump(get_provider_details_by_id(provider_details_id)).data
+    data = provider_details_schema.dump(
+        get_provider_details_by_id(provider_details_id)
+    ).data
     return jsonify(provider_details=data)
 
 
 @provider_details.route('/<uuid:provider_details_id>/versions', methods=['GET'])
 def get_provider_versions(provider_details_id):
     versions = dao_get_provider_versions(provider_details_id)
-    data = provider_details_history_schema.dump(
-        versions,
-        many=True
-    ).data
+    data = provider_details_history_schema.dump(versions, many=True).data
     return jsonify(data=data)
 
 

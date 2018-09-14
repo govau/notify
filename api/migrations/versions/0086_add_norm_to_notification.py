@@ -14,7 +14,9 @@ down_revision = '0085_update_incoming_to_inbound'
 
 
 def upgrade():
-    op.add_column('notifications', sa.Column('normalised_to', sa.String(), nullable=True))
+    op.add_column(
+        'notifications', sa.Column('normalised_to', sa.String(), nullable=True)
+    )
 
 
 def downgrade():

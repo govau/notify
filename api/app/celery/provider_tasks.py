@@ -15,14 +15,20 @@ from app.models import NOTIFICATION_TECHNICAL_FAILURE
 
 @worker_process_shutdown.connect
 def worker_process_shutdown(sender, signal, pid, exitcode):
-    current_app.logger.info('Provider worker shutdown: PID: {} Exitcode: {}'.format(pid, exitcode))
+    current_app.logger.info(
+        'Provider worker shutdown: PID: {} Exitcode: {}'.format(pid, exitcode)
+    )
 
 
-@notify_celery.task(bind=True, name="deliver_sms", max_retries=48, default_retry_delay=300)
+@notify_celery.task(
+    bind=True, name="deliver_sms", max_retries=48, default_retry_delay=300
+)
 @statsd(namespace="tasks")
 def deliver_sms(self, notification_id):
     try:
-        current_app.logger.info("Start sending SMS for notification id: {}".format(notification_id))
+        current_app.logger.info(
+            "Start sending SMS for notification id: {}".format(notification_id)
+        )
         notification = notifications_dao.get_notification_by_id(notification_id)
         if not notification:
             raise NoResultFound()
@@ -34,17 +40,27 @@ def deliver_sms(self, notification_id):
             )
             self.retry(queue=QueueNames.RETRY)
         except self.MaxRetriesExceededError:
-            message = "RETRY FAILED: Max retries reached. The task send_sms_to_provider failed for notification {}. " \
-                      "Notification has been updated to technical-failure".format(notification_id)
-            update_notification_status_by_id(notification_id, NOTIFICATION_TECHNICAL_FAILURE)
+            message = (
+                "RETRY FAILED: Max retries reached. The task send_sms_to_provider failed for notification {}. "
+                "Notification has been updated to technical-failure".format(
+                    notification_id
+                )
+            )
+            update_notification_status_by_id(
+                notification_id, NOTIFICATION_TECHNICAL_FAILURE
+            )
             raise NotificationTechnicalFailureException(message)
 
 
-@notify_celery.task(bind=True, name="deliver_email", max_retries=48, default_retry_delay=300)
+@notify_celery.task(
+    bind=True, name="deliver_email", max_retries=48, default_retry_delay=300
+)
 @statsd(namespace="tasks")
 def deliver_email(self, notification_id):
     try:
-        current_app.logger.info("Start sending email for notification id: {}".format(notification_id))
+        current_app.logger.info(
+            "Start sending email for notification id: {}".format(notification_id)
+        )
         notification = notifications_dao.get_notification_by_id(notification_id)
         if not notification:
             raise NoResultFound()
@@ -59,8 +75,14 @@ def deliver_email(self, notification_id):
             )
             self.retry(queue=QueueNames.RETRY)
         except self.MaxRetriesExceededError:
-            message = "RETRY FAILED: Max retries reached. " \
-                      "The task send_email_to_provider failed for notification {}. " \
-                      "Notification has been updated to technical-failure".format(notification_id)
-            update_notification_status_by_id(notification_id, NOTIFICATION_TECHNICAL_FAILURE)
+            message = (
+                "RETRY FAILED: Max retries reached. "
+                "The task send_email_to_provider failed for notification {}. "
+                "Notification has been updated to technical-failure".format(
+                    notification_id
+                )
+            )
+            update_notification_status_by_id(
+                notification_id, NOTIFICATION_TECHNICAL_FAILURE
+            )
             raise NotificationTechnicalFailureException(message)

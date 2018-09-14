@@ -15,8 +15,12 @@ from alembic import op
 
 def upgrade():
     op.get_bind()
-    op.execute("UPDATE RATES SET rate = 0.0158 WHERE valid_from = '2017-04-01 00:00:00'")
-    op.execute("UPDATE RATES SET rate = 0.0165 WHERE valid_from = '2016-05-18 00:00:00'")
+    op.execute(
+        "UPDATE RATES SET rate = 0.0158 WHERE valid_from = '2017-04-01 00:00:00'"
+    )
+    op.execute(
+        "UPDATE RATES SET rate = 0.0165 WHERE valid_from = '2016-05-18 00:00:00'"
+    )
 
 
 def downgrade():

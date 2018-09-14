@@ -30,16 +30,18 @@ def upgrade():
         VALUES ('{}', '{}', '{}', '{}', '{}', False, '{}', '{}', '{}', 1, '{}', false)
     """
 
-    template_content = '\n'.join([
-        "((user_name)) has invited you to collaborate on ((organisation_name)) on GOV.UK Notify.",
-        "",
-        "GOV.UK Notify makes it easy to keep people updated by helping you send text messages, emails and letters.",
-        "",
-        "Open this link to create an account on GOV.UK Notify:",
-        "((url))",
-        "",
-        "This invitation will stop working at midnight tomorrow. This is to keep ((organisation_name)) secure.",
-    ])
+    template_content = '\n'.join(
+        [
+            "((user_name)) has invited you to collaborate on ((organisation_name)) on GOV.UK Notify.",
+            "",
+            "GOV.UK Notify makes it easy to keep people updated by helping you send text messages, emails and letters.",
+            "",
+            "Open this link to create an account on GOV.UK Notify:",
+            "((url))",
+            "",
+            "This invitation will stop working at midnight tomorrow. This is to keep ((organisation_name)) secure.",
+        ]
+    )
 
     template_name = "Notify organisation invitation email"
     template_subject = '((user_name)) has invited you to collaborate on ((organisation_name)) on GOV.UK Notify'
@@ -54,7 +56,7 @@ def upgrade():
             current_app.config['NOTIFY_SERVICE_ID'],
             template_subject,
             current_app.config['NOTIFY_USER_ID'],
-            'normal'
+            'normal',
         )
     )
 
@@ -68,15 +70,23 @@ def upgrade():
             current_app.config['NOTIFY_SERVICE_ID'],
             template_subject,
             current_app.config['NOTIFY_USER_ID'],
-            'normal'
+            'normal',
         )
     )
 
     # clean up constraints on org_to_service - service_id-org_id constraint is redundant
-    op.drop_constraint('organisation_to_service_service_id_organisation_id_key', 'organisation_to_service', type_='unique')
+    op.drop_constraint(
+        'organisation_to_service_service_id_organisation_id_key',
+        'organisation_to_service',
+        type_='unique',
+    )
 
 
 def downgrade():
     op.execute("DELETE FROM templates_history WHERE id = '{}'".format(template_id))
     op.execute("DELETE FROM templates WHERE id = '{}'".format(template_id))
-    op.create_unique_constraint('organisation_to_service_service_id_organisation_id_key', 'organisation_to_service', ['service_id', 'organisation_id'])
+    op.create_unique_constraint(
+        'organisation_to_service_service_id_organisation_id_key',
+        'organisation_to_service',
+        ['service_id', 'organisation_id'],
+    )

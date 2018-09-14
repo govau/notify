@@ -14,17 +14,24 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 def upgrade():
-    op.create_table('template_redacted',
+    op.create_table(
+        'template_redacted',
         sa.Column('template_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('redact_personalisation', sa.Boolean(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.Column('updated_by_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.ForeignKeyConstraint(['template_id'], ['templates.id'], ),
-        sa.ForeignKeyConstraint(['updated_by_id'], ['users.id'], ),
-        sa.PrimaryKeyConstraint('template_id')
+        sa.ForeignKeyConstraint(['template_id'], ['templates.id']),
+        sa.ForeignKeyConstraint(['updated_by_id'], ['users.id']),
+        sa.PrimaryKeyConstraint('template_id'),
     )
-    op.create_index(op.f('ix_template_redacted_updated_by_id'), 'template_redacted', ['updated_by_id'], unique=False)
+    op.create_index(
+        op.f('ix_template_redacted_updated_by_id'),
+        'template_redacted',
+        ['updated_by_id'],
+        unique=False,
+    )
 
 
 def downgrade():

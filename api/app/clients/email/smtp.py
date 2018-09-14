@@ -6,13 +6,9 @@ from email.message import EmailMessage
 
 from app.clients.email import EmailClient
 
+
 class SMTPClient(EmailClient):
-    def __init__(
-            self,
-            addr=None,
-            port=587,
-            user=None,
-            password=None):
+    def __init__(self, addr=None, port=587, user=None, password=None):
         self._addr = addr
         self._port = port
         self._user = user
@@ -30,13 +26,8 @@ class SMTPClient(EmailClient):
         return self.name
 
     def send_email(
-            self,
-            source,
-            to_addresses,
-            subject,
-            body,
-            html_body='',
-            reply_to_address=None):
+        self, source, to_addresses, subject, body, html_body='', reply_to_address=None
+    ):
         if isinstance(to_addresses, str):
             to_addresses = [to_addresses]
 
@@ -64,9 +55,7 @@ class SMTPClient(EmailClient):
             server.send_message(message)
 
         # Avoid circular imports by importing this file later.
-        from app.models import (
-            NOTIFICATION_SENT
-        )
+        from app.models import NOTIFICATION_SENT
 
         # If we reach this point, the email has been sent. It may not actually
         # be delivered. E.g. this doesn't account for cases such as the

@@ -18,19 +18,35 @@ def upgrade():
         'notification_history',
         'status',
         existing_type=postgresql.ENUM(
-            'created', 'sending', 'delivered', 'pending', 'failed', 'technical-failure',
-            'temporary-failure', 'permanent-failure', 'sent', name='notify_status_type'
+            'created',
+            'sending',
+            'delivered',
+            'pending',
+            'failed',
+            'technical-failure',
+            'temporary-failure',
+            'permanent-failure',
+            'sent',
+            name='notify_status_type',
         ),
-        nullable=True
+        nullable=True,
     )
     op.alter_column(
         'notifications',
         'status',
         existing_type=postgresql.ENUM(
-            'created', 'sending', 'delivered', 'pending', 'failed', 'technical-failure',
-            'temporary-failure', 'permanent-failure', 'sent', name='notify_status_type'
+            'created',
+            'sending',
+            'delivered',
+            'pending',
+            'failed',
+            'technical-failure',
+            'temporary-failure',
+            'permanent-failure',
+            'sent',
+            name='notify_status_type',
         ),
-        nullable=True
+        nullable=True,
     )
 
 
@@ -39,17 +55,33 @@ def downgrade():
         'notifications',
         'status',
         existing_type=postgresql.ENUM(
-            'created', 'sending', 'delivered', 'pending', 'failed', 'technical-failure',
-            'temporary-failure', 'permanent-failure', 'sent', name='notify_status_type'
+            'created',
+            'sending',
+            'delivered',
+            'pending',
+            'failed',
+            'technical-failure',
+            'temporary-failure',
+            'permanent-failure',
+            'sent',
+            name='notify_status_type',
         ),
-        nullable=False
+        nullable=False,
     )
     op.alter_column(
         'notification_history',
         'status',
         existing_type=postgresql.ENUM(
-            'created', 'sending', 'delivered', 'pending', 'failed', 'technical-failure',
-            'temporary-failure', 'permanent-failure', 'sent', name='notify_status_type'
+            'created',
+            'sending',
+            'delivered',
+            'pending',
+            'failed',
+            'technical-failure',
+            'temporary-failure',
+            'permanent-failure',
+            'sent',
+            name='notify_status_type',
         ),
-        nullable=False
+        nullable=False,
     )

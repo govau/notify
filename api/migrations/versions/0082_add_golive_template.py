@@ -95,7 +95,7 @@ GOV.UK Notify team
             current_app.config['NOTIFY_SERVICE_ID'],
             template_subject,
             current_app.config['NOTIFY_USER_ID'],
-            'normal'
+            'normal',
         )
     )
 
@@ -109,11 +109,11 @@ GOV.UK Notify team
             current_app.config['NOTIFY_SERVICE_ID'],
             template_subject,
             current_app.config['NOTIFY_USER_ID'],
-            'normal'
+            'normal',
         )
     )
 
 
 def downgrade():
-   op.execute("DELETE FROM templates_history WHERE id = '{}'".format(template_id))
-   op.execute("DELETE FROM templates WHERE id = '{}'".format(template_id))
+    op.execute("DELETE FROM templates_history WHERE id = '{}'".format(template_id))
+    op.execute("DELETE FROM templates WHERE id = '{}'".format(template_id))

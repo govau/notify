@@ -19,23 +19,57 @@ def upgrade():
 
 
 def downgrade():
-    op.create_table('notification_to_email_reply_to',
-                    sa.Column('notification_id', postgresql.UUID(), autoincrement=False, nullable=False),
-                    sa.Column('service_email_reply_to_id', postgresql.UUID(), autoincrement=False, nullable=False),
-                    sa.ForeignKeyConstraint(['notification_id'], ['notifications.id'],
-                                            name='notification_to_email_reply_to_notification_id_fkey'),
-                    sa.ForeignKeyConstraint(['service_email_reply_to_id'], ['service_email_reply_to.id'],
-                                            name='notification_to_email_reply_to_service_email_reply_to_id_fkey'),
-                    sa.PrimaryKeyConstraint('notification_id', 'service_email_reply_to_id',
-                                            name='notification_to_email_reply_to_pkey')
-                    )
-    op.create_table('notification_to_sms_sender',
-                    sa.Column('notification_id', postgresql.UUID(), autoincrement=False, nullable=False),
-                    sa.Column('service_sms_sender_id', postgresql.UUID(), autoincrement=False, nullable=False),
-                    sa.ForeignKeyConstraint(['notification_id'], ['notifications.id'],
-                                            name='notification_to_sms_sender_notification_id_fkey'),
-                    sa.ForeignKeyConstraint(['service_sms_sender_id'], ['service_sms_senders.id'],
-                                            name='notification_to_sms_sender_service_sms_sender_id_fkey'),
-                    sa.PrimaryKeyConstraint('notification_id', 'service_sms_sender_id',
-                                            name='notification_to_sms_sender_pkey')
-                    )
+    op.create_table(
+        'notification_to_email_reply_to',
+        sa.Column(
+            'notification_id', postgresql.UUID(), autoincrement=False, nullable=False
+        ),
+        sa.Column(
+            'service_email_reply_to_id',
+            postgresql.UUID(),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ['notification_id'],
+            ['notifications.id'],
+            name='notification_to_email_reply_to_notification_id_fkey',
+        ),
+        sa.ForeignKeyConstraint(
+            ['service_email_reply_to_id'],
+            ['service_email_reply_to.id'],
+            name='notification_to_email_reply_to_service_email_reply_to_id_fkey',
+        ),
+        sa.PrimaryKeyConstraint(
+            'notification_id',
+            'service_email_reply_to_id',
+            name='notification_to_email_reply_to_pkey',
+        ),
+    )
+    op.create_table(
+        'notification_to_sms_sender',
+        sa.Column(
+            'notification_id', postgresql.UUID(), autoincrement=False, nullable=False
+        ),
+        sa.Column(
+            'service_sms_sender_id',
+            postgresql.UUID(),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ['notification_id'],
+            ['notifications.id'],
+            name='notification_to_sms_sender_notification_id_fkey',
+        ),
+        sa.ForeignKeyConstraint(
+            ['service_sms_sender_id'],
+            ['service_sms_senders.id'],
+            name='notification_to_sms_sender_service_sms_sender_id_fkey',
+        ),
+        sa.PrimaryKeyConstraint(
+            'notification_id',
+            'service_sms_sender_id',
+            name='notification_to_sms_sender_pkey',
+        ),
+    )

@@ -20,5 +20,7 @@ def upgrade():
 
 def downgrade():
     op.get_bind()
-    op.execute("delete from service_permissions where permission = 'precompiled_letter'")
+    op.execute(
+        "delete from service_permissions where permission = 'precompiled_letter'"
+    )
     op.execute("delete from service_permission_types where name = 'precompiled_letter'")

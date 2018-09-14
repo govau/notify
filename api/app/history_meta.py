@@ -62,8 +62,7 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
         return col
 
     properties = util.OrderedDict()
-    if not super_mapper or \
-            local_mapper.local_table is not super_mapper.local_table:
+    if not super_mapper or local_mapper.local_table is not super_mapper.local_table:
         cols = []
         version_meta = {"version_meta": True}
         for column in local_mapper.local_table.c:
@@ -72,13 +71,9 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
 
             col = _col_copy(column)
 
-            if super_mapper and \
-                    col_references_table(column, super_mapper.local_table):
+            if super_mapper and col_references_table(column, super_mapper.local_table):
                 super_fks.append(
-                    (
-                        col.key,
-                        list(super_history_mapper.local_table.primary_key)[0]
-                    )
+                    (col.key, list(super_history_mapper.local_table.primary_key)[0])
                 )
 
             cols.append(col)
@@ -88,24 +83,25 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
 
             orig_prop = local_mapper.get_property_by_column(column)
             # carry over column re-mappings
-            if len(orig_prop.columns) > 1 or \
-                    orig_prop.columns[0].key != orig_prop.key:
+            if len(orig_prop.columns) > 1 or orig_prop.columns[0].key != orig_prop.key:
                 properties[orig_prop.key] = tuple(
-                    col.info['history_copy'] for col in orig_prop.columns)
+                    col.info['history_copy'] for col in orig_prop.columns
+                )
 
         if super_mapper:
-            super_fks.append(
-                (
-                    'version', super_history_mapper.local_table.c.version
-                )
-            )
+            super_fks.append(('version', super_history_mapper.local_table.c.version))
 
         # "version" stores the integer version id.  This column is
         # required.
         cols.append(
             Column(
-                'version', Integer, primary_key=True,
-                autoincrement=False, info=version_meta))
+                'version',
+                Integer,
+                primary_key=True,
+                autoincrement=False,
+                info=version_meta,
+            )
+        )
 
         if super_fks:
             cols.append(ForeignKeyConstraint(*zip(*super_fks)))
@@ -129,9 +125,8 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
         bases = (super_history_mapper.class_,)
 
         if table is not None:
-            properties['changed'] = (
-                (table.c.changed, ) +
-                tuple(super_history_mapper.attrs.changed.columns)
+            properties['changed'] = (table.c.changed,) + tuple(
+                super_history_mapper.attrs.changed.columns
             )
 
     else:
@@ -144,7 +139,7 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
         inherits=super_history_mapper,
         polymorphic_on=polymorphic_on,
         polymorphic_identity=local_mapper.polymorphic_identity,
-        properties=properties
+        properties=properties,
     )
     cls.__history_mapper__ = m
 
@@ -152,8 +147,7 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
         local_mapper.local_table.append_column(
             Column('version', Integer, default=1, nullable=False)
         )
-        local_mapper.add_property(
-            "version", local_mapper.local_table.c.version)
+        local_mapper.add_property("version", local_mapper.local_table.c.version)
 
 
 class Versioned(object):
@@ -163,6 +157,7 @@ class Versioned(object):
             mp = mapper(cls, *arg, **kw)
             _history_mapper(mp)
             return mp
+
         return map
 
     @classmethod

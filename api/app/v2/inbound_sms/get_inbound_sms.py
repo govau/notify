@@ -14,22 +14,20 @@ def get_inbound_sms():
     paginated_inbound_sms = inbound_sms_dao.dao_get_paginated_inbound_sms_for_service_for_public_api(
         authenticated_service.id,
         older_than=data.get('older_than', None),
-        page_size=current_app.config.get('API_PAGE_SIZE')
+        page_size=current_app.config.get('API_PAGE_SIZE'),
     )
 
-    return jsonify(
-        received_text_messages=[i.serialize() for i in paginated_inbound_sms],
-        links=_build_links(paginated_inbound_sms)
-    ), 200
+    return (
+        jsonify(
+            received_text_messages=[i.serialize() for i in paginated_inbound_sms],
+            links=_build_links(paginated_inbound_sms),
+        ),
+        200,
+    )
 
 
 def _build_links(inbound_sms_list):
-    _links = {
-        'current': url_for(
-            "v2_inbound_sms.get_inbound_sms",
-            _external=True,
-        ),
-    }
+    _links = {'current': url_for("v2_inbound_sms.get_inbound_sms", _external=True)}
 
     if inbound_sms_list:
         _links['next'] = url_for(

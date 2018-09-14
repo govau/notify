@@ -16,11 +16,19 @@ from sqlalchemy.dialects import postgresql
 
 
 def upgrade():
-    op.alter_column('jobs', 'job_status', existing_type=sa.VARCHAR(length=255), nullable=False)
-    op.alter_column('jobs', 'status', existing_type=sa.VARCHAR(length=255), nullable=True)
+    op.alter_column(
+        'jobs', 'job_status', existing_type=sa.VARCHAR(length=255), nullable=False
+    )
+    op.alter_column(
+        'jobs', 'status', existing_type=sa.VARCHAR(length=255), nullable=True
+    )
 
 
 def downgrade():
     # this downgrade leaves status empty and with no not null constraint.
-    op.alter_column('jobs', 'status', existing_type=sa.VARCHAR(length=255), nullable=False)
-    op.alter_column('jobs', 'job_status', existing_type=sa.VARCHAR(length=255), nullable=True)
+    op.alter_column(
+        'jobs', 'status', existing_type=sa.VARCHAR(length=255), nullable=False
+    )
+    op.alter_column(
+        'jobs', 'job_status', existing_type=sa.VARCHAR(length=255), nullable=True
+    )

@@ -13,7 +13,9 @@ delivery_blueprint = Blueprint('delivery', __name__)
 register_errors(delivery_blueprint)
 
 
-@delivery_blueprint.route('/deliver/notification/<uuid:notification_id>', methods=['POST'])
+@delivery_blueprint.route(
+    '/deliver/notification/<uuid:notification_id>', methods=['POST']
+)
 def send_notification_to_provider(notification_id):
     notification = notifications_dao.get_notification_by_id(notification_id)
     if not notification:
@@ -24,14 +26,14 @@ def send_notification_to_provider(notification_id):
             send_to_providers.send_email_to_provider,
             provider_tasks.deliver_email,
             notification,
-            QueueNames.SEND_EMAIL
+            QueueNames.SEND_EMAIL,
         )
     else:
         send_response(
             send_to_providers.send_sms_to_provider,
             provider_tasks.deliver_sms,
             notification,
-            QueueNames.SEND_SMS
+            QueueNames.SEND_SMS,
         )
     return jsonify({}), 204
 
@@ -42,7 +44,8 @@ def send_response(send_call, task_call, notification, queue):
     except Exception as e:
         current_app.logger.exception(
             "Failed to send notification, retrying in celery. ID {} type {}".format(
-                notification.id,
-                notification.notification_type),
-            e)
+                notification.id, notification.notification_type
+            ),
+            e,
+        )
         task_call.apply_async((str(notification.id)), queue=queue)

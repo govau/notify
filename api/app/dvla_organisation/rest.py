@@ -9,6 +9,4 @@ register_errors(dvla_organisation_blueprint)
 
 @dvla_organisation_blueprint.route('', methods=['GET'])
 def get_dvla_organisations():
-    return jsonify({
-        org.id: org.name for org in dao_get_dvla_organisations()
-    })
+    return jsonify({org.id: org.name for org in dao_get_dvla_organisations()})

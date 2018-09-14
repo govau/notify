@@ -5,11 +5,6 @@ letter_job_ids = {
     "description": "list of job ids",
     "type": "object",
     "title": "job_ids",
-    "properties": {
-        "job_ids": {"type": "array",
-                    "items": uuid,
-                    "minItems": 1
-                    },
-    },
-    "required": ["job_ids"]
+    "properties": {"job_ids": {"type": "array", "items": uuid, "minItems": 1}},
+    "required": ["job_ids"],
 }

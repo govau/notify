@@ -4,7 +4,8 @@ from app.models import ServiceWhitelist
 
 def dao_fetch_service_whitelist(service_id):
     return ServiceWhitelist.query.filter(
-        ServiceWhitelist.service_id == service_id).all()
+        ServiceWhitelist.service_id == service_id
+    ).all()
 
 
 def dao_add_and_commit_whitelisted_contacts(objs):
@@ -14,4 +15,5 @@ def dao_add_and_commit_whitelisted_contacts(objs):
 
 def dao_remove_service_whitelist(service_id):
     return ServiceWhitelist.query.filter(
-        ServiceWhitelist.service_id == service_id).delete()
+        ServiceWhitelist.service_id == service_id
+    ).delete()

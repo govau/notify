@@ -15,12 +15,12 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.alter_column('inbound_sms', 'provider',
-               existing_type=sa.VARCHAR(),
-               nullable=False)
+    op.alter_column(
+        'inbound_sms', 'provider', existing_type=sa.VARCHAR(), nullable=False
+    )
 
 
 def downgrade():
-    op.alter_column('inbound_sms', 'provider',
-               existing_type=sa.VARCHAR(),
-               nullable=True)
+    op.alter_column(
+        'inbound_sms', 'provider', existing_type=sa.VARCHAR(), nullable=True
+    )

@@ -8,7 +8,9 @@ from app.models import EmailBranding
 from tests.app.db import create_email_branding
 
 
-def test_get_email_branding_options_gets_all_email_branding(notify_db, notify_db_session):
+def test_get_email_branding_options_gets_all_email_branding(
+    notify_db, notify_db_session
+):
     email_branding_1 = create_email_branding(name='test_email_branding_1')
     email_branding_2 = create_email_branding(name='test_email_branding_2')
 
@@ -19,7 +21,9 @@ def test_get_email_branding_options_gets_all_email_branding(notify_db, notify_db
     assert email_branding_2 == email_branding[1]
 
 
-def test_get_email_branding_by_id_gets_correct_email_branding(notify_db, notify_db_session):
+def test_get_email_branding_by_id_gets_correct_email_branding(
+    notify_db, notify_db_session
+):
     email_branding = create_email_branding()
 
     email_branding_from_db = dao_get_email_branding_by_id(email_branding.id)

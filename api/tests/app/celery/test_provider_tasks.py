@@ -16,17 +16,19 @@ def test_should_have_decorated_tasks_functions():
 
 
 def test_should_call_send_sms_to_provider_from_deliver_sms_task(
-        sample_notification,
-        mocker):
+    sample_notification, mocker
+):
     mocker.patch('app.delivery.send_to_providers.send_sms_to_provider')
 
     deliver_sms(sample_notification.id)
-    app.delivery.send_to_providers.send_sms_to_provider.assert_called_with(sample_notification)
+    app.delivery.send_to_providers.send_sms_to_provider.assert_called_with(
+        sample_notification
+    )
 
 
 def test_should_add_to_retry_queue_if_notification_not_found_in_deliver_sms_task(
-        notify_db_session,
-        mocker):
+    notify_db_session, mocker
+):
     mocker.patch('app.delivery.send_to_providers.send_sms_to_provider')
     mocker.patch('app.celery.provider_tasks.deliver_sms.retry')
 
@@ -38,15 +40,19 @@ def test_should_add_to_retry_queue_if_notification_not_found_in_deliver_sms_task
 
 
 def test_should_call_send_email_to_provider_from_deliver_email_task(
-        sample_notification,
-        mocker):
+    sample_notification, mocker
+):
     mocker.patch('app.delivery.send_to_providers.send_email_to_provider')
 
     deliver_email(sample_notification.id)
-    app.delivery.send_to_providers.send_email_to_provider.assert_called_with(sample_notification)
+    app.delivery.send_to_providers.send_email_to_provider.assert_called_with(
+        sample_notification
+    )
 
 
-def test_should_add_to_retry_queue_if_notification_not_found_in_deliver_email_task(mocker):
+def test_should_add_to_retry_queue_if_notification_not_found_in_deliver_email_task(
+    mocker
+):
     mocker.patch('app.delivery.send_to_providers.send_email_to_provider')
     mocker.patch('app.celery.provider_tasks.deliver_email.retry')
 
@@ -54,14 +60,25 @@ def test_should_add_to_retry_queue_if_notification_not_found_in_deliver_email_ta
 
     deliver_email(notification_id)
     app.delivery.send_to_providers.send_email_to_provider.assert_not_called()
-    app.celery.provider_tasks.deliver_email.retry.assert_called_with(queue="retry-tasks")
+    app.celery.provider_tasks.deliver_email.retry.assert_called_with(
+        queue="retry-tasks"
+    )
 
 
 # DO THESE FOR THE 4 TYPES OF TASK
 
-def test_should_go_into_technical_error_if_exceeds_retries_on_deliver_sms_task(sample_notification, mocker):
-    mocker.patch('app.delivery.send_to_providers.send_sms_to_provider', side_effect=Exception("EXPECTED"))
-    mocker.patch('app.celery.provider_tasks.deliver_sms.retry', side_effect=MaxRetriesExceededError())
+
+def test_should_go_into_technical_error_if_exceeds_retries_on_deliver_sms_task(
+    sample_notification, mocker
+):
+    mocker.patch(
+        'app.delivery.send_to_providers.send_sms_to_provider',
+        side_effect=Exception("EXPECTED"),
+    )
+    mocker.patch(
+        'app.celery.provider_tasks.deliver_sms.retry',
+        side_effect=MaxRetriesExceededError(),
+    )
 
     with pytest.raises(NotificationTechnicalFailureException) as e:
         deliver_sms(sample_notification.id)
@@ -72,9 +89,17 @@ def test_should_go_into_technical_error_if_exceeds_retries_on_deliver_sms_task(s
     assert str(sample_notification.id) in e.value.message
 
 
-def test_should_go_into_technical_error_if_exceeds_retries_on_deliver_email_task(sample_notification, mocker):
-    mocker.patch('app.delivery.send_to_providers.send_email_to_provider', side_effect=Exception("EXPECTED"))
-    mocker.patch('app.celery.provider_tasks.deliver_email.retry', side_effect=MaxRetriesExceededError())
+def test_should_go_into_technical_error_if_exceeds_retries_on_deliver_email_task(
+    sample_notification, mocker
+):
+    mocker.patch(
+        'app.delivery.send_to_providers.send_email_to_provider',
+        side_effect=Exception("EXPECTED"),
+    )
+    mocker.patch(
+        'app.celery.provider_tasks.deliver_email.retry',
+        side_effect=MaxRetriesExceededError(),
+    )
 
     with pytest.raises(NotificationTechnicalFailureException) as e:
         deliver_email(sample_notification.id)
@@ -84,8 +109,13 @@ def test_should_go_into_technical_error_if_exceeds_retries_on_deliver_email_task
     assert str(sample_notification.id) in e.value.message
 
 
-def test_should_technical_error_and_not_retry_if_invalid_email(sample_notification, mocker):
-    mocker.patch('app.delivery.send_to_providers.send_email_to_provider', side_effect=InvalidEmailError('bad email'))
+def test_should_technical_error_and_not_retry_if_invalid_email(
+    sample_notification, mocker
+):
+    mocker.patch(
+        'app.delivery.send_to_providers.send_email_to_provider',
+        side_effect=InvalidEmailError('bad email'),
+    )
     mocker.patch('app.celery.provider_tasks.deliver_email.retry')
 
     deliver_email(sample_notification.id)
@@ -99,11 +129,14 @@ def test_should_retry_and_log_exception(sample_notification, mocker):
         'Error': {
             'Code': 'SomeError',
             'Message': 'some error message from amazon',
-            'Type': 'Sender'
+            'Type': 'Sender',
         }
     }
     ex = ClientError(error_response=error_response, operation_name='opname')
-    mocker.patch('app.delivery.send_to_providers.send_email_to_provider', side_effect=AwsSesClientException(str(ex)))
+    mocker.patch(
+        'app.delivery.send_to_providers.send_email_to_provider',
+        side_effect=AwsSesClientException(str(ex)),
+    )
     mocker.patch('app.celery.provider_tasks.deliver_email.retry')
 
     deliver_email(sample_notification.id)
@@ -112,10 +145,14 @@ def test_should_retry_and_log_exception(sample_notification, mocker):
     assert sample_notification.status == 'created'
 
 
-def test_send_sms_should_switch_providers_on_provider_failure(sample_notification, mocker):
+def test_send_sms_should_switch_providers_on_provider_failure(
+    sample_notification, mocker
+):
     provider_to_use = mocker.patch('app.delivery.send_to_providers.provider_to_use')
     provider_to_use.return_value.send_sms.side_effect = Exception('Error')
-    switch_provider_mock = mocker.patch('app.delivery.send_to_providers.dao_toggle_sms_provider')
+    switch_provider_mock = mocker.patch(
+        'app.delivery.send_to_providers.dao_toggle_sms_provider'
+    )
     mocker.patch('app.celery.provider_tasks.deliver_sms.retry')
 
     deliver_sms(sample_notification.id)
@@ -124,14 +161,15 @@ def test_send_sms_should_switch_providers_on_provider_failure(sample_notificatio
 
 
 def test_send_sms_should_not_switch_providers_on_non_provider_failure(
-    sample_notification,
-    mocker
+    sample_notification, mocker
 ):
     mocker.patch(
         'app.delivery.send_to_providers.send_sms_to_provider',
-        side_effect=Exception("Non Provider Exception")
+        side_effect=Exception("Non Provider Exception"),
     )
-    switch_provider_mock = mocker.patch('app.delivery.send_to_providers.dao_toggle_sms_provider')
+    switch_provider_mock = mocker.patch(
+        'app.delivery.send_to_providers.dao_toggle_sms_provider'
+    )
     mocker.patch('app.celery.provider_tasks.deliver_sms.retry')
 
     deliver_sms(sample_notification.id)

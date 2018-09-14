@@ -14,8 +14,13 @@ down_revision = '0124_add_free_sms_fragment_limit'
 
 
 def upgrade():
-    op.add_column('services', sa.Column('organisation_type', sa.String(length=255), nullable=True))
-    op.add_column('services_history', sa.Column('organisation_type', sa.String(length=255), nullable=True))
+    op.add_column(
+        'services', sa.Column('organisation_type', sa.String(length=255), nullable=True)
+    )
+    op.add_column(
+        'services_history',
+        sa.Column('organisation_type', sa.String(length=255), nullable=True),
+    )
 
 
 def downgrade():

@@ -8,7 +8,7 @@ from app.v2.template.template_schemas import (
     get_template_by_id_response,
     get_template_by_id_request,
     post_template_preview_request,
-    post_template_preview_response
+    post_template_preview_response,
 )
 from app.schema_validation import validate
 from jsonschema.exceptions import ValidationError
@@ -37,34 +37,46 @@ valid_json_get_response_with_optionals = {
     'name': 'some name',
 }
 
-valid_request_args = [{"id": str(uuid.uuid4()), "version": 1}, {"id": str(uuid.uuid4())}]
-
-invalid_request_args = [
-    ({"id": str(uuid.uuid4()), "version": "test"}, ["version test is not of type integer, null"]),
-    ({"id": str(uuid.uuid4()), "version": 0}, ["version 0 is less than the minimum of 1"]),
-    ({"version": 1}, ["id is a required property"]),
-    ({"id": "invalid_uuid"}, ["id is not a valid UUID"]),
-    ({"id": "invalid_uuid", "version": 0}, ["version 0 is less than the minimum of 1", "id is not a valid UUID"])
+valid_request_args = [
+    {"id": str(uuid.uuid4()), "version": 1},
+    {"id": str(uuid.uuid4())},
 ]
 
-valid_json_post_args = {
-    "id": str(uuid.uuid4()),
-    "personalisation": {"key": "value"}
-}
+invalid_request_args = [
+    (
+        {"id": str(uuid.uuid4()), "version": "test"},
+        ["version test is not of type integer, null"],
+    ),
+    (
+        {"id": str(uuid.uuid4()), "version": 0},
+        ["version 0 is less than the minimum of 1"],
+    ),
+    ({"version": 1}, ["id is a required property"]),
+    ({"id": "invalid_uuid"}, ["id is not a valid UUID"]),
+    (
+        {"id": "invalid_uuid", "version": 0},
+        ["version 0 is less than the minimum of 1", "id is not a valid UUID"],
+    ),
+]
+
+valid_json_post_args = {"id": str(uuid.uuid4()), "personalisation": {"key": "value"}}
 
 invalid_json_post_args = [
     (
         {"id": "invalid_uuid", "personalisation": {"key": "value"}},
-        ["id is not a valid UUID"]
+        ["id is not a valid UUID"],
     ),
     (
         {"id": str(uuid.uuid4()), "personalisation": ['a', 'b']},
-        ["personalisation [a, b] is not of type object"]
+        ["personalisation [a, b] is not of type object"],
     ),
     (
         {"personalisation": "invalid_personalisation"},
-        ["id is a required property", "personalisation invalid_personalisation is not of type object"]
-    )
+        [
+            "id is a required property",
+            "personalisation invalid_personalisation is not of type object",
+        ],
+    ),
 ]
 
 valid_json_post_response = {
@@ -72,7 +84,7 @@ valid_json_post_response = {
     'type': 'email',
     'version': 1,
     'created_by': 'someone@test.com',
-    'body': 'some body'
+    'body': 'some body',
 }
 
 valid_json_post_response_with_optionals = {
@@ -81,7 +93,7 @@ valid_json_post_response_with_optionals = {
     'version': 1,
     'created_by': 'someone@test.com',
     'body': "some body",
-    'subject': 'some subject'
+    'subject': 'some subject',
 }
 
 
@@ -91,7 +103,9 @@ def test_get_template_request_schema_against_valid_args_is_valid(args):
 
 
 @pytest.mark.parametrize("args,error_message", invalid_request_args)
-def test_get_template_request_schema_against_invalid_args_is_invalid(args, error_message):
+def test_get_template_request_schema_against_invalid_args_is_invalid(
+    args, error_message
+):
     with pytest.raises(ValidationError) as e:
         validate(args, get_template_by_id_request)
     errors = json.loads(str(e.value))
@@ -103,9 +117,13 @@ def test_get_template_request_schema_against_invalid_args_is_invalid(args, error
 
 
 @pytest.mark.parametrize("template_type", TEMPLATE_TYPES)
-@pytest.mark.parametrize("response", [valid_json_get_response, valid_json_get_response_with_optionals])
+@pytest.mark.parametrize(
+    "response", [valid_json_get_response, valid_json_get_response_with_optionals]
+)
 @pytest.mark.parametrize("updated_datetime", [None, '2017-01-11T18:25:43.511Z'])
-def test_get_template_response_schema_is_valid(response, template_type, updated_datetime):
+def test_get_template_response_schema_is_valid(
+    response, template_type, updated_datetime
+):
     if updated_datetime:
         response['updated_at'] = updated_datetime
 
@@ -115,7 +133,10 @@ def test_get_template_response_schema_is_valid(response, template_type, updated_
 
 
 def test_post_template_preview_against_valid_args_is_valid():
-    assert validate(valid_json_post_args, post_template_preview_request) == valid_json_post_args
+    assert (
+        validate(valid_json_post_args, post_template_preview_request)
+        == valid_json_post_args
+    )
 
 
 @pytest.mark.parametrize("args,error_messages", invalid_json_post_args)
@@ -131,7 +152,9 @@ def test_post_template_preview_against_invalid_args_is_invalid(args, error_messa
 
 
 @pytest.mark.parametrize("template_type", TEMPLATE_TYPES)
-@pytest.mark.parametrize("response", [valid_json_post_response, valid_json_post_response_with_optionals])
+@pytest.mark.parametrize(
+    "response", [valid_json_post_response, valid_json_post_response_with_optionals]
+)
 def test_post_template_preview_response_schema_is_valid(response, template_type):
     response['type'] = template_type
 

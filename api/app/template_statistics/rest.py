@@ -1,26 +1,24 @@
-from flask import (
-    Blueprint,
-    jsonify,
-    request,
-    current_app)
+from flask import Blueprint, jsonify, request, current_app
 
 from app import redis_store
 from app.dao.notifications_dao import (
     dao_get_template_usage,
-    dao_get_last_template_usage
+    dao_get_last_template_usage,
 )
 from app.dao.templates_dao import (
     dao_get_templates_for_cache,
-    dao_get_template_by_id_and_service_id
+    dao_get_template_by_id_and_service_id,
 )
 
 from app.schemas import notification_with_template_schema
 from app.utils import cache_key_for_service_template_counter
 from app.errors import register_errors, InvalidRequest
 
-template_statistics = Blueprint('template-statistics',
-                                __name__,
-                                url_prefix='/service/<service_id>/template-statistics')
+template_statistics = Blueprint(
+    'template-statistics',
+    __name__,
+    url_prefix='/service/<service_id>/template-statistics',
+)
 
 register_errors(template_statistics)
 
@@ -48,7 +46,7 @@ def get_template_statistics_for_service_by_day(service_id):
             'template_id': str(data.template_id),
             'template_name': data.name,
             'template_type': data.template_type,
-            'is_precompiled_letter': data.is_precompiled_letter
+            'is_precompiled_letter': data.is_precompiled_letter,
         }
 
     return jsonify(data=[serialize(row) for row in stats])
@@ -77,9 +75,9 @@ def get_template_statistics_for_7_days(limit_days, service_id):
         stats = dao_get_template_usage(service_id, limit_days=limit_days)
         cache_values = dict([(x.template_id, x.count) for x in stats])
         if cache_values:
-            redis_store.set_hash_and_expire(cache_key,
-                                            cache_values,
-                                            current_app.config['EXPIRE_CACHE_TEN_MINUTES'])
+            redis_store.set_hash_and_expire(
+                cache_key, cache_values, current_app.config['EXPIRE_CACHE_TEN_MINUTES']
+            )
     else:
         stats = dao_get_templates_for_cache(template_stats_by_id.items())
     return stats

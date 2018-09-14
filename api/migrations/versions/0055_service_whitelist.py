@@ -14,17 +14,28 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 def upgrade():
-    op.create_table('service_whitelist',
+    op.create_table(
+        'service_whitelist',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('service_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('recipient_type', sa.Enum('mobile', 'email', name='recipient_type'), nullable=False),
+        sa.Column(
+            'recipient_type',
+            sa.Enum('mobile', 'email', name='recipient_type'),
+            nullable=False,
+        ),
         sa.Column('recipient', sa.String(length=255), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(['service_id'], ['services.id'], ),
-        sa.PrimaryKeyConstraint('id')
+        sa.ForeignKeyConstraint(['service_id'], ['services.id']),
+        sa.PrimaryKeyConstraint('id'),
     )
-    op.create_index(op.f('ix_service_whitelist_service_id'), 'service_whitelist', ['service_id'], unique=False)
+    op.create_index(
+        op.f('ix_service_whitelist_service_id'),
+        'service_whitelist',
+        ['service_id'],
+        unique=False,
+    )
 
 
 def downgrade():

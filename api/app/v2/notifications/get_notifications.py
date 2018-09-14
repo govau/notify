@@ -3,7 +3,10 @@ from app import api_user, authenticated_service
 from app.dao import notifications_dao
 from app.schema_validation import validate
 from app.v2.notifications import v2_notification_blueprint
-from app.v2.notifications.notification_schemas import get_notifications_request, notification_by_id
+from app.v2.notifications.notification_schemas import (
+    get_notifications_request,
+    notification_by_id,
+)
 
 
 @v2_notification_blueprint.route("/<notification_id>", methods=['GET'])
@@ -42,21 +45,27 @@ def get_notifications():
         older_than=data.get('older_than'),
         client_reference=data.get('reference'),
         page_size=current_app.config.get('API_PAGE_SIZE'),
-        include_jobs=data.get('include_jobs')
+        include_jobs=data.get('include_jobs'),
     )
 
     def _build_links(notifications):
-        _links = {
-            'current': url_for(".get_notifications", _external=True, **data),
-        }
+        _links = {'current': url_for(".get_notifications", _external=True, **data)}
 
         if len(notifications):
             next_query_params = dict(data, older_than=notifications[-1].id)
-            _links['next'] = url_for(".get_notifications", _external=True, **next_query_params)
+            _links['next'] = url_for(
+                ".get_notifications", _external=True, **next_query_params
+            )
 
         return _links
 
-    return jsonify(
-        notifications=[notification.serialize() for notification in paginated_notifications.items],
-        links=_build_links(paginated_notifications.items)
-    ), 200
+    return (
+        jsonify(
+            notifications=[
+                notification.serialize()
+                for notification in paginated_notifications.items
+            ],
+            links=_build_links(paginated_notifications.items),
+        ),
+        200,
+    )

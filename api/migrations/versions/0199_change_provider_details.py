@@ -12,7 +12,10 @@ import sqlalchemy as sa
 revision = '0199'
 down_revision = '0198'
 
-def make_provider_details_upgrade_sql(identifier, priority, supports_international, active):
+
+def make_provider_details_upgrade_sql(
+    identifier, priority, supports_international, active
+):
     return """
         UPDATE provider_details
         SET priority={1}, supports_international={2}, active={3}, updated_at=now(), version=(
@@ -20,23 +23,27 @@ def make_provider_details_upgrade_sql(identifier, priority, supports_internation
         ) + 1
         WHERE identifier='{0}'
     """.format(
-        identifier,
-        priority,
-        supports_international,
-        active,
+        identifier, priority, supports_international, active
     )
+
 
 def make_provider_details_history_upgrade_sql(identifier):
     return """
         INSERT INTO provider_details_history (id, display_name, identifier, priority, notification_type, active, version, updated_at, created_by_id, supports_international)
         SELECT id, display_name, identifier, priority, notification_type, active, version, updated_at, created_by_id, supports_international FROM provider_details WHERE identifier = '{0}'
-    """.format(identifier)
+    """.format(
+        identifier
+    )
+
 
 def make_provider_details_history_downgrade_sql(identifier):
     return """
         DELETE FROM provider_details_history
         WHERE identifier = {0} AND version = (SELECT version from provider_details WHERE identifier = '{0}')
-    """.format(identifier)
+    """.format(
+        identifier
+    )
+
 
 def make_provider_details_downgrade_sql(identifier):
     return """
@@ -58,20 +65,43 @@ def make_provider_details_downgrade_sql(identifier):
             LIMIT 1
         ) h
         WHERE identifier = '{0}'
-    """.format(identifier)
+    """.format(
+        identifier
+    )
+
 
 def upgrade():
-    op.execute(make_provider_details_upgrade_sql(identifier="twilio", priority=10, supports_international=True, active=True))
+    op.execute(
+        make_provider_details_upgrade_sql(
+            identifier="twilio", priority=10, supports_international=True, active=True
+        )
+    )
     op.execute(make_provider_details_history_upgrade_sql(identifier="twilio"))
 
-    op.execute(make_provider_details_upgrade_sql(identifier="telstra", priority=15, supports_international=False, active=True))
+    op.execute(
+        make_provider_details_upgrade_sql(
+            identifier="telstra", priority=15, supports_international=False, active=True
+        )
+    )
     op.execute(make_provider_details_history_upgrade_sql(identifier="telstra"))
 
-    op.execute(make_provider_details_upgrade_sql(identifier="mmg", priority=20, supports_international=False, active=False))
+    op.execute(
+        make_provider_details_upgrade_sql(
+            identifier="mmg", priority=20, supports_international=False, active=False
+        )
+    )
     op.execute(make_provider_details_history_upgrade_sql(identifier="mmg"))
 
-    op.execute(make_provider_details_upgrade_sql(identifier="firetext", priority=20, supports_international=False, active=False))
+    op.execute(
+        make_provider_details_upgrade_sql(
+            identifier="firetext",
+            priority=20,
+            supports_international=False,
+            active=False,
+        )
+    )
     op.execute(make_provider_details_history_upgrade_sql(identifier="firetext"))
+
 
 def downgrade():
     op.execute(make_provider_details_history_downgrade_sql(identifier="firetext"))
@@ -85,4 +115,3 @@ def downgrade():
 
     op.execute(make_provider_details_history_downgrade_sql(identifier="twilio"))
     op.execute(make_provider_details_downgrade_sql(identifier="twilio"))
-

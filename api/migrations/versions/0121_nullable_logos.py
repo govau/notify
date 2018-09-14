@@ -15,9 +15,7 @@ down_revision = '0120_add_org_banner_branding'
 
 def upgrade():
     op.alter_column(
-        'organisation', 'logo',
-        existing_type=sa.VARCHAR(length=255),
-        nullable=True
+        'organisation', 'logo', existing_type=sa.VARCHAR(length=255), nullable=True
     )
 
 

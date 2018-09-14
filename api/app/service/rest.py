@@ -1,12 +1,7 @@
 import itertools
 from datetime import datetime
 
-from flask import (
-    jsonify,
-    request,
-    current_app,
-    Blueprint
-)
+from flask import jsonify, request, current_app, Blueprint
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -16,7 +11,8 @@ from app.dao.api_key_dao import (
     save_model_api_key,
     get_model_api_keys,
     get_unsigned_secret,
-    expire_api_key)
+    expire_api_key,
+)
 from app.dao.inbound_numbers_dao import dao_allocate_number_for_service
 from app.dao.organisation_dao import dao_get_organisation_by_service_id
 from app.dao.service_sms_sender_dao import (
@@ -24,7 +20,7 @@ from app.dao.service_sms_sender_dao import (
     dao_update_service_sms_sender,
     dao_get_service_sms_senders_by_id,
     dao_get_sms_senders_by_service_id,
-    update_existing_sms_sender_with_inbound_number
+    update_existing_sms_sender_with_inbound_number,
 )
 from app.dao.services_dao import (
     dao_add_user_to_service,
@@ -43,41 +39,41 @@ from app.dao.services_dao import (
     dao_suspend_service,
     dao_update_service,
     fetch_aggregate_stats_by_date_range_for_all_services,
-    fetch_stats_by_date_range_for_all_services
+    fetch_stats_by_date_range_for_all_services,
 )
 from app.dao.service_whitelist_dao import (
     dao_fetch_service_whitelist,
     dao_add_and_commit_whitelisted_contacts,
-    dao_remove_service_whitelist
+    dao_remove_service_whitelist,
 )
 from app.dao.service_email_reply_to_dao import (
     add_reply_to_email_address_for_service,
     dao_get_reply_to_by_id,
     dao_get_reply_to_by_service_id,
-    update_reply_to_email_address
+    update_reply_to_email_address,
 )
 from app.dao.service_letter_contact_dao import (
     dao_get_letter_contacts_by_service_id,
     dao_get_letter_contact_by_id,
     add_letter_contact_for_service,
-    update_letter_contact
+    update_letter_contact,
 )
 from app.dao.provider_statistics_dao import get_fragment_count
 from app.dao.users_dao import get_user_by_id
-from app.errors import (
-    InvalidRequest,
-    register_errors
-)
+from app.errors import InvalidRequest, register_errors
 from app.models import Service, EmailBranding
 from app.schema_validation import validate
 from app.service import statistics
 from app.service.service_senders_schema import (
     add_service_email_reply_to_request,
     add_service_letter_contact_block_request,
-    add_service_sms_sender_request
+    add_service_sms_sender_request,
 )
 from app.service.utils import get_whitelist_objects
-from app.service.sender import send_notification_to_service_users, send_notification_to_notify_support
+from app.service.sender import (
+    send_notification_to_service_users,
+    send_notification_to_notify_support,
+)
 from app.service.send_notification import send_one_off_notification
 from app.schemas import (
     service_schema,
@@ -85,7 +81,7 @@ from app.schemas import (
     permission_schema,
     notification_with_template_schema,
     notifications_filter_schema,
-    detailed_service_schema
+    detailed_service_schema,
 )
 from app.utils import pagination_links
 
@@ -100,12 +96,19 @@ def handle_integrity_error(exc):
     Handle integrity errors caused by the unique constraint on ix_organisation_name
     """
     if 'services_name_key' or 'services_email_from_key' in str(exc):
-        return jsonify(
-            result='error',
-            message={'name': ["Duplicate service name '{}'".format(
-                exc.params.get('name', exc.params.get('email_from', ''))
-            )]}
-        ), 400
+        return (
+            jsonify(
+                result='error',
+                message={
+                    'name': [
+                        "Duplicate service name '{}'".format(
+                            exc.params.get('name', exc.params.get('email_from', ''))
+                        )
+                    ]
+                },
+            ),
+            400,
+        )
     current_app.logger.exception(exc)
     return jsonify(result='error', message="Internal server error"), 500
 
@@ -117,12 +120,15 @@ def get_platform_stats():
     # If start and end date are not set, we are expecting today's stats.
     today = str(datetime.utcnow().date())
 
-    start_date = datetime.strptime(request.args.get('start_date', today), '%Y-%m-%d').date()
+    start_date = datetime.strptime(
+        request.args.get('start_date', today), '%Y-%m-%d'
+    ).date()
     end_date = datetime.strptime(request.args.get('end_date', today), '%Y-%m-%d').date()
-    data = fetch_aggregate_stats_by_date_range_for_all_services(start_date=start_date,
-                                                                end_date=end_date,
-                                                                include_from_test_key=include_from_test_key
-                                                                )
+    data = fetch_aggregate_stats_by_date_range_for_all_services(
+        start_date=start_date,
+        end_date=end_date,
+        include_from_test_key=include_from_test_key,
+    )
     stats = statistics.format_statistics(data)
 
     result = jsonify(stats)
@@ -139,16 +145,22 @@ def get_services():
     # If start and end date are not set, we are expecting today's stats.
     today = str(datetime.utcnow().date())
 
-    start_date = datetime.strptime(request.args.get('start_date', today), '%Y-%m-%d').date()
+    start_date = datetime.strptime(
+        request.args.get('start_date', today), '%Y-%m-%d'
+    ).date()
     end_date = datetime.strptime(request.args.get('end_date', today), '%Y-%m-%d').date()
 
     if user_id:
         services = dao_fetch_all_services_by_user(user_id, only_active)
     elif detailed:
-        result = jsonify(data=get_detailed_services(start_date=start_date, end_date=end_date,
-                                                    only_active=only_active,
-                                                    include_from_test_key=include_from_test_key
-                                                    ))
+        result = jsonify(
+            data=get_detailed_services(
+                start_date=start_date,
+                end_date=end_date,
+                only_active=only_active,
+                include_from_test_key=include_from_test_key,
+            )
+        )
         return result
     else:
         services = dao_fetch_all_services(only_active)
@@ -159,7 +171,9 @@ def get_services():
 @service_blueprint.route('/<uuid:service_id>', methods=['GET'])
 def get_service_by_id(service_id):
     if request.args.get('detailed') == 'True':
-        data = get_detailed_service(service_id, today_only=request.args.get('today_only') == 'True')
+        data = get_detailed_service(
+            service_id, today_only=request.args.get('today_only') == 'True'
+        )
     else:
         fetched = dao_fetch_service_by_id(service_id)
 
@@ -192,7 +206,9 @@ def update_service(service_id):
     req_json = request.get_json()
     fetched_service = dao_fetch_service_by_id(service_id)
     # Capture the status change here as Marshmallow changes this later
-    service_going_live = fetched_service.restricted and not req_json.get('restricted', True)
+    service_going_live = fetched_service.restricted and not req_json.get(
+        'restricted', True
+    )
     current_data = dict(service_schema.dump(fetched_service).data.items())
     current_data.update(request.get_json())
 
@@ -203,7 +219,11 @@ def update_service(service_id):
 
     if 'email_branding' in req_json:
         email_branding_id = req_json['email_branding']
-        service.email_branding = None if not email_branding_id else EmailBranding.query.get(email_branding_id)
+        service.email_branding = (
+            None
+            if not email_branding_id
+            else EmailBranding.query.get(email_branding_id)
+        )
 
     dao_update_service(service)
 
@@ -213,9 +233,9 @@ def update_service(service_id):
             template_id=current_app.config['SERVICE_NOW_LIVE_TEMPLATE_ID'],
             personalisation={
                 'service_name': current_data['name'],
-                'message_limit': '{:,}'.format(current_data['message_limit'])
+                'message_limit': '{:,}'.format(current_data['message_limit']),
             },
-            include_user_fields=['name']
+            include_user_fields=['name'],
         )
 
     return jsonify(data=service_schema.dump(fetched_service).data), 200
@@ -226,7 +246,9 @@ def request_to_go_live(service_id):
     fetched_service = dao_fetch_service_by_id(service_id=service_id)
 
     if fetched_service.restricted:
-        send_notification_to_notify_support(current_app.config['REQUEST_TO_GO_LIVE_TEMPLATE_ID'], request.get_json())
+        send_notification_to_notify_support(
+            current_app.config['REQUEST_TO_GO_LIVE_TEMPLATE_ID'], request.get_json()
+        )
     return jsonify(), 200
 
 
@@ -240,7 +262,9 @@ def create_api_key(service_id=None):
     return jsonify(data=unsigned_api_key), 201
 
 
-@service_blueprint.route('/<uuid:service_id>/api-key/revoke/<uuid:api_key_id>', methods=['POST'])
+@service_blueprint.route(
+    '/<uuid:service_id>/api-key/revoke/<uuid:api_key_id>', methods=['POST']
+)
 def revoke_api_key(service_id, api_key_id):
     expire_api_key(service_id=service_id, api_key_id=api_key_id)
     return jsonify(), 202
@@ -316,16 +340,18 @@ def get_service_provider_aggregate_statistics(service_id):
 # tables. This is so product owner can pass stories as done
 @service_blueprint.route('/<uuid:service_id>/history', methods=['GET'])
 def get_service_history(service_id):
-    from app.models import (Service, ApiKey, TemplateHistory)
+    from app.models import Service, ApiKey, TemplateHistory
     from app.schemas import (
         service_history_schema,
         api_key_history_schema,
-        template_history_schema
+        template_history_schema,
     )
 
     service_history = Service.get_history_model().query.filter_by(id=service_id).all()
     service_data = service_history_schema.dump(service_history, many=True).data
-    api_key_history = ApiKey.get_history_model().query.filter_by(service_id=service_id).all()
+    api_key_history = (
+        ApiKey.get_history_model().query.filter_by(service_id=service_id).all()
+    )
     api_keys_data = api_key_history_schema.dump(api_key_history, many=True).data
 
     template_history = TemplateHistory.query.filter_by(service_id=service_id).all()
@@ -335,7 +361,8 @@ def get_service_history(service_id):
         'service_history': service_data,
         'api_key_history': api_keys_data,
         'template_history': template_data,
-        'events': []}
+        'events': [],
+    }
 
     return jsonify(data=data)
 
@@ -344,13 +371,21 @@ def get_service_history(service_id):
 def get_all_notifications_for_service(service_id):
     data = notifications_filter_schema.load(request.args).data
     if data.get('to'):
-        notification_type = data.get('template_type')[0] if data.get('template_type') else None
-        return search_for_notification_by_to_field(service_id=service_id,
-                                                   search_term=data['to'],
-                                                   statuses=data.get('status'),
-                                                   notification_type=notification_type)
+        notification_type = (
+            data.get('template_type')[0] if data.get('template_type') else None
+        )
+        return search_for_notification_by_to_field(
+            service_id=service_id,
+            search_term=data['to'],
+            statuses=data.get('status'),
+            notification_type=notification_type,
+        )
     page = data['page'] if 'page' in data else 1
-    page_size = data['page_size'] if 'page_size' in data else current_app.config.get('PAGE_SIZE')
+    page_size = (
+        data['page_size']
+        if 'page_size' in data
+        else current_app.config.get('PAGE_SIZE')
+    )
     limit_days = data.get('limit_days')
     include_jobs = data.get('include_jobs', True)
     include_from_test_key = data.get('include_from_test_key', False)
@@ -362,62 +397,75 @@ def get_all_notifications_for_service(service_id):
         page_size=page_size,
         limit_days=limit_days,
         include_jobs=include_jobs,
-        include_from_test_key=include_from_test_key
+        include_from_test_key=include_from_test_key,
     )
     kwargs = request.args.to_dict()
     kwargs['service_id'] = service_id
-    return jsonify(
-        notifications=notification_with_template_schema.dump(pagination.items, many=True).data,
-        page_size=page_size,
-        total=pagination.total,
-        links=pagination_links(
-            pagination,
-            '.get_all_notifications_for_service',
-            **kwargs
-        )
-    ), 200
+    return (
+        jsonify(
+            notifications=notification_with_template_schema.dump(
+                pagination.items, many=True
+            ).data,
+            page_size=page_size,
+            total=pagination.total,
+            links=pagination_links(
+                pagination, '.get_all_notifications_for_service', **kwargs
+            ),
+        ),
+        200,
+    )
 
 
-@service_blueprint.route('/<uuid:service_id>/notifications/<uuid:notification_id>', methods=['GET'])
+@service_blueprint.route(
+    '/<uuid:service_id>/notifications/<uuid:notification_id>', methods=['GET']
+)
 def get_notification_for_service(service_id, notification_id):
 
     notification = notifications_dao.get_notification_with_personalisation(
-        service_id,
-        notification_id,
-        key_type=None,
+        service_id, notification_id, key_type=None
     )
-    return jsonify(
-        notification_with_template_schema.dump(notification).data,
-    ), 200
+    return jsonify(notification_with_template_schema.dump(notification).data), 200
 
 
-def search_for_notification_by_to_field(service_id, search_term, statuses, notification_type):
+def search_for_notification_by_to_field(
+    service_id, search_term, statuses, notification_type
+):
     results = notifications_dao.dao_get_notifications_by_to_field(
         service_id=service_id,
         search_term=search_term,
         statuses=statuses,
-        notification_type=notification_type
+        notification_type=notification_type,
     )
-    return jsonify(
-        notifications=notification_with_template_schema.dump(results, many=True).data
-    ), 200
+    return (
+        jsonify(
+            notifications=notification_with_template_schema.dump(
+                results, many=True
+            ).data
+        ),
+        200,
+    )
 
 
 @service_blueprint.route('/<uuid:service_id>/notifications/monthly', methods=['GET'])
 def get_monthly_notification_stats(service_id):
     service = dao_fetch_service_by_id(service_id)
     try:
-        return jsonify(data=dao_fetch_monthly_historical_stats_for_service(
-            service.id,
-            int(request.args.get('year', 'NaN'))
-        ))
+        return jsonify(
+            data=dao_fetch_monthly_historical_stats_for_service(
+                service.id, int(request.args.get('year', 'NaN'))
+            )
+        )
     except ValueError:
         raise InvalidRequest('Year must be a number', status_code=400)
 
 
 def get_detailed_service(service_id, today_only=False):
     service = dao_fetch_service_by_id(service_id)
-    stats_fn = dao_fetch_todays_stats_for_service if today_only else dao_fetch_stats_for_service
+    stats_fn = (
+        dao_fetch_todays_stats_for_service
+        if today_only
+        else dao_fetch_stats_for_service
+    )
     stats = stats_fn(service_id)
 
     service.statistics = statistics.format_statistics(stats)
@@ -425,16 +473,21 @@ def get_detailed_service(service_id, today_only=False):
     return detailed_service_schema.dump(service).data
 
 
-def get_detailed_services(start_date, end_date, only_active=False, include_from_test_key=True):
+def get_detailed_services(
+    start_date, end_date, only_active=False, include_from_test_key=True
+):
     if start_date == datetime.utcnow().date():
-        stats = dao_fetch_todays_stats_for_all_services(include_from_test_key=include_from_test_key,
-                                                        only_active=only_active)
+        stats = dao_fetch_todays_stats_for_all_services(
+            include_from_test_key=include_from_test_key, only_active=only_active
+        )
     else:
 
-        stats = fetch_stats_by_date_range_for_all_services(start_date=start_date,
-                                                           end_date=end_date,
-                                                           include_from_test_key=include_from_test_key,
-                                                           only_active=only_active)
+        stats = fetch_stats_by_date_range_for_all_services(
+            start_date=start_date,
+            end_date=end_date,
+            include_from_test_key=include_from_test_key,
+            only_active=only_active,
+        )
     results = []
     for service_id, rows in itertools.groupby(stats, lambda x: x.service_id):
         rows = list(rows)
@@ -442,22 +495,25 @@ def get_detailed_services(start_date, end_date, only_active=False, include_from_
             s = statistics.create_zeroed_stats_dicts()
         else:
             s = statistics.format_statistics(rows)
-        results.append({
-            'id': str(rows[0].service_id),
-            'name': rows[0].name,
-            'notification_type': rows[0].notification_type,
-            'research_mode': rows[0].research_mode,
-            'restricted': rows[0].restricted,
-            'active': rows[0].active,
-            'created_at': rows[0].created_at,
-            'statistics': s
-        })
+        results.append(
+            {
+                'id': str(rows[0].service_id),
+                'name': rows[0].name,
+                'notification_type': rows[0].notification_type,
+                'research_mode': rows[0].research_mode,
+                'restricted': rows[0].restricted,
+                'active': rows[0].active,
+                'created_at': rows[0].created_at,
+                'statistics': s,
+            }
+        )
     return results
 
 
 @service_blueprint.route('/<uuid:service_id>/whitelist', methods=['GET'])
 def get_whitelist(service_id):
-    from app.models import (EMAIL_TYPE, MOBILE_TYPE)
+    from app.models import EMAIL_TYPE, MOBILE_TYPE
+
     service = dao_fetch_service_by_id(service_id)
 
     if not service:
@@ -465,10 +521,12 @@ def get_whitelist(service_id):
 
     whitelist = dao_fetch_service_whitelist(service.id)
     return jsonify(
-        email_addresses=[item.recipient for item in whitelist
-                         if item.recipient_type == EMAIL_TYPE],
-        phone_numbers=[item.recipient for item in whitelist
-                       if item.recipient_type == MOBILE_TYPE]
+        email_addresses=[
+            item.recipient for item in whitelist if item.recipient_type == EMAIL_TYPE
+        ],
+        phone_numbers=[
+            item.recipient for item in whitelist if item.recipient_type == MOBILE_TYPE
+        ],
     )
 
 
@@ -535,12 +593,13 @@ def resume_service(service_id):
     return '', 204
 
 
-@service_blueprint.route('/<uuid:service_id>/notifications/templates_usage/monthly', methods=['GET'])
+@service_blueprint.route(
+    '/<uuid:service_id>/notifications/templates_usage/monthly', methods=['GET']
+)
 def get_monthly_template_usage(service_id):
     try:
         data = dao_fetch_monthly_historical_usage_by_template_for_service(
-            service_id,
-            int(request.args.get('year', 'NaN'))
+            service_id, int(request.args.get('year', 'NaN'))
         )
 
         stats = list()
@@ -553,7 +612,7 @@ def get_monthly_template_usage(service_id):
                     'month': i.month,
                     'year': i.year,
                     'count': i.count,
-                    'is_precompiled_letter': i.is_precompiled_letter
+                    'is_precompiled_letter': i.is_precompiled_letter,
                 }
             )
 
@@ -574,7 +633,9 @@ def get_email_reply_to_addresses(service_id):
     return jsonify([i.serialize() for i in result]), 200
 
 
-@service_blueprint.route('/<uuid:service_id>/email-reply-to/<uuid:reply_to_id>', methods=["GET"])
+@service_blueprint.route(
+    '/<uuid:service_id>/email-reply-to/<uuid:reply_to_id>', methods=["GET"]
+)
 def get_email_reply_to_address(service_id, reply_to_id):
     result = dao_get_reply_to_by_id(service_id=service_id, reply_to_id=reply_to_id)
     return jsonify(result.serialize()), 200
@@ -585,21 +646,27 @@ def add_service_reply_to_email_address(service_id):
     # validate the service exists, throws ResultNotFound exception.
     dao_fetch_service_by_id(service_id)
     form = validate(request.get_json(), add_service_email_reply_to_request)
-    new_reply_to = add_reply_to_email_address_for_service(service_id=service_id,
-                                                          email_address=form['email_address'],
-                                                          is_default=form.get('is_default', True))
+    new_reply_to = add_reply_to_email_address_for_service(
+        service_id=service_id,
+        email_address=form['email_address'],
+        is_default=form.get('is_default', True),
+    )
     return jsonify(data=new_reply_to.serialize()), 201
 
 
-@service_blueprint.route('/<uuid:service_id>/email-reply-to/<uuid:reply_to_email_id>', methods=['POST'])
+@service_blueprint.route(
+    '/<uuid:service_id>/email-reply-to/<uuid:reply_to_email_id>', methods=['POST']
+)
 def update_service_reply_to_email_address(service_id, reply_to_email_id):
     # validate the service exists, throws ResultNotFound exception.
     dao_fetch_service_by_id(service_id)
     form = validate(request.get_json(), add_service_email_reply_to_request)
-    new_reply_to = update_reply_to_email_address(service_id=service_id,
-                                                 reply_to_id=reply_to_email_id,
-                                                 email_address=form['email_address'],
-                                                 is_default=form.get('is_default', True))
+    new_reply_to = update_reply_to_email_address(
+        service_id=service_id,
+        reply_to_id=reply_to_email_id,
+        email_address=form['email_address'],
+        is_default=form.get('is_default', True),
+    )
     return jsonify(data=new_reply_to.serialize()), 200
 
 
@@ -609,9 +676,13 @@ def get_letter_contacts(service_id):
     return jsonify([i.serialize() for i in result]), 200
 
 
-@service_blueprint.route('/<uuid:service_id>/letter-contact/<uuid:letter_contact_id>', methods=["GET"])
+@service_blueprint.route(
+    '/<uuid:service_id>/letter-contact/<uuid:letter_contact_id>', methods=["GET"]
+)
 def get_letter_contact_by_id(service_id, letter_contact_id):
-    result = dao_get_letter_contact_by_id(service_id=service_id, letter_contact_id=letter_contact_id)
+    result = dao_get_letter_contact_by_id(
+        service_id=service_id, letter_contact_id=letter_contact_id
+    )
     return jsonify(result.serialize()), 200
 
 
@@ -620,21 +691,27 @@ def add_service_letter_contact(service_id):
     # validate the service exists, throws ResultNotFound exception.
     dao_fetch_service_by_id(service_id)
     form = validate(request.get_json(), add_service_letter_contact_block_request)
-    new_letter_contact = add_letter_contact_for_service(service_id=service_id,
-                                                        contact_block=form['contact_block'],
-                                                        is_default=form.get('is_default', True))
+    new_letter_contact = add_letter_contact_for_service(
+        service_id=service_id,
+        contact_block=form['contact_block'],
+        is_default=form.get('is_default', True),
+    )
     return jsonify(data=new_letter_contact.serialize()), 201
 
 
-@service_blueprint.route('/<uuid:service_id>/letter-contact/<uuid:letter_contact_id>', methods=['POST'])
+@service_blueprint.route(
+    '/<uuid:service_id>/letter-contact/<uuid:letter_contact_id>', methods=['POST']
+)
 def update_service_letter_contact(service_id, letter_contact_id):
     # validate the service exists, throws ResultNotFound exception.
     dao_fetch_service_by_id(service_id)
     form = validate(request.get_json(), add_service_letter_contact_block_request)
-    new_reply_to = update_letter_contact(service_id=service_id,
-                                         letter_contact_id=letter_contact_id,
-                                         contact_block=form['contact_block'],
-                                         is_default=form.get('is_default', True))
+    new_reply_to = update_letter_contact(
+        service_id=service_id,
+        letter_contact_id=letter_contact_id,
+        contact_block=form['contact_block'],
+        is_default=form.get('is_default', True),
+    )
     return jsonify(data=new_reply_to.serialize()), 200
 
 
@@ -646,7 +723,9 @@ def add_service_sms_sender(service_id):
     sms_sender = form.get('sms_sender')
 
     if inbound_number_id:
-        updated_number = dao_allocate_number_for_service(service_id=service_id, inbound_number_id=inbound_number_id)
+        updated_number = dao_allocate_number_for_service(
+            service_id=service_id, inbound_number_id=inbound_number_id
+        )
         # the sms_sender in the form is not set, use the inbound number
         sms_sender = updated_number.number
         existing_sms_sender = dao_get_sms_senders_by_service_id(service_id)
@@ -656,40 +735,54 @@ def add_service_sms_sender(service_id):
             new_sms_sender = update_existing_sms_sender_with_inbound_number(
                 service_sms_sender=update_existing_sms_sender,
                 sms_sender=sms_sender,
-                inbound_number_id=inbound_number_id)
+                inbound_number_id=inbound_number_id,
+            )
 
             return jsonify(new_sms_sender.serialize()), 201
 
-    new_sms_sender = dao_add_sms_sender_for_service(service_id=service_id,
-                                                    sms_sender=sms_sender,
-                                                    is_default=form['is_default'],
-                                                    inbound_number_id=inbound_number_id
-                                                    )
+    new_sms_sender = dao_add_sms_sender_for_service(
+        service_id=service_id,
+        sms_sender=sms_sender,
+        is_default=form['is_default'],
+        inbound_number_id=inbound_number_id,
+    )
     return jsonify(new_sms_sender.serialize()), 201
 
 
-@service_blueprint.route('/<uuid:service_id>/sms-sender/<uuid:sms_sender_id>', methods=['POST'])
+@service_blueprint.route(
+    '/<uuid:service_id>/sms-sender/<uuid:sms_sender_id>', methods=['POST']
+)
 def update_service_sms_sender(service_id, sms_sender_id):
     form = validate(request.get_json(), add_service_sms_sender_request)
 
-    sms_sender_to_update = dao_get_service_sms_senders_by_id(service_id=service_id,
-                                                             service_sms_sender_id=sms_sender_id)
-    if sms_sender_to_update.inbound_number_id and form['sms_sender'] != sms_sender_to_update.sms_sender:
-        raise InvalidRequest("You can not change the inbound number for service {}".format(service_id),
-                             status_code=400)
+    sms_sender_to_update = dao_get_service_sms_senders_by_id(
+        service_id=service_id, service_sms_sender_id=sms_sender_id
+    )
+    if (
+        sms_sender_to_update.inbound_number_id
+        and form['sms_sender'] != sms_sender_to_update.sms_sender
+    ):
+        raise InvalidRequest(
+            "You can not change the inbound number for service {}".format(service_id),
+            status_code=400,
+        )
 
-    new_sms_sender = dao_update_service_sms_sender(service_id=service_id,
-                                                   service_sms_sender_id=sms_sender_id,
-                                                   is_default=form['is_default'],
-                                                   sms_sender=form['sms_sender']
-                                                   )
+    new_sms_sender = dao_update_service_sms_sender(
+        service_id=service_id,
+        service_sms_sender_id=sms_sender_id,
+        is_default=form['is_default'],
+        sms_sender=form['sms_sender'],
+    )
     return jsonify(new_sms_sender.serialize()), 200
 
 
-@service_blueprint.route('/<uuid:service_id>/sms-sender/<uuid:sms_sender_id>', methods=['GET'])
+@service_blueprint.route(
+    '/<uuid:service_id>/sms-sender/<uuid:sms_sender_id>', methods=['GET']
+)
 def get_service_sms_sender_by_id(service_id, sms_sender_id):
-    sms_sender = dao_get_service_sms_senders_by_id(service_id=service_id,
-                                                   service_sms_sender_id=sms_sender_id)
+    sms_sender = dao_get_service_sms_senders_by_id(
+        service_id=service_id, service_sms_sender_id=sms_sender_id
+    )
     return jsonify(sms_sender.serialize()), 200
 
 
@@ -712,8 +805,7 @@ def is_service_name_unique():
     name_exists = Service.query.filter_by(name=name).first()
 
     email_from_exists = Service.query.filter(
-        Service.email_from == email_from,
-        Service.id != service_id
+        Service.email_from == email_from, Service.id != service_id
     ).first()
 
     result = not (name_exists or email_from_exists)

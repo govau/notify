@@ -5,6 +5,7 @@ class EmailClientException(ClientException):
     '''
     Base Exception for EmailClients
     '''
+
     pass
 
 

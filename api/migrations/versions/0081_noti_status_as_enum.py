@@ -15,13 +15,16 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    status_table = op.create_table('notification_status_types',
+    status_table = op.create_table(
+        'notification_status_types',
         sa.Column('name', sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint('name')
+        sa.PrimaryKeyConstraint('name'),
     )
-    op.bulk_insert(status_table,
+    op.bulk_insert(
+        status_table,
         [
-            {'name': x} for x in {
+            {'name': x}
+            for x in {
                 'created',
                 'sending',
                 'delivered',
@@ -32,14 +35,22 @@ def upgrade():
                 'permanent-failure',
                 'sent',
             }
-        ]
+        ],
     )
 
     op.execute('ALTER TABLE notifications ADD COLUMN notification_status text')
     op.execute('ALTER TABLE notification_history ADD COLUMN notification_status text')
 
-    op.create_index(op.f('ix_notifications_notification_status'), 'notifications', ['notification_status'])
-    op.create_index(op.f('ix_notification_history_notification_status'), 'notification_history', ['notification_status'])
+    op.create_index(
+        op.f('ix_notifications_notification_status'),
+        'notifications',
+        ['notification_status'],
+    )
+    op.create_index(
+        op.f('ix_notification_history_notification_status'),
+        'notification_history',
+        ['notification_status'],
+    )
     op.create_foreign_key(
         'fk_notifications_notification_status',
         'notifications',
@@ -54,7 +65,6 @@ def upgrade():
         ['notification_status'],
         ['name'],
     )
-
 
 
 def downgrade():

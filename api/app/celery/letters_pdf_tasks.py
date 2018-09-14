@@ -3,10 +3,7 @@ from datetime import datetime
 
 from botocore.exceptions import ClientError as BotoClientError
 from flask import current_app
-from requests import (
-    post as requests_post,
-    RequestException
-)
+from requests import post as requests_post, RequestException
 
 from notifications_utils.statsd_decorators import statsd
 
@@ -26,17 +23,21 @@ from app.letters.utils import (
     get_reference_from_filename,
     move_scanned_pdf_to_test_or_live_pdf_bucket,
     upload_letter_pdf,
-    move_failed_pdf, ScanErrorType)
+    move_failed_pdf,
+    ScanErrorType,
+)
 from app.models import (
     KEY_TYPE_TEST,
     NOTIFICATION_CREATED,
     NOTIFICATION_DELIVERED,
     NOTIFICATION_VIRUS_SCAN_FAILED,
-    NOTIFICATION_TECHNICAL_FAILURE
+    NOTIFICATION_TECHNICAL_FAILURE,
 )
 
 
-@notify_celery.task(bind=True, name="create-letters-pdf", max_retries=15, default_retry_delay=300)
+@notify_celery.task(
+    bind=True, name="create-letters-pdf", max_retries=15, default_retry_delay=300
+)
 @statsd(namespace="tasks")
 def create_letters_pdf(self, notification_id):
     try:
@@ -46,7 +47,7 @@ def create_letters_pdf(self, notification_id):
             notification.template,
             contact_block=notification.reply_to_text,
             org_id=notification.service.dvla_organisation.id,
-            values=notification.personalisation
+            values=notification.personalisation,
         )
 
         upload_letter_pdf(notification, pdf_data)
@@ -56,17 +57,23 @@ def create_letters_pdf(self, notification_id):
 
         current_app.logger.info(
             'Letter notification reference {reference}: billable units set to {billable_units}'.format(
-                reference=str(notification.reference), billable_units=billable_units))
+                reference=str(notification.reference), billable_units=billable_units
+            )
+        )
 
     except (RequestException, BotoClientError):
         try:
             current_app.logger.exception(
-                "Letters PDF notification creation for id: {} failed".format(notification_id)
+                "Letters PDF notification creation for id: {} failed".format(
+                    notification_id
+                )
             )
             self.retry(queue=QueueNames.RETRY)
         except self.MaxRetriesExceededError:
             current_app.logger.exception(
-                "RETRY FAILED: task create_letters_pdf failed for notification {}".format(notification_id),
+                "RETRY FAILED: task create_letters_pdf failed for notification {}".format(
+                    notification_id
+                )
             )
             update_notification_status_by_id(notification_id, 'technical-failure')
 
@@ -74,7 +81,7 @@ def create_letters_pdf(self, notification_id):
 def get_letters_pdf(template, contact_block, org_id, values):
     template_for_letter_print = {
         "subject": template.subject,
-        "content": template.content
+        "content": template.content,
     }
 
     data = {
@@ -84,16 +91,20 @@ def get_letters_pdf(template, contact_block, org_id, values):
         'dvla_org_id': org_id,
     }
     resp = requests_post(
-        '{}/print.pdf'.format(
-            current_app.config['TEMPLATE_PREVIEW_API_HOST']
-        ),
+        '{}/print.pdf'.format(current_app.config['TEMPLATE_PREVIEW_API_HOST']),
         json=data,
-        headers={'Authorization': 'Token {}'.format(current_app.config['TEMPLATE_PREVIEW_API_KEY'])}
+        headers={
+            'Authorization': 'Token {}'.format(
+                current_app.config['TEMPLATE_PREVIEW_API_KEY']
+            )
+        },
     )
     resp.raise_for_status()
 
     pages_per_sheet = 2
-    billable_units = math.ceil(int(resp.headers.get("X-pdf-page-count", 0)) / pages_per_sheet)
+    billable_units = math.ceil(
+        int(resp.headers.get("X-pdf-page-count", 0)) / pages_per_sheet
+    )
 
     return resp.content, billable_units
 
@@ -101,22 +112,20 @@ def get_letters_pdf(template, contact_block, org_id, values):
 @notify_celery.task(name='collate-letter-pdfs-for-day')
 def collate_letter_pdfs_for_day(date):
     letter_pdfs = s3.get_s3_bucket_objects(
-        current_app.config['LETTERS_PDF_BUCKET_NAME'],
-        subfolder=date
+        current_app.config['LETTERS_PDF_BUCKET_NAME'], subfolder=date
     )
     for letters in group_letters(letter_pdfs):
         filenames = [letter['Key'] for letter in letters]
         current_app.logger.info(
             'Calling task zip-and-send-letter-pdfs for {} pdfs of total size {:,} bytes'.format(
-                len(filenames),
-                sum(letter['Size'] for letter in letters)
+                len(filenames), sum(letter['Size'] for letter in letters)
             )
         )
         notify_celery.send_task(
             name=TaskNames.ZIP_AND_SEND_LETTER_PDFS,
             kwargs={'filenames_to_zip': filenames},
             queue=QueueNames.PROCESS_FTP,
-            compression='zlib'
+            compression='zlib',
         )
 
 
@@ -129,10 +138,14 @@ def group_letters(letter_pdfs):
     running_filesize = 0
     list_of_files = []
     for letter in letter_pdfs:
-        if letter['Key'].lower().endswith('.pdf') and letter_in_created_state(letter['Key']):
+        if letter['Key'].lower().endswith('.pdf') and letter_in_created_state(
+            letter['Key']
+        ):
             if (
-                running_filesize + letter['Size'] > current_app.config['MAX_LETTER_PDF_ZIP_FILESIZE'] or
-                len(list_of_files) >= current_app.config['MAX_LETTER_PDF_COUNT_PER_ZIP']
+                running_filesize + letter['Size']
+                > current_app.config['MAX_LETTER_PDF_ZIP_FILESIZE']
+                or len(list_of_files)
+                >= current_app.config['MAX_LETTER_PDF_COUNT_PER_ZIP']
             ):
                 yield list_of_files
                 running_filesize = 0
@@ -153,11 +166,11 @@ def letter_in_created_state(filename):
     if notifications:
         if notifications[0].status == NOTIFICATION_CREATED:
             return True
-        current_app.logger.info('Collating letters for {} but notification with reference {} already in {}'.format(
-            subfolder,
-            ref,
-            notifications[0].status
-        ))
+        current_app.logger.info(
+            'Collating letters for {} but notification with reference {} already in {}'.format(
+                subfolder, ref, notifications[0].status
+            )
+        )
     return False
 
 
@@ -165,16 +178,14 @@ def letter_in_created_state(filename):
 def process_virus_scan_passed(filename):
     reference = get_reference_from_filename(filename)
     notification = dao_get_notification_by_reference(reference)
-    current_app.logger.info('notification id {} Virus scan passed: {}'.format(notification.id, filename))
+    current_app.logger.info(
+        'notification id {} Virus scan passed: {}'.format(notification.id, filename)
+    )
 
     is_test_key = notification.key_type == KEY_TYPE_TEST
-    move_scanned_pdf_to_test_or_live_pdf_bucket(
-        filename,
-        is_test_letter=is_test_key
-    )
+    move_scanned_pdf_to_test_or_live_pdf_bucket(filename, is_test_letter=is_test_key)
     update_letter_pdf_status(
-        reference,
-        NOTIFICATION_DELIVERED if is_test_key else NOTIFICATION_CREATED
+        reference, NOTIFICATION_DELIVERED if is_test_key else NOTIFICATION_CREATED
     )
 
 
@@ -192,7 +203,9 @@ def process_virus_scan_failed(filename):
             )
         )
 
-    raise VirusScanError('notification id {} Virus scan failed: {}'.format(notification.id, filename))
+    raise VirusScanError(
+        'notification id {} Virus scan failed: {}'.format(notification.id, filename)
+    )
 
 
 @notify_celery.task(name='process-virus-scan-error')
@@ -209,13 +222,13 @@ def process_virus_scan_error(filename):
             )
         )
 
-    raise VirusScanError('notification id {} Virus scan error: {}'.format(notification.id, filename))
+    raise VirusScanError(
+        'notification id {} Virus scan error: {}'.format(notification.id, filename)
+    )
 
 
 def update_letter_pdf_status(reference, status):
     return dao_update_notifications_by_reference(
         references=[reference],
-        update_dict={
-            'status': status,
-            'updated_at': datetime.utcnow()
-        })
+        update_dict={'status': status, 'updated_at': datetime.utcnow()},
+    )

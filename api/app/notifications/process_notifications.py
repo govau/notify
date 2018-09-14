@@ -7,7 +7,7 @@ from notifications_utils.clients import redis
 from notifications_utils.recipients import (
     get_international_phone_info,
     validate_and_format_phone_number,
-    format_email_address
+    format_email_address,
 )
 
 from app import redis_store
@@ -20,12 +20,12 @@ from app.models import (
     SMS_TYPE,
     NOTIFICATION_CREATED,
     Notification,
-    ScheduledNotification
+    ScheduledNotification,
 )
 from app.dao.notifications_dao import (
     dao_create_notification,
     dao_delete_notifications_and_history_by_id,
-    dao_created_scheduled_notification
+    dao_created_scheduled_notification,
 )
 
 from app.v2.errors import BadRequestError
@@ -47,7 +47,9 @@ def create_content_for_notification(template, personalisation):
 
 def check_placeholders(template_object):
     if template_object.missing_data:
-        message = 'Missing personalisation: {}'.format(", ".join(template_object.missing_data))
+        message = 'Missing personalisation: {}'.format(
+            ", ".join(template_object.missing_data)
+        )
         raise BadRequestError(fields=[{'template': message}], message=message)
 
 
@@ -97,7 +99,9 @@ def persist_notification(
     )
 
     if notification_type == SMS_TYPE:
-        formatted_recipient = validate_and_format_phone_number(recipient, international=True)
+        formatted_recipient = validate_and_format_phone_number(
+            recipient, international=True
+        )
         recipient_info = get_international_phone_info(formatted_recipient)
         notification.normalised_to = formatted_recipient
         notification.international = recipient_info.international
@@ -112,19 +116,29 @@ def persist_notification(
         if key_type != KEY_TYPE_TEST:
             if redis_store.get(redis.daily_limit_cache_key(service.id)):
                 redis_store.incr(redis.daily_limit_cache_key(service.id))
-            if redis_store.get_all_from_hash(cache_key_for_service_template_counter(service.id)):
-                redis_store.increment_hash_value(cache_key_for_service_template_counter(service.id), template_id)
+            if redis_store.get_all_from_hash(
+                cache_key_for_service_template_counter(service.id)
+            ):
+                redis_store.increment_hash_value(
+                    cache_key_for_service_template_counter(service.id), template_id
+                )
 
-            increment_template_usage_cache(service.id, template_id, notification_created_at)
+            increment_template_usage_cache(
+                service.id, template_id, notification_created_at
+            )
 
         current_app.logger.info(
-            "{} {} created at {}".format(notification_type, notification_id, notification_created_at)
+            "{} {} created at {}".format(
+                notification_type, notification_id, notification_created_at
+            )
         )
     return notification
 
 
 def increment_template_usage_cache(service_id, template_id, created_at):
-    key = cache_key_for_service_template_usage_per_day(service_id, convert_utc_to_bst(created_at))
+    key = cache_key_for_service_template_usage_per_day(
+        service_id, convert_utc_to_bst(created_at)
+    )
     redis_store.increment_hash_value(key, template_id)
     # set key to expire in eight days - we don't know if we've just created the key or not, so must assume that we
     # have and reset the expiry. Eight days is longer than any notification is in the notifications table, so we'll
@@ -152,15 +166,17 @@ def send_notification_to_queue(notification, research_mode, queue=None):
         raise
 
     current_app.logger.debug(
-        "{} {} sent to the {} queue for delivery".format(notification.notification_type,
-                                                         notification.id,
-                                                         queue))
+        "{} {} sent to the {} queue for delivery".format(
+            notification.notification_type, notification.id, queue
+        )
+    )
 
 
 def simulated_recipient(to_address, notification_type):
     if notification_type == SMS_TYPE:
         formatted_simulated_numbers = [
-            validate_and_format_phone_number(number) for number in current_app.config['SIMULATED_SMS_NUMBERS']
+            validate_and_format_phone_number(number)
+            for number in current_app.config['SIMULATED_SMS_NUMBERS']
         ]
         return to_address in formatted_simulated_numbers
     else:
@@ -168,7 +184,10 @@ def simulated_recipient(to_address, notification_type):
 
 
 def persist_scheduled_notification(notification_id, scheduled_for):
-    scheduled_datetime = convert_bst_to_utc(datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M"))
-    scheduled_notification = ScheduledNotification(notification_id=notification_id,
-                                                   scheduled_for=scheduled_datetime)
+    scheduled_datetime = convert_bst_to_utc(
+        datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M")
+    )
+    scheduled_notification = ScheduledNotification(
+        notification_id=notification_id, scheduled_for=scheduled_datetime
+    )
     dao_created_scheduled_notification(scheduled_notification)

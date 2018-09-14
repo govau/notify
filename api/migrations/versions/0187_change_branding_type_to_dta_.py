@@ -13,28 +13,40 @@ down_revision = '0186'
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
     INSERT INTO branding_type(name) VALUES ('govau')
-    """)
-    op.execute("""
+    """
+    )
+    op.execute(
+        """
     UPDATE services SET
           branding = 'govau'
     WHERE branding = 'govuk'
-    """)
-    op.execute("""
+    """
+    )
+    op.execute(
+        """
     DELETE FROM branding_type WHERE name = 'govuk'
-    """)
+    """
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
     INSERT INTO branding_type(name) VALUES ('govuk')
-    """)
-    op.execute("""
+    """
+    )
+    op.execute(
+        """
     UPDATE services SET
           branding = 'govuk'
     WHERE branding = 'govau'
-    """)
-    op.execute("""
+    """
+    )
+    op.execute(
+        """
     DELETE FROM branding_type WHERE name = 'govau'
-    """)
+    """
+    )

@@ -16,6 +16,7 @@ from sqlalchemy.orm.session import Session
 
 from app.models import Service
 
+
 def upgrade():
     op.add_column('notifications', sa.Column('billable_units', sa.Integer()))
     op.add_column('notification_history', sa.Column('billable_units', sa.Integer()))
@@ -26,18 +27,20 @@ def upgrade():
     op.alter_column('notifications', 'billable_units', nullable=False)
     op.alter_column('notification_history', 'billable_units', nullable=False)
 
-
     conn = op.get_bind()
 
     # caveats
     # only adjusts notifications for services that have never been in research mode. On live, research mode was
     # limited to only services that we have set up ourselves so deemed this acceptable.
-    billable_services = conn.execute('''
+    billable_services = conn.execute(
+        '''
         SELECT id FROM services_history WHERE id not in (select id from services_history where research_mode)
-    ''')
+    '''
+    )
     # set to 'null' if there are no billable services so we don't get a syntax error in the update statement
-    service_ids = ','.join("'{}'".format(service.id) for service in billable_services) or 'null'
-
+    service_ids = (
+        ','.join("'{}'".format(service.id) for service in billable_services) or 'null'
+    )
 
     update_statement = '''
         UPDATE {}
@@ -60,17 +63,17 @@ def upgrade():
 
 
 def downgrade():
-    op.add_column('notifications', sa.Column(
-        'content_char_count',
-        sa.INTEGER(),
-        autoincrement=False,
-        nullable=True)
+    op.add_column(
+        'notifications',
+        sa.Column(
+            'content_char_count', sa.INTEGER(), autoincrement=False, nullable=True
+        ),
     )
-    op.add_column('notification_history', sa.Column(
-        'content_char_count',
-        sa.INTEGER(),
-        autoincrement=False,
-        nullable=True)
+    op.add_column(
+        'notification_history',
+        sa.Column(
+            'content_char_count', sa.INTEGER(), autoincrement=False, nullable=True
+        ),
     )
 
     conn = op.get_bind()
@@ -78,11 +81,15 @@ def downgrade():
     # caveats
     # only adjusts notifications for services that have never been in research mode. On live, research mode was
     # limited to only services that we have set up ourselves
-    billable_services = conn.execute('''
+    billable_services = conn.execute(
+        '''
         SELECT id FROM services_history WHERE id not in (select id from services_history where research_mode)
-    ''')
+    '''
+    )
     # set to 'null' if there are no billable services so we don't get a syntax error in the update statement
-    service_ids = ','.join("'{}'".format(service.id) for service in billable_services) or 'null'
+    service_ids = (
+        ','.join("'{}'".format(service.id) for service in billable_services) or 'null'
+    )
 
     # caveats:
     # only approximates character counts - billable * 153 to get at least a decent ballpark

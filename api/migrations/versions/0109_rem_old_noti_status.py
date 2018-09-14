@@ -24,22 +24,38 @@ def downgrade():
         sa.Column(
             'status',
             postgresql.ENUM(
-                'created', 'sending', 'delivered', 'pending', 'failed', 'technical-failure',
-                'temporary-failure', 'permanent-failure', 'sent', name='notify_status_type'
+                'created',
+                'sending',
+                'delivered',
+                'pending',
+                'failed',
+                'technical-failure',
+                'temporary-failure',
+                'permanent-failure',
+                'sent',
+                name='notify_status_type',
             ),
             autoincrement=False,
-            nullable=True
-        )
+            nullable=True,
+        ),
     )
     op.add_column(
         'notification_history',
         sa.Column(
             'status',
             postgresql.ENUM(
-                'created', 'sending', 'delivered', 'pending', 'failed', 'technical-failure',
-                'temporary-failure', 'permanent-failure', 'sent', name='notify_status_type'
+                'created',
+                'sending',
+                'delivered',
+                'pending',
+                'failed',
+                'technical-failure',
+                'temporary-failure',
+                'permanent-failure',
+                'sent',
+                name='notify_status_type',
             ),
             autoincrement=False,
-            nullable=True
-        )
+            nullable=True,
+        ),
     )

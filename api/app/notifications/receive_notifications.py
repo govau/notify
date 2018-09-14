@@ -17,7 +17,9 @@ receive_notifications_blueprint = Blueprint('receive_notifications', __name__)
 register_errors(receive_notifications_blueprint)
 
 
-@receive_notifications_blueprint.route('/notifications/sms/receive/mmg', methods=['POST'])
+@receive_notifications_blueprint.route(
+    '/notifications/sms/receive/mmg', methods=['POST']
+)
 def receive_mmg_sms():
     """
     {
@@ -35,9 +37,15 @@ def receive_mmg_sms():
     if not auth:
         current_app.logger.warning("Inbound sms (MMG) no auth header")
         abort(401)
-    elif auth.username not in current_app.config['MMG_INBOUND_SMS_USERNAME'] \
-            or auth.password not in current_app.config['MMG_INBOUND_SMS_AUTH']:
-        current_app.logger.warning("Inbound sms (MMG) incorrect username ({}) or password".format(auth.username))
+    elif (
+        auth.username not in current_app.config['MMG_INBOUND_SMS_USERNAME']
+        or auth.password not in current_app.config['MMG_INBOUND_SMS_AUTH']
+    ):
+        current_app.logger.warning(
+            "Inbound sms (MMG) incorrect username ({}) or password".format(
+                auth.username
+            )
+        )
         abort(403)
 
     inbound_number = strip_leading_sixty_one(post_data['Number'])
@@ -50,23 +58,30 @@ def receive_mmg_sms():
 
     statsd_client.incr('inbound.mmg.successful')
 
-    inbound = create_inbound_sms_object(service,
-                                        content=format_mmg_message(post_data["Message"]),
-                                        from_number=post_data['MSISDN'],
-                                        provider_ref=post_data["ID"],
-                                        date_received=post_data.get('DateRecieved'),
-                                        provider_name="mmg")
+    inbound = create_inbound_sms_object(
+        service,
+        content=format_mmg_message(post_data["Message"]),
+        from_number=post_data['MSISDN'],
+        provider_ref=post_data["ID"],
+        date_received=post_data.get('DateRecieved'),
+        provider_name="mmg",
+    )
 
-    tasks.send_inbound_sms_to_service.apply_async([str(inbound.id), str(service.id)], queue=QueueNames.NOTIFY)
+    tasks.send_inbound_sms_to_service.apply_async(
+        [str(inbound.id), str(service.id)], queue=QueueNames.NOTIFY
+    )
 
     current_app.logger.debug(
-        '{} received inbound SMS with reference {} from MMG'.format(service.id, inbound.provider_reference))
-    return jsonify({
-        "status": "ok"
-    }), 200
+        '{} received inbound SMS with reference {} from MMG'.format(
+            service.id, inbound.provider_reference
+        )
+    )
+    return jsonify({"status": "ok"}), 200
 
 
-@receive_notifications_blueprint.route('/notifications/sms/receive/firetext', methods=['POST'])
+@receive_notifications_blueprint.route(
+    '/notifications/sms/receive/firetext', methods=['POST']
+)
 def receive_firetext_sms():
     post_data = request.form
 
@@ -74,33 +89,43 @@ def receive_firetext_sms():
     if not auth:
         current_app.logger.warning("Inbound sms (Firetext) no auth header")
         abort(401)
-    elif auth.username != 'notify' or auth.password not in current_app.config['FIRETEXT_INBOUND_SMS_AUTH']:
-        current_app.logger.warning("Inbound sms (Firetext) incorrect username ({}) or password".format(auth.username))
+    elif (
+        auth.username != 'notify'
+        or auth.password not in current_app.config['FIRETEXT_INBOUND_SMS_AUTH']
+    ):
+        current_app.logger.warning(
+            "Inbound sms (Firetext) incorrect username ({}) or password".format(
+                auth.username
+            )
+        )
         abort(403)
 
     inbound_number = strip_leading_sixty_one(post_data['destination'])
 
     service = fetch_potential_service(inbound_number, 'firetext')
     if not service:
-        return jsonify({
-            "status": "ok"
-        }), 200
+        return jsonify({"status": "ok"}), 200
 
-    inbound = create_inbound_sms_object(service=service,
-                                        content=post_data["message"],
-                                        from_number=post_data['source'],
-                                        provider_ref=None,
-                                        date_received=post_data['time'],
-                                        provider_name="firetext")
+    inbound = create_inbound_sms_object(
+        service=service,
+        content=post_data["message"],
+        from_number=post_data['source'],
+        provider_ref=None,
+        date_received=post_data['time'],
+        provider_name="firetext",
+    )
 
     statsd_client.incr('inbound.firetext.successful')
 
-    tasks.send_inbound_sms_to_service.apply_async([str(inbound.id), str(service.id)], queue=QueueNames.NOTIFY)
+    tasks.send_inbound_sms_to_service.apply_async(
+        [str(inbound.id), str(service.id)], queue=QueueNames.NOTIFY
+    )
     current_app.logger.debug(
-        '{} received inbound SMS with reference {} from Firetext'.format(service.id, inbound.provider_reference))
-    return jsonify({
-        "status": "ok"
-    }), 200
+        '{} received inbound SMS with reference {} from Firetext'.format(
+            service.id, inbound.provider_reference
+        )
+    )
+    return jsonify({"status": "ok"}), 200
 
 
 def format_mmg_message(message):
@@ -121,11 +146,11 @@ def format_mmg_datetime(date):
     return convert_bst_to_utc(parsed_datetime)
 
 
-def create_inbound_sms_object(service, content, from_number, provider_ref, date_received, provider_name):
+def create_inbound_sms_object(
+    service, content, from_number, provider_ref, date_received, provider_name
+):
     user_number = try_validate_and_format_phone_number(
-        from_number,
-        international=True,
-        log_msg='Invalid from_number received'
+        from_number, international=True, log_msg='Invalid from_number received'
     )
 
     provider_date = date_received
@@ -139,7 +164,7 @@ def create_inbound_sms_object(service, content, from_number, provider_ref, date_
         provider_date=provider_date,
         provider_reference=provider_ref,
         content=content,
-        provider=provider_name
+        provider=provider_name,
     )
     dao_create_inbound_sms(inbound)
     return inbound
@@ -149,15 +174,18 @@ def fetch_potential_service(inbound_number, provider_name):
     service = dao_fetch_service_by_inbound_number(inbound_number)
 
     if not service:
-        current_app.logger.error('Inbound number "{}" from {} not associated with a service'.format(
-            inbound_number, provider_name
-        ))
+        current_app.logger.error(
+            'Inbound number "{}" from {} not associated with a service'.format(
+                inbound_number, provider_name
+            )
+        )
         statsd_client.incr('inbound.{}.failed'.format(provider_name))
         return False
 
     if not has_inbound_sms_permissions(service.permissions):
         current_app.logger.error(
-            'Service "{}" does not allow inbound SMS'.format(service.id))
+            'Service "{}" does not allow inbound SMS'.format(service.id)
+        )
         return False
 
     return service

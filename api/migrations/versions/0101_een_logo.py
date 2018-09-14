@@ -16,15 +16,23 @@ ENTERPRISE_EUROPE_NETWORK_ID = '89ce468b-fb29-4d5d-bd3f-d468fb6f7c36'
 
 
 def upgrade():
-    op.execute("""INSERT INTO organisation VALUES (
+    op.execute(
+        """INSERT INTO organisation VALUES (
         '{}',
         '',
         'een_x2.png',
         ''
-    )""".format(ENTERPRISE_EUROPE_NETWORK_ID))
+    )""".format(
+            ENTERPRISE_EUROPE_NETWORK_ID
+        )
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM organisation WHERE "id" = '{}'
-    """.format(ENTERPRISE_EUROPE_NETWORK_ID))
+    """.format(
+            ENTERPRISE_EUROPE_NETWORK_ID
+        )
+    )

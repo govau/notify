@@ -4,8 +4,12 @@ from notifications_utils.recipients import allowed_to_send_to
 
 from app.models import (
     ServiceWhitelist,
-    MOBILE_TYPE, EMAIL_TYPE,
-    KEY_TYPE_TEST, KEY_TYPE_TEAM, KEY_TYPE_NORMAL)
+    MOBILE_TYPE,
+    EMAIL_TYPE,
+    KEY_TYPE_TEST,
+    KEY_TYPE_TEAM,
+    KEY_TYPE_NORMAL,
+)
 
 
 def get_recipients_from_request(request_json, key, type):
@@ -16,17 +20,15 @@ def get_whitelist_objects(service_id, request_json):
     return [
         ServiceWhitelist.from_string(service_id, type, recipient)
         for type, recipient in (
-            get_recipients_from_request(request_json,
-                                        'phone_numbers',
-                                        MOBILE_TYPE) +
-            get_recipients_from_request(request_json,
-                                        'email_addresses',
-                                        EMAIL_TYPE)
+            get_recipients_from_request(request_json, 'phone_numbers', MOBILE_TYPE)
+            + get_recipients_from_request(request_json, 'email_addresses', EMAIL_TYPE)
         )
     ]
 
 
-def service_allowed_to_send_to(recipient, service, key_type, allow_whitelisted_recipients=True):
+def service_allowed_to_send_to(
+    recipient, service, key_type, allow_whitelisted_recipients=True
+):
     if key_type == KEY_TYPE_TEST:
         return True
 
@@ -37,18 +39,12 @@ def service_allowed_to_send_to(recipient, service, key_type, allow_whitelisted_r
         [user.mobile_number, user.email_address] for user in service.users
     )
     whitelist_members = [
-        member.recipient for member in service.whitelist
-        if allow_whitelisted_recipients
+        member.recipient for member in service.whitelist if allow_whitelisted_recipients
     ]
 
-    if (
-        (key_type == KEY_TYPE_NORMAL and service.restricted) or
-        (key_type == KEY_TYPE_TEAM)
+    if (key_type == KEY_TYPE_NORMAL and service.restricted) or (
+        key_type == KEY_TYPE_TEAM
     ):
         return allowed_to_send_to(
-            recipient,
-            itertools.chain(
-                team_members,
-                whitelist_members
-            )
+            recipient, itertools.chain(team_members, whitelist_members)
         )

@@ -14,8 +14,10 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+
 def upgrade():
     op.execute("INSERT INTO job_status VALUES ('cancelled')")
+
 
 def downgrade():
     op.execute("UPDATE jobs SET job_status = 'finished' WHERE job_status = 'cancelled'")

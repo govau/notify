@@ -20,7 +20,7 @@ def create_authorization_header(service_id=None, key_type=KEY_TYPE_NORMAL):
                 'service': service,
                 'name': uuid.uuid4(),
                 'created_by': service.created_by,
-                'key_type': key_type
+                'key_type': key_type,
             }
             api_key = ApiKey(**data)
             save_model_api_key(api_key)

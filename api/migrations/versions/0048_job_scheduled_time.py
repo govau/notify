@@ -15,14 +15,17 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.create_table('job_status',
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.PrimaryKeyConstraint('name')
+    op.create_table(
+        'job_status',
+        sa.Column('name', sa.String(length=255), nullable=False),
+        sa.PrimaryKeyConstraint('name'),
     )
     op.add_column('jobs', sa.Column('job_status', sa.String(length=255), nullable=True))
     op.add_column('jobs', sa.Column('scheduled_for', sa.DateTime(), nullable=True))
     op.create_index(op.f('ix_jobs_job_status'), 'jobs', ['job_status'], unique=False)
-    op.create_index(op.f('ix_jobs_scheduled_for'), 'jobs', ['scheduled_for'], unique=False)
+    op.create_index(
+        op.f('ix_jobs_scheduled_for'), 'jobs', ['scheduled_for'], unique=False
+    )
     op.create_foreign_key(None, 'jobs', 'job_status', ['job_status'], ['name'])
 
     op.execute("insert into job_status values ('pending')")

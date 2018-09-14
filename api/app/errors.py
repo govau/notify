@@ -1,7 +1,4 @@
-from flask import (
-    jsonify,
-    current_app,
-    json)
+from flask import jsonify, current_app, json
 from notifications_utils.recipients import InvalidEmailError
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm.exc import NoResultFound
@@ -34,12 +31,7 @@ class InvalidRequest(Exception):
         '''
         return {
             "status_code": self.status_code,
-            "errors": [
-                {
-                    "error": self.__class__.__name__,
-                    "message": self.message
-                }
-            ]
+            "errors": [{"error": self.__class__.__name__, "message": self.message}],
         }
 
     def __str__(self):
@@ -83,7 +75,11 @@ def register_errors(blueprint):
     @blueprint.errorhandler(401)
     def unauthorized(e):
         error_message = "Unauthorized, authentication token must be provided"
-        return jsonify(result='error', message=error_message), 401, [('WWW-Authenticate', 'Bearer')]
+        return (
+            jsonify(result='error', message=error_message),
+            401,
+            [('WWW-Authenticate', 'Bearer')],
+        )
 
     @blueprint.errorhandler(403)
     def forbidden(e):

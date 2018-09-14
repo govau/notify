@@ -1,11 +1,7 @@
 from datetime import datetime, timedelta, date
 from tests.app.conftest import sample_notification
 from app.celery.reporting_tasks import create_nightly_billing, get_rate
-from app.models import (FactBilling,
-                        Notification,
-                        LETTER_TYPE,
-                        EMAIL_TYPE,
-                        SMS_TYPE)
+from app.models import FactBilling, Notification, LETTER_TYPE, EMAIL_TYPE, SMS_TYPE
 from decimal import Decimal
 import pytest
 from app.dao.letter_rate_dao import dao_create_letter_rate
@@ -19,7 +15,14 @@ def test_reporting_should_have_decorated_tasks_functions():
     assert create_nightly_billing.__wrapped__.__name__ == 'create_nightly_billing'
 
 
-def mocker_get_rate(non_letter_rates, letter_rates, notification_type, date, crown=None, rate_multiplier=None):
+def mocker_get_rate(
+    non_letter_rates,
+    letter_rates,
+    notification_type,
+    date,
+    crown=None,
+    rate_multiplier=None,
+):
     if notification_type == LETTER_TYPE:
         return Decimal(2.1)
     elif notification_type == SMS_TYPE:
@@ -28,19 +31,21 @@ def mocker_get_rate(non_letter_rates, letter_rates, notification_type, date, cro
         return Decimal(0)
 
 
-@pytest.mark.parametrize('second_rate, records_num, billable_units, multiplier',
-                         [(1.0, 1, 2, [1]),
-                          (2.0, 2, 1, [1, 2])])
+@pytest.mark.parametrize(
+    'second_rate, records_num, billable_units, multiplier',
+    [(1.0, 1, 2, [1]), (2.0, 2, 1, [1, 2])],
+)
 def test_create_nightly_billing_sms_rate_multiplier(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        mocker,
-        second_rate,
-        records_num,
-        billable_units,
-        multiplier):
+    notify_db,
+    notify_db_session,
+    sample_service,
+    sample_template,
+    mocker,
+    second_rate,
+    records_num,
+    billable_units,
+    multiplier,
+):
 
     yesterday = datetime.now() - timedelta(days=1)
 
@@ -86,12 +91,13 @@ def test_create_nightly_billing_sms_rate_multiplier(
 
 
 def test_create_nightly_billing_different_templates(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        sample_email_template,
-        mocker):
+    notify_db,
+    notify_db_session,
+    sample_service,
+    sample_template,
+    sample_email_template,
+    mocker,
+):
     yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
@@ -139,12 +145,13 @@ def test_create_nightly_billing_different_templates(
 
 
 def test_create_nightly_billing_different_sent_by(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        sample_email_template,
-        mocker):
+    notify_db,
+    notify_db_session,
+    sample_service,
+    sample_template,
+    sample_email_template,
+    mocker,
+):
     yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
@@ -190,11 +197,8 @@ def test_create_nightly_billing_different_sent_by(
 
 
 def test_create_nightly_billing_letter(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_letter_template,
-        mocker):
+    notify_db, notify_db_session, sample_service, sample_letter_template, mocker
+):
     yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
@@ -227,11 +231,8 @@ def test_create_nightly_billing_letter(
 
 
 def test_create_nightly_billing_null_sent_by_sms(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        mocker):
+    notify_db, notify_db_session, sample_service, sample_template, mocker
+):
     yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
@@ -266,11 +267,8 @@ def test_create_nightly_billing_null_sent_by_sms(
 
 @freeze_time('2018-01-15T03:30:00')
 def test_create_nightly_billing_consolidate_from_3_days_delta(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        mocker):
+    notify_db, notify_db_session, sample_service, sample_template, mocker
+):
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -304,50 +302,66 @@ def test_create_nightly_billing_consolidate_from_3_days_delta(
 
 
 def test_get_rate_for_letter_latest(notify_db, notify_db_session):
-    letter_rate = LetterRate(start_date=datetime(2017, 12, 1),
-                             rate=Decimal(0.33),
-                             crown=True,
-                             sheet_count=1,
-                             post_class='second')
+    letter_rate = LetterRate(
+        start_date=datetime(2017, 12, 1),
+        rate=Decimal(0.33),
+        crown=True,
+        sheet_count=1,
+        post_class='second',
+    )
 
     dao_create_letter_rate(letter_rate)
-    letter_rate = LetterRate(start_date=datetime(2016, 12, 1),
-                             end_date=datetime(2017, 12, 1),
-                             rate=Decimal(0.30),
-                             crown=True,
-                             sheet_count=1,
-                             post_class='second')
+    letter_rate = LetterRate(
+        start_date=datetime(2016, 12, 1),
+        end_date=datetime(2017, 12, 1),
+        rate=Decimal(0.30),
+        crown=True,
+        sheet_count=1,
+        post_class='second',
+    )
     dao_create_letter_rate(letter_rate)
 
-    non_letter_rates = [(r.notification_type, r.valid_from, r.rate) for r in
-                        Rate.query.order_by(desc(Rate.valid_from)).all()]
-    letter_rates = [(r.start_date, r.crown, r.sheet_count, r.rate) for r in
-                    LetterRate.query.order_by(desc(LetterRate.start_date)).all()]
+    non_letter_rates = [
+        (r.notification_type, r.valid_from, r.rate)
+        for r in Rate.query.order_by(desc(Rate.valid_from)).all()
+    ]
+    letter_rates = [
+        (r.start_date, r.crown, r.sheet_count, r.rate)
+        for r in LetterRate.query.order_by(desc(LetterRate.start_date)).all()
+    ]
 
-    rate = get_rate(non_letter_rates, letter_rates, LETTER_TYPE, datetime(2018, 1, 1), True, 1)
+    rate = get_rate(
+        non_letter_rates, letter_rates, LETTER_TYPE, datetime(2018, 1, 1), True, 1
+    )
     assert rate == Decimal(0.33)
 
 
 def test_get_rate_for_sms_and_email(notify_db, notify_db_session):
-    letter_rate = LetterRate(start_date=datetime(2017, 12, 1),
-                             rate=Decimal(0.33),
-                             crown=True,
-                             sheet_count=1,
-                             post_class='second')
+    letter_rate = LetterRate(
+        start_date=datetime(2017, 12, 1),
+        rate=Decimal(0.33),
+        crown=True,
+        sheet_count=1,
+        post_class='second',
+    )
     dao_create_letter_rate(letter_rate)
-    sms_rate = Rate(valid_from=datetime(2017, 12, 1),
-                    rate=Decimal(0.15),
-                    notification_type=SMS_TYPE)
+    sms_rate = Rate(
+        valid_from=datetime(2017, 12, 1), rate=Decimal(0.15), notification_type=SMS_TYPE
+    )
     db.session.add(sms_rate)
-    email_rate = Rate(valid_from=datetime(2017, 12, 1),
-                      rate=Decimal(0),
-                      notification_type=EMAIL_TYPE)
+    email_rate = Rate(
+        valid_from=datetime(2017, 12, 1), rate=Decimal(0), notification_type=EMAIL_TYPE
+    )
     db.session.add(email_rate)
 
-    non_letter_rates = [(r.notification_type, r.valid_from, r.rate) for r in
-                        Rate.query.order_by(desc(Rate.valid_from)).all()]
-    letter_rates = [(r.start_date, r.crown, r.sheet_count, r.rate) for r in
-                    LetterRate.query.order_by(desc(LetterRate.start_date)).all()]
+    non_letter_rates = [
+        (r.notification_type, r.valid_from, r.rate)
+        for r in Rate.query.order_by(desc(Rate.valid_from)).all()
+    ]
+    letter_rates = [
+        (r.start_date, r.crown, r.sheet_count, r.rate)
+        for r in LetterRate.query.order_by(desc(LetterRate.start_date)).all()
+    ]
 
     rate = get_rate(non_letter_rates, letter_rates, SMS_TYPE, datetime(2018, 1, 1))
     assert rate == Decimal(0.15)
@@ -359,11 +373,8 @@ def test_get_rate_for_sms_and_email(notify_db, notify_db_session):
 @freeze_time('2018-03-27T03:30:00')
 # summer time starts on 2018-03-25
 def test_create_nightly_billing_use_BST(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        mocker):
+    notify_db, notify_db_session, sample_service, sample_template, mocker
+):
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -408,11 +419,8 @@ def test_create_nightly_billing_use_BST(
 
 @freeze_time('2018-01-15T03:30:00')
 def test_create_nightly_billing_update_when_record_exists(
-        notify_db,
-        notify_db_session,
-        sample_service,
-        sample_template,
-        mocker):
+    notify_db, notify_db_session, sample_service, sample_template, mocker
+):
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 

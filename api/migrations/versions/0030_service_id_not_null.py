@@ -18,12 +18,12 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.alter_column('permissions', 'service_id',
-               existing_type=postgresql.UUID(),
-               nullable=True)
+    op.alter_column(
+        'permissions', 'service_id', existing_type=postgresql.UUID(), nullable=True
+    )
 
 
 def downgrade():
-    op.alter_column('permissions', 'service_id',
-               existing_type=postgresql.UUID(),
-               nullable=False)
+    op.alter_column(
+        'permissions', 'service_id', existing_type=postgresql.UUID(), nullable=False
+    )

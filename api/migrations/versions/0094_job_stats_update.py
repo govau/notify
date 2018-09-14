@@ -15,7 +15,9 @@ down_revision = '0093_data_gov_uk'
 
 def upgrade():
     op.add_column('job_statistics', sa.Column('sent', sa.BigInteger(), nullable=True))
-    op.add_column('job_statistics', sa.Column('delivered', sa.BigInteger(), nullable=True))
+    op.add_column(
+        'job_statistics', sa.Column('delivered', sa.BigInteger(), nullable=True)
+    )
     op.add_column('job_statistics', sa.Column('failed', sa.BigInteger(), nullable=True))
 
 

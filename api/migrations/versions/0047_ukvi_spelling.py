@@ -14,16 +14,20 @@ from alembic import op
 
 
 def upgrade():
-    op.execute("""
+    op.execute(
+        """
         UPDATE organisation
         SET name = 'UK Visas & Immigration'
         WHERE id = '9d25d02d-2915-4e98-874b-974e123e8536'
-    """)
+    """
+    )
 
 
 def downgrade():
-    op.execute("""
+    op.execute(
+        """
         UPDATE organisation
         SET name = 'UK Visas and Immigration'
         WHERE id = '9d25d02d-2915-4e98-874b-974e123e8536'
-    """)
+    """
+    )

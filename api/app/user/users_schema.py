@@ -2,12 +2,9 @@ post_verify_code_schema = {
     '$schema': 'http://json-schema.org/draft-04/schema#',
     'description': 'POST schema for verifying a 2fa code',
     'type': 'object',
-    'properties': {
-        'code': {'type': 'string'},
-        'code_type': {'type': 'string'},
-    },
+    'properties': {'code': {'type': 'string'}, 'code_type': {'type': 'string'}},
     'required': ['code', 'code_type'],
-    'additionalProperties': False
+    'additionalProperties': False,
 }
 
 
@@ -26,7 +23,7 @@ post_send_user_email_code_schema = {
         'next': {'type': ['string', 'null']},
     },
     'required': [],
-    'additionalProperties': False
+    'additionalProperties': False,
 }
 
 
@@ -34,9 +31,7 @@ post_send_user_sms_code_schema = {
     '$schema': 'http://json-schema.org/draft-04/schema#',
     'description': 'POST schema for generating a 2fa sms',
     'type': 'object',
-    'properties': {
-        'to': {'type': ['string', 'null']},
-    },
+    'properties': {'to': {'type': ['string', 'null']}},
     'required': [],
-    'additionalProperties': False
+    'additionalProperties': False,
 }

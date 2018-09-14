@@ -21,8 +21,10 @@ def test_get_all_templates_returns_200(client, sample_service):
 
     auth_header = create_authorization_header(service_id=sample_service.id)
 
-    response = client.get(path='/v2/templates',
-                          headers=[('Content-Type', 'application/json'), auth_header])
+    response = client.get(
+        path='/v2/templates',
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert response.status_code == 200
     assert response.headers['Content-type'] == 'application/json'
@@ -46,15 +48,17 @@ def test_get_all_templates_for_valid_type_returns_200(client, sample_service, tm
             sample_service,
             template_type=tmp_type,
             template_name='Template {}'.format(i),
-            subject='subject_{}'.format(i) if tmp_type == EMAIL_TYPE else ''
+            subject='subject_{}'.format(i) if tmp_type == EMAIL_TYPE else '',
         )
         for i in range(3)
     ]
 
     auth_header = create_authorization_header(service_id=sample_service.id)
 
-    response = client.get(path='/v2/templates?type={}'.format(tmp_type),
-                          headers=[('Content-Type', 'application/json'), auth_header])
+    response = client.get(
+        path='/v2/templates?type={}'.format(tmp_type),
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert response.status_code == 200
     assert response.headers['Content-type'] == 'application/json'
@@ -72,7 +76,9 @@ def test_get_all_templates_for_valid_type_returns_200(client, sample_service, tm
 
 
 @pytest.mark.parametrize("tmp_type", TEMPLATE_TYPES)
-def test_get_correct_num_templates_for_valid_type_returns_200(client, sample_service, tmp_type):
+def test_get_correct_num_templates_for_valid_type_returns_200(
+    client, sample_service, tmp_type
+):
     num_templates = 3
 
     templates = []
@@ -85,8 +91,10 @@ def test_get_correct_num_templates_for_valid_type_returns_200(client, sample_ser
 
     auth_header = create_authorization_header(service_id=sample_service.id)
 
-    response = client.get(path='/v2/templates?type={}'.format(tmp_type),
-                          headers=[('Content-Type', 'application/json'), auth_header])
+    response = client.get(
+        path='/v2/templates?type={}'.format(tmp_type),
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert response.status_code == 200
 
@@ -100,8 +108,10 @@ def test_get_all_templates_for_invalid_type_returns_400(client, sample_service):
 
     invalid_type = 'coconut'
 
-    response = client.get(path='/v2/templates?type={}'.format(invalid_type),
-                          headers=[('Content-Type', 'application/json'), auth_header])
+    response = client.get(
+        path='/v2/templates?type={}'.format(invalid_type),
+        headers=[('Content-Type', 'application/json'), auth_header],
+    )
 
     assert response.status_code == 400
     assert response.headers['Content-type'] == 'application/json'
@@ -113,7 +123,7 @@ def test_get_all_templates_for_invalid_type_returns_400(client, sample_service):
         'errors': [
             {
                 'message': 'type coconut is not one of [sms, email, letter]',
-                'error': 'ValidationError'
+                'error': 'ValidationError',
             }
-        ]
+        ],
     }

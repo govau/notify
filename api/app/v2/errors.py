@@ -18,12 +18,7 @@ class JobIncompleteError(Exception):
     def to_dict_v2(self):
         return {
             'status_code': self.status_code,
-            "errors": [
-                {
-                    "error": 'JobIncompleteError',
-                    "message": self.message
-                }
-            ]
+            "errors": [{"error": 'JobIncompleteError', "message": self.message}],
         }
 
 
@@ -37,7 +32,9 @@ class TooManyRequestsError(InvalidRequest):
 
 class RateLimitError(InvalidRequest):
     status_code = 429
-    message_template = 'Exceeded rate limit for key type {} of {} requests per {} seconds'
+    message_template = (
+        'Exceeded rate limit for key type {} of {} requests per {} seconds'
+    )
 
     def __init__(self, sending_limit, interval, key_type):
         # normal keys are spoken of as "live" in the documentation
@@ -45,7 +42,9 @@ class RateLimitError(InvalidRequest):
         if key_type == 'normal':
             key_type = 'live'
 
-        self.message = self.message_template.format(key_type.upper(), sending_limit, interval)
+        self.message = self.message_template.format(
+            key_type.upper(), sending_limit, interval
+        )
 
 
 class BadRequestError(InvalidRequest):
@@ -63,8 +62,13 @@ def register_errors(blueprint):
         # Please not that InvalidEmailError is re-raised for InvalidEmail or InvalidPhone,
         # work should be done in the utils app to tidy up these errors.
         current_app.logger.info(error)
-        return jsonify(status_code=400,
-                       errors=[{"error": error.__class__.__name__, "message": str(error)}]), 400
+        return (
+            jsonify(
+                status_code=400,
+                errors=[{"error": error.__class__.__name__, "message": str(error)}],
+            ),
+            400,
+        )
 
     @blueprint.errorhandler(InvalidRequest)
     def invalid_data(error):
@@ -85,16 +89,35 @@ def register_errors(blueprint):
     @blueprint.errorhandler(DataError)
     def no_result_found(e):
         current_app.logger.info(e)
-        return jsonify(status_code=404,
-                       errors=[{"error": e.__class__.__name__, "message": "No result found"}]), 404
+        return (
+            jsonify(
+                status_code=404,
+                errors=[{"error": e.__class__.__name__, "message": "No result found"}],
+            ),
+            404,
+        )
 
     @blueprint.errorhandler(AuthError)
     def auth_error(error):
-        current_app.logger.info('API AuthError, client: {} error: {}'.format(request.headers.get('User-Agent'), error))
+        current_app.logger.info(
+            'API AuthError, client: {} error: {}'.format(
+                request.headers.get('User-Agent'), error
+            )
+        )
         return jsonify(error.to_dict_v2()), error.code
 
     @blueprint.errorhandler(Exception)
     def internal_server_error(error):
         current_app.logger.exception(error)
-        return jsonify(status_code=500,
-                       errors=[{"error": error.__class__.__name__, "message": 'Internal server error'}]), 500
+        return (
+            jsonify(
+                status_code=500,
+                errors=[
+                    {
+                        "error": error.__class__.__name__,
+                        "message": 'Internal server error',
+                    }
+                ],
+            ),
+            500,
+        )
