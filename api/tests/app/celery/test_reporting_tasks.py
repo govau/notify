@@ -42,7 +42,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
         billable_units,
         multiplier):
 
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
