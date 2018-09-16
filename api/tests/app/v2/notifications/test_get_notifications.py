@@ -298,7 +298,7 @@ def test_get_all_notifications_except_job_notifications_returns_200(client, samp
 
 
 def test_get_all_notifications_with_include_jobs_arg_returns_200(
-    client, sample_template, sample_job
+    client, sample_template, sample_jobtest_get_logo_url_works_for_different_environments
 ):
     notifications = [
         create_notification(template=sample_template, job=sample_job),

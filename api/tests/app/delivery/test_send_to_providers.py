@@ -459,7 +459,7 @@ def test_get_html_email_renderer_prepends_logo_path(notify_api):
 
     renderer = send_to_providers.get_html_email_options(service)
 
-    assert renderer['brand_logo'] == 'http://static-logos.notify.tools/justice-league.png'
+    assert renderer['brand_logo'] == 'http://localhost:6012/static-logo/justice-league.png'
 
 
 def test_get_html_email_renderer_handles_email_branding_without_logo(notify_api):
@@ -476,12 +476,12 @@ def test_get_html_email_renderer_handles_email_branding_without_logo(notify_api)
 
 @pytest.mark.parametrize('base_url, expected_url', [
     # don't change localhost to prevent errors when testing locally
-    ('http://localhost:6012', 'http://static-logos.notify.tools/filename.png'),
-    ('https://www.notifications.service.gov.uk', 'https://static-logos.notifications.service.gov.uk/filename.png'),
-    ('https://notify.works', 'https://static-logos.notify.works/filename.png'),
-    ('https://staging-notify.works', 'https://static-logos.staging-notify.works/filename.png'),
-    ('https://www.notify.works', 'https://static-logos.notify.works/filename.png'),
-    ('https://www.staging-notify.works', 'https://static-logos.staging-notify.works/filename.png'),
+    ('http://localhost:6012', 'http://localhost:6012/static-logo/filename.png'),
+    ('https://www.notifications.service.gov.uk', 'https://www.notifications.service.gov.uk/static-logo/filename.png'),
+    ('https://notify.works', 'https://notify.works/static-logo/filename.png'),
+    ('https://staging-notify.works', 'https://staging-notify.works/static-logo/filename.png'),
+    ('https://www.notify.works', 'https://www.notify.works/static-logo/filename.png'),
+    ('https://www.staging-notify.works', 'https://www.staging-notify.works/static-logo/filename.png'),
 ])
 def test_get_logo_url_works_for_different_environments(base_url, expected_url):
     logo_file = 'filename.png'
