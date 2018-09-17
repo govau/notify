@@ -9,6 +9,7 @@ from app.schema_validation import validate
 
 pytest.skip("we do not support sending letters", allow_module_level=True)
 
+
 def test_letter_job_id_retuns_400_if_array_is_empty():
     with pytest.raises(ValidationError) as e:
         validate({"job_ids": []}, letter_job_ids)

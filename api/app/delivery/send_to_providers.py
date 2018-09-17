@@ -157,7 +157,7 @@ def send_email_to_provider(notification):
 def update_notification(notification, provider, status=None):
     notification.sent_at = datetime.utcnow()
     notification.sent_by = provider.get_name()
-    if status != None:
+    if status is not None:
         notification.status = status
     else:
         notification.status = NOTIFICATION_SENDING

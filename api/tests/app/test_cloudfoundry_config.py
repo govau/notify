@@ -1,6 +1,5 @@
 import os
 import json
-
 import pytest
 
 from app.cloudfoundry_config import extract_cloudfoundry_config, set_config_env_vars

@@ -7,6 +7,7 @@ from app.models import EMAIL_TYPE, KEY_TYPE_NORMAL
 from app.notifications.process_notifications import persist_notification, send_notification_to_queue
 from app.notifications.validators import validate_template
 
+
 def send_notification_to_service_users(service_id, template_id, personalisation=None, include_user_fields=None):
     personalisation = personalisation or {}
     include_user_fields = include_user_fields or []

@@ -1,10 +1,9 @@
-import os
 import smtplib
 import uuid
-from flask import current_app
 from email.message import EmailMessage
 
 from app.clients.email import EmailClient
+
 
 class SMTPClient(EmailClient):
     def __init__(

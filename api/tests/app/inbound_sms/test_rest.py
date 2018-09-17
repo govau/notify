@@ -3,9 +3,7 @@ from datetime import datetime
 import pytest
 from freezegun import freeze_time
 
-from tests.app.db import (
-    create_inbound_sms, create_service, create_service_with_inbound_number,
-)
+from tests.app.db import create_inbound_sms, create_service, create_service_with_inbound_number
 
 
 def test_post_to_get_inbound_sms_with_no_params(admin_request, sample_service):
@@ -67,10 +65,9 @@ def test_post_to_get_inbound_sms_should_error_with_invalid_limit(admin_request, 
 
 
 @pytest.mark.parametrize('user_number', [
-     '(0412) 345-678',
-     '+610412345678',
-     '61412345678'
-])
+                         '(0412) 345-678',
+                         '+610412345678',
+                         '61412345678'])
 def test_post_to_get_inbound_sms_filters_user_number(admin_request, sample_service, user_number):
     # user_number in the db is international and normalised
     one = create_inbound_sms(sample_service, user_number='61412345678')
@@ -157,10 +154,9 @@ def test_old_get_inbound_sms(admin_request, sample_service):
 
 
 @pytest.mark.parametrize('user_number', [
-     '(0412) 345-678',
-     '+610412345678',
-     '61412345678'
-])
+                         '(0412) 345-678',
+                         '+610412345678',
+                         '61412345678'])
 def test_old_get_inbound_sms_filters_user_number(admin_request, sample_service, user_number):
     # user_number in the db is international and normalised
     one = create_inbound_sms(sample_service, user_number='61412345678')
