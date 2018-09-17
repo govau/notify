@@ -3,7 +3,6 @@ import pytest
 from app.models import EmailBranding
 
 
-@pytest.mark.skip(reason='database reset issues')
 def test_get_email_branding_options(admin_request, notify_db, notify_db_session):
     email_branding1 = EmailBranding(colour='#FFFFFF', logo='/path/image.png', name='Org1')
     email_branding2 = EmailBranding(colour='#000000', logo='/path/other.png', name='Org2')
@@ -14,17 +13,11 @@ def test_get_email_branding_options(admin_request, notify_db, notify_db_session)
         'email_branding.get_email_branding_options'
     )['email_branding']
 
-    assert len(email_branding) == 6
-    assert {
-        email_branding['id'] for email_branding in email_branding
-    } == {
-        '9d25d02d-2915-4e98-874b-974e123e8536',
-        '123496d4-44cb-4324-8e0a-4187101f4bdc',
-        '1d70f564-919b-4c68-8bdf-b8520d92516e',
-        '89ce468b-fb29-4d5d-bd3f-d468fb6f7c36',
-        str(email_branding1.id),
-        str(email_branding2.id)
-    }
+    assert len(email_branding) >= 2
+    email_branding_id_list = list(map(lambda x: x['id'], email_branding))
+
+    assert str(email_branding1.id) in email_branding_id_list
+    assert str(email_branding2.id) in email_branding_id_list
 
 
 def test_get_email_branding_by_id(admin_request, notify_db, notify_db_session):
