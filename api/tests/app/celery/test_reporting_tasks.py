@@ -42,7 +42,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
         billable_units,
         multiplier):
 
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -92,7 +92,7 @@ def test_create_nightly_billing_different_templates(
         sample_template,
         sample_email_template,
         mocker):
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -145,7 +145,7 @@ def test_create_nightly_billing_different_sent_by(
         sample_template,
         sample_email_template,
         mocker):
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -195,7 +195,7 @@ def test_create_nightly_billing_letter(
         sample_service,
         sample_letter_template,
         mocker):
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -232,7 +232,7 @@ def test_create_nightly_billing_null_sent_by_sms(
         sample_service,
         sample_template,
         mocker):
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
