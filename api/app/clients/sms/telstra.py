@@ -1,21 +1,22 @@
 from monotonic import monotonic
 from app.clients.sms import SmsClient
 import Telstra_Messaging
-from Telstra_Messaging.rest import ApiException
 
 telstra_response_map = {
     'PEND': 'pending',
     'SENT': 'sending',
     'DELIVRD': 'delivered',
-    'EXPIRED': 'permanent-failure', # TODO: assuming this is permanent
-    'DELETED': 'permanent-failure', # TODO: assuming this is permanent
-    'UNDVBL': 'permanent-failure', # TODO: assuming this is permanent
-    'REJECTED': 'temporary-failure', # TODO: assuming this is temporary
-    'READ': 'delivered' # TODO: can we add a new status 'read'?
+    'EXPIRED': 'permanent-failure',  # TODO: assuming this is permanent
+    'DELETED': 'permanent-failure',  # TODO: assuming this is permanent
+    'UNDVBL': 'permanent-failure',  # TODO: assuming this is permanent
+    'REJECTED': 'temporary-failure',  # TODO: assuming this is temporary
+    'READ': 'delivered'  # TODO: can we add a new status 'read'?
 }
+
 
 def get_telstra_responses(status):
     return telstra_response_map[status]
+
 
 class TelstraSMSClient(SmsClient):
     def __init__(self, client_id=None, client_secret=None, *args, **kwargs):

@@ -9,6 +9,7 @@ from app.notifications.process_client_response import validate_callback_data, pr
 sms_callback_blueprint = Blueprint("sms_callback", __name__, url_prefix="/notifications/sms")
 register_errors(sms_callback_blueprint)
 
+
 @sms_callback_blueprint.route('/telstra/<notification_id>', methods=['POST'])
 def process_telstra_response(notification_id):
     client_name = 'Telstra'
@@ -31,6 +32,7 @@ def process_telstra_response(notification_id):
         raise InvalidRequest(errors, status_code=400)
     else:
         return jsonify(result='success', message=success), 200
+
 
 @sms_callback_blueprint.route('/twilio/<notification_id>', methods=['POST'])
 def process_twilio_response(notification_id):
@@ -60,7 +62,6 @@ def process_twilio_response(notification_id):
         raise InvalidRequest(errors, status_code=400)
     else:
         return jsonify(result='success', message=success), 200
-
 
 
 @sms_callback_blueprint.route('/mmg', methods=['POST'])
