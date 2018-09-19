@@ -45,8 +45,11 @@ setup-dev: setup-frontend version-file ## Setup everything in dev mode
 test: version-file ## Run linter, python tests, node tests
 	$(RUNNER) flake8 .
 	$(RUNNER) isort --check-only -rc ./app ./tests
-	$(RUNNER) py.test --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 --maxfail=10
+	$(MAKE) tests
 	$(NPM) test
+
+tests: version-file
+	$(RUNNER) py.test -n4 tests
 
 run-gulp: ## Continuously build css
 	$(NPM) run watch
@@ -85,4 +88,4 @@ deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
-.PHONY: help test setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
+.PHONY: help test tests setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
