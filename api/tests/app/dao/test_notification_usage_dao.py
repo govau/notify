@@ -140,36 +140,38 @@ def test_get_monthly_billing_data(notify_db, notify_db_session, sample_template,
 
 def test_get_monthly_billing_data_with_multiple_rates(notify_db, notify_db_session, sample_template,
                                                       sample_email_template):
-    set_up_rate(notify_db, datetime(2016, 4, 1), 0.014)
-    set_up_rate(notify_db, datetime(2016, 6, 5), 0.0175)
-    set_up_rate(notify_db, datetime(2017, 7, 5), 0.018)
-    # previous year
-    create_notification(template=sample_template, created_at=datetime(2016, 3, 31), sent_at=datetime(2016, 3, 31),
+    set_up_rate(notify_db, datetime(2016, 6, 30, 14, 00, 00), 0.014)
+    set_up_rate(notify_db, datetime(2016, 12, 10), 0.0175)
+    set_up_rate(notify_db, datetime(2017, 3, 5), 0.018)
+    # previous FY year
+    create_notification(template=sample_template, created_at=datetime(2016, 6, 29, 13, 59, 59), sent_at=datetime(2016, 6, 29, 13, 59, 59),
                         status='sending', billable_units=1)
-    # current year
-    create_notification(template=sample_template, created_at=datetime(2016, 4, 2), sent_at=datetime(2016, 4, 2),
+    # current FY year
+    create_notification(template=sample_template, created_at=datetime(2016, 7, 2), sent_at=datetime(2016, 7, 2),
                         status='sending', billable_units=1)
-    create_notification(template=sample_template, created_at=datetime(2016, 5, 18), sent_at=datetime(2016, 5, 18),
+    create_notification(template=sample_template, created_at=datetime(2016, 10, 18), sent_at=datetime(2016, 10, 18),
                         status='sending', billable_units=2)
-    create_notification(template=sample_template, created_at=datetime(2016, 6, 1), sent_at=datetime(2016, 6, 1),
+    create_notification(template=sample_template, created_at=datetime(2016, 12, 5), sent_at=datetime(2016, 12, 5),
                         status='sending', billable_units=3)
-    create_notification(template=sample_template, created_at=datetime(2016, 6, 15), sent_at=datetime(2016, 6, 15),
+    create_notification(template=sample_template, created_at=datetime(2016, 12, 15), sent_at=datetime(2016, 12, 15),
                         status='sending', billable_units=4)
-    create_notification(template=sample_email_template, created_at=datetime(2016, 8, 22),
-                        sent_at=datetime(2016, 7, 22),
+    create_notification(template=sample_email_template, created_at=datetime(2017, 5, 22),
+                        sent_at=datetime(2017, 5, 22),
                         status='sending', billable_units=0)
-    create_notification(template=sample_email_template, created_at=datetime(2016, 8, 30),
-                        sent_at=datetime(2016, 7, 22),
+    create_notification(template=sample_email_template, created_at=datetime(2017, 5, 30),
+                        sent_at=datetime(2017, 5, 30),
                         status='sending', billable_units=0)
-    # next year
-    create_notification(template=sample_template, created_at=datetime(2017, 3, 31, 23, 00, 00),
-                        sent_at=datetime(2017, 3, 31), status='sending', billable_units=6)
+    # next FY year
+    create_notification(template=sample_template, created_at=datetime(2017, 6, 30, 14, 00, 00),
+                        sent_at=datetime(2017, 6, 30, 14, 00, 00), status='sending', billable_units=6)
+
     results = get_monthly_billing_data(sample_template.service_id, 2016)
+
     assert len(results) == 4
-    assert results[0] == ('April', 1, 1, False, SMS_TYPE, 0.014)
-    assert results[1] == ('May', 2, 1, False, SMS_TYPE, 0.014)
-    assert results[2] == ('June', 3, 1, False, SMS_TYPE, 0.014)
-    assert results[3] == ('June', 4, 1, False, SMS_TYPE, 0.0175)
+    assert results[0] == ('July', 1, 1, False, SMS_TYPE, 0.014)
+    assert results[1] == ('October', 2, 1, False, SMS_TYPE, 0.014)
+    assert results[2] == ('December', 3, 1, False, SMS_TYPE, 0.014)
+    assert results[3] == ('December', 4, 1, False, SMS_TYPE, 0.0175)
 
 
 def test_get_monthly_billing_data_with_no_notifications_for_daterange(notify_db, notify_db_session, sample_template):
