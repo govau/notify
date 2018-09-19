@@ -95,7 +95,7 @@ jobs:
     steps:
       - *attach_workspace
       - run: make api.setup-dev
-      - run: make -C api tests
+      - run: make api.test
 
   build-api:
     <<: *python_node_image
