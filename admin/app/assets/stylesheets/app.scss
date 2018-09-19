@@ -176,6 +176,13 @@ details .arrow {
   margin-top: 5px;
 }
 
+/* stretch out content to push sticky footer down */
+#content {
+  margin: 0 auto;
+  flex: 1 0 auto;
+  width: 100%;
+}
+
 #content.override-elements-content {
   padding-bottom: 0;
 }

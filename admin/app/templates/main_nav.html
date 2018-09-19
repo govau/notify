@@ -1,7 +1,8 @@
 {% from "components/banner.html" import banner_wrapper %}
 
-{% macro nav_item(href, link) -%}
-  <li class="au-navitem {{ "au-navitem--active" if request.path == href }}">
+{% macro nav_item(href, link, active = none) -%}
+{% set item_active = request.path.startswith(href) if active is none else active %}
+  <li class="au-navitem {{ "au-navitem--active" if item_active }}">
     <a href="{{ href }}" >{{ link }}</a>
   </li>
 {%- endmacro %}
@@ -50,7 +51,11 @@
 
 <nav class="navigation au-navigation">
   <ul>
-  {{ nav_item(url_for('.service_dashboard', service_id=current_service.id), 'Service overview') }}
+  {{ nav_item(
+    url_for('.service_dashboard', service_id=current_service.id),
+    'Service overview',
+    active=request.path == url_for('.service_dashboard', service_id=current_service.id))
+  }}
   {% if current_user.has_permissions('view_activity') %}
     {{ nav_item(url_for('.choose_template', service_id=current_service.id), 'Templates') }}
   {% endif %}
