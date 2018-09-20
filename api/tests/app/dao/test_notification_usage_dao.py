@@ -16,41 +16,44 @@ from app.models import (
 )
 from tests.app.db import create_notification, create_rate, create_letter_rate, create_template, create_service
 
+# In the following tests, we test years like 2010 rather than 2017 (the current
+# year at the time of writing) so that our testing does not conflict with the
+# rates that are already in the database.
 
 def test_get_rates_for_daterange(notify_db, notify_db_session):
-    set_up_rate(notify_db, datetime(2016, 5, 18), 0.016)
-    set_up_rate(notify_db, datetime(2017, 3, 31, 23), 0.0158)
-    start_date, end_date = get_financial_year(2017)
+    set_up_rate(notify_db, datetime(2010, 8, 18), 0.016)
+    set_up_rate(notify_db, datetime(2011, 6, 30, 14, 00), 0.0158)
+    start_date, end_date = get_financial_year(2011)
     rates = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
     assert len(rates) == 1
-    assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2017-03-31 23:00:00"
+    assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2011-06-30 14:00:00"
     assert rates[0].rate == 0.0158
 
 
 def test_get_rates_for_daterange_multiple_result_per_year(notify_db, notify_db_session):
-    set_up_rate(notify_db, datetime(2016, 4, 1), 0.015)
-    set_up_rate(notify_db, datetime(2016, 5, 18), 0.016)
-    set_up_rate(notify_db, datetime(2017, 4, 1), 0.0158)
-    start_date, end_date = get_financial_year(2016)
+    set_up_rate(notify_db, datetime(2010, 6, 30, 14, 00), 0.015)
+    set_up_rate(notify_db, datetime(2010, 7, 18), 0.016)
+    set_up_rate(notify_db, datetime(2011, 6, 30, 14, 00), 0.0158)
+    start_date, end_date = get_financial_year(2010)
     rates = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
     assert len(rates) == 2
-    assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2016-04-01 00:00:00"
+    assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2010-06-30 14:00:00"
     assert rates[0].rate == 0.015
-    assert datetime.strftime(rates[1].valid_from, '%Y-%m-%d %H:%M:%S') == "2016-05-18 00:00:00"
+    assert datetime.strftime(rates[1].valid_from, '%Y-%m-%d %H:%M:%S') == "2010-07-18 00:00:00"
     assert rates[1].rate == 0.016
 
 
 def test_get_rates_for_daterange_returns_correct_rates(notify_db, notify_db_session):
-    set_up_rate(notify_db, datetime(2016, 4, 1), 0.015)
-    set_up_rate(notify_db, datetime(2016, 9, 1), 0.016)
-    set_up_rate(notify_db, datetime(2017, 6, 1), 0.0175)
-    start_date, end_date = get_financial_year(2017)
-    rates_2017 = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
-    assert len(rates_2017) == 2
-    assert datetime.strftime(rates_2017[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2016-09-01 00:00:00"
-    assert rates_2017[0].rate == 0.016
-    assert datetime.strftime(rates_2017[1].valid_from, '%Y-%m-%d %H:%M:%S') == "2017-06-01 00:00:00"
-    assert rates_2017[1].rate == 0.0175
+    set_up_rate(notify_db, datetime(2010, 6, 30, 14, 00), 0.015)
+    set_up_rate(notify_db, datetime(2010, 12, 1), 0.016)
+    set_up_rate(notify_db, datetime(2011, 8, 1), 0.0175)
+    start_date, end_date = get_financial_year(2011)
+    rates_2011 = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
+    assert len(rates_2011) == 2
+    assert datetime.strftime(rates_2011[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2010-12-01 00:00:00"
+    assert rates_2011[0].rate == 0.016
+    assert datetime.strftime(rates_2011[1].valid_from, '%Y-%m-%d %H:%M:%S') == "2011-08-01 00:00:00"
+    assert rates_2011[1].rate == 0.0175
 
 
 def test_get_rates_for_daterange_in_the_future(notify_db, notify_db_session):
@@ -63,9 +66,9 @@ def test_get_rates_for_daterange_in_the_future(notify_db, notify_db_session):
 
 
 def test_get_rates_for_daterange_returns_empty_list_if_year_is_before_earliest_rate(notify_db, notify_db_session):
-    set_up_rate(notify_db, datetime(2016, 4, 1), 0.015)
-    set_up_rate(notify_db, datetime(2017, 6, 1), 0.0175)
-    start_date, end_date = get_financial_year(2015)
+    set_up_rate(notify_db, datetime(2010, 6, 30, 14, 00), 0.015)
+    set_up_rate(notify_db, datetime(2011, 9, 1), 0.0175)
+    start_date, end_date = get_financial_year(2008)
     rates = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
     assert rates == []
 
@@ -81,12 +84,12 @@ def test_get_rates_for_daterange_early_rate(notify_db, notify_db_session):
 
 
 def test_get_rates_for_daterange_edge_case(notify_db, notify_db_session):
-    set_up_rate(notify_db, datetime(2016, 3, 31, 23, 00), 0.015)
-    set_up_rate(notify_db, datetime(2017, 3, 31, 23, 00), 0.0175)
-    start_date, end_date = get_financial_year(2016)
+    set_up_rate(notify_db, datetime(2010, 6, 30, 14, 00), 0.015)
+    set_up_rate(notify_db, datetime(2011, 6, 30, 14, 00), 0.0175)
+    start_date, end_date = get_financial_year(2010)
     rates = get_rates_for_daterange(start_date, end_date, SMS_TYPE)
     assert len(rates) == 1
-    assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2016-03-31 23:00:00"
+    assert datetime.strftime(rates[0].valid_from, '%Y-%m-%d %H:%M:%S') == "2010-06-30 14:00:00"
     assert rates[0].rate == 0.015
 
 

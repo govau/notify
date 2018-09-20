@@ -466,9 +466,9 @@ def test_persist_email_notification_stores_normalised_email(
 
 
 @pytest.mark.parametrize('utc_time, day_in_key', [
-    ('2016-01-01 23:00:00', '2016-01-01'),
-    ('2016-06-01 22:59:00', '2016-06-01'),
-    ('2016-06-01 23:00:00', '2016-06-02'),
+    ('2016-01-01 13:00:00', '2016-01-02'),
+    ('2016-06-01 22:59:00', '2016-06-02'),
+    ('2016-06-01 14:00:00', '2016-06-02'),
 ])
 def test_persist_notification_increments_and_expires_redis_template_usage(
     utc_time,
@@ -486,7 +486,7 @@ def test_persist_notification_increments_and_expires_redis_template_usage(
         persist_notification(
             template_id=sample_template.id,
             template_version=sample_template.version,
-            recipient='+447111111122',
+            recipient='+61412345678',
             service=sample_template.service,
             personalisation={},
             notification_type='sms',
