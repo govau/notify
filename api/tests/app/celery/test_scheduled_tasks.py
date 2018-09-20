@@ -722,11 +722,11 @@ def test_monday_alert_if_letter_notifications_still_sending_reports_friday_lette
     )
 
 
-@freeze_time("2017-07-12 02:00:00")
+@freeze_time("2017-07-12 16:00:00") # 2am AEST
 def test_populate_monthly_billing_populates_correctly(sample_template):
-    yesterday = datetime(2017, 7, 11, 13, 30)
-    jul_month_start = datetime(2017, 6, 30, 23)
-    jul_month_end = datetime(2017, 7, 31, 22, 59, 59, 999999)
+    yesterday = datetime(2017, 7, 11, 13, 30) # 11.30pm yesterday AEST
+    jul_month_start = datetime(2017, 6, 30, 14, 00, 00)
+    jul_month_end = datetime(2017, 7, 31, 13, 59, 59, 999999)
     create_rate(datetime(2016, 1, 1), 0.0123, 'sms')
 
     create_notification(template=sample_template, status='delivered', created_at=yesterday)
