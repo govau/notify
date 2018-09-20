@@ -93,6 +93,7 @@ gulp.task("javascripts", () =>
       plugins.addSrc.prepend([
         paths.npm + "hogan.js/dist/hogan-3.0.2.js",
         paths.npm + "jquery/dist/jquery.min.js",
+        paths.npm + "jquery-migrate/dist/jquery-migrate.js",
         paths.npm + "query-command-supported/dist/queryCommandSupported.min.js",
         paths.npm + "diff-dom/diffDOM.js",
         paths.npm + "timeago/jquery.timeago.js"
