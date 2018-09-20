@@ -8,11 +8,17 @@ from app.utils import (
     convert_aest_to_utc)
 
 @pytest.mark.parametrize('date, expected_date', [
-    (datetime(2016, 7, 26, 0, 30), datetime(2016, 7, 25, 14, 0)), # 2016-07-26 is outside daylight savings time
-    (datetime(2016, 6, 26, 0, 0), datetime(2016, 6, 25, 14, 0)), # 2016-06-26 is outside daylight savings time
-    (datetime(2016, 11, 26, 11, 59), datetime(2016, 11, 25, 13, 0)), # 2016-11-26 is during daylight savings time
+    (datetime(2016, 7, 26, 00, 30), datetime(2016, 7, 25, 14, 00)), # 2016-07-26 is outside daylight savings time
+    (datetime(2016, 6, 26, 00, 00), datetime(2016, 6, 25, 14, 00)), # 2016-06-26 is outside daylight savings time
+    (datetime(2016, 11, 26, 00, 00), datetime(2016, 11, 25, 13, 00)), # 2016-11-26 is during daylight savings time
+    (datetime(2016, 11, 26, 11, 59), datetime(2016, 11, 25, 13, 00)), # 2016-11-26 is during daylight savings time
+    (datetime(2016, 11, 26, 23, 59), datetime(2016, 11, 25, 13, 00)), # 2016-11-26 is during daylight savings time
 ])
 def test_get_sydney_midnight_in_utc_returns_expected_date(date, expected_date):
+    """
+     :param date a local datetime
+     :param expected_date a UTC datetime
+    """
     assert get_sydney_midnight_in_utc(date) == expected_date
 
 

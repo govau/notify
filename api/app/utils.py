@@ -36,12 +36,12 @@ def get_template_instance(template, values):
 
 def get_sydney_midnight_in_utc(date):
     """
-     This function takes in a date, converts it to midnight (sets time to
+     This function takes in a local date, converts it to midnight (sets time to
      00:00), then localizes to local_timezone. Finally, it converts it to UTC.
      It drops the timezone information information because the database stores
      the timestamps without timezone.
-     :param date: the day to calculate the Sydney midnight in UTC for
-     :return: the datetime of Sydney midnight in UTC, for example 2016-11-26 = 2016-11-25 13:00:00 (because this date is during daylight savings time)
+     :param date: a local datetime for which to calculate the Sydney midnight in UTC
+     :return: the UTC datetime of Sydney midnight, for example 2016-11-26 = 2016-11-25 13:00:00 (13:00, not 14:00 because this date is during ADST)
     """
     return local_timezone.localize(datetime.combine(date, datetime.min.time())).astimezone(
         pytz.UTC).replace(
