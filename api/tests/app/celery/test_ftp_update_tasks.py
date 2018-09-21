@@ -206,9 +206,10 @@ def test_update_letter_notifications_statuses_persists_daily_sorted_letter_count
     mocker.patch('app.celery.tasks.s3.get_s3_file', return_value=valid_file)
     persist_letter_count_mock = mocker.patch('app.celery.tasks.persist_daily_sorted_letter_counts')
 
+    # 2017-08-23 16:08:12 UTC is 2017-08-24 02:08:12 AEST
     update_letter_notifications_statuses(filename='NOTIFY-20170823160812-RSP.TXT')
 
-    persist_letter_count_mock.assert_called_once_with(day=date(2017, 8, 23),
+    persist_letter_count_mock.assert_called_once_with(day=date(2017, 8, 24),
                                                       file_name='NOTIFY-20170823160812-RSP.TXT',
                                                       sorted_letter_counts={'Unsorted': 1, 'Sorted': 1})
 
@@ -225,9 +226,10 @@ def test_update_letter_notifications_statuses_persists_daily_sorted_letter_count
         sent_letter_1.reference, sent_letter_2.reference)
     mocker.patch('app.celery.tasks.s3.get_s3_file', return_value=valid_file)
 
+    # 2017-08-23 16:08:12 UTC is 2017-08-24 02:08:12 AEST
     update_letter_notifications_statuses(filename='NOTIFY-20170823160812-RSP.TXT')
 
-    daily_sorted_letter = dao_get_daily_sorted_letter_by_billing_day(date(2017, 8, 23))
+    daily_sorted_letter = dao_get_daily_sorted_letter_by_billing_day(date(2017, 8, 24))
 
     assert daily_sorted_letter.unsorted_count == 2
     assert daily_sorted_letter.sorted_count == 0
