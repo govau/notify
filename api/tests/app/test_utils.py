@@ -16,7 +16,7 @@ from app.utils import (
 ])
 def test_get_sydney_midnight_in_utc_returns_expected_date(date, expected_date):
     """
-     :param date a local datetime
+     :param date a localized datetime
      :param expected_date a UTC datetime
     """
     assert get_sydney_midnight_in_utc(date) == expected_date
@@ -32,12 +32,12 @@ def test_get_midnight_for_day_before_returns_expected_date(date, expected_date):
 
 
 @pytest.mark.parametrize('date, expected_date', [
-    (datetime(2016, 3, 30, 14, 0), datetime(2016, 3, 31, 1, 0)), # During ADST
+    (datetime(2016, 3, 30, 14, 0), datetime(2016, 3, 31, 1, 0)), # During AEDT
     (datetime(2017, 3, 26, 23, 0), datetime(2017, 3, 27, 10, 0)),
     (datetime(2017, 3, 20, 23, 0), datetime(2017, 3, 21, 10, 0)),
     (datetime(2017, 3, 28, 10, 0), datetime(2017, 3, 28, 21, 0)),
-    (datetime(2017, 4, 2, 3, 0), datetime(2017, 4, 2, 13, 0)), # ADST crossover
-    (datetime(2017, 10, 1, 2, 0), datetime(2017, 10, 1, 13, 0)), # ADST crossover
+    (datetime(2017, 4, 2, 3, 0), datetime(2017, 4, 2, 13, 0)), # AEDT crossover
+    (datetime(2017, 10, 1, 2, 0), datetime(2017, 10, 1, 13, 0)), # AEDT crossover
     (datetime(2017, 10, 28, 1, 0), datetime(2017, 10, 28, 12, 0)),
     (datetime(2017, 10, 29, 1, 0), datetime(2017, 10, 29, 12, 0)),
     (datetime(2017, 5, 12, 14), datetime(2017, 5, 13, 0, 0))

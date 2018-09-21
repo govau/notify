@@ -321,7 +321,7 @@ def test_send_daily_performance_stats_calls_does_not_send_if_inactive(client, mo
     assert send_mock.call_count == 0
 
 
-@freeze_time("2016-01-11 12:30:00") # 2016-01-11 11:30pm AEST
+@freeze_time("2016-01-11 12:30:00") # 2016-01-11 11:30pm AEDT
 def test_send_total_sent_notifications_to_performance_platform_calls_with_correct_totals(
     notify_db,
     notify_db_session,
@@ -342,7 +342,7 @@ def test_send_total_sent_notifications_to_performance_platform_calls_with_correc
     notification_history(notification_type='sms')
 
     # Create some notifications for the day before
-    yesterday = datetime(2016, 1, 10, 12, 45, 0, 0) # 2016-01-10 11:45pm AEST
+    yesterday = datetime(2016, 1, 10, 12, 45, 0, 0) # 2016-01-10 11:45pm AEDT
     with freeze_time(yesterday):
         notification_history(notification_type='sms')
         notification_history(notification_type='sms')

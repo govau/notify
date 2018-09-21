@@ -20,10 +20,10 @@ def test_get_financial_year_start():
 
 @pytest.mark.parametrize("month, year, expected_start, expected_end", [
     (7, 2017, datetime(2017, 6, 30, 14, 00, 00), datetime(2017, 7, 31, 13, 59, 59, 999999)), # During AEST
-    (2, 2016, datetime(2016, 1, 31, 13, 00, 00), datetime(2016, 2, 29, 12, 59, 59, 999999)), # During ADST
-    (2, 2017, datetime(2017, 1, 31, 13, 00, 00), datetime(2017, 2, 28, 12, 59, 59, 999999)), # During ADST
+    (2, 2016, datetime(2016, 1, 31, 13, 00, 00), datetime(2016, 2, 29, 12, 59, 59, 999999)), # During AEDT
+    (2, 2017, datetime(2017, 1, 31, 13, 00, 00), datetime(2017, 2, 28, 12, 59, 59, 999999)), # During AEDT
     (9, 2018, datetime(2018, 8, 31, 14, 00, 00), datetime(2018, 9, 30, 13, 59, 59, 999999)), # During AEST
-    (12, 2019, datetime(2019, 11, 30, 13, 00, 00), datetime(2019, 12, 31, 12, 59, 59, 999999)) # During ADST
+    (12, 2019, datetime(2019, 11, 30, 13, 00, 00), datetime(2019, 12, 31, 12, 59, 59, 999999)) # During AEDT
 ])
 def test_get_month_start_and_end_date_in_utc(month, year, expected_start, expected_end):
     month_year = datetime(year, month, 10, 13, 30, 00)

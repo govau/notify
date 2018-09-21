@@ -223,7 +223,7 @@ def test_get_notification_by_id_invalid_id(client, sample_notification, id):
 
 @pytest.mark.parametrize('created_at_month, estimated_delivery', [
     (
-        12, '2000-12-06T05:00:00.000000Z',  # 4pm ADST (in summer)
+        12, '2000-12-06T05:00:00.000000Z',  # 4pm AEDT (in summer)
     ),
     (
         6, '2000-06-05T06:00:00.000000Z',  # 4pm AEST (in winter)

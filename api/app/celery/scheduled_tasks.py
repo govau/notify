@@ -236,6 +236,9 @@ def send_daily_performance_platform_stats():
 
 
 def send_total_sent_notifications_to_performance_platform(day):
+    """
+     :day a UTC datetime
+    """
     count_dict = total_sent_notifications.get_total_sent_notifications_for_day(day)
     email_sent_count = count_dict.get('email').get('count')
     sms_sent_count = count_dict.get('sms').get('count')

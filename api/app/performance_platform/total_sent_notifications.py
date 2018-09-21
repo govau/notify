@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from app import performance_platform_client
 from app.dao.notifications_dao import get_total_sent_notifications_in_date_range
-from app.utils import get_sydney_midnight_in_utc
+from app.utils import get_sydney_midnight_in_utc, convert_utc_to_aest
 
 
 def send_total_notifications_sent_for_day_stats(date, notification_type, count):
@@ -18,7 +18,11 @@ def send_total_notifications_sent_for_day_stats(date, notification_type, count):
 
 
 def get_total_sent_notifications_for_day(day):
-    start_date = get_sydney_midnight_in_utc(day)
+    """
+     :day a UTC datetime
+    """
+    day_in_aest = convert_utc_to_aest(day)
+    start_date = get_sydney_midnight_in_utc(day_in_aest)
     end_date = start_date + timedelta(days=1)
 
     email_count = get_total_sent_notifications_in_date_range(start_date, end_date, 'email')
