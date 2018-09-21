@@ -400,8 +400,8 @@ def get_letter_timings(upload_time):
         }.get(processing_day.strftime('%A'), (1, 3, 4))
     )
 
-    printed_by = print_day.astimezone(pytz.timezone('Europe/London')).replace(hour=15, minute=0)
-    now = datetime.utcnow().replace(tzinfo=pytz.timezone('Europe/London'))
+    printed_by = print_day.astimezone(pytz.timezone('Australia/Sydney')).replace(hour=15, minute=0)
+    now = datetime.utcnow().replace(tzinfo=pytz.timezone('Australia/Sydney'))
 
     return LetterTimings(
         printed_by=printed_by,
@@ -414,7 +414,7 @@ def get_letter_timings(upload_time):
 def gmt_timezones(date):
     date = dateutil.parser.parse(date)
     forced_utc = date.replace(tzinfo=pytz.utc)
-    return forced_utc.astimezone(pytz.timezone('Europe/London'))
+    return forced_utc.astimezone(pytz.timezone('Australia/Sydney'))
 
 
 def get_cdn_domain():
