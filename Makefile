@@ -59,7 +59,7 @@ cf-login-prod:
 	  cf-login
 
 DIRS        = api admin status
-TARGETS     = setup setup-dev vendor clean deploy deploy-dev
+TARGETS     = setup setup-dev vendor clean deploy deploy-dev test
 API_TARGETS = deploy-celery deploy-dev-celery
 ANY_TARGETS = $(TARGETS) $(API_TARGETS)
 
