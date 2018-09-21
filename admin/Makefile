@@ -32,9 +32,12 @@ version-file: app/version.py
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
+build-frontend:
+	$(NPM) run build -- --production
+
 setup-frontend: ## Setup and build css
 	$(NPM) install
-	$(NPM) run build -- --production
+	$(MAKE) build-frontend
 
 setup: setup-frontend version-file ## Setup virtualenv, install python deps, build css
 	$(PIPENV) install
