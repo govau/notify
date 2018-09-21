@@ -29,7 +29,11 @@ def get_service_ids_that_need_billing_populated(start_date, end_date):
 
 @statsd(namespace="dao")
 def create_or_update_monthly_billing(service_id, billing_month):
-    start_date, end_date = get_month_start_and_end_date_in_utc(billing_month)
+    """
+     :param billing_month a UTC datetime
+    """
+    billing_month_in_aest = convert_utc_to_aest(billing_month)
+    start_date, end_date = get_month_start_and_end_date_in_utc(billing_month_in_aest)
     _update_monthly_billing(service_id, start_date, end_date, SMS_TYPE)
     _update_monthly_billing(service_id, start_date, end_date, EMAIL_TYPE)
     _update_monthly_billing(service_id, start_date, end_date, LETTER_TYPE)
@@ -116,7 +120,7 @@ def get_monthly_billing_by_notification_type(service_id, billing_month, notifica
 @statsd(namespace="dao")
 def get_billing_data_for_financial_year(service_id, year, notification_types=[SMS_TYPE, EMAIL_TYPE, LETTER_TYPE]):
     # Update totals to the latest so we include data for today
-    now = convert_utc_to_aest(datetime.utcnow())
+    now = datetime.utcnow()
     create_or_update_monthly_billing(service_id=service_id, billing_month=now)
 
     start_date, end_date = get_financial_year(year)

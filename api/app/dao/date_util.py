@@ -38,7 +38,7 @@ def get_financial_year_start(year):
 def get_month_start_and_end_date_in_utc(month_year):
     """
      This function returns the start and end date of the month_year as UTC,
-     :param month_year: the datetime to calculate the start and end date for that month
+     :param month_year: a localized datetime to calculate the start and end date for that month
      :return: start_date, end_date, month
     """
     import calendar

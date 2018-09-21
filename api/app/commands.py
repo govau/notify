@@ -190,7 +190,8 @@ def populate_monthly_billing(year):
     Populate monthly billing table for all services for a given year.
     """
     def populate(service_id, year, month):
-        create_or_update_monthly_billing(service_id, datetime(year, month, 1))
+        # TODO: generated billing_month should be in UTC but this is untested.
+        create_or_update_monthly_billing(service_id, billing_month=datetime(year, month, 1))
         sms_res = get_monthly_billing_by_notification_type(
             service_id, datetime(year, month, 1), SMS_TYPE
         )
