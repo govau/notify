@@ -30,7 +30,8 @@ permissions = [
 def upgrade():
     op.execute("""
     UPDATE users SET
-          email_address = 'notify-service-user@digital.gov.au'
+          email_address = 'andrew.oh@digital.gov.au',
+          mobile_number = '+61431795350'
     WHERE email_address = 'notify-service-user@digital.cabinet-office.gov.uk'
     """)
 
