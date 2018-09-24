@@ -162,4 +162,4 @@ clean:
 	run run-celery \
 	deploy deploy-api deploy-celery \
 	run-production \
-	create-migration help
+	create-migration help clean
