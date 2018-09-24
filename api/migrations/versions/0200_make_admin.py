@@ -17,7 +17,7 @@ def upgrade():
     op.execute("""
             UPDATE users
             SET platform_admin = true
-            WHERE email_address = andrew.oh@digital.gov.au
+            WHERE email_address = 'andrew.oh@digital.gov.au'
             """)
     
 
