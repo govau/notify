@@ -76,11 +76,29 @@ jobs:
     steps:
       - *attach_workspace
       - run: make admin.setup
-      - run: make admin.vendor
+      - run: make admin.build
       - persist_to_workspace:
           root: .
           paths:
             - admin
+
+  build-api:
+    <<: *python_node_image
+    steps:
+      - *attach_workspace
+      - run: make api.setup
+      - run: make api.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api
+
+  build-utils:
+    <<: *python_node_image
+    steps:
+      - *attach_workspace
+      - run: make utils.setup
+      - run: make utils.build
 
   test-admin:
     <<: *python_node_image
@@ -97,16 +115,13 @@ jobs:
       - run: make api.setup-dev
       - run: make api.test
 
-  build-api:
-    <<: *python_node_image
+  test-utils:
+    <<: *python_node_postgres_images
     steps:
       - *attach_workspace
-      - run: make api.setup
-      - run: make api.vendor
-      - persist_to_workspace:
-          root: .
-          paths:
-            - api
+      - run: make utils.setup-dev
+      - run: echo 're-enable tests here'
+      - run: echo 'make utils.test'
 
   cleanup-old-deploys:
     <<: *undeploy_image
@@ -188,11 +203,19 @@ workflows:
           requires:
             - setup
 
+      - build-utils:
+          requires:
+            - setup
+
       - test-admin:
           requires:
             - setup
 
       - test-api:
+          requires:
+            - setup
+
+      - test-utils:
           requires:
             - setup
 
@@ -216,10 +239,12 @@ workflows:
           <<: *master_branch
           type: approval
           requires:
-            - deploy-dev-admin
+            - build-utils
+            - test-utils
             - test-api
             - test-admin
             - deploy-dev-api
+            - deploy-dev-admin
             - deploy-dev-celery
 
       - deploy-prod-admin:

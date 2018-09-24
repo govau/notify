@@ -4,6 +4,7 @@ import botocore
 from boto3 import resource
 from flask import current_app
 
+
 def s3upload(
         filedata, region, bucket_name, file_location,
         content_type='binary/octet-stream',

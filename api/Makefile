@@ -113,6 +113,8 @@ run-ngrok:
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
+build: vendor
+
 vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
@@ -150,6 +152,9 @@ create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RU
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
 create-migration: ## Create an appropriately ordered migration stub
 	$(RUNNER) flask db revision --rev-id $(MIGRATION_NUMBER) --message "$(MIGRATION_MESSAGE)"
+
+clean:
+	-rm -r vendor
 
 .PHONY:
 	setup setup-dev setup-db \

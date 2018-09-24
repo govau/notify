@@ -46,10 +46,8 @@ setup(
         'pytest',
         'pytest-mock',
         'pytest-cov',
-        'pytest-xdist',
         'requests-mock',
         'freezegun',
         'flake8',
-        'flake8-print',
     ],
 )

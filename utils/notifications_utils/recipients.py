@@ -369,6 +369,7 @@ def is_au_phone_number(number):
         return True
     return False
 
+
 international_phone_info = namedtuple('PhoneNumber', [
     'international',
     'country_prefix',

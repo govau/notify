@@ -66,6 +66,8 @@ run-gunicorn: version-file ## Run a production server
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
+build: vendor
+
 vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
@@ -90,5 +92,8 @@ deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
 
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
+
+clean:
+	-rm -r vendor
 
 .PHONY: help test tests setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
