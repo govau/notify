@@ -4,7 +4,7 @@
 
 ### Pipenv
 
-install pipenv according to your platform. it can be installed through
+Install pipenv according to your platform. it can be installed through
 homebrew, apt, or most easily-- pip.
 
 ```shell

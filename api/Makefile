@@ -113,6 +113,8 @@ run-ngrok:
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
+build: vendor
+
 vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
@@ -151,10 +153,13 @@ create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration messa
 create-migration: ## Create an appropriately ordered migration stub
 	$(RUNNER) flask db revision --rev-id $(MIGRATION_NUMBER) --message "$(MIGRATION_MESSAGE)"
 
+clean:
+	-rm -r vendor
+
 .PHONY:
 	setup setup-dev setup-db \
 	setup-test-db test lint tests $(APP_TESTS) $(DAO_TESTS) test-roots \
 	run run-celery \
 	deploy deploy-api deploy-celery \
 	run-production \
-	create-migration help
+	create-migration help clean

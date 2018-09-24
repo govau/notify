@@ -6,35 +6,22 @@ Provides logging utils etc.
 
 ## Installing
 
-This is a [python](https://www.python.org/) application.
+### Pipenv
 
-#### Python version
+Install pipenv according to your platform. it can be installed through
+homebrew, apt, or most easily-- pip.
 
-This is a python 3 application. It has not been run against any version of python 2.x
+```shell
+    pip3 install --user pipenv
+```
 
-    brew install python3
+## Testing
 
-#### Dependency management
+First, run `make setup-dev` to get an environment ready for testing.
 
-This is done through [pip](pip.readthedocs.org/) and [virtualenv](https://virtualenv.readthedocs.org/en/latest/). In practise we have used
-[VirtualEnvWrapper](http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html) for our virtual environemnts.
+Then issue the following command to run code analysis using flake8 and our
+entire test suite:
 
-Setting up a virtualenvwrapper for python3
-
-    mkvirtualenv -p /usr/local/bin/python3 notifications-python-client
-
-The boostrap script will set the application up. _Ensure you have activated the virtual environment first._
-
-    ./scripts/bootstrap.sh
-
-This will
-
-- Use pip to install dependencies.
-
-#### Tests
-
-The `./scripts/run_tests.sh` script will run all the tests. [py.test](http://pytest.org/latest/) is used for testing.
-
-Running tests will also apply syntax checking, using [pycodestyle](https://pypi.python.org/pypi/pycodestyle).
-
-Additionally code coverage is checked via pytest-cov:
+```shell
+    make test
+```

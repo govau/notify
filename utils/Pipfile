@@ -4,9 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-notifications-utils = {editable = true, file = "file:///Users/peter/work/dto/notifications/utils"}
+notifications-utils = {editable = true, path = "."}
 
 [dev-packages]
+pytest = "*"
+pytest-mock = "*"
+pytest-cov = "*"
+requests-mock = "*"
+freezegun = "*"
+"flake8" = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"

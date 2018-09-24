@@ -11,7 +11,7 @@ Flask-Bcrypt = "==0.7.1"
 flask-marshmallow = "==0.8.0"
 Flask-Migrate = "==2.1.1"
 Flask-SQLAlchemy = "==2.3.2"
-Flask = "==0.12.2"
+Flask = "~=0.12.3"
 click-datetime = "==0.2"
 eventlet = "==0.22.1"
 gunicorn = "==19.7.1"
@@ -24,10 +24,10 @@ monotonic = "==1.4"
 PyJWT = "==1.6.1"
 SQLAlchemy = "==1.2.6"
 notifications-python-client = "==4.8.1"
-awscli-cwlogs = "<1.5,>=1.4"
 notifications-utils = {path = "./../utils", editable = true}
 Telstra_Messaging = {git = "https://github.com/Telstra/MessagingAPI-SDK-python.git"}
 twilio = "~=6.16"
+"boto3" = "~=1.8"
 
 [dev-packages]
 "flake8" = "==3.5.0"

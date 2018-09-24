@@ -22,6 +22,8 @@ help: ## List common commands and their usage
 setup: ## Setup ruby gems
 	$(BUNDLE) install
 
+setup-dev: setup
+
 setup-db:
 	$(RUNNER) rake db:setup
 
@@ -43,4 +45,6 @@ deploy:
 create-service-mysql:
 	-$(CF) create-service mysql shared notify-mysql-status
 
-.PHONY: setup run deploy create-service-mysql setup-db migrate-db help
+clean:
+
+.PHONY: setup setup-dev run deploy create-service-mysql setup-db migrate-db help clean

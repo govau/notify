@@ -93,6 +93,7 @@ gulp.task("javascripts", () =>
       plugins.addSrc.prepend([
         paths.npm + "hogan.js/dist/hogan-3.0.2.js",
         paths.npm + "jquery/dist/jquery.min.js",
+        paths.npm + "jquery-migrate/dist/jquery-migrate.min.js",
         paths.npm + "query-command-supported/dist/queryCommandSupported.min.js",
         paths.npm + "diff-dom/diffDOM.js",
         paths.npm + "timeago/jquery.timeago.js"
@@ -141,10 +142,10 @@ gulp.task("copy:govuk_template:error_page", () =>
 
 // Watch for changes and re-run tasks
 gulp.task("watchForChanges", function() {
-  gulp.watch(paths.src + "javascripts/**/*", ["javascripts"]);
-  gulp.watch(paths.src + "stylesheets/**/*", ["sass"]);
-  gulp.watch(paths.src + "images/**/*", ["images"]);
-  gulp.watch("gulpfile.babel.js", ["default"]);
+  gulp.watch(paths.src + "javascripts/**/*", gulp.series("javascripts"));
+  gulp.watch(paths.src + "stylesheets/**/*", gulp.series("sass"));
+  gulp.watch(paths.src + "images/**/*", gulp.series("images"));
+  gulp.watch("gulpfile.babel.js", gulp.series("default"));
 });
 
 gulp.task("lint:sass", () =>
@@ -167,10 +168,10 @@ gulp.task("lint:js", () =>
     .pipe(plugins.jshint.reporter("fail"))
 );
 
-gulp.task("lint", ["lint:js"]);
+gulp.task("lint", gulp.series("lint:js"));
 
 // Default: compile everything
-gulp.task("default", [
+gulp.task("default", gulp.series(
   "copy:govuk_template:images",
   //'copy:govuk_template:css',
   "copy:govuk_template:js",
@@ -178,7 +179,7 @@ gulp.task("default", [
   "javascripts",
   "sass",
   "images"
-]);
+));
 
 // Optional: recompile on changes
-gulp.task("watch", ["default", "watchForChanges"]);
+gulp.task("watch", gulp.series("default", "watchForChanges"));

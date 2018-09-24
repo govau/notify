@@ -32,9 +32,12 @@ version-file: app/version.py
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
+build-frontend:
+	$(NPM) run build -- --production
+
 setup-frontend: ## Setup and build css
 	$(NPM) install
-	$(NPM) run build -- --production
+	$(MAKE) build-frontend
 
 setup: setup-frontend version-file ## Setup virtualenv, install python deps, build css
 	$(PIPENV) install
@@ -63,6 +66,8 @@ run-gunicorn: version-file ## Run a production server
 pipenv-requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
+build: vendor
+
 vendor: pipenv-requirements.txt
 	$(RUNNER) pip download -d $@ -r $<
 
@@ -88,4 +93,12 @@ deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
-.PHONY: help test tests setup-frontend setup setup-dev run run-gunicorn deploy build-linux-wheels
+clean:
+	-rm -r vendor
+
+.PHONY:
+	help clean \
+	test tests \
+	setup-frontend setup setup-dev \
+	run run-gunicorn \
+	deploy build-linux-wheels
