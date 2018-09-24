@@ -65,9 +65,11 @@ def authenticate():
 
 
 def requires_auth():
+    if request.endpoint != 'main.static_logo':
+        return None
+
     if not check_auth(current_app.config, request.authorization):
-        if request.endpoint != 'main.static_logo':
-            return authenticate()
+        return authenticate()
 
 
 def user_has_permissions(*permissions, **permission_kwargs):
