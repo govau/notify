@@ -769,7 +769,7 @@ def test_populate_monthly_billing_populates_correctly(sample_template):
 
 
 @freeze_time("2016-04-01 23:00:00")
-def test_populate_monthly_billing_updates_correct_month_in_aest(sample_template):
+def test_populate_monthly_billing_updates_correct_month_in_aet(sample_template):
     yesterday = datetime.utcnow() - timedelta(days=1)
     apr_month_start = datetime(2016, 3, 31, 13, 00, 00)
     apr_month_end = datetime(2016, 4, 30, 13, 59, 59, 999999)

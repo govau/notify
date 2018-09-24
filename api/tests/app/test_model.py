@@ -158,7 +158,7 @@ def test_notification_for_csv_returns_formatted_status(
 
 
 @freeze_time("2017-03-26 13:01:53.321312")
-def test_notification_for_csv_returns_aest_correctly(notify_db, notify_db_session):
+def test_notification_for_csv_returns_aet_correctly(notify_db, notify_db_session):
     notification = create_sample_notification_with_job(
         notify_db,
         notify_db_session,

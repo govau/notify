@@ -5,7 +5,9 @@ from flask import url_for
 from sqlalchemy import func
 from notifications_utils.template import SMSMessageTemplate, PlainTextEmailTemplate
 
-local_timezone = pytz.timezone("Australia/Sydney")
+# AET is Australian Eastern Time (https://www.timeanddate.com/time/zones/aet).
+aet_tz_str = "Australia/Sydney"
+aet_tz = pytz.timezone(aet_tz_str)
 
 
 def pagination_links(pagination, endpoint, **kwargs):
@@ -37,13 +39,13 @@ def get_template_instance(template, values):
 def get_sydney_midnight_in_utc(date):
     """
      This function takes in a local date, converts it to midnight (sets time to
-     00:00), then localizes to local_timezone. Finally, it converts it to UTC.
+     00:00), then localizes to aet_tz. Finally, it converts it to UTC.
      It drops the timezone information information because the database stores
      the timestamps without timezone.
      :param date: a localized datetime for which to calculate the Sydney midnight in UTC
      :return: the UTC datetime of Sydney midnight, for example 2016-11-26 = 2016-11-25 13:00:00 (13:00, not 14:00 because this date is during AEDT)
     """
-    return local_timezone.localize(datetime.combine(date, datetime.min.time())).astimezone(
+    return aet_tz.localize(datetime.combine(date, datetime.min.time())).astimezone(
         pytz.UTC).replace(
         tzinfo=None)
 
@@ -53,27 +55,34 @@ def get_midnight_for_day_before(date):
     return get_sydney_midnight_in_utc(day_before)
 
 
-def convert_utc_to_aest(utc_dt):
-    return pytz.utc.localize(utc_dt).astimezone(local_timezone).replace(tzinfo=None)
+def convert_utc_to_local(utc_dt, local_tz):
+    return pytz.utc.localize(utc_dt).astimezone(local_tz).replace(tzinfo=None)
 
 
-def convert_aest_to_utc(date):
-    return local_timezone.localize(date).astimezone(pytz.UTC).replace(tzinfo=None)
+def convert_utc_to_aet(utc_dt):
+    return convert_utc_to_local(utc_dt, aet_tz)
 
+
+def convert_local_to_utc(date, local_tz):
+    return local_tz.localize(date).astimezone(pytz.UTC).replace(tzinfo=None)
+
+
+def convert_aet_to_utc(date):
+    return convert_local_to_utc(date, aet_tz)
 
 def get_sydney_month_from_utc_column(column):
     """
      Where queries need to count notifications by month it needs to be
-     the month in AEST.
+     the month in AET.
      The database stores all timestamps as UTC without the timezone.
       - First set the timezone on created_at to UTC
-      - then convert the timezone to AEST (or Australia/Sydney)
+      - then convert the timezone to AET
       - lastly truncate the datetime to month with which we can group
         queries
     """
     return func.date_trunc(
         "month",
-        func.timezone("Australia/Sydney", func.timezone("UTC", column))
+        func.timezone(aet_tz_str, func.timezone("UTC", column))
     )
 
 

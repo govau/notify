@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from app.utils import convert_utc_to_aest
+from app.utils import convert_utc_to_aet
 from app.dao.date_util import get_financial_year, get_financial_year_start, get_month_start_and_end_date_in_utc
 
 
@@ -27,7 +27,7 @@ def test_get_financial_year_start():
 ])
 def test_get_month_start_and_end_date_in_utc(month, year, expected_start, expected_end):
     month_year = datetime(year, month, 10, 13, 30, 00)
-    month_year_in_aest = convert_utc_to_aest(month_year)
-    result = get_month_start_and_end_date_in_utc(month_year_in_aest)
+    month_year_in_aet = convert_utc_to_aet(month_year)
+    result = get_month_start_and_end_date_in_utc(month_year_in_aet)
     assert result[0] == expected_start
     assert result[1] == expected_end

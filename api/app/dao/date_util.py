@@ -2,12 +2,12 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from app.utils import convert_aest_to_utc
+from app.utils import convert_aet_to_utc, aet_tz
 
 
 def get_months_for_financial_year(year):
     return [
-        convert_aest_to_utc(month) for month in (
+        convert_aet_to_utc(month) for month in (
             get_months_for_year(7, 13, year) +
             get_months_for_year(1, 7, year + 1)
         )
@@ -31,7 +31,7 @@ def get_financial_year_start(year):
      :param year: the year for which to calculate the 1 July, 00:00 AEST
      :return: the datetime of 1 July for the given year, for example 2016 = 2016-06-30 14:00:00
     """
-    return pytz.timezone('Australia/Sydney').localize(datetime(year, 7, 1, 0, 0, 0)).astimezone(pytz.UTC).replace(
+    return aet_tz.localize(datetime(year, 7, 1, 0, 0, 0)).astimezone(pytz.UTC).replace(
         tzinfo=None)
 
 
@@ -45,7 +45,7 @@ def get_month_start_and_end_date_in_utc(month_year):
     _, num_days = calendar.monthrange(month_year.year, month_year.month)
     first_day = datetime(month_year.year, month_year.month, 1, 0, 0, 0)
     last_day = datetime(month_year.year, month_year.month, num_days, 23, 59, 59, 999999)
-    return convert_aest_to_utc(first_day), convert_aest_to_utc(last_day)
+    return convert_aet_to_utc(first_day), convert_aet_to_utc(last_day)
 
 
 def get_current_financial_year_start_year():
