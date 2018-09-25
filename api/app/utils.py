@@ -70,6 +70,7 @@ def convert_local_to_utc(date, local_tz):
 def convert_aet_to_utc(date):
     return convert_local_to_utc(date, aet_tz)
 
+
 def get_sydney_month_from_utc_column(column):
     """
      Where queries need to count notifications by month it needs to be
