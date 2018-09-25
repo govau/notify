@@ -20,6 +20,7 @@ from tests.app.db import create_notification, create_rate, create_letter_rate, c
 # year at the time of writing) so that our testing does not conflict with the
 # rates that are already in the database.
 
+
 def test_get_rates_for_daterange(notify_db, notify_db_session):
     set_up_rate(notify_db, datetime(2010, 8, 18), 0.016)
     set_up_rate(notify_db, datetime(2011, 6, 30, 14, 00), 0.0158)
