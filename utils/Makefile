@@ -30,6 +30,9 @@ tests:
 lint:
 	$(RUNNER) flake8 notifications_utils
 
+fmt:
+	$(RUNNER) autopep8 --in-place --recursive .
+
 test: lint tests
 
 clean:
@@ -42,4 +45,4 @@ clean-full:
 	-$(MAKE) clean
 	-$(PIPENV) --rm
 
-.PHONY: help build setup setup-dev test lint tests clean clean-full
+.PHONY: help build setup setup-dev test lint fmt tests clean clean-full

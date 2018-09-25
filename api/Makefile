@@ -66,6 +66,9 @@ test: lint tests
 lint:
 	$(RUNNER) flake8 .
 
+fmt:
+	$(RUNNER) autopep8 --in-place --recursive .
+
 tests: version-file
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
 
@@ -158,7 +161,7 @@ clean:
 
 .PHONY:
 	setup setup-dev setup-db \
-	setup-test-db test lint tests $(APP_TESTS) $(DAO_TESTS) test-roots \
+	setup-test-db test lint fmt tests $(APP_TESTS) $(DAO_TESTS) test-roots \
 	run run-celery \
 	deploy deploy-api deploy-celery \
 	run-production \
