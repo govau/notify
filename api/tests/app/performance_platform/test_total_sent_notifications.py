@@ -36,7 +36,7 @@ def test_send_total_notifications_sent_for_day_stats_stats_creates_correct_call(
     assert request_args['_id'] == expected_base64_id
 
 
-@freeze_time("2016-01-11 12:30:00") # 2016-01-11 11:30pm AEDT
+@freeze_time("2016-01-11 12:30:00")  # 2016-01-11 11:30pm AEDT
 def test_get_total_sent_notifications_yesterday_returns_expected_totals_dict(
     notify_db,
     notify_db_session,
@@ -54,8 +54,8 @@ def test_get_total_sent_notifications_yesterday_returns_expected_totals_dict(
     notification_history(notification_type='sms')
 
     # Create some notifications for the day before
-    yesterday = datetime(2016, 1, 10, 12, 30, 0, 0) # 2016-01-10 11:30pm AEDT
-    ereyesterday = datetime(2016, 1, 9, 12, 30, 0, 0) # 2016-01-09 11:30pm AEDT
+    yesterday = datetime(2016, 1, 10, 12, 30, 0, 0)  # 2016-01-10 11:30pm AEDT
+    ereyesterday = datetime(2016, 1, 9, 12, 30, 0, 0)  # 2016-01-09 11:30pm AEDT
     with freeze_time(yesterday):
         notification_history(notification_type='letter')
         notification_history(notification_type='sms')

@@ -9,7 +9,7 @@ from app.performance_platform.processing_time import (
 )
 
 
-@freeze_time('2016-07-17T16:00') # 2016-07-18 2:00am AEST
+@freeze_time('2016-07-17T16:00')  # 2016-07-18 2:00am AEST
 def test_send_processing_time_to_performance_platform_generates_correct_calls(mocker, sample_template):
     send_mock = mocker.patch('app.performance_platform.processing_time.send_processing_time_data')
 

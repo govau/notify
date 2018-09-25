@@ -322,8 +322,8 @@ def test_check_billable_units_when_billable_units_does_not_match_page_count(
 
 
 @pytest.mark.parametrize('filename_date, billing_date', [
-    ('20170820140000', date(2017, 8, 21)), # During AEST
-    ('20170120130000', date(2017, 1, 21)) # During AEDT
+    ('20170820140000', date(2017, 8, 21)),  # During AEST
+    ('20170120130000', date(2017, 1, 21))  # During AEDT
 ])
 def test_get_billing_date_in_aet_from_filename(filename_date, billing_date):
     filename = 'NOTIFY-{}-RSP.TXT'.format(filename_date)

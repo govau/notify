@@ -27,7 +27,7 @@ def test_get_notification_by_id_returns_200(
         template=sample_template,
         billable_units=billable_units,
         sent_by=provider,
-        scheduled_for="2017-05-12 15:15" # 3:15pm in AEST
+        scheduled_for="2017-05-12 15:15"  # 3:15pm in AEST
     )
 
     # another
@@ -35,7 +35,7 @@ def test_get_notification_by_id_returns_200(
         template=sample_template,
         billable_units=billable_units,
         sent_by=provider,
-        scheduled_for="2017-06-12 15:15" # 3:15pm in AEST
+        scheduled_for="2017-06-12 15:15"  # 3:15pm in AEST
     )
 
     auth_header = create_authorization_header(service_id=sample_notification.service_id)
@@ -152,7 +152,7 @@ def test_get_notification_by_reference_returns_200(client, sample_template):
 def test_get_notifications_returns_scheduled_for(client, sample_template):
     sample_notification_with_reference = create_notification(template=sample_template,
                                                              client_reference='some-client-reference',
-                                                             scheduled_for='2017-05-23 17:15') # 5:15pm in AEST
+                                                             scheduled_for='2017-05-23 17:15')  # 5:15pm in AEST
 
     auth_header = create_authorization_header(service_id=sample_notification_with_reference.service_id)
     response = client.get(
