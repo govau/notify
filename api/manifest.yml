@@ -1,6 +1,6 @@
----
 defaults: &defaults
-  buildpack: python_buildpack
+  buildpacks:
+    - python_buildpack
   instances: 1
   memory: 1G
   services:
@@ -12,21 +12,21 @@ defaults: &defaults
     - twilio
     - smtp
   env:
-    RUNNER: './vcapenvwrapper --root notify-shared --root notify-api --root aws --root telstra --root twilio --root smtp'
+    RUNNER: "./vcapenvwrapper --root notify-shared --root notify-api --root aws --root telstra --root twilio --root smtp"
     FLASK_APP: application.py
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify.gov.au
     API_HOST_NAME: https://rest-api.notify.gov.au
 
 applications:
-- name: notify-api
-  <<: *defaults
-  command: make run-production
-  routes:
-    - route: rest-api.notify.gov.au
-    - route: notify-api.apps.b.cld.gov.au
-- name: notify-celery
-  <<: *defaults
-  health-check-type: process
-  no-route: true
-  command: make run-celery
+  - name: notify-api
+    <<: *defaults
+    command: make run-production
+    routes:
+      - route: rest-api.notify.gov.au
+      - route: notify-api.apps.b.cld.gov.au
+  - name: notify-celery
+    <<: *defaults
+    health-check-type: process
+    no-route: true
+    command: make run-celery
