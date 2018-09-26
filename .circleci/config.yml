@@ -111,6 +111,10 @@ jobs:
       - *attach_workspace
       - run: make docs.setup
       - run: make docs.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docs
 
   test-admin:
     <<: *python_node_image
