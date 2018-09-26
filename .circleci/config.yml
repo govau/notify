@@ -1,6 +1,10 @@
 version: 2
 
 references:
+  node_image: &node_image
+    docker:
+      - image: circleci/node:10
+
   python_node_image: &python_node_image
     docker:
       - image: circleci/python:3.6.5-node
@@ -69,6 +73,7 @@ jobs:
             - api
             - admin
             - status
+            - docs
             - ci
 
   build-admin:
@@ -99,6 +104,13 @@ jobs:
       - *attach_workspace
       - run: make utils.setup
       - run: make utils.build
+
+  build-docs:
+    <<: *node_image
+    steps:
+      - *attach_workspace
+      - run: make docs.setup
+      - run: make docs.build
 
   test-admin:
     <<: *python_node_image
@@ -165,6 +177,14 @@ jobs:
       - *cf_login
       - run: make create-service-psql
       - run: make api.deploy-dev-celery
+
+  deploy-dev-docs:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make docs.deploy-dev
 
   deploy-prod-admin:
     <<: *deploy_image

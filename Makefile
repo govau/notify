@@ -58,7 +58,7 @@ cf-login-prod:
 	  CF_SPACE=notify\
 	  cf-login
 
-DIRS        = api admin utils status
+DIRS        = api admin utils status docs
 TARGETS     = setup setup-dev build check-vulnerabilities clean deploy deploy-dev test
 API_TARGETS = deploy-celery deploy-dev-celery
 ANY_TARGETS = $(TARGETS) $(API_TARGETS)
