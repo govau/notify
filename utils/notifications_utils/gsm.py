@@ -59,7 +59,7 @@ def get_unicode_char_from_codepoint(codepoint):
     # lets just make sure we aren't evaling anything weird
     if not set(codepoint) <= set('0123456789ABCDEF') or not len(codepoint) == 4:
         raise ValueError('{} is not a valid unicode codepoint'.format(codepoint))
-    return eval('"\\u{}"'.format(codepoint))
+    return eval('"\\u{}"'.format(codepoint)) # nosec
 
 
 def downgrade_character(c):
