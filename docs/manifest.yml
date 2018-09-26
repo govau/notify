@@ -1,0 +1,13 @@
+---
+defaults: &defaults
+  buildpack: staticfile_buildpack
+  instances: 1
+  memory: 32M
+  path: public
+
+applications:
+- name: notify-docs
+  <<: *defaults
+  routes:
+    - route: docs.notify.gov.au
+    - route: notify-docs.apps.b.cld.gov.au
