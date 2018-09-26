@@ -236,6 +236,10 @@ workflows:
           requires:
             - setup
 
+      - build-docs:
+          requires:
+            - setup
+
       - test-admin:
           requires:
             - setup
@@ -263,6 +267,10 @@ workflows:
       - deploy-dev-celery:
           requires:
             - build-api
+
+      - deploy-dev-docs:
+          requires:
+            - build-docs
 
       - cleanup-old-deploys:
           requires:
