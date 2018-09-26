@@ -64,13 +64,12 @@ def authenticate():
         {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not check_auth(current_app.config, request.authorization):
-            return authenticate()
-        return f(*args, **kwargs)
-    return decorated
+def requires_auth():
+    if request.endpoint == 'main.static_logo':
+        return None
+
+    if not check_auth(current_app.config, request.authorization):
+        return authenticate()
 
 
 def user_has_permissions(*permissions, **permission_kwargs):

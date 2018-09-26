@@ -146,7 +146,7 @@ def create_app(application):
 def init_app(application):
     application.after_request(useful_headers_after_request)
     application.after_request(save_service_or_org_after_request)
-    application.before_request(requires_auth(lambda: None))
+    application.before_request(requires_auth)
     application.before_request(load_service_before_request)
     application.before_request(load_organisation_before_request)
     application.before_request(request_helper.check_proxy_header_before_request)
