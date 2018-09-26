@@ -1,6 +1,6 @@
----
 defaults: &defaults
-  buildpack: python_buildpack
+  buildpacks:
+    - python_buildpack
   instances: 1
   memory: 1G
   services:
@@ -8,17 +8,17 @@ defaults: &defaults
     - notify-admin
     - aws
   env: &defaults_env
-    RUNNER: './vcapenvwrapper --root notify-shared --root notify-admin --root aws'
+    RUNNER: "./vcapenvwrapper --root notify-shared --root notify-admin --root aws"
     NOTIFY_ENVIRONMENT: production
   command: make run-gunicorn
 
 applications:
-- name: notify
-  <<: *defaults
-  routes:
-    - route: notify.gov.au
-    - route: notify.apps.b.cld.gov.au
-  env:
-    <<: *defaults_env
-    ADMIN_BASE_URL: https://notify.gov.au
-    API_HOST_NAME: https://rest-api.notify.gov.au
+  - name: notify
+    <<: *defaults
+    routes:
+      - route: notify.gov.au
+      - route: notify.apps.b.cld.gov.au
+    env:
+      <<: *defaults_env
+      ADMIN_BASE_URL: https://notify.gov.au
+      API_HOST_NAME: https://rest-api.notify.gov.au
