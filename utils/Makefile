@@ -45,4 +45,4 @@ clean-full:
 	-$(MAKE) clean
 	-$(PIPENV) --rm
 
-.PHONY: help build setup setup-dev test lint tests clean clean-full
+.PHONY: help build setup setup-dev test lint tests clean clean-full check-vulnerabilities
