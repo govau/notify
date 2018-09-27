@@ -45,7 +45,6 @@ deploy:
 create-service-mysql:
 	-$(CF) create-service mysql shared notify-mysql-status
 
-check-vulnerabilities:
 clean:
 
 
