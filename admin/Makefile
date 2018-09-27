@@ -91,7 +91,7 @@ deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
-	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
+	$(CF) zero-downtime-push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 clean:
 	-rm -r vendor

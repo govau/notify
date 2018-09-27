@@ -140,7 +140,7 @@ deploy: vendor requirements.txt ## Deploy prod application
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
-	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
+	$(CF) zero-downtime-push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 deploy-celery:
 	APP=notify-celery $(MAKE) deploy
