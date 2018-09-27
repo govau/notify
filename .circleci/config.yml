@@ -258,7 +258,7 @@ workflows:
             - test-utils
             - test-api
             - test-admin
-            - check-vulnerabilities
+            # - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
             - deploy-dev-celery
