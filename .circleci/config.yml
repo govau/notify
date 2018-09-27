@@ -34,7 +34,7 @@ references:
         mv ./cf bin/
         echo export PATH="$PWD/bin:\$PATH" >> $BASH_ENV
         source $BASH_ENV
-        cf install-plugin -f https://github.com/contraband/autopilot/releases/download/0.0.6/autopilot-linux
+        cf install-plugin -f https://github.com/contraband/autopilot/releases/download/0.0.8/autopilot-linux
 
   cf_login: &cf_login
     run:
