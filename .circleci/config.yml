@@ -113,7 +113,8 @@ jobs:
     steps:
       - *attach_workspace
       - run: make api.setup-dev
-      - run: make api.test
+      - run: make -C api test-notifications
+      - run: make -C api test-roots
 
   test-utils:
     <<: *python_node_postgres_images
