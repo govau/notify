@@ -228,9 +228,9 @@ workflows:
           requires:
             - setup
 
-      # - check-vulnerabilities:
-      #     requires:
-      #       - setup
+      - check-vulnerabilities:
+          requires:
+            - setup
 
       - deploy-dev-admin:
           requires:
