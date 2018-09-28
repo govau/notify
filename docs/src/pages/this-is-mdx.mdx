@@ -9,4 +9,22 @@ some content right here ay
 
 - love it
 
+```
+let session = 
+  Notify.Session.create
+    ~service_id:your_service_id
+    ~api_key:your_api_key
+    ()
+```
+
+```
+Notify.send_email_notification
+  ~template_id
+  ~email_address:"someone@example.com"
+  ~reference:"accdef"
+  session
+```
+
+
+
 <Button onClick={() => { alert('great job mate'); }}>Tell me now!</Button>

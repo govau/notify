@@ -3,8 +3,8 @@ import { Link } from 'gatsby'
 import styled from 'styled-components'
 
 const Wrapper = styled.div`
-  background: #072a31;
-  color: white;
+  background: ${props => props.theme.darkest};
+  color: ${props => props.theme.contentInverted};
   width: 100%;
 `
 
@@ -14,12 +14,12 @@ const Content = styled.div`
   max-width: 80rem;
 `
 
-const Heading = styled.h1`
+const Heading = styled.div`
   margin: 0;
 `
 
 const HeadingLink = styled(Link)`
-  color: white;
+  color: ${props => props.theme.contentInverted};
   text-decoration: none;
 `
 

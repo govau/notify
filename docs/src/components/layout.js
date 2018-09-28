@@ -6,6 +6,7 @@ import styled from 'styled-components'
 
 import Header from './header'
 import Footer from './footer'
+import Providers from './providers'
 import './layout.css'
 
 const Root = styled.div`
@@ -23,33 +24,35 @@ const Main = styled.div`
 `
 
 const Layout = ({ children }) => (
-  <StaticQuery
-    query={graphql`
-      query SiteTitleQuery {
-        site {
-          siteMetadata {
-            title
+  <Providers>
+    <StaticQuery
+      query={graphql`
+        query SiteTitleQuery {
+          site {
+            siteMetadata {
+              title
+            }
           }
         }
-      }
-    `}
-    render={data => (
-      <Root>
-        <Helmet
-          title={data.site.siteMetadata.title}
-          meta={[
-            { name: 'description', content: 'Sample' },
-            { name: 'keywords', content: 'sample, something' },
-          ]}
-        >
-          <html lang="en" />
-        </Helmet>
-        <Header siteTitle={data.site.siteMetadata.title} />
-        <Main>{children}</Main>
-        <Footer />
-      </Root>
-    )}
-  />
+      `}
+      render={data => (
+        <Root>
+          <Helmet
+            title={data.site.siteMetadata.title}
+            meta={[
+              { name: 'description', content: 'Sample' },
+              { name: 'keywords', content: 'sample, something' },
+            ]}
+          >
+            <html lang="en" />
+          </Helmet>
+          <Header siteTitle={data.site.siteMetadata.title} />
+          <Main>{children}</Main>
+          <Footer />
+        </Root>
+      )}
+    />
+  </Providers>
 )
 
 Layout.propTypes = {
