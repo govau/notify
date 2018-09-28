@@ -23,6 +23,7 @@ module.exports = {
         name: 'markdown-content',
       },
     },
+    'gatsby-mdx',
     'gatsby-transformer-remark',
     'gatsby-plugin-offline',
   ],

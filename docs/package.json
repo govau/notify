@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
+    "@mdx-js/mdx": "^0.15.4",
+    "@mdx-js/tag": "^0.15.0",
     "gatsby": "^2.0.0",
+    "gatsby-mdx": "^0.1.4",
     "gatsby-plugin-manifest": "^2.0.2",
     "gatsby-plugin-offline": "^2.0.5",
     "gatsby-plugin-react-helmet": "^3.0.0",

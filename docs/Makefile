@@ -51,8 +51,11 @@ clean:
 	-rm -r public
 	-rm manifest-vars-*
 
+clean-full: clean
+	-rm -r node_modules
+
 .PHONY:
-	help clean \
+	help clean clean-full \
 	setup setup-dev \
 	test run \
 	deploy deploy-dev
