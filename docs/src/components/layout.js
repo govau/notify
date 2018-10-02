@@ -9,7 +9,7 @@ import Footer from './footer'
 import Providers from './providers'
 import Sidenav from './sidenav'
 import { Wrapper } from './theme'
-import './layout.css'
+import './base.css'
 
 const Root = styled.div`
   display: flex;
@@ -22,7 +22,6 @@ const NavWrapper = styled.div`
 `
 
 const StickyNav = styled.div`
-  background-color: ${props => props.theme.subtle};
   position: sticky;
   top: 0;
   padding: 4rem;

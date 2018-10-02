@@ -1,9 +1,10 @@
 import React from 'react'
-import { Link, StaticQuery, graphql } from 'gatsby'
+import { StaticQuery, graphql } from 'gatsby'
 import styled from 'styled-components'
 
+import Link from './link'
+
 const NavWrapper = styled.nav`
-  background-color: ${props => props.theme.subtle};
 `
 
 const NavList = styled.ul`

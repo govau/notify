@@ -4,8 +4,6 @@ import ThemeProvider from './theme'
 
 import Code from './code'
 
-const langRegex = /language-(\w+)/g
-
 const getLanguage = props => {
   const re = /language-(\w+)/g
   const matches = re.exec(props.className)

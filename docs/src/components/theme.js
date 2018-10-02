@@ -7,6 +7,8 @@ const theme = {
   darker: '#01090E66',
   darkest: '#121212',
   subtle: '#F2F6F7',
+
+  tinted: '#005ea5',
   content: '#0B3442',
   contentSubtle: '#0A3443B3',
   contentInverted: '#DBDCDD',
