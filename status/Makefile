@@ -46,7 +46,7 @@ create-service-mysql:
 	-$(CF) create-service mysql shared notify-mysql-status
 
 check-vulnerabilities:
-clean:
 
+clean:
 
 .PHONY: setup setup-dev run deploy create-service-mysql setup-db migrate-db help clean check-vulnerabilities

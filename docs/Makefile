@@ -54,8 +54,10 @@ clean:
 clean-full: clean
 	-rm -r node_modules
 
+check-vulnerabilities:
+
 .PHONY:
-	help clean clean-full \
+	help clean clean-full check-vulnerabilities \
 	setup setup-dev \
 	test run \
 	deploy deploy-dev
