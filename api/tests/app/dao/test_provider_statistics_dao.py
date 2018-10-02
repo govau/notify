@@ -37,10 +37,10 @@ def test_get_fragment_count_filters_on_service_id(notify_db, sample_template, se
 
 
 @pytest.mark.parametrize('creation_time, expected_count', [
-    ('2000-03-31 22:59:59', 0),  # before the start of the year
-    ('2000-04-01 00:00:00', 1),  # after the start of the year
-    ('2001-03-31 22:59:59', 1),  # before the end of the year
-    ('2001-04-01 00:00:00', 0),  # after the end of the year
+    ('2000-06-30 13:59:59', 0),  # before the start of the FY year
+    ('2000-06-30 14:00:00', 1),  # after the start of the FY year
+    ('2001-06-30 13:59:59', 1),  # before the end of the FY year
+    ('2001-06-30 14:00:00', 0),  # after the end of the FY year
 ])
 def test_get_fragment_count_filters_on_year(
     notify_db, sample_template, creation_time, expected_count

@@ -51,6 +51,9 @@ test: version-file ## Run linter, python tests, node tests
 	$(MAKE) tests
 	$(NPM) test
 
+fmt:
+	$(RUNNER) autopep8 --in-place --recursive .
+
 tests: version-file
 	$(RUNNER) py.test -n4 tests
 
@@ -98,7 +101,7 @@ clean:
 
 .PHONY:
 	help clean \
-	test tests \
+	test fmt tests \
 	setup-frontend setup setup-dev \
 	run run-gunicorn \
 	deploy build-linux-wheels

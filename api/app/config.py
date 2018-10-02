@@ -175,7 +175,7 @@ class Config(object):
     """
 
     CELERY_ENABLE_UTC = True
-    CELERY_TIMEZONE = 'Europe/London'
+    CELERY_TIMEZONE = 'Australia/Sydney'
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_IMPORTS = ('app.celery.tasks', 'app.celery.scheduled_tasks', 'app.celery.reporting_tasks')

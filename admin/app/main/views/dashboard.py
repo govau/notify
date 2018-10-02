@@ -402,8 +402,8 @@ def get_months_for_financial_year(year, time_format='%B'):
     return [
         month.strftime(time_format)
         for month in (
-            get_months_for_year(4, 13, year) +
-            get_months_for_year(1, 4, year + 1)
+            get_months_for_year(7, 13, year) +
+            get_months_for_year(1, 7, year + 1)
         )
         if month < datetime.now()
     ]

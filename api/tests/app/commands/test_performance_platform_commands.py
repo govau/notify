@@ -11,9 +11,9 @@ def test_backfill_processing_time_works_for_correct_dates(mocker, notify_api):
     backfill_processing_time.callback.__wrapped__(datetime(2017, 8, 1), datetime(2017, 8, 3))
 
     assert send_mock.call_count == 3
-    send_mock.assert_any_call(datetime(2017, 7, 31, 23, 0), datetime(2017, 8, 1, 23, 0))
-    send_mock.assert_any_call(datetime(2017, 8, 1, 23, 0), datetime(2017, 8, 2, 23, 0))
-    send_mock.assert_any_call(datetime(2017, 8, 2, 23, 0), datetime(2017, 8, 3, 23, 0))
+    send_mock.assert_any_call(datetime(2017, 7, 31, 14, 00), datetime(2017, 8, 1, 14, 00))
+    send_mock.assert_any_call(datetime(2017, 8, 1, 14, 0), datetime(2017, 8, 2, 14, 0))
+    send_mock.assert_any_call(datetime(2017, 8, 2, 14, 0), datetime(2017, 8, 3, 14, 0))
 
 
 def test_backfill_totals_works_for_correct_dates(mocker, notify_api):
@@ -24,6 +24,6 @@ def test_backfill_totals_works_for_correct_dates(mocker, notify_api):
     backfill_performance_platform_totals.callback.__wrapped__(datetime(2017, 8, 1), datetime(2017, 8, 3))
 
     assert send_mock.call_count == 3
-    send_mock.assert_any_call(datetime(2017, 8, 1))
-    send_mock.assert_any_call(datetime(2017, 8, 2))
-    send_mock.assert_any_call(datetime(2017, 8, 3))
+    send_mock.assert_any_call(datetime(2017, 8, 1))  # UTC datetime
+    send_mock.assert_any_call(datetime(2017, 8, 2))  # UTC datetime
+    send_mock.assert_any_call(datetime(2017, 8, 3))  # UTC datetime

@@ -467,7 +467,7 @@ def create_annual_billing(
 
 
 def create_letter_rate(
-    start_date=datetime(2017, 1, 1, 00, 00, 00),
+    start_date=datetime(2016, 12, 31, 13, 00, 00),  # 2017-01-01 00:00 AEDT
     end_date=None,
     sheet_count=1,
     rate=0.31,

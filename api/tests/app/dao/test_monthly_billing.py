@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from functools import partial
 
@@ -20,23 +19,29 @@ from tests.app.db import (
     create_monthly_billing_entry,
     create_letter_rate)
 
-FEB_2016_MONTH_START = datetime(2016, 2, 1)
-FEB_2016_MONTH_END = datetime(2016, 2, 29, 23, 59, 59, 99999)
+FEB_2016_MONTH_START = datetime(2016, 1, 31, 13, 00, 00)
+FEB_2016_MONTH_END = datetime(2016, 2, 29, 12, 59, 59, 999999)
 
-MAR_2016_MONTH_START = datetime(2016, 3, 1)
-MAR_2016_MONTH_END = datetime(2016, 3, 31, 22, 59, 59, 99999)
+MAR_2016_MONTH_START = datetime(2016, 2, 29, 13, 00, 00)
+MAR_2016_MONTH_END = datetime(2016, 3, 31, 12, 59, 59, 999999)
 
-APR_2016_MONTH_START = datetime(2016, 3, 31, 23, 00, 00)
-APR_2016_MONTH_END = datetime(2016, 4, 30, 22, 59, 59, 99999)
+APR_2016_MONTH_START = datetime(2016, 3, 31, 13, 00, 00)
+APR_2016_MONTH_END = datetime(2016, 4, 30, 13, 59, 59, 999999)
 
-MAY_2016_MONTH_START = datetime(2016, 5, 31, 23, 00, 00)
-MAY_2016_MONTH_END = MAY_2016_MONTH_START + relativedelta(months=1, seconds=-1)
+MAY_2016_MONTH_START = datetime(2016, 4, 30, 14, 00, 00)
+MAY_2016_MONTH_END = datetime(2016, 5, 31, 13, 59, 59, 999999)
 
-APR_2017_MONTH_START = datetime(2017, 3, 31, 23, 00, 00)
-APR_2017_MONTH_END = datetime(2017, 4, 30, 23, 59, 59, 99999)
+JUL_2016_MONTH_START = datetime(2016, 6, 30, 14, 00, 00)
+JUL_2016_MONTH_END = datetime(2016, 7, 31, 13, 59, 59, 999999)
 
-JAN_2017_MONTH_START = datetime(2017, 1, 1)
-JAN_2017_MONTH_END = datetime(2017, 1, 31, 23, 59, 59, 99999)
+JAN_2017_MONTH_START = datetime(2016, 12, 31, 13, 00, 00)
+JAN_2017_MONTH_END = datetime(2017, 1, 31, 12, 59, 59, 999999)
+
+APR_2017_MONTH_START = datetime(2017, 3, 31, 13, 00, 00)
+APR_2017_MONTH_END = datetime(2017, 4, 30, 13, 59, 59, 999999)
+
+JUL_2017_MONTH_START = datetime(2017, 6, 30, 14, 00, 00)
+JUL_2017_MONTH_END = datetime(2017, 7, 31, 13, 59, 59, 999999)
 
 FEB_2017 = datetime(2017, 2, 15)
 APR_2016 = datetime(2016, 4, 10)
@@ -421,8 +426,13 @@ def test_get_yearly_billing_data_for_year_returns_within_year_only(
     monthly_billing_entry = partial(
         create_monthly_billing_entry, service=sample_template.service, notification_type=SMS_TYPE
     )
-    monthly_billing_entry(start_date=FEB_2016_MONTH_START, end_date=FEB_2016_MONTH_END)
     monthly_billing_entry(
+        start_date=FEB_2016_MONTH_START,
+        end_date=FEB_2016_MONTH_END,
+    )
+    monthly_billing_entry(
+        start_date=JUL_2016_MONTH_START,
+        end_date=JUL_2016_MONTH_END,
         monthly_totals=[{
             "billing_units": 138,
             "rate": 0.0158,
@@ -430,22 +440,25 @@ def test_get_yearly_billing_data_for_year_returns_within_year_only(
             "total_cost": 2.1804,
             "international": None
         }],
-        start_date=APR_2016_MONTH_START,
-        end_date=APR_2016_MONTH_END,
         notification_type=SMS_TYPE
     )
-    monthly_billing_entry(start_date=APR_2017_MONTH_START, end_date=APR_2017_MONTH_END)
+    monthly_billing_entry(
+        start_date=JUL_2017_MONTH_START,
+        end_date=JUL_2017_MONTH_END,
+    )
 
     billing_data = get_billing_data_for_financial_year(sample_template.service.id, 2016, [SMS_TYPE])
 
     assert len(billing_data) == 1
+    assert len(billing_data[0].monthly_totals) == 1
     assert billing_data[0].monthly_totals[0]['billing_units'] == 138
 
 
 def test_get_yearly_billing_data_for_year_returns_multiple_notification_types(sample_template):
     monthly_billing_entry = partial(
         create_monthly_billing_entry, service=sample_template.service,
-        start_date=APR_2016_MONTH_START, end_date=APR_2016_MONTH_END
+        start_date=JUL_2016_MONTH_START,
+        end_date=JUL_2016_MONTH_END,
     )
 
     monthly_billing_entry(
@@ -471,18 +484,19 @@ def test_get_yearly_billing_data_for_year_returns_multiple_notification_types(sa
     assert len(billing_data) == 2
 
     assert billing_data[0].notification_type == EMAIL_TYPE
+    assert len(billing_data[0].monthly_totals) == 1
     assert billing_data[0].monthly_totals[0]['billing_units'] == 2
     assert billing_data[1].notification_type == SMS_TYPE
 
 
-@freeze_time("2016-04-21 11:00:00")
+@freeze_time("2016-07-21 11:00:00")
 def test_get_yearly_billing_data_for_year_includes_current_day_totals(sample_template):
     create_rate(start_date=FEB_2016_MONTH_START, value=0.0158, notification_type=SMS_TYPE)
 
     create_monthly_billing_entry(
         service=sample_template.service,
-        start_date=APR_2016_MONTH_START,
-        end_date=APR_2016_MONTH_END,
+        start_date=JUL_2016_MONTH_START,
+        end_date=JUL_2016_MONTH_END,
         notification_type=SMS_TYPE
     )
 

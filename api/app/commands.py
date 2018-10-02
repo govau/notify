@@ -33,7 +33,7 @@ from app.models import PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
 from app.performance_platform.processing_time import (send_processing_time_for_start_and_end)
 from app.utils import (
     cache_key_for_service_template_usage_per_day,
-    get_london_midnight_in_utc,
+    get_sydney_midnight_in_utc,
     get_midnight_for_day_before,
 )
 
@@ -190,7 +190,8 @@ def populate_monthly_billing(year):
     Populate monthly billing table for all services for a given year.
     """
     def populate(service_id, year, month):
-        create_or_update_monthly_billing(service_id, datetime(year, month, 1))
+        # TODO: generated billing_month should be in UTC but this is untested.
+        create_or_update_monthly_billing(service_id, billing_month=datetime(year, month, 1))
         sms_res = get_monthly_billing_by_notification_type(
             service_id, datetime(year, month, 1), SMS_TYPE
         )
@@ -266,7 +267,7 @@ def backfill_processing_time(start_date, end_date):
         process_date = start_date + timedelta(days=i + 1)
 
         process_start_date = get_midnight_for_day_before(process_date)
-        process_end_date = get_london_midnight_in_utc(process_date)
+        process_end_date = get_sydney_midnight_in_utc(process_date)
 
         print('Sending notification processing-time for {} - {}'.format(
             process_start_date.isoformat(),
@@ -510,8 +511,8 @@ def populate_redis_template_usage(service_id, day):
         sys.exit(1)
 
     # the day variable is set by click to be midnight of that day
-    start_time = get_london_midnight_in_utc(day)
-    end_time = get_london_midnight_in_utc(day + timedelta(days=1))
+    start_time = get_sydney_midnight_in_utc(day)
+    end_time = get_sydney_midnight_in_utc(day + timedelta(days=1))
 
     usage = {
         str(row.template_id): row.count

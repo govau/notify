@@ -46,7 +46,7 @@ from app.models import (
 )
 
 from app.dao.dao_utils import transactional
-from app.utils import convert_utc_to_bst
+from app.utils import convert_utc_to_aet
 
 
 @statsd(namespace="dao")
@@ -318,7 +318,7 @@ def _filter_query(query, filter_dict=None):
 @statsd(namespace="dao")
 @transactional
 def delete_notifications_created_more_than_a_week_ago_by_type(notification_type):
-    seven_days_ago = convert_utc_to_bst(datetime.utcnow()).date() - timedelta(days=7)
+    seven_days_ago = convert_utc_to_aet(datetime.utcnow()).date() - timedelta(days=7)
     deleted = db.session.query(Notification).filter(
         func.date(Notification.created_at) < seven_days_ago,
         Notification.notification_type == notification_type,

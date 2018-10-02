@@ -185,11 +185,11 @@ def in_business_hours():
     if is_weekend(now) or is_bank_holiday(now):
         return False
 
-    return london_time_today_as_utc(9, 30) <= now < london_time_today_as_utc(17, 30)
+    return sydney_time_today_as_utc(9, 30) <= now < sydney_time_today_as_utc(17, 30)
 
 
-def london_time_today_as_utc(hour, minute):
-    return pytz.timezone('Europe/London').localize(
+def sydney_time_today_as_utc(hour, minute):
+    return pytz.timezone('Australia/Sydney').localize(
         datetime.now().replace(hour=hour, minute=minute)
     ).astimezone(pytz.utc)
 

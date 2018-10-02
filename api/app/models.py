@@ -38,7 +38,7 @@ from app import (
 )
 
 from app.history_meta import Versioned
-from app.utils import convert_utc_to_bst, convert_bst_to_utc
+from app.utils import convert_utc_to_aet, convert_aet_to_utc
 
 SMS_TYPE = 'sms'
 EMAIL_TYPE = 'email'
@@ -1298,7 +1298,7 @@ class Notification(db.Model):
             return self.status
 
     def serialize_for_csv(self):
-        created_at_in_bst = convert_utc_to_bst(self.created_at)
+        created_at_in_aet = convert_utc_to_aet(self.created_at)
         serialized = {
             "row_number": '' if self.job_row_number is None else self.job_row_number + 1,
             "recipient": self.to,
@@ -1306,7 +1306,7 @@ class Notification(db.Model):
             "template_type": self.template.template_type,
             "job_name": self.job.original_file_name if self.job else '',
             "status": self.formatted_status,
-            "created_at": time.strftime('%A %d %B %Y at %H:%M', created_at_in_bst.timetuple())
+            "created_at": time.strftime('%A %d %B %Y at %H:%M', created_at_in_aet.timetuple())
         }
 
         return serialized
@@ -1339,7 +1339,7 @@ class Notification(db.Model):
             "sent_at": self.sent_at.strftime(DATETIME_FORMAT) if self.sent_at else None,
             "completed_at": self.completed_at(),
             "scheduled_for": (
-                convert_bst_to_utc(
+                convert_aet_to_utc(
                     self.scheduled_notification.scheduled_for
                 ).strftime(DATETIME_FORMAT)
                 if self.scheduled_notification

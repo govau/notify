@@ -633,52 +633,52 @@ def test_fetch_monthly_historical_stats_separates_months(notify_db, notify_db_se
         sample_template
     )
     # _before_start_of_financial_year
-    notification_history(created_at=datetime(2016, 3, 31))
+    notification_history(created_at=datetime(2016, 6, 29, 12, 00))
     # start_of_financial_year
-    notification_history(created_at=datetime(2016, 4, 1))
-    # start_of_summer
-    notification_history(created_at=datetime(2016, 6, 20))
-    # start_of_autumn
-    notification_history(created_at=datetime(2016, 9, 30, 23, 30, 0))  # October because BST
+    notification_history(created_at=datetime(2016, 6, 30, 14, 00))
     # start_of_winter
-    notification_history(created_at=datetime(2016, 12, 1), status='delivered')
+    notification_history(created_at=datetime(2016, 7, 10))
     # start_of_spring
+    notification_history(created_at=datetime(2016, 9, 30, 14, 00, 00))
+    # start_of_summer
+    notification_history(created_at=datetime(2016, 11, 30, 13, 00), status='delivered')
+    # start_of_autumn
     notification_history(created_at=datetime(2017, 3, 11))
     # end_of_financial_year
-    notification_history(created_at=datetime(2017, 3, 31))
+    notification_history(created_at=datetime(2017, 6, 29, 12, 00))
     # _after_end_of_financial_year
-    notification_history(created_at=datetime(2017, 3, 31, 23, 30))  # after because BST
+    notification_history(created_at=datetime(2017, 6, 30, 14, 00))
 
     result = dao_fetch_monthly_historical_stats_for_service(sample_template.service_id, 2016)
 
-    for date, status, count in (
-        ('2016-04', 'sending', 0),
-        ('2016-04', 'delivered', 0),
-        ('2016-04', 'pending', 0),
-        ('2016-04', 'failed', 0),
-        ('2016-04', 'technical-failure', 0),
-        ('2016-04', 'temporary-failure', 0),
-        ('2016-04', 'permanent-failure', 0),
+    assert result.keys() == {
+        '2016-07', '2016-08', '2016-09',
+        '2016-10', '2016-11', '2016-12',
+        '2017-01', '2017-02', '2017-03',
+        '2017-04', '2017-05', '2017-06',
+    }
 
-        ('2016-06', 'created', 1),
+    for date, status, count in (
+        ('2016-07', 'created', 2),
 
         ('2016-10', 'created', 1),
 
         ('2016-12', 'created', 0),
         ('2016-12', 'delivered', 1),
 
-        ('2017-03', 'created', 2),
+        ('2017-03', 'created', 1),
+
+        ('2017-06', 'sending', 0),
+        ('2017-06', 'delivered', 0),
+        ('2017-06', 'pending', 0),
+        ('2017-06', 'failed', 0),
+        ('2017-06', 'technical-failure', 0),
+        ('2017-06', 'temporary-failure', 0),
+        ('2017-06', 'permanent-failure', 0),
     ):
         assert result[date]['sms'][status] == count
         assert result[date]['email'][status] == 0
         assert result[date]['letter'][status] == 0
-
-    assert result.keys() == {
-        '2016-04', '2016-05', '2016-06',
-        '2016-07', '2016-08', '2016-09',
-        '2016-10', '2016-11', '2016-12',
-        '2017-01', '2017-02', '2017-03',
-    }
 
 
 def test_dao_fetch_todays_total_message_count_returns_count_for_today(notify_db,
@@ -713,15 +713,16 @@ def test_dao_fetch_todays_stats_for_all_services_includes_all_services(notify_db
 
 
 def test_dao_fetch_todays_stats_for_all_services_only_includes_today(notify_db, notify_db_session):
-    with freeze_time('2001-01-01T23:59:00'):
-        # just_before_midnight_yesterday
+    # just_before_midnight_yesterday
+    with freeze_time('2001-01-01T12:59:00'):
         create_notification(notify_db, None, to_field='1', status='delivered')
 
-    with freeze_time('2001-01-02T00:01:00'):
-        # just_after_midnight_today
+    # just_after_midnight_today
+    with freeze_time('2001-01-01T13:01:00'):
         create_notification(notify_db, None, to_field='2', status='failed')
 
-    with freeze_time('2001-01-02T12:00:00'):
+    # today
+    with freeze_time('2001-01-02T13:00:00'):
         stats = dao_fetch_todays_stats_for_all_services()
 
     stats = {row.status: row.count for row in stats}

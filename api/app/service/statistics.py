@@ -18,9 +18,9 @@ def format_monthly_template_notification_stats(year, rows):
     stats = {
         datetime.strftime(date, '%Y-%m'): {}
         for date in [
-            datetime(year, month, 1) for month in range(4, 13)
+            datetime(year, month, 1) for month in range(7, 13)
         ] + [
-            datetime(year + 1, month, 1) for month in range(1, 4)
+            datetime(year + 1, month, 1) for month in range(1, 7)
         ]
     }
 

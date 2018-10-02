@@ -18,7 +18,7 @@ from app.models import (
 )
 from app.celery.tasks import (
     check_billable_units,
-    get_billing_date_in_bst_from_filename,
+    get_billing_date_in_aet_from_filename,
     persist_daily_sorted_letter_counts,
     process_updates_from_file,
     update_dvla_job_to_error,
@@ -206,9 +206,10 @@ def test_update_letter_notifications_statuses_persists_daily_sorted_letter_count
     mocker.patch('app.celery.tasks.s3.get_s3_file', return_value=valid_file)
     persist_letter_count_mock = mocker.patch('app.celery.tasks.persist_daily_sorted_letter_counts')
 
+    # 2017-08-23 16:08:12 UTC is 2017-08-24 02:08:12 AEST
     update_letter_notifications_statuses(filename='NOTIFY-20170823160812-RSP.TXT')
 
-    persist_letter_count_mock.assert_called_once_with(day=date(2017, 8, 23),
+    persist_letter_count_mock.assert_called_once_with(day=date(2017, 8, 24),
                                                       file_name='NOTIFY-20170823160812-RSP.TXT',
                                                       sorted_letter_counts={'Unsorted': 1, 'Sorted': 1})
 
@@ -225,9 +226,10 @@ def test_update_letter_notifications_statuses_persists_daily_sorted_letter_count
         sent_letter_1.reference, sent_letter_2.reference)
     mocker.patch('app.celery.tasks.s3.get_s3_file', return_value=valid_file)
 
+    # 2017-08-23 16:08:12 UTC is 2017-08-24 02:08:12 AEST
     update_letter_notifications_statuses(filename='NOTIFY-20170823160812-RSP.TXT')
 
-    daily_sorted_letter = dao_get_daily_sorted_letter_by_billing_day(date(2017, 8, 23))
+    daily_sorted_letter = dao_get_daily_sorted_letter_by_billing_day(date(2017, 8, 24))
 
     assert daily_sorted_letter.unsorted_count == 2
     assert daily_sorted_letter.sorted_count == 0
@@ -320,12 +322,12 @@ def test_check_billable_units_when_billable_units_does_not_match_page_count(
 
 
 @pytest.mark.parametrize('filename_date, billing_date', [
-    ('20170820230000', date(2017, 8, 21)),
-    ('20170120230000', date(2017, 1, 20))
+    ('20170820140000', date(2017, 8, 21)),  # During AEST
+    ('20170120130000', date(2017, 1, 21))  # During AEDT
 ])
-def test_get_billing_date_in_bst_from_filename(filename_date, billing_date):
+def test_get_billing_date_in_aet_from_filename(filename_date, billing_date):
     filename = 'NOTIFY-{}-RSP.TXT'.format(filename_date)
-    result = get_billing_date_in_bst_from_filename(filename)
+    result = get_billing_date_in_aet_from_filename(filename)
 
     assert result == billing_date
 

@@ -9,7 +9,7 @@ from app.performance_platform.processing_time import (
 )
 
 
-@freeze_time('2016-10-18T02:00')
+@freeze_time('2016-07-17T16:00')  # 2016-07-18 2:00am AEST
 def test_send_processing_time_to_performance_platform_generates_correct_calls(mocker, sample_template):
     send_mock = mocker.patch('app.performance_platform.processing_time.send_processing_time_data')
 
@@ -21,15 +21,15 @@ def test_send_processing_time_to_performance_platform_generates_correct_calls(mo
 
     send_processing_time_to_performance_platform()
 
-    send_mock.assert_any_call(datetime(2016, 10, 16, 23, 0), 'messages-total', 2)
-    send_mock.assert_any_call(datetime(2016, 10, 16, 23, 0), 'messages-within-10-secs', 1)
+    send_mock.assert_any_call(datetime(2016, 7, 16, 14, 0), 'messages-total', 2)
+    send_mock.assert_any_call(datetime(2016, 7, 16, 14, 0), 'messages-within-10-secs', 1)
 
 
 def test_send_processing_time_to_performance_platform_creates_correct_call_to_perf_platform(mocker):
     send_stats = mocker.patch('app.performance_platform.total_sent_notifications.performance_platform_client.send_stats_to_performance_platform')  # noqa
 
     send_processing_time_data(
-        date=datetime(2016, 10, 15, 23, 0, 0),
+        date=datetime(2016, 10, 15, 13, 0, 0),
         status='foo',
         count=142
     )

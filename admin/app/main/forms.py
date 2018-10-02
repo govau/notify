@@ -45,8 +45,8 @@ def get_time_value_and_label(future_time):
     return (
         future_time.replace(tzinfo=None).isoformat(),
         '{} at {}'.format(
-            get_human_day(future_time.astimezone(pytz.timezone('Europe/London'))),
-            get_human_time(future_time.astimezone(pytz.timezone('Europe/London')))
+            get_human_day(future_time.astimezone(pytz.timezone('Australia/Sydney'))),
+            get_human_time(future_time.astimezone(pytz.timezone('Australia/Sydney')))
         )
     )
 

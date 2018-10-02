@@ -211,8 +211,8 @@ def test_unescape_string(raw, expected):
 
 
 @pytest.mark.parametrize('provider_date, expected_output', [
-    ('2017-01-21+11%3A56%3A11', datetime(2017, 1, 21, 11, 56, 11)),
-    ('2017-05-21+11%3A56%3A11', datetime(2017, 5, 21, 10, 56, 11))
+    ('2017-01-21+11%3A56%3A11', datetime(2017, 1, 21, 00, 56, 11)),
+    ('2017-05-21+11%3A56%3A11', datetime(2017, 5, 21, 1, 56, 11))
 ])
 def test_format_mmg_datetime(provider_date, expected_output):
     assert format_mmg_datetime(provider_date) == expected_output
@@ -223,7 +223,7 @@ def test_create_inbound_mmg_sms_object(sample_service_full_permissions):
         'Message': 'hello+there+%F0%9F%93%A9',
         'Number': sample_service_full_permissions.get_inbound_number(),
         'MSISDN': '0412 345 678',
-        'DateRecieved': '2017-01-02+03%3A04%3A05',
+        'DateRecieved': '2017-01-02+03%3A00%3A00',
         'ID': 'bar',
     }
 
@@ -233,7 +233,7 @@ def test_create_inbound_mmg_sms_object(sample_service_full_permissions):
     assert inbound_sms.service_id == sample_service_full_permissions.id
     assert inbound_sms.notify_number == sample_service_full_permissions.get_inbound_number()
     assert inbound_sms.user_number == '61412345678'
-    assert inbound_sms.provider_date == datetime(2017, 1, 2, 3, 4, 5)
+    assert inbound_sms.provider_date == datetime(2017, 1, 1, 16, 00, 00)
     assert inbound_sms.provider_reference == 'bar'
     assert inbound_sms._content != 'hello there 📩'
     assert inbound_sms.content == 'hello there 📩'
@@ -337,7 +337,7 @@ def test_receive_notification_from_firetext_persists_message(notify_db_session, 
     assert persisted.service == service
     assert persisted.content == 'this is a message'
     assert persisted.provider == 'firetext'
-    assert persisted.provider_date == datetime(2017, 1, 1, 12, 0, 0, 0)
+    assert persisted.provider_date == datetime(2017, 1, 1, 1, 0, 0, 0)
     mocked.assert_called_once_with([str(persisted.id), str(service.id)], queue="notify-internal-tasks")
 
 

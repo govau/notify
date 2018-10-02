@@ -18,7 +18,7 @@ from app.models import (
     LetterRate,
     Service
 )
-from app.utils import get_london_month_from_utc_column
+from app.utils import get_sydney_month_from_utc_column
 
 
 @statsd(namespace="dao")
@@ -111,7 +111,7 @@ def is_between(date, start_date, end_date):
 
 @statsd(namespace="dao")
 def billing_data_per_month_query(rate, service_id, start_date, end_date, notification_type):
-    month = get_london_month_from_utc_column(NotificationHistory.created_at)
+    month = get_sydney_month_from_utc_column(NotificationHistory.created_at)
     if notification_type == SMS_TYPE:
         filter_subq = func.sum(NotificationHistory.billable_units).label('billing_units')
     elif notification_type == EMAIL_TYPE:
@@ -147,7 +147,7 @@ def rate_multiplier():
 
 @statsd(namespace="dao")
 def billing_letter_data_per_month_query(service_id, start_date, end_date):
-    month = get_london_month_from_utc_column(NotificationHistory.created_at)
+    month = get_sydney_month_from_utc_column(NotificationHistory.created_at)
     crown = Service.query.get(service_id).crown
     results = db.session.query(
         month.label('month'),

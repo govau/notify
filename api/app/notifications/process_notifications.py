@@ -32,8 +32,8 @@ from app.v2.errors import BadRequestError
 from app.utils import (
     cache_key_for_service_template_counter,
     cache_key_for_service_template_usage_per_day,
-    convert_bst_to_utc,
-    convert_utc_to_bst,
+    convert_aet_to_utc,
+    convert_utc_to_aet,
     get_template_instance,
 )
 
@@ -124,7 +124,7 @@ def persist_notification(
 
 
 def increment_template_usage_cache(service_id, template_id, created_at):
-    key = cache_key_for_service_template_usage_per_day(service_id, convert_utc_to_bst(created_at))
+    key = cache_key_for_service_template_usage_per_day(service_id, convert_utc_to_aet(created_at))
     redis_store.increment_hash_value(key, template_id)
     # set key to expire in eight days - we don't know if we've just created the key or not, so must assume that we
     # have and reset the expiry. Eight days is longer than any notification is in the notifications table, so we'll
@@ -168,7 +168,7 @@ def simulated_recipient(to_address, notification_type):
 
 
 def persist_scheduled_notification(notification_id, scheduled_for):
-    scheduled_datetime = convert_bst_to_utc(datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M"))
+    scheduled_datetime = convert_aet_to_utc(datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M"))
     scheduled_notification = ScheduledNotification(notification_id=notification_id,
                                                    scheduled_for=scheduled_datetime)
     dao_created_scheduled_notification(scheduled_notification)

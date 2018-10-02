@@ -71,7 +71,7 @@ from app.models import (
 )
 from app.notifications.process_notifications import persist_notification
 from app.service.utils import service_allowed_to_send_to
-from app.utils import convert_utc_to_bst
+from app.utils import convert_utc_to_aet
 
 
 @worker_process_shutdown.connect
@@ -431,7 +431,7 @@ def update_letter_notifications_statuses(self, filename):
                 )
                 raise DVLAException(message)
 
-            billing_date = get_billing_date_in_bst_from_filename(filename)
+            billing_date = get_billing_date_in_aet_from_filename(filename)
             persist_daily_sorted_letter_counts(day=billing_date,
                                                file_name=filename,
                                                sorted_letter_counts=sorted_letter_counts)
@@ -443,10 +443,10 @@ def update_letter_notifications_statuses(self, filename):
                 raise DVLAException(message)
 
 
-def get_billing_date_in_bst_from_filename(filename):
+def get_billing_date_in_aet_from_filename(filename):
     datetime_string = filename.split('-')[1]
     datetime_obj = datetime.strptime(datetime_string, '%Y%m%d%H%M%S')
-    return convert_utc_to_bst(datetime_obj).date()
+    return convert_utc_to_aet(datetime_obj).date()
 
 
 def persist_daily_sorted_letter_counts(day, file_name, sorted_letter_counts):

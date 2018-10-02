@@ -35,10 +35,10 @@ def test_populate_redis_template_usage_only_populates_for_today(mocker, notify_a
     create_notification(sample_template, created_at=datetime(2017, 6, 9, 23, 0, 0))
     create_notification(sample_template, created_at=datetime(2017, 6, 9, 23, 0, 0))
     create_notification(sample_template, created_at=datetime(2017, 6, 10, 0, 0, 0))
-    create_notification(sample_template, created_at=datetime(2017, 6, 10, 23, 0, 0))  # actually on 11th BST
+    create_notification(sample_template, created_at=datetime(2017, 6, 10, 14, 0, 0))  # actually on 11th AEST
 
     with set_config(notify_api, 'REDIS_ENABLED', True):
-        populate_redis_template_usage.callback.__wrapped__(sample_template.service_id, datetime(2017, 6, 10))
+        populate_redis_template_usage.callback.__wrapped__(sample_template.service_id, datetime(2017, 6, 10))  # 2017-06-10 is a local date
 
     mock_redis.set_hash_and_expire.assert_called_once_with(
         'service-{}-template-usage-2017-06-10'.format(sample_template.service_id),

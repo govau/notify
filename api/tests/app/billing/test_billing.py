@@ -23,11 +23,11 @@ from app.billing.rest import update_free_sms_fragment_limit_data
 
 from tests import create_authorization_header
 
-APR_2016_MONTH_START = datetime(2016, 3, 31, 23, 00, 00)
-APR_2016_MONTH_END = datetime(2016, 4, 30, 22, 59, 59, 99999)
+APR_2016_MONTH_START = datetime(2016, 3, 31, 13, 00, 00)
+APR_2016_MONTH_END = datetime(2016, 4, 30, 13, 59, 59, 999999)
 
-IN_MAY_2016 = datetime(2016, 5, 10, 23, 00, 00)
-IN_JUN_2016 = datetime(2016, 6, 3, 23, 00, 00)
+IN_MAY_2016 = datetime(2016, 5, 10, 14, 00, 00)
+IN_JUN_2016 = datetime(2016, 6, 3, 14, 00, 00)
 
 
 def _assert_dict_equals(actual, expected_dict):

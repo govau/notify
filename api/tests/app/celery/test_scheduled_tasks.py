@@ -58,7 +58,7 @@ from app.models import (
     LETTER_TYPE,
     SMS_TYPE
 )
-from app.utils import get_london_midnight_in_utc
+from app.utils import get_sydney_midnight_in_utc
 from app.celery.service_callback_tasks import create_encrypted_callback_data
 from app.v2.errors import JobIncompleteError
 from tests.app.db import (
@@ -321,7 +321,7 @@ def test_send_daily_performance_stats_calls_does_not_send_if_inactive(client, mo
     assert send_mock.call_count == 0
 
 
-@freeze_time("2016-01-11 12:30:00")
+@freeze_time("2016-01-11 12:30:00")  # 2016-01-11 11:30pm AEDT
 def test_send_total_sent_notifications_to_performance_platform_calls_with_correct_totals(
     notify_db,
     notify_db_session,
@@ -342,7 +342,7 @@ def test_send_total_sent_notifications_to_performance_platform_calls_with_correc
     notification_history(notification_type='sms')
 
     # Create some notifications for the day before
-    yesterday = datetime(2016, 1, 10, 15, 30, 0, 0)
+    yesterday = datetime(2016, 1, 10, 12, 45, 0, 0)  # 2016-01-10 11:45pm AEDT
     with freeze_time(yesterday):
         notification_history(notification_type='sms')
         notification_history(notification_type='sms')
@@ -359,8 +359,8 @@ def test_send_total_sent_notifications_to_performance_platform_calls_with_correc
         send_total_sent_notifications_to_performance_platform(yesterday)
 
         perf_mock.assert_has_calls([
-            call(get_london_midnight_in_utc(yesterday), 'sms', 2),
-            call(get_london_midnight_in_utc(yesterday), 'email', 3)
+            call(get_sydney_midnight_in_utc(yesterday), 'sms', 2),
+            call(get_sydney_midnight_in_utc(yesterday), 'email', 3)
         ])
 
 
@@ -722,11 +722,11 @@ def test_monday_alert_if_letter_notifications_still_sending_reports_friday_lette
     )
 
 
-@freeze_time("2017-07-12 02:00:00")
+@freeze_time("2017-07-12 16:00:00")  # 2am AEST
 def test_populate_monthly_billing_populates_correctly(sample_template):
-    yesterday = datetime(2017, 7, 11, 13, 30)
-    jul_month_start = datetime(2017, 6, 30, 23)
-    jul_month_end = datetime(2017, 7, 31, 22, 59, 59, 99999)
+    yesterday = datetime(2017, 7, 11, 13, 30)  # 11.30pm yesterday AEST
+    jul_month_start = datetime(2017, 6, 30, 14, 00, 00)
+    jul_month_end = datetime(2017, 7, 31, 13, 59, 59, 999999)
     create_rate(datetime(2016, 1, 1), 0.0123, 'sms')
 
     create_notification(template=sample_template, status='delivered', created_at=yesterday)
@@ -769,10 +769,10 @@ def test_populate_monthly_billing_populates_correctly(sample_template):
 
 
 @freeze_time("2016-04-01 23:00:00")
-def test_populate_monthly_billing_updates_correct_month_in_bst(sample_template):
+def test_populate_monthly_billing_updates_correct_month_in_aet(sample_template):
     yesterday = datetime.utcnow() - timedelta(days=1)
-    apr_month_start = datetime(2016, 3, 31, 23)
-    apr_month_end = datetime(2016, 4, 30, 22, 59, 59, 99999)
+    apr_month_start = datetime(2016, 3, 31, 13, 00, 00)
+    apr_month_end = datetime(2016, 4, 30, 13, 59, 59, 999999)
     create_rate(datetime(2016, 1, 1), 0.0123, 'sms')
     create_notification(template=sample_template, status='delivered', created_at=yesterday)
     populate_monthly_billing()

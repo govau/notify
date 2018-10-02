@@ -10,7 +10,7 @@ from app.dao.monthly_billing_dao import (
 from app.dao.date_util import get_months_for_financial_year
 from app.errors import register_errors
 from app.models import SMS_TYPE, EMAIL_TYPE, LETTER_TYPE
-from app.utils import convert_utc_to_bst
+from app.utils import convert_utc_to_aet
 from app.dao.annual_billing_dao import (dao_get_free_sms_fragment_limit_for_year,
                                         dao_get_all_free_sms_fragment_limit,
                                         dao_create_or_update_annual_billing_for_year,
@@ -91,7 +91,7 @@ def _get_total_billable_units_and_rate_for_notification_type(billing_data, noti_
 
 
 def _transform_billing_for_month_sms(billing_for_month):
-    month_name = datetime.strftime(convert_utc_to_bst(billing_for_month.start_date), "%B")
+    month_name = datetime.strftime(convert_utc_to_aet(billing_for_month.start_date), "%B")
     billing_units = rate = 0
 
     for total in billing_for_month.monthly_totals:
@@ -107,7 +107,7 @@ def _transform_billing_for_month_sms(billing_for_month):
 
 
 def _transform_billing_for_month_letters(billing_for_month):
-    month_name = datetime.strftime(convert_utc_to_bst(billing_for_month.start_date), "%B")
+    month_name = datetime.strftime(convert_utc_to_aet(billing_for_month.start_date), "%B")
     x = list()
 
     for total in billing_for_month.monthly_totals:
