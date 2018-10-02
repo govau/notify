@@ -2,16 +2,12 @@ import React from 'react'
 import { Link } from 'gatsby'
 import styled from 'styled-components'
 
-const Wrapper = styled.div`
+import { Wrapper } from './theme'
+
+const Root = styled.div`
   background: ${props => props.theme.darkest};
   color: ${props => props.theme.contentInverted};
   width: 100%;
-`
-
-const Content = styled.div`
-  margin: 0 auto;
-  padding: 1rem 2rem;
-  max-width: 80rem;
 `
 
 const Heading = styled.div`
@@ -24,11 +20,11 @@ const HeadingLink = styled(Link)`
 `
 
 export default ({ siteTitle }) => (
-  <Wrapper>
-    <Content>
+  <Root>
+    <Wrapper>
       <Heading>
         <HeadingLink to="/">{siteTitle}</HeadingLink>
       </Heading>
-    </Content>
-  </Wrapper>
+    </Wrapper>
+  </Root>
 )

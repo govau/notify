@@ -7,6 +7,8 @@ import styled from 'styled-components'
 import Header from './header'
 import Footer from './footer'
 import Providers from './providers'
+import Sidenav from './sidenav'
+import { Wrapper } from './theme'
 import './layout.css'
 
 const Root = styled.div`
@@ -15,13 +17,12 @@ const Root = styled.div`
   min-height: 100vh;
 `
 
-const Main = styled.div`
-  margin: 0 auto;
-  padding: 1rem 2rem;
-  max-width: 80rem;
+const Main = styled(Wrapper)`
   flex: 1 0 auto;
-  width: 100%;
+  display: flex;
 `
+
+const Content = styled.div``
 
 const Layout = ({ children }) => (
   <Providers>
@@ -47,7 +48,10 @@ const Layout = ({ children }) => (
             <html lang="en" />
           </Helmet>
           <Header siteTitle={data.site.siteMetadata.title} />
-          <Main>{children}</Main>
+          <Main>
+            <Content>{children}</Content>
+            <Sidenav />
+          </Main>
           <Footer />
         </Root>
       )}

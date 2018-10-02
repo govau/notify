@@ -1,11 +1,11 @@
 import React from 'react'
-import { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 
 const theme = {
   highlight: '#37C2F3',
   dark: '#062032',
-  darker: '#062032',
-  darkest: '#01090E66',
+  darker: '#01090E66',
+  darkest: '#121212',
   content: '#0B3442',
   contentSubtle: '#0A3443B3',
   contentInverted: '#DBDCDD',
@@ -13,4 +13,11 @@ const theme = {
 
 const Provider = props => <ThemeProvider theme={theme} {...props} />
 
-export { Provider as default, theme }
+const Wrapper = styled.section`
+  margin: 0 auto;
+  max-width: 92rem;
+  width: 100%;
+  padding: 1rem 2rem;
+`
+
+export { Provider as default, theme, Wrapper }

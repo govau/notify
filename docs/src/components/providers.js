@@ -8,9 +8,10 @@ export default ({ children }) => (
   <ThemeProvider>
     <MDXProvider
       components={{
-        code: ({ children }) => {
-          return <Code language="ocaml">{children}</Code>
-        },
+        pre: React.Fragment,
+        code: ({ children, ...props }) => (
+          <Code language={props.lang}>{children}</Code>
+        ),
       }}
     >
       {children}
