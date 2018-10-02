@@ -53,7 +53,7 @@
   <ul>
   {{ nav_item(
     url_for('.service_dashboard', service_id=current_service.id),
-    'Service overview',
+    'Dashboard',
     active=request.path == url_for('.service_dashboard', service_id=current_service.id))
   }}
   {% if current_user.has_permissions('view_activity') %}
