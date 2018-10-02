@@ -123,6 +123,15 @@ jobs:
       - run: echo 're-enable tests here'
       - run: echo 'make utils.test'
 
+  check-vulnerabilities:
+    <<: *python_node_postgres_images
+    steps:
+      - *attach_workspace
+      - run: make admin.setup-dev
+      - run: make api.setup-dev
+      - run: make utils.setup-dev
+      - run: make check-vulnerabilities
+
   cleanup-old-deploys:
     <<: *undeploy_image
     steps:
@@ -219,6 +228,10 @@ workflows:
           requires:
             - setup
 
+      - check-vulnerabilities:
+          requires:
+            - setup
+
       - deploy-dev-admin:
           requires:
             - build-admin
@@ -243,6 +256,7 @@ workflows:
             - test-utils
             - test-api
             - test-admin
+            - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
             - deploy-dev-celery

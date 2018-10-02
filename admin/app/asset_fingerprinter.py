@@ -36,7 +36,7 @@ class AssetFingerprinter(object):
         return self._cache[asset_path]
 
     def get_asset_fingerprint(self, asset_file_path):
-        return hashlib.md5(
+        return hashlib.md5( # nosec
             self.get_asset_file_contents(asset_file_path).encode('utf-8')
         ).hexdigest()
 

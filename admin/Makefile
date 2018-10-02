@@ -54,6 +54,9 @@ test: version-file ## Run linter, python tests, node tests
 tests: version-file
 	$(RUNNER) py.test -n4 tests
 
+check-vulnerabilities:
+	$(RUNNER) bandit -r . -x node_modules,tests -ll
+
 run-gulp: ## Continuously build css
 	$(NPM) run watch
 
@@ -101,4 +104,5 @@ clean:
 	test tests \
 	setup-frontend setup setup-dev \
 	run run-gunicorn \
-	deploy build-linux-wheels
+	deploy build-linux-wheels \
+	check-vulnerabilities
