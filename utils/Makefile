@@ -27,6 +27,9 @@ build:
 tests:
 	$(RUNNER) python setup.py test
 
+check-vulnerabilities:
+	$(RUNNER) bandit -r . -x tests -ll
+
 lint:
 	$(RUNNER) flake8 notifications_utils
 
@@ -45,4 +48,4 @@ clean-full:
 	-$(MAKE) clean
 	-$(PIPENV) --rm
 
-.PHONY: help build setup setup-dev test lint fmt tests clean clean-full
+.PHONY: help build setup setup-dev test lint fmt tests clean clean-full check-vulnerabilities

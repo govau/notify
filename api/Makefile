@@ -69,6 +69,9 @@ lint:
 fmt:
 	$(RUNNER) autopep8 --in-place --recursive .
 
+check-vulnerabilities:
+	$(RUNNER) bandit -x migration,tests,app/commands.py -r . -ll
+
 tests: version-file
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
 
@@ -165,4 +168,4 @@ clean:
 	run run-celery \
 	deploy deploy-api deploy-celery \
 	run-production \
-	create-migration help clean
+	create-migration help clean check-vulnerabilities

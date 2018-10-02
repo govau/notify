@@ -7,6 +7,7 @@ name = "pypi"
 notifications-utils = {editable = true, path = "."}
 
 [dev-packages]
+bandit = "==1.5.1"
 pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
