@@ -2,7 +2,9 @@ import React from 'react'
 import { Link, StaticQuery, graphql } from 'gatsby'
 import styled from 'styled-components'
 
-const NavWrapper = styled.nav``
+const NavWrapper = styled.nav`
+  background-color: ${props => props.theme.subtle};
+`
 
 const NavList = styled.ul`
   list-style: none;
@@ -12,50 +14,52 @@ const NavList = styled.ul`
 const NavItem = styled.li``
 
 const Nav = props => (
-  <NavWrapper>
+  <NavWrapper {...props}>
     <NavList {...props} />
   </NavWrapper>
 )
 
 export default props => (
-  <Nav>
-    <NavItem>
-      <Link to="/this-is-mdx">Getting started</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Set up the client</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Send a message</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Get message status</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Get a template</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Get received text messages</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Testing</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">API keys</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Limits</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Callbacks</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">API architecture</Link>
-    </NavItem>
-    <NavItem>
-      <Link to="/this-is-mdx">Support</Link>
-    </NavItem>
-  </Nav>
+  <NavWrapper {...props}>
+    <NavList>
+      <NavItem>
+        <Link to="/this-is-mdx">Getting started</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/setup-client">Set up the client</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Send a message</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Get message status</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Get a template</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Get received text messages</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Testing</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">API keys</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Limits</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Callbacks</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">API architecture</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/this-is-mdx">Support</Link>
+      </NavItem>
+    </NavList>
+  </NavWrapper>
 )
 
 export const dynamic = props => (

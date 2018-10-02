@@ -17,12 +17,33 @@ const Root = styled.div`
   min-height: 100vh;
 `
 
+const NavWrapper = styled.div`
+  flex: 0 0 300px;
+`
+
+const StickyNav = styled.div`
+  background-color: ${props => props.theme.subtle};
+  position: sticky;
+  top: 0;
+  padding: 4rem;
+  overflow-y: auto;
+`
+
 const Main = styled(Wrapper)`
   flex: 1 0 auto;
   display: flex;
+  position: relative;
 `
 
-const Content = styled.div``
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  justify-content: flex-start;
+  align-items: stretch;
+`
 
 const Layout = ({ children }) => (
   <Providers>
@@ -50,7 +71,11 @@ const Layout = ({ children }) => (
           <Header siteTitle={data.site.siteMetadata.title} />
           <Main>
             <Content>{children}</Content>
-            <Sidenav />
+            <NavWrapper>
+              <StickyNav>
+                <Sidenav />
+              </StickyNav>
+            </NavWrapper>
           </Main>
           <Footer />
         </Root>

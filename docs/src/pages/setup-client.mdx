@@ -1,0 +1,26 @@
+import Layout from '../components/layout'
+
+export default Layout
+
+
+## Install the client
+
+Run the following code in the command line:
+
+```shell
+pip install notifications-python-client
+```
+
+Refer to the [client changelog](https://github.com/alphagov/notifications-python-client/blob/master/CHANGELOG.md) for the client version number and the latest updates.
+
+## Create a new instance of the client
+
+Add this code to your application:
+
+```python
+from notifications_python_client.notifications import NotificationsAPIClient
+
+notifications_client = NotificationsAPIClient(api_key)
+```
+
+To get an API key, [sign in to GOV.UK Notify](https://www.notifications.service.gov.uk/) and go to the __API integration__ page. You can find more information in the [API keys](#api-keys) section of this documentation.

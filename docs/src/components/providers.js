@@ -4,13 +4,22 @@ import ThemeProvider from './theme'
 
 import Code from './code'
 
+const langRegex = /language-(\w+)/g
+
+const getLanguage = props => {
+  const re = /language-(\w+)/g
+  const matches = re.exec(props.className)
+
+  return props.lang ? props.lang : matches ? matches[1] : undefined
+}
+
 export default ({ children }) => (
   <ThemeProvider>
     <MDXProvider
       components={{
         pre: React.Fragment,
         code: ({ children, ...props }) => (
-          <Code language={props.lang}>{children}</Code>
+          <Code language={getLanguage(props)}>{children}</Code>
         ),
       }}
     >

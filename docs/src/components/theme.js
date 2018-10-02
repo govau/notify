@@ -6,6 +6,7 @@ const theme = {
   dark: '#062032',
   darker: '#01090E66',
   darkest: '#121212',
+  subtle: '#F2F6F7',
   content: '#0B3442',
   contentSubtle: '#0A3443B3',
   contentInverted: '#DBDCDD',
@@ -15,9 +16,8 @@ const Provider = props => <ThemeProvider theme={theme} {...props} />
 
 const Wrapper = styled.section`
   margin: 0 auto;
-  max-width: 92rem;
+  max-width: 120rem;
   width: 100%;
-  padding: 1rem 2rem;
 `
 
 export { Provider as default, theme, Wrapper }
