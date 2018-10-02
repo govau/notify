@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'gatsby'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
-export default styled(Link)`
+const styles = css`
   & {
     color: ${props => props.theme.tinted};
     text-decoration: none;
@@ -14,3 +14,17 @@ export default styled(Link)`
     background-color: ${props => props.theme.highlight};
   }
 `
+
+export default styled(Link)`
+  ${styles};
+`
+
+const ExternalX = styled.a`
+  ${styles};
+`
+
+const blankProps = { target: '_blank', rel: 'noopener noreferrer' }
+
+export const External = ({ blank, ...props }) => (
+  <ExternalX {...(blank ? blankProps : null)} {...props} />
+)

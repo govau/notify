@@ -14,6 +14,11 @@ const theme = {
   contentInverted: '#DBDCDD',
 }
 
+const dark = {
+  tinted: 'white',
+  highlight: 'red',
+}
+
 const Provider = props => <ThemeProvider theme={theme} {...props} />
 
 const Wrapper = styled.section`
@@ -22,4 +27,4 @@ const Wrapper = styled.section`
   width: 100%;
 `
 
-export { Provider as default, theme, Wrapper }
+export { Provider as default, theme, dark, Wrapper }
