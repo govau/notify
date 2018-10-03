@@ -1,0 +1,10 @@
+---
+defaults: &defaults
+  buildpack: staticfile_buildpack
+  instances: 1
+  memory: 32M
+  path: public
+
+applications:
+- name: notify-((stg))
+  <<: *defaults

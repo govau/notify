@@ -1,0 +1,37 @@
+import Layout from '../components/layout'
+import Button from '../components/button'
+
+export default Layout
+
+# My MDX
+
+some content right here ay
+
+- love it
+- yeah
+
+```ocaml
+let session = 
+  Notify.Session.create
+    ~service_id:your_service_id
+    ~api_key:your_api_key
+    ()
+```
+
+and another thing
+
+```ocaml lang=OCaml
+Notify.send_email_notification
+  ~template_id
+  ~email_address:"someone@example.com"
+  ~reference:"accdef"
+  session
+```
+
+```python lang=Python
+def whatever(first, second):
+    return 'forever %s never %d' % (first, second)
+```
+
+
+<Button onClick={() => { alert('great job mate'); }}>Tell me now!</Button>
