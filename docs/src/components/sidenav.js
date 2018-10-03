@@ -24,11 +24,27 @@ export default props => (
   <NavWrapper {...props}>
     <NavList>
       <NavItem>
-        <Link to="/this-is-mdx">Getting started</Link>
+        <Link to="/getting-started">Getting started</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/installation">Installation</Link>
       </NavItem>
       <NavItem>
         <Link to="/setup-client">Set up the client</Link>
       </NavItem>
+      <NavItem>
+        <Link to="/sending-text-messages">Sending text messages</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/sending-email-messages">Sending email messages</Link>
+      </NavItem>
+      <NavItem>
+        <Link to="/check-available-templates">Check available templates</Link>
+      </NavItem>
+
+
+      <hr />
+      
       <NavItem>
         <Link to="/this-is-mdx">Send a message</Link>
       </NavItem>
