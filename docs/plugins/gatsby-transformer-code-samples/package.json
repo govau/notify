@@ -1,0 +1,11 @@
+{
+    "name": "gatsby-transformer-code-samples",
+    "description": "Gatsby transformer plugin to pull code samples",
+    "license": "MIT",
+    "keywords": [
+      "gatsby",
+      "gatsby-plugin",
+      "code-samples"
+    ]
+  }
+  
