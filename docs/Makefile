@@ -30,6 +30,9 @@ setup-dev:
 test:
 	echo 'all g.'
 
+fmt:
+	$(RUNNER) fmt
+
 run:
 	$(RUNNER) develop
 
@@ -59,5 +62,5 @@ check-vulnerabilities:
 .PHONY:
 	help clean clean-full check-vulnerabilities \
 	setup setup-dev \
-	test run \
+	fmt test run \
 	deploy deploy-dev
