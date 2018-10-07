@@ -25,12 +25,12 @@ def upgrade():
         return
 
     if os.environ['CREATE_ADMIN_USER'].lower() == 'true':
-        print('Attempting to create notify-service-admin@digital.gov.au user...')
+        print('Attempting to create notify-dev@digital.gov.au user...')
         insert_user = """INSERT INTO users (id, name, email_address, created_at, password_changed_at, failed_login_count, _password, mobile_number, state, platform_admin, auth_type)
                          VALUES ('{}', 'Notify Admin', 'notify-dev@digital.gov.au', '{}', '{}', 0,'{}', '+61408184363', 'active', True, 'sms_auth')
                       """
         op.execute(insert_user.format(admin_user_id, datetime.utcnow(), datetime.utcnow(), hashpw(str(uuid.uuid4()))))
-        print('Successfully created notify-service-admin@digital.gov.au user')
+        print('Successfully created notify-dev@digital.gov.au user')
 
 
 def downgrade():
