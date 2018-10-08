@@ -31,6 +31,7 @@ endif
 SERVICES     = notify-shared notify-api notify-admin aws smtp telstra twilio
 SVC_APPLIED  = $(SERVICES:%=apply-service-%)
 SVC_CREATED  = $(SERVICES:%=create-service-%)
+SVC_DIFFED   = $(SERVICES:%=diff-service-%)
 APPLY_ACTION?= update
 
 PSQL_SVC_NAME ?= notify-psql-dev
@@ -79,6 +80,13 @@ $(SVC_APPLIED): apply-service-%: ci/ups/$(CLD_HOST)/%.json
 
 $(SVC_CREATED): create-service-%:
 	$(MAKE) apply-service-$* APPLY_ACTION=create
+
+$(SVC_DIFFED): SHELL = /bin/bash
+$(SVC_DIFFED): diff-service-%:
+	@diff \
+	  <(cf curl "/v2/user_provided_service_instances?q=name:$*" | jq -S ".resources[].entity.credentials") \
+	  <(jq -S . ci/ups/$(CLD_HOST)/$*.json) 
+
 
 create-service-psql:
 	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
