@@ -6,6 +6,7 @@ CF_ORG      ?= dta
 CF_SPACE    ?= notifications
 CF_HOME     ?= $(HOME)
 CF          ?= cf
+JQ          ?= jq
 
 # deploys can respond to STG env variable if they support
 # feature branches or alternate production builds
@@ -84,8 +85,8 @@ $(SVC_CREATED): create-service-%:
 $(SVC_DIFFED): SHELL = /bin/bash
 $(SVC_DIFFED): diff-service-%:
 	@diff \
-	  <(cf curl "/v2/user_provided_service_instances?q=name:$*" | jq -S ".resources[].entity.credentials") \
-	  <(jq -S . ci/ups/$(CLD_HOST)/$*.json) 
+	  <($(CF) curl "/v2/user_provided_service_instances?q=name:$*" | $(JQ) -S ".resources[].entity.credentials") \
+	  <($(JQ) -S . ci/ups/$(CLD_HOST)/$*.json)
 
 
 create-service-psql:
