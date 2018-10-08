@@ -13,7 +13,6 @@ const Heading = styled.header`
   display: flex;
   justify-content: space-between;
   padding: 2rem;
-  font-family: 'system-ui';
 `
 
 const Language = styled.span`
@@ -34,7 +33,12 @@ export default props => (
     <Content>
       <SyntaxHighligher
         style={tomorrowNight}
-        customStyle={{ background: 'none', margin: '0', padding: '0' }}
+        customStyle={{
+          background: 'none',
+          margin: '0',
+          padding: '0',
+          overflowX: 'scroll',
+        }}
         {...props}
       />
     </Content>

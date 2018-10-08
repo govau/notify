@@ -9,12 +9,15 @@ import Footer from './footer'
 import Providers from './providers'
 import Sidenav from './sidenav'
 import { Wrapper } from './theme'
-import './base.css'
+import 'sanitize.css'
+import './core/index.css'
 
 const Root = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+
+  color: ${props => props.theme.content};
 `
 
 const NavWrapper = styled.div`
@@ -42,6 +45,7 @@ const Content = styled.div`
   flex-basis: auto;
   justify-content: flex-start;
   align-items: stretch;
+  overflow: hidden;
 `
 
 const Layout = ({ children }) => (

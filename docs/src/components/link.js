@@ -4,8 +4,8 @@ import styled, { css } from 'styled-components'
 
 const styles = css`
   & {
-    color: ${props => props.theme.tinted};
-    text-decoration: none;
+    color: ${props => props.theme.content};
+    text-decoration: underline;
   }
 
   &:hover,
