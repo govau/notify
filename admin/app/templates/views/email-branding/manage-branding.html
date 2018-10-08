@@ -15,8 +15,7 @@
 
       {% if logo %}
         <div id="logo-img">
-            {# TODO: use a real cdn url here when we make one #}
-          <img src="//{{ cdn_url }}/static-logo/{{ logo }}"/>
+          <img src="https://{{ cdn_url }}/{{ logo }}"/>
         </div>
       {% endif %}
       {{ file_upload(form.file, button_text='{} logo'.format('Update' if email_branding else 'Upload')) }}

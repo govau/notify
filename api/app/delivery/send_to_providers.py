@@ -182,11 +182,9 @@ def provider_to_use(notification_type, notification_id, international=False):
 
 
 def get_logo_url(base_url, logo_file):
-    # TODO: point this to our real cdn when we get one
-
     parsed_uri = parse.urlparse(base_url)
     return parsed_uri._replace(
-        path='/static-logo/{}'.format(logo_file),
+        path='/{}'.format(logo_file),
         params='',
         query='',
         fragment=''
@@ -199,7 +197,7 @@ def get_html_email_options(service):
     if service.branding != BRANDING_GOVAU and service.email_branding:
 
         logo_url = get_logo_url(
-            current_app.config['ADMIN_BASE_URL'],
+            current_app.config['CDN_BASE_URL'],
             service.email_branding.logo
         ) if service.email_branding.logo else None
 

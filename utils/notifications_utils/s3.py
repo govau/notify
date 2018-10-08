@@ -8,6 +8,7 @@ from flask import current_app
 def s3upload(
         filedata, region, bucket_name, file_location,
         content_type='binary/octet-stream',
+        acl=None,
         tags=None,
         session=None):
 
@@ -36,7 +37,8 @@ def s3upload(
     put_args = {
         'Body': contents,
         'ServerSideEncryption': 'AES256',
-        'ContentType': content_type
+        'ContentType': content_type,
+        'ACL': acl,
     }
 
     if tags:
