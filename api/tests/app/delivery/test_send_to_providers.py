@@ -459,7 +459,7 @@ def test_get_html_email_renderer_prepends_logo_path(notify_api):
 
     renderer = send_to_providers.get_html_email_options(service)
 
-    assert renderer['brand_logo'] == 'http://localhost:6012/static-logo/justice-league.png'
+    assert renderer['brand_logo'] == 'https://notify-static-logos-staging.static.cld.gov.au/justice-league.png'
 
 
 def test_get_html_email_renderer_handles_email_branding_without_logo(notify_api):
@@ -475,16 +475,17 @@ def test_get_html_email_renderer_handles_email_branding_without_logo(notify_api)
 
 
 @pytest.mark.parametrize('base_url, expected_url', [
-    # don't change localhost to prevent errors when testing locally
-    ('http://localhost:6012', 'http://localhost:6012/static-logo/filename.png'),
-    ('https://www.notify.gov.au', 'https://www.notify.gov.au/static-logo/filename.png'),
-    ('https://notify.works', 'https://notify.works/static-logo/filename.png'),
-    ('https://staging-notify.works', 'https://staging-notify.works/static-logo/filename.png'),
-    ('https://www.notify.works', 'https://www.notify.works/static-logo/filename.png'),
-    ('https://www.staging-notify.works', 'https://www.staging-notify.works/static-logo/filename.png'),
+    ('http://localhost:6012', 'http://localhost:6012/f.png'),
+    ('https://static-logos.example.com', 'https://static-logos.example.com/f.png'),
+    # Extra path stripped
+    ('https://static-logos.example.com/extra', 'https://static-logos.example.com/f.png'),
+    # Query params stripped
+    ('https://static-logos.example.com/?a=b', 'https://static-logos.example.com/f.png'),
+    # Fragment stripped
+    ('https://static-logos.example.com/#a', 'https://static-logos.example.com/f.png'),
 ])
-def test_get_logo_url_works_for_different_environments(base_url, expected_url):
-    logo_file = 'filename.png'
+def test_get_logo_url(base_url, expected_url):
+    logo_file = 'f.png'
 
     logo_url = send_to_providers.get_logo_url(base_url, logo_file)
 

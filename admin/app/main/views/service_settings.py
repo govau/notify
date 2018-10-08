@@ -827,11 +827,9 @@ def get_branding_as_value_and_label(email_branding):
 
 
 def get_branding_as_dict(email_branding):
-    # TODO: point this to our cdn when we make it
-
     return {
         branding['id']: {
-            'logo': '//{}/static-logo/{}'.format(get_cdn_domain(), branding['logo']),
+            'logo': 'https://{}/{}'.format(get_cdn_domain(), branding['logo']),
             'colour': branding['colour']
         } for branding in email_branding
     }

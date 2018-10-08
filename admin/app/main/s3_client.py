@@ -39,9 +39,11 @@ class S3Client(object):
     def delete_object(self, filename):
         return self.get_object(filename).delete()
 
-    def copy_object(self, old_name, new_name):
+    def copy_object(self, old_name, new_name, acl=None):
         self.get_object(new_name).copy_from(
-            CopySource='{}/{}'.format(self._bucket_name, old_name))
+            CopySource='{}/{}'.format(self._bucket_name, old_name),
+            ACL=acl,
+            )
 
 
 class Clients(object):
@@ -65,8 +67,8 @@ class Clients(object):
 
 clients = Clients()
 
-def rename_s3_object(client, old_name, new_name):
-    client.copy_object(old_name, new_name)
+def rename_s3_object(client, old_name, new_name, acl=None):
+    client.copy_object(old_name, new_name, acl)
     client.delete_object(old_name)
 
 def get_s3_objects_filter_by_prefix(client, prefix):
@@ -143,6 +145,7 @@ def upload_logo(filename, filedata, region, user_id):
         bucket_name=client.bucket_name,
         file_location=upload_file_name,
         content_type='image/png',
+        acl='public-read',
         session=client.session
     )
 
@@ -156,7 +159,7 @@ def persist_logo(filename, user_id):
     else:
         return filename
 
-    rename_s3_object(clients.logo, filename, persisted_filename)
+    rename_s3_object(clients.logo, filename, persisted_filename, acl='public-read')
     return persisted_filename
 
 

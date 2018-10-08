@@ -34,5 +34,4 @@ from app.main.views import (  # noqa
     notifications,
     inbound_number,
     agreement,
-    static_logo,
 )

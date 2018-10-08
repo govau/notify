@@ -66,6 +66,8 @@ class Config(object):
     # URL of api app (on AWS this is the internal api endpoint)
     API_HOST_NAME = os.getenv('API_HOST_NAME')
 
+    CDN_BASE_URL = os.environ.get('CDN_BASE_URL', 'https://notify-static-logos-staging.static.cld.gov.au')
+
     # admin app api key
     ADMIN_CLIENT_SECRET = os.getenv('ADMIN_CLIENT_SECRET')
 

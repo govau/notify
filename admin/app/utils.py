@@ -65,9 +65,6 @@ def authenticate():
 
 
 def requires_auth():
-    if request.endpoint == 'main.static_logo':
-        return None
-
     if not check_auth(current_app.config, request.authorization):
         return authenticate()
 
@@ -418,9 +415,7 @@ def gmt_timezones(date):
 
 
 def get_cdn_domain():
-    # TODO: create a real cdn for this
-
-    parsed_uri = urlparse(current_app.config['ADMIN_BASE_URL'])
+    parsed_uri = urlparse(current_app.config['CDN_BASE_URL'])
     return parsed_uri._replace(
         scheme='',
         path='',
