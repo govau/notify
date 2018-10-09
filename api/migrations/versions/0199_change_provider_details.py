@@ -35,7 +35,7 @@ def make_provider_details_history_upgrade_sql(identifier):
 def make_provider_details_history_downgrade_sql(identifier):
     return """
         DELETE FROM provider_details_history
-        WHERE identifier = {0} AND version = (SELECT version from provider_details WHERE identifier = '{0}')
+        WHERE identifier = '{0}' AND version = (SELECT version from provider_details WHERE identifier = '{0}')
     """.format(identifier)
 
 def make_provider_details_downgrade_sql(identifier):
@@ -57,7 +57,7 @@ def make_provider_details_downgrade_sql(identifier):
             ORDER BY version desc
             LIMIT 1
         ) h
-        WHERE identifier = '{0}'
+        WHERE provider_details.identifier = '{0}'
     """.format(identifier)
 
 def upgrade():
