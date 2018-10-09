@@ -1,13 +1,13 @@
 const crypto = require('crypto')
 
-const isNotSupportedExtension = extension => ['java', 'py', 'sh', 'groovy', 'cs', 'go', 'rb', 'php', 'md'].indexOf(extension) === -1
+const isSupportedExtension = extension => ['java', 'py', 'sh', 'groovy', 'cs', 'go', 'rb', 'php', 'md'].indexOf(extension) !== -1
 
 exports.onCreateNode = ({ node, actions, loadNodeContent }, pluginOptions) => {
   if (!pluginOptions.name || pluginOptions.name !== node.sourceInstanceName) {
     return
   }
 
-  if (isNotSupportedExtension(node.extension)) {
+  if (!isSupportedExtension(node.extension)) {
     return
   }
 

@@ -3,9 +3,7 @@ import styled, {css} from 'styled-components'
 import SyntaxHighligher from 'react-syntax-highlighter'
 import { StaticQuery, graphql } from 'gatsby'
 import ReactMarkdown from 'react-markdown'
-// import Code from './code'
 
-// http://jsfiddle.net/qnimate/H7bnp/?utm_source=website&utm_medium=embed&utm_campaign=H7bnp
 
 const linkCSS = css`
   line-height: 1.25;
@@ -20,25 +18,6 @@ const linkCSS = css`
     cursor: pointer;
   }
 `
-
-// const StyledLink = styled.label`${linkCSS};`
-
-// const Link = ({to, target}) => <StyledLink />
-
-
-// let elemId = 0;
-
-// const generateElemId = (prefix='') => `${prefix}${elemId++}`
-
-// import {generateElemId} from '../element-utils'
-
-
-
-// const tab1Id  = generateElemId('tabs-checkbox-')
-// const tab1Id  = generateElemId()
-// const tab1Id  = generateElemId()
-
-// export default ({ data, subject }) => {
 
 const Tabs = styled.div`
   margin-top: 1rem;
