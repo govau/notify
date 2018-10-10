@@ -85,15 +85,15 @@ export default class CodeExamples extends React.Component {
           }}
         />
       )
-    } else {
-      return (
-        <SyntaxHighligher
-          customStyle={customStyle}
-          language={snippet.extension}
-          children={snippet.content}
-        />
-      )
     }
+
+    return (
+      <SyntaxHighligher
+        customStyle={customStyle}
+        language={snippet.extension}
+        children={snippet.content}
+      />
+    )
   }
 
   renderTabs = data => {
@@ -117,13 +117,13 @@ export default class CodeExamples extends React.Component {
           </Ul>
         </TabsNav>
 
-        <div>
+        <>
           {codeSnippets.map((s, i) => (
             <TabContent key={i} active={this.state.activeTab === i}>
               {this.syntaxHighlighter(s)}
             </TabContent>
           ))}
-        </div>
+        </>
       </Tabs>
     )
   }
