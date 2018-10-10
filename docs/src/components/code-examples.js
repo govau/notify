@@ -63,7 +63,7 @@ export default class CodeExamples extends React.Component {
 
   filterTransformSortCodeSnippets = codeSnippets =>
     codeSnippets
-      .filter(n => n.node.relativePath.startsWith(this.props.codePath))
+      .filter(n => n.node.relativePath.startsWith(this.props.path))
       .map(n => n.node)
       .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -117,13 +117,11 @@ export default class CodeExamples extends React.Component {
           </Ul>
         </TabsNav>
 
-        <>
-          {codeSnippets.map((s, i) => (
-            <TabContent key={i} active={this.state.activeTab === i}>
-              {this.syntaxHighlighter(s)}
-            </TabContent>
-          ))}
-        </>
+        {codeSnippets.map((s, i) => (
+          <TabContent key={i} active={this.state.activeTab === i}>
+            {this.syntaxHighlighter(s)}
+          </TabContent>
+        ))}
       </Tabs>
     )
   }
