@@ -13,8 +13,8 @@ PRD_BRANCH    ?= master
 PRD_STAGE     ?= stg
 STG_PREFIX    ?= feat-
 CIRCLE_BRANCH ?=
-BRANCH  ?= $(CIRCLE_BRANCH)
-FEATURE  = $(BRANCH:$(STG_PREFIX)%=%)
+BRANCH        ?= $(CIRCLE_BRANCH)
+FEATURE        = $(BRANCH:$(STG_PREFIX)%=%)
 
 # set prod stage if we're on prod branch
 ifeq ($(BRANCH), $(PRD_BRANCH))
@@ -27,14 +27,6 @@ ifneq ($(BRANCH), $(FEATURE))
 	export STG    ?= f-$(FEATURE)
 	PSQL_SVC_NAME ?= notify-psql-f-$(FEATURE)
 endif
-
-SERVICES     = notify-shared notify-api notify-admin aws smtp telstra twilio
-SVC_APPLIED  = $(SERVICES:%=apply-service-%)
-SVC_CREATED  = $(SERVICES:%=create-service-%)
-APPLY_ACTION?= update
-
-PSQL_SVC_NAME ?= notify-psql-dev
-PSQL_SVC_PLAN ?= shared
 
 all: setup
 
@@ -72,15 +64,4 @@ $(TARGETS):
 $(API_TARGETS):
 	$(MAKE) api.$@
 
-apply-services: $(SVC_APPLIED)
-
-$(SVC_APPLIED): apply-service-%: ci/ups/$(CLD_HOST)/%.json
-	$(CF) $(APPLY_ACTION)-user-provided-service $* -p $<
-
-$(SVC_CREATED): create-service-%:
-	$(MAKE) apply-service-$* APPLY_ACTION=create
-
-create-service-psql:
-	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
-
-.PHONY: cf-login $(TARGETS) $(SVC_APPLIED) $(SVC_CREATED) create-service-psql
+.PHONY: cf-login cf-login-prod $(TARGETS) $(API_TARGETS)

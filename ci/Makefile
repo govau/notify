@@ -1,8 +1,53 @@
-PIPENV      ?= pipenv
-RUNNER      ?= $(PIPENV) run
-CF          ?= cf
-CF_SPACE_ID ?= f2c9cbdc-9449-4da9-8825-899e3142f783
-GIT_REMOTE  ?= https://github.com/govau/notify
+CF_SPACE_ID   ?= f2c9cbdc-9449-4da9-8825-899e3142f783
+GIT_REMOTE    ?= https://github.com/govau/notify
+PIPENV        ?= pipenv
+RUNNER        ?= $(PIPENV) run
+CF            ?= cf
+JQ            ?= jq
+
+CLD_Y         ?= y.cld.gov.au
+CLD_B         ?= b.cld.gov.au
+CLD_HOST      ?= $(CLD_Y)
+
+SERVICES       = notify-shared notify-api notify-admin aws smtp telstra twilio
+SVC_APPLIED    = $(SERVICES:%=apply-service-%)
+SVC_CREATED    = $(SERVICES:%=create-service-%)
+SVC_DIFFED     = $(SERVICES:%=diff-service-%)
+SVC_FETCHED    = $(SERVICES:%=fetch-service-%)
+APPLY_ACTION  ?= update
+
+PSQL_SVC_NAME ?= notify-psql-dev
+PSQL_SVC_PLAN ?= shared
+
+
+apply-services: $(SVC_APPLIED)
+
+fetch-services: $(SVC_FETCHED)
+
+diff-services: $(SVC_DIFFED)
+
+ups/$(CLD_HOST)/%.json:
+	-mkdir -p $(@D)
+	$(CF) curl "/v2/user_provided_service_instances?q=name:$*" | $(JQ) -S ".resources[].entity.credentials" > $@
+
+$(SVC_APPLIED): apply-service-%: ups/$(CLD_HOST)/%.json
+	$(CF) $(APPLY_ACTION)-user-provided-service $* -p $<
+
+$(SVC_CREATED): create-service-%:
+	$(MAKE) apply-service-$* APPLY_ACTION=create
+
+$(SVC_DIFFED): SHELL = /bin/bash
+$(SVC_DIFFED): diff-service-%:
+	@diff \
+	  <($(CF) curl "/v2/user_provided_service_instances?q=name:$*" | $(JQ) -S ".resources[].entity.credentials") \
+	  <($(JQ) -S . ups/$(CLD_HOST)/$*.json)
+
+$(SVC_FETCHED): fetch-service-%:
+	-mkdir -p ups/$(CLD_HOST)
+	$(CF) curl "/v2/user_provided_service_instances?q=name:$*" | $(JQ) -S ".resources[].entity.credentials" > ups/$(CLD_HOST)/$*.json
+
+create-service-psql:
+	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
 
 list-branches:
 	git ls-remote --heads ${GIT_REMOTE} | egrep "/feat-.*" | $(RUNNER) python remove_feat_prefix.py
@@ -24,4 +69,8 @@ undeploy-%:
 	-$(CF) delete notify-celery-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 
-.PHONY: list-branches list-apps list-services list-deployed-features prune
+.PHONY: prune \
+	list-branches list-apps\
+	list-services list-deployed-features\
+	create-service-psql\
+	$(SVC_APPLIED) $(SVC_CREATED) $(SVC_DIFFED) $(SVC_FETCHED)
