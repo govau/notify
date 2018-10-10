@@ -20,13 +20,13 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `data`,
-        path: `${__dirname}/src/pages/`
+        path: `${__dirname}/src/pages/`,
       },
     },
     {
       resolve: `gatsby-transformer-code-samples`,
       options: {
-        name: `data`
+        name: `data`,
       },
     },
     'gatsby-mdx',
