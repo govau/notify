@@ -1,9 +1,14 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 
+const colours = {
+  prettyBlue: '#2483FF',
+}
+
 const theme = {
+  colours,
   background: '#FFFFFF',
-  highlight: '#2483FF',
+  highlight: '#50C2EE',
   content: '#0E3148',
   subtle: '#0e3148cc',
 }

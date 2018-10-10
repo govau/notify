@@ -16,7 +16,7 @@ const Heading = styled.header`
 `
 
 const Language = styled.span`
-  color: ${props => props.theme.highlight};
+  color: ${props => props.theme.colours.prettyBlue};
 `
 
 const Content = styled.div`
