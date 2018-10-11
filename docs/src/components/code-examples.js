@@ -88,7 +88,7 @@ export class CodeExamplesComponent extends React.Component {
 
         {codeSnippets.map((s, i) => (
           <TabContent key={i} active={this.state.activeTab === i}>
-            <SyntaxHighligher codeSnippet={s} />
+            <SyntaxHighligher content={s.content} language={s.extension} />
           </TabContent>
         ))}
       </Tabs>
