@@ -47,8 +47,19 @@ const NavLink = styled.label`
 `
 
 const TabContent = styled.div`
-  display: ${props => (props.active ? 'visible' : 'none')};
+  display: ${props => (props.active ? 'block' : 'none')};
 `
+
+export const filterTransformSortCodeSnippets = ({ codeSnippets, path }) => {
+  if (!codeSnippets) {
+    return []
+  }
+
+  return codeSnippets
+    .filter(n => n.node.relativePath.startsWith(path))
+    .map(n => n.node)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
 
 export class CodeExamplesComponent extends React.Component {
   state = {
@@ -59,16 +70,11 @@ export class CodeExamplesComponent extends React.Component {
     this.setState({ activeTab: index })
   }
 
-  filterTransformSortCodeSnippets = codeSnippets =>
-    codeSnippets
-      .filter(n => n.node.relativePath.startsWith(this.props.path))
-      .map(n => n.node)
-      .sort((a, b) => a.name.localeCompare(b.name))
-
   render = () => {
-    const codeSnippets = this.filterTransformSortCodeSnippets(
-      this.props.data.allCodeSamples.edges
-    )
+    const codeSnippets = filterTransformSortCodeSnippets({
+      codeSnippets: this.props.data.allCodeSamples.edges,
+      path: this.props.path,
+    })
     return (
       <Tabs>
         <TabsNav>

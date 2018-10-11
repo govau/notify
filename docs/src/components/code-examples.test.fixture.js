@@ -1,4 +1,4 @@
-const fixture = {
+const mockGraphQLResponse = {
   allCodeSamples: {
     edges: [
       {
@@ -94,4 +94,4 @@ const fixture = {
   },
 }
 
-export default fixture
+export default mockGraphQLResponse

@@ -1,12 +1,25 @@
 import React from 'react'
 import renderer from 'react-test-renderer'
-import { CodeExamplesComponent } from './code-examples'
-import mockQuery from './code-examples.test.fixture'
+import { filterTransformSortCodeSnippets } from './code-examples'
+import mockGraphQLResponse from './code-examples.test.fixture'
 
-describe('CodeExamplesComponent', () =>
-  it('renders correctly', () => {
-    const tree = renderer
-      .create(<CodeExamplesComponent data={mockQuery} path="sending-emails" />)
-      .toJSON()
-    expect(tree).toMatchSnapshot()
-  }))
+const mockData = mockGraphQLResponse.allCodeSamples.edges
+
+test.each`
+  data         | path                | expectedLength | testDescription
+  ${mockData}  | ${'sending-emails'} | ${3}           | ${'filters correctly'}
+  ${mockData}  | ${'unknown-path'}   | ${0}           | ${'returns empty array no matches found'}
+  ${[]}        | ${'sending-emails'} | ${0}           | ${'returns empty array when data is empty'}
+  ${null}      | ${'sending-emails'} | ${0}           | ${'returns empty array when data is null'}
+  ${undefined} | ${'sending-emails'} | ${0}           | ${'returns empty array when data is undefined'}
+`(
+  'filterTransformSortCodeSnippets $testDescription',
+  ({ data, path, expectedLength }) => {
+    expect(
+      filterTransformSortCodeSnippets({
+        codeSnippets: mockGraphQLResponse.allCodeSamples.edges,
+        path: 'sending-emails',
+      })
+    ).toHaveLength(3)
+  }
+)
