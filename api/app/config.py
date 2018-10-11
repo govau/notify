@@ -19,7 +19,7 @@ if os.environ.get('VCAP_SERVICES'):
 class QueueNames(object):
     PERIODIC = 'periodic-tasks'
     PRIORITY = 'priority-tasks'
-    DATABASE = 'database-tasks'
+    DATABASE = 'database-tatest_create_nightly_billing_different_sent_bysks'
     SEND_SMS = 'send-sms-tasks'
     SEND_EMAIL = 'send-email-tasks'
     RESEARCH_MODE = 'research-mode-tasks'

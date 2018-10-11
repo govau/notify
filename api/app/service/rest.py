@@ -87,7 +87,7 @@ from app.schemas import (
     notifications_filter_schema,
     detailed_service_schema
 )
-from app.utils import pagination_links
+from app.utils import pagination_links, convert_utc_to_aet
 
 service_blueprint = Blueprint('service', __name__)
 
@@ -115,7 +115,7 @@ def get_platform_stats():
     include_from_test_key = request.args.get('include_from_test_key', 'True') != 'False'
 
     # If start and end date are not set, we are expecting today's stats.
-    today = str(datetime.utcnow().date())
+    today = str(convert_utc_to_aet(datetime.utcnow()).date())
 
     start_date = datetime.strptime(request.args.get('start_date', today), '%Y-%m-%d').date()
     end_date = datetime.strptime(request.args.get('end_date', today), '%Y-%m-%d').date()
