@@ -1,8 +1,7 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import SyntaxHighligher from 'react-syntax-highlighter'
 import { StaticQuery, graphql } from 'gatsby'
-import ReactMarkdown from 'react-markdown'
+import SyntaxHighligher from './syntax-highlighter'
 
 const linkCSS = css`
   line-height: 1.25;
@@ -51,7 +50,7 @@ const TabContent = styled.div`
   display: ${props => (props.active ? 'visible' : 'none')};
 `
 
-export default class CodeExamples extends React.Component {
+export class CodeExamplesComponent extends React.Component {
   state = {
     activeTab: 0,
   }
@@ -66,38 +65,9 @@ export default class CodeExamples extends React.Component {
       .map(n => n.node)
       .sort((a, b) => a.name.localeCompare(b.name))
 
-  syntaxHighlighter = snippet => {
-    const customStyle = { margin: 0 }
-    if (snippet.extension && snippet.extension.toLowerCase() === 'md') {
-      return (
-        <ReactMarkdown
-          source={snippet.content}
-          renderers={{
-            pre: React.Fragment,
-            code: ({ value, language }) => (
-              <SyntaxHighligher
-                customStyle={customStyle}
-                language={language}
-                children={value}
-              />
-            ),
-          }}
-        />
-      )
-    }
-
-    return (
-      <SyntaxHighligher
-        customStyle={customStyle}
-        language={snippet.extension}
-        children={snippet.content}
-      />
-    )
-  }
-
-  renderTabs = data => {
+  render = () => {
     const codeSnippets = this.filterTransformSortCodeSnippets(
-      data.allCodeSamples.edges
+      this.props.data.allCodeSamples.edges
     )
     return (
       <Tabs>
@@ -118,30 +88,30 @@ export default class CodeExamples extends React.Component {
 
         {codeSnippets.map((s, i) => (
           <TabContent key={i} active={this.state.activeTab === i}>
-            {this.syntaxHighlighter(s)}
+            <SyntaxHighligher codeSnippet={s} />
           </TabContent>
         ))}
       </Tabs>
     )
   }
+}
 
-  render = () => (
-    <StaticQuery
-      query={graphql`
-        query {
-          allCodeSamples {
-            edges {
-              node {
-                content
-                extension
-                relativePath
-                name
-              }
+export default ({ path }) => (
+  <StaticQuery
+    query={graphql`
+      query {
+        allCodeSamples {
+          edges {
+            node {
+              content
+              extension
+              relativePath
+              name
             }
           }
         }
-      `}
-      render={data => this.renderTabs(data)}
-    />
-  )
-}
+      }
+    `}
+    render={data => <CodeExamplesComponent data={data} path={path} />}
+  />
+)
