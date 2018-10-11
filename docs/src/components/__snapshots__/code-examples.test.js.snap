@@ -1,0 +1,295 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CodeExamplesComponent renders correctly 1`] = `
+<div
+  className="sc-bdVaJa hPuEoI"
+>
+  <div
+    className="sc-bwzfXH hyVNwM"
+  >
+    <ul
+      className="sc-htpNat bHRdbh"
+    >
+      <li
+        className="sc-bxivhb fpojHh"
+      >
+        <label
+          className="sc-ifAKCX ffLiWg"
+          onClick={[Function]}
+        >
+          cURL
+        </label>
+      </li>
+      <li
+        className="sc-bxivhb fpojHh"
+      >
+        <label
+          className="sc-ifAKCX iLlAOV"
+          onClick={[Function]}
+        >
+          Java
+        </label>
+      </li>
+      <li
+        className="sc-bxivhb fpojHh"
+      >
+        <label
+          className="sc-ifAKCX iLlAOV"
+          onClick={[Function]}
+        >
+          Python
+        </label>
+      </li>
+    </ul>
+  </div>
+  <div
+    className="sc-EHOje dhIMBA"
+  >
+    <pre
+      style={
+        Object {
+          "background": "#F0F0F0",
+          "color": "#444",
+          "display": "block",
+          "margin": 0,
+          "overflowX": "auto",
+          "padding": "0.5em",
+        }
+      }
+    >
+      <code>
+        curl \\
+    -H 
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "Authorization: Bearer 
+          <span
+            style={
+              Object {
+                "color": "#BC6060",
+              }
+            }
+          >
+            \${JWT}
+          </span>
+          "
+        </span>
+         \\
+    -H 
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "Content-type: application/json"
+        </span>
+         \\
+    --request POST \\
+    --data 
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          '{
+      "template_id": "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx",
+      "email_address": "lisa@example.com",
+      "personalisation": {
+        "user_name": "Lisa",
+        "amount_owing": "$15.50"
+      }
+    }'
+        </span>
+         \\
+    https://rest-api.notify.gov.au/v2/notifications/email
+
+      </code>
+    </pre>
+  </div>
+  <div
+    className="sc-EHOje vChbq"
+  >
+    <pre
+      style={
+        Object {
+          "background": "#F0F0F0",
+          "color": "#444",
+          "display": "block",
+          "margin": 0,
+          "overflowX": "auto",
+          "padding": "0.5em",
+        }
+      }
+    >
+      <code>
+        HashMap&lt;String, String&gt; personalisation = 
+        <span
+          style={
+            Object {
+              "fontWeight": "bold",
+            }
+          }
+        >
+          new
+        </span>
+         HashMap&lt;String, String&gt;();
+personalisation.put(
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "user_name"
+        </span>
+        , 
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "Lisa"
+        </span>
+        );
+
+SendEmailResponse response = client.sendEmail(
+    
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx"
+        </span>
+        ,
+    
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "lisa@example.com"
+        </span>
+        ,
+    personalisation,
+    
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          "your-unique-reference-id"
+        </span>
+        );
+
+      </code>
+    </pre>
+  </div>
+  <div
+    className="sc-EHOje vChbq"
+  >
+    <pre
+      style={
+        Object {
+          "background": "#F0F0F0",
+          "color": "#444",
+          "display": "block",
+          "margin": 0,
+          "overflowX": "auto",
+          "padding": "0.5em",
+        }
+      }
+    >
+      <code>
+        notifications_client.send_email_notification(
+    email_address=
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          'lisa@example.com'
+        </span>
+        ,
+    template_id=
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          'f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx'
+        </span>
+        ,
+    personalisation={
+        
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          'user_name'
+        </span>
+        : 
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          'Lisa'
+        </span>
+        ,
+        
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          'amount_owing'
+        </span>
+        : 
+        <span
+          style={
+            Object {
+              "color": "#880000",
+            }
+          }
+        >
+          '$15.50'
+        </span>
+        
+    }
+)
+
+      </code>
+    </pre>
+  </div>
+</div>
+`;
