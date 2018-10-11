@@ -52,12 +52,11 @@ const TabContent = styled.div`
 `
 
 export default class CodeExamples extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { activeTab: 0 }
+  state = {
+    activeTab: 0,
   }
 
-  onClick = index => {
+  handleClick = index => {
     this.setState({ activeTab: index })
   }
 
@@ -107,7 +106,7 @@ export default class CodeExamples extends React.Component {
             {codeSnippets.map((s, i) => (
               <NavItem key={i}>
                 <NavLink
-                  onClick={() => this.onClick(i)}
+                  onClick={() => this.handleClick(i)}
                   active={this.state.activeTab === i}
                 >
                   {s.name}
