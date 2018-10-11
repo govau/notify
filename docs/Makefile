@@ -28,7 +28,7 @@ setup-dev:
 	$(MAKE) setup
 
 test:
-	echo 'all g.'
+	$(RUNNER) test
 
 fmt:
 	$(RUNNER) fmt

@@ -116,6 +116,13 @@ jobs:
           paths:
             - docs
 
+  test-docs:
+    <<: *node_image
+    steps:
+      - *attach_workspace
+      - run: make docs.setup
+      - run: make docs.test
+
   test-admin:
     <<: *python_node_image
     steps:
@@ -241,6 +248,10 @@ workflows:
             - setup
 
       - build-docs:
+          requires:
+            - setup
+
+      - test-docs:
           requires:
             - setup
 
