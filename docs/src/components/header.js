@@ -1,19 +1,20 @@
 import React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import styled from 'styled-components'
 
 import dta from '../images/dta-wordmark.png'
-import { Wrapper, dark } from './theme'
+import { Wrapper, PanelProvider } from './theme'
 import Link from './link'
 
 const Logo = styled.img`
   height: 4rem;
 `
 
-const Root = styled.div`
-  background: ${props => props.theme.darkest};
-  color: ${props => props.theme.contentInverted};
+const Root = styled.header`
+  background: ${props => props.theme.background};
+  color: ${props => props.theme.content};
   width: 100%;
 `
+
 const Banner = styled.h1`
   display: inline-block;
   font-weight: normal;
@@ -42,9 +43,9 @@ const Navitem = styled.li`
 `
 
 export default ({ siteTitle }) => (
-  <Root>
-    <Wrapper>
-      <ThemeProvider theme={dark}>
+  <PanelProvider>
+    <Root>
+      <Wrapper>
         <Heading>
           <Link to="/">
             <Logo src={dta} />
@@ -64,7 +65,7 @@ export default ({ siteTitle }) => (
             </Navitems>
           </Nav>
         </Heading>
-      </ThemeProvider>
-    </Wrapper>
-  </Root>
+      </Wrapper>
+    </Root>
+  </PanelProvider>
 )

@@ -1,18 +1,39 @@
 import React from 'react'
 import { StaticQuery, graphql } from 'gatsby'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import Link from './link'
 
-const NavWrapper = styled.nav`
-`
+const NavWrapper = styled.nav``
 
 const NavList = styled.ul`
   list-style: none;
   margin: 0;
+  padding: 0;
 `
 
-const NavItem = styled.li``
+const NavItem = styled.li`
+  padding-left: 1em;
+  & a {
+    text-decoration: none;
+  }
+
+  ${props =>
+    props.active
+      ? css`
+          border-left: 1px solid ${props.theme.highlight};
+          & a {
+            text-decoration: underline;
+          }
+        `
+      : css``};
+`
+
+const SubNav = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`
 
 const Nav = props => (
   <NavWrapper {...props}>
@@ -26,6 +47,26 @@ export default props => (
       <NavItem>
         <Link to="/getting-started">Getting started</Link>
       </NavItem>
+      <NavItem>
+        <SubNav>
+          <NavItem>
+            <Link to="/getting-started#creating-a-notify-client">
+              Creating a notify client
+            </Link>
+          </NavItem>
+          <NavItem active>
+            <Link to="/getting-started#rolling-your-own-client">
+              Rolling your own client
+            </Link>
+          </NavItem>
+          <NavItem>
+            <Link to="/getting-started#example-implementation">
+              Example implementation
+            </Link>
+          </NavItem>
+        </SubNav>
+      </NavItem>
+
       <NavItem>
         <Link to="/installation">Installation</Link>
       </NavItem>
@@ -42,9 +83,8 @@ export default props => (
         <Link to="/check-available-templates">Check available templates</Link>
       </NavItem>
 
-
       <hr />
-      
+
       <NavItem>
         <Link to="/this-is-mdx">Send a message</Link>
       </NavItem>

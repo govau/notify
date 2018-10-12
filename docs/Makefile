@@ -55,7 +55,7 @@ clean:
 	-rm manifest-vars-*
 
 clean-full: clean
-	-rm -r node_modules
+	-rm -rf node_modules
 
 check-vulnerabilities:
 

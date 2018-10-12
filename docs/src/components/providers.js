@@ -3,6 +3,8 @@ import { MDXProvider } from '@mdx-js/tag'
 import ThemeProvider from './theme'
 
 import Code from './code'
+import P from './core/paragraph'
+import { H1, H2, H3, H4 } from './core/heading'
 
 const getLanguage = props => {
   const re = /language-(\w+)/g
@@ -19,6 +21,11 @@ export default ({ children }) => (
         code: ({ children, ...props }) => (
           <Code language={getLanguage(props)}>{children}</Code>
         ),
+        p: P,
+        h1: H1,
+        h2: H2,
+        h3: H3,
+        h4: H4,
       }}
     >
       {children}
