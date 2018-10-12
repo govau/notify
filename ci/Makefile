@@ -4,10 +4,12 @@ PIPENV        ?= pipenv
 RUNNER        ?= $(PIPENV) run
 CF            ?= cf
 JQ            ?= jq
+DIFF          ?= diff
 
 CLD_Y         ?= y.cld.gov.au
 CLD_B         ?= b.cld.gov.au
 CLD_HOST      ?= $(CLD_Y)
+STG           ?= dev
 
 SERVICES       = notify-shared notify-api notify-admin aws smtp telstra twilio
 SVC_APPLIED    = $(SERVICES:%=apply-service-%)
@@ -16,8 +18,8 @@ SVC_DIFFED     = $(SERVICES:%=diff-service-%)
 SVC_FETCHED    = $(SERVICES:%=fetch-service-%)
 APPLY_ACTION  ?= update
 
-PSQL_SVC_NAME ?= notify-psql-dev
 PSQL_SVC_PLAN ?= shared
+PSQL_SVC_NAME ?= notify-psql-$(STG)
 
 
 apply-services: $(SVC_APPLIED)
@@ -38,7 +40,7 @@ $(SVC_CREATED): create-service-%:
 
 $(SVC_DIFFED): SHELL = /bin/bash
 $(SVC_DIFFED): diff-service-%:
-	@diff \
+	@$(DIFF) \
 	  <($(CF) curl "/v2/user_provided_service_instances?q=name:$*" | $(JQ) -S ".resources[].entity.credentials") \
 	  <($(JQ) -S . ups/$(CLD_HOST)/$*.json)
 
