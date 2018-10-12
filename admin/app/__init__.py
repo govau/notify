@@ -473,8 +473,8 @@ def useful_headers_after_request(response):
     response.headers.add('X-XSS-Protection', '1; mode=block')
     response.headers.add('Content-Security-Policy', (
         "default-src 'self' 'unsafe-inline';"
-        "script-src 'self' *.google-analytics.com 'unsafe-inline' 'unsafe-eval' data:;"
-        "connect-src 'self' *.google-analytics.com;"
+        "script-src 'self' *.google-analytics.com fullstory.com 'unsafe-inline' 'unsafe-eval' data:;"
+        "connect-src 'self' *.google-analytics.com rs.fullstory.com;"
         "object-src 'self';"
         "font-src 'self' data:;"
         "img-src 'self' *.google-analytics.com *.cld.gov.au {} data:;"

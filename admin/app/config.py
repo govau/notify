@@ -11,6 +11,7 @@ class Config(object):
     DANGEROUS_SALT = os.environ.get('DANGEROUS_SALT')
     DESKPRO_API_HOST = os.environ.get('DESKPRO_API_HOST')
     DESKPRO_API_KEY = os.environ.get('DESKPRO_API_KEY')
+    ENABLE_FULLSTORY = os.getenv('ENABLE_FULLSTORY', False)
 
     # if we're not on cloudfoundry, we can get to this app from localhost. but on cloudfoundry its different
     ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://localhost:6012')

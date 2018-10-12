@@ -22,6 +22,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta property="og:image" content="{{ asset_path }}images/opengraph-image.png?0.23.0">
 
+    {% block fullstory -%}
+        {% if config.ENABLE_FULLSTORY %}{% include "fullstory.html" %}{% endif %}
+    {%- endblock %}
     {% block head %}{% endblock %}
   </head>
 
