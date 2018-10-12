@@ -368,16 +368,18 @@ def test_get_estimated_delivery_date_for_letter(
     assert timings.latest_delivery.strftime('%A %Y-%m-%d') == expected_latest
 
 
-def test_get_cdn_domain_on_localhost(client, mocker):
-    mocker.patch.dict('app.current_app.config', values={'ADMIN_BASE_URL': 'http://localhost:6012'})
+@pytest.mark.parametrize('url', [
+    'http://static-logos.cdn.com',
+    'https://static-logos.cdn.com',
+    'https://static-logos.cdn.com/',
+    'https://static-logos.cdn.com/extra/path',
+    'https://static-logos.cdn.com/?q=a',
+    'https://static-logos.cdn.com/#fragment',
+])
+def test_get_cdn_domain(client, mocker, url):
+    mocker.patch.dict('app.current_app.config', values={'CDN_BASE_URL': url})
     domain = get_cdn_domain()
-    assert domain == 'static-logos.notify.tools'
-
-
-def test_get_cdn_domain_on_non_localhost(client, mocker):
-    mocker.patch.dict('app.current_app.config', values={'ADMIN_BASE_URL': 'https://some.admintest.com'})
-    domain = get_cdn_domain()
-    assert domain == 'static-logos.admintest.com'
+    assert domain == 'static-logos.cdn.com'
 
 
 @pytest.mark.parametrize("domain_or_email_address", (

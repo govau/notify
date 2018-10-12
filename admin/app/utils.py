@@ -416,13 +416,7 @@ def gmt_timezones(date):
 
 def get_cdn_domain():
     parsed_uri = urlparse(current_app.config['CDN_BASE_URL'])
-    return parsed_uri._replace(
-        scheme='',
-        path='',
-        params='',
-        query='',
-        fragment=''
-    ).geturl()
+    return parsed_uri.netloc
 
 def parse_filter_args(filter_dict):
     if not isinstance(filter_dict, MultiDict):
