@@ -19,5 +19,6 @@ applications:
       - route: notify.apps.b.cld.gov.au
     env:
       <<: *defaults_env
+      ENABLE_FULLSTORY: true
       ADMIN_BASE_URL: https://notify.gov.au
       API_HOST_NAME: https://rest-api.notify.gov.au
