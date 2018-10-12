@@ -18,14 +18,12 @@ FEATURE        = $(BRANCH:$(STG_PREFIX)%=%)
 
 # set prod stage if we're on prod branch
 ifeq ($(BRANCH), $(PRD_BRANCH))
-	export STG    ?= $(PRD_STAGE)
-	PSQL_SVC_NAME ?= notify-psql-$(STG)
+	export STG ?= $(PRD_STAGE)
 endif
 
 # export stg variable only if we are on a feature branch
 ifneq ($(BRANCH), $(FEATURE))
-	export STG    ?= f-$(FEATURE)
-	PSQL_SVC_NAME ?= notify-psql-f-$(FEATURE)
+	export STG ?= f-$(FEATURE)
 endif
 
 all: setup
@@ -53,7 +51,8 @@ cf-login-prod:
 DIRS        = api admin utils status docs
 TARGETS     = setup setup-dev build check-vulnerabilities clean deploy deploy-dev test
 API_TARGETS = deploy-celery deploy-dev-celery
-ANY_TARGETS = $(TARGETS) $(API_TARGETS)
+CI_TARGETS  = create-service-psql
+ANY_TARGETS = $(TARGETS) $(API_TARGETS) $(CI_TARGETS)
 
 $(ANY_TARGETS:%=\%.%):
 	$(MAKE) -C $* $(@:$*.%=%)
@@ -64,4 +63,7 @@ $(TARGETS):
 $(API_TARGETS):
 	$(MAKE) api.$@
 
-.PHONY: cf-login cf-login-prod $(TARGETS) $(API_TARGETS)
+$(CI_TARGETS):
+	$(MAKE) ci.$@
+
+.PHONY: cf-login cf-login-prod $(TARGETS) $(API_TARGETS) $(CI_TARGETS)

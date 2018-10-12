@@ -170,7 +170,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
-      - run: make -C ci create-service-psql
+      - run: make ci.create-service-psql
       - run: make api.deploy-dev
 
   deploy-dev-celery:
@@ -179,7 +179,7 @@ jobs:
       - *cf_install
       - *attach_workspace
       - *cf_login
-      - run: make -C ci create-service-psql
+      - run: make ci.create-service-psql
       - run: make api.deploy-dev-celery
 
   deploy-dev-docs:
