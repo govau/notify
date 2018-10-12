@@ -1,5 +1,6 @@
 defaults: &defaults
-  buildpack: ruby_buildpack
+  buildpacks:
+    - ruby_buildpack
   instances: 1
   memory: 1G
   services:

@@ -1,5 +1,6 @@
 defaults: &defaults
-  buildpack: python_buildpack
+  buildpacks:
+    - python_buildpack
   instances: 1
   memory: 1G
   services:
