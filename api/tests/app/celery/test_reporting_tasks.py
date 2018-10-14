@@ -357,8 +357,8 @@ def test_get_rate_for_sms_and_email(notify_db, notify_db_session):
     assert rate == Decimal(0)
 
 
-@freeze_time('2018-03-27T03:30:00')
-# summer time starts on 2018-03-25
+@freeze_time('2018-10-09T13:30:00') # 10/10/2018 00:30:00 AEDT
+# Note: daylight savings time starts on 2018-10-07
 def test_create_nightly_billing_use_BST(
         notify_db,
         notify_db_session,
@@ -371,7 +371,7 @@ def test_create_nightly_billing_use_BST(
     sample_notification(
         notify_db,
         notify_db_session,
-        created_at=datetime(2018, 3, 25, 12, 0),
+        created_at=datetime(2018, 10, 6, 14, 30), # 07/10/2018 00:30:00 AEDT
         service=sample_service,
         template=sample_template,
         status='delivered',
@@ -384,7 +384,7 @@ def test_create_nightly_billing_use_BST(
     sample_notification(
         notify_db,
         notify_db_session,
-        created_at=datetime(2018, 3, 25, 23, 5),
+        created_at=datetime(2018, 10, 7, 13, 30), # 08/10/2018 00:30:00 AEDT
         service=sample_service,
         template=sample_template,
         status='delivered',
@@ -403,8 +403,13 @@ def test_create_nightly_billing_use_BST(
     records = FactBilling.query.order_by(FactBilling.bst_date).all()
 
     assert len(records) == 2
-    assert records[0].bst_date == date(2018, 3, 25)
-    assert records[-1].bst_date == date(2018, 3, 26)
+    # The first record's bst_date is 06/10/2018. This is because the current
+    # time is 2018-10-09T13:30:00 UTC, and 3 days earlier than that is
+    # 2018-10-06T13:30:00 UTC which is 06/10/2018 23:30:00 AEST. This falls
+    # outside of daylight savings time and so the bst_date is the 6th, not the
+    # 7th.
+    assert records[0].bst_date == date(2018, 10, 6)
+    assert records[-1].bst_date == date(2018, 10, 8)
 
 
 @freeze_time('2018-01-15T03:30:00')

@@ -13,6 +13,7 @@ from sqlalchemy import func, desc, case
 from notifications_utils.statsd_decorators import statsd
 from app import notify_celery
 from flask import current_app
+from app.utils import convert_utc_to_aet
 
 
 def get_rate(non_letter_rates, letter_rates, notification_type, date, crown=None, rate_multiplier=None):
@@ -28,17 +29,17 @@ def get_rate(non_letter_rates, letter_rates, notification_type, date, crown=None
 @notify_celery.task(name="create-nightly-billing")
 @statsd(namespace="tasks")
 def create_nightly_billing():
-    # day_start is a datetime.date() object representing yesterday. e.g.
-    # 3 days of data counting back from day_start is consolidated
-    day_start = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     non_letter_rates = [(r.notification_type, r.valid_from, r.rate) for r in
                         Rate.query.order_by(desc(Rate.valid_from)).all()]
     letter_rates = [(r.start_date, r.crown, r.sheet_count, r.rate) for r in
                     LetterRate.query.order_by(desc(LetterRate.start_date)).all()]
 
+    # 3 days of data counting back from yesterday is consolidated.
     for i in range(0, 3):
-        process_day = day_start - timedelta(days=i)
+        process_day = yesterday - timedelta(days=i)
+        process_day_in_aet = convert_utc_to_aet(process_day)
         ds = datetime.combine(process_day, time.min)
         de = datetime.combine(process_day + timedelta(days=1), time.min)
 
@@ -82,7 +83,7 @@ def create_nightly_billing():
 
         for data in transit_data:
             update_count = FactBilling.query.filter(
-                FactBilling.bst_date == datetime.date(process_day),
+                FactBilling.bst_date == datetime.date(process_day_in_aet),
                 FactBilling.template_id == data.template_id,
                 FactBilling.service_id == data.service_id,
                 FactBilling.provider == data.sent_by,  # This could be zero - this is a bug that needs to be fixed.
@@ -96,7 +97,7 @@ def create_nightly_billing():
 
             if update_count == 0:
                 billing_record = FactBilling(
-                    bst_date=process_day,
+                    bst_date=process_day_in_aet,
                     template_id=data.template_id,
                     service_id=data.service_id,
                     notification_type=data.notification_type,
