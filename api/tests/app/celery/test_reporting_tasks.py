@@ -42,7 +42,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
         billable_units,
         multiplier):
 
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -75,7 +75,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
     assert len(records) == records_num
 
@@ -93,7 +93,7 @@ def test_create_nightly_billing_different_templates(
         sample_template,
         sample_email_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -125,7 +125,7 @@ def test_create_nightly_billing_different_templates(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
 
     assert len(records) == 2
@@ -146,7 +146,7 @@ def test_create_nightly_billing_different_sent_by(
         sample_template,
         sample_email_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -179,7 +179,7 @@ def test_create_nightly_billing_different_sent_by(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
 
     assert len(records) == 2
@@ -196,7 +196,7 @@ def test_create_nightly_billing_letter(
         sample_service,
         sample_letter_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -216,7 +216,7 @@ def test_create_nightly_billing_letter(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
     assert len(records) == 1
     record = records[0]
@@ -233,7 +233,7 @@ def test_create_nightly_billing_null_sent_by_sms(
         sample_service,
         sample_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -253,7 +253,7 @@ def test_create_nightly_billing_null_sent_by_sms(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.all()
 
     assert len(records) == 1
@@ -439,6 +439,6 @@ def test_create_nightly_billing_update_when_record_exists(
     assert len(records) == 1
     assert records[0].bst_date == date(2018, 1, 14)
 
-    # run again, make sure create_nightly_billing() updates with no error
+    # run again, make sure create_nightly_billing updates with no error
     create_nightly_billing()
     assert len(records) == 1

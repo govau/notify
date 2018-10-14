@@ -28,11 +28,10 @@ def get_rate(non_letter_rates, letter_rates, notification_type, date, crown=None
 
 @notify_celery.task(name="create-nightly-billing")
 @statsd(namespace="tasks")
-def create_nightly_billing(day_start=None):
-    # day_start is a datetime.date() object. e.g.
+def create_nightly_billing():
+    # day_start is a datetime.date() object representing yesterday. e.g.
     # 3 days of data counting back from day_start is consolidated
-    if day_start is None:
-        day_start = datetime.today() - timedelta(days=1)
+    day_start = datetime.utcnow() - timedelta(days=1)
 
     non_letter_rates = [(r.notification_type, r.valid_from, r.rate) for r in
                         Rate.query.order_by(desc(Rate.valid_from)).all()]
@@ -41,8 +40,8 @@ def create_nightly_billing(day_start=None):
 
     for i in range(0, 3):
         process_day = day_start - timedelta(days=i)
-        ds = convert_aet_to_utc(datetime.combine(process_day, time.min))
-        de = convert_aet_to_utc(datetime.combine(process_day + timedelta(days=1), time.min))
+        ds = datetime.combine(process_day, time.min)
+        de = datetime.combine(process_day + timedelta(days=1), time.min)
 
         transit_data = db.session.query(
             Notification.template_id,
