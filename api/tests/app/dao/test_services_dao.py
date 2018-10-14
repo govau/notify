@@ -843,8 +843,8 @@ def test_fetch_stats_by_date_range_for_all_services_returns_test_notifications(n
                          [("5", "1", "4"),  # a date range less than 7 days ago returns test and normal notifications
                           ("9", "8", "1"),  # a date range older than 9 days does not return test notifications.
                           ("8", "4", "2")])  # a date range that starts more than 7 days ago
-@freeze_time('2017-10-23T23:00:00')
-def test_fetch_stats_by_date_range_during_bst_hour_for_all_services_returns_test_notifications(
+@freeze_time('2017-12-12T23:00:00')  # 13/12/2017 10:00:00 AEDT
+def test_fetch_stats_by_date_range_during_aedt_hour_for_all_services_returns_test_notifications(
     notify_db, notify_db_session, start_delta, end_delta, expected
 ):
     create_noti = functools.partial(create_notification, notify_db, notify_db_session)
