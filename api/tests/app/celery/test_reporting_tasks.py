@@ -13,6 +13,7 @@ from app.models import LetterRate, Rate
 from app import db
 from freezegun import freeze_time
 from sqlalchemy import desc
+from app.utils import convert_utc_to_aet
 
 
 def test_reporting_should_have_decorated_tasks_functions():
@@ -184,7 +185,7 @@ def test_create_nightly_billing_different_sent_by(
 
     assert len(records) == 2
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(yesterday)
+        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == Decimal(1.33)
         assert record.billable_units == 1
         assert record.rate_multiplier == 1.0
@@ -359,7 +360,7 @@ def test_get_rate_for_sms_and_email(notify_db, notify_db_session):
 
 @freeze_time('2018-10-09T13:30:00')  # 10/10/2018 00:30:00 AEDT
 # Note: daylight savings time starts on 2018-10-07
-def test_create_nightly_billing_use_BST(
+def test_create_nightly_billing_use_aet(
         notify_db,
         notify_db_session,
         sample_service,
