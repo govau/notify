@@ -357,7 +357,7 @@ def test_get_rate_for_sms_and_email(notify_db, notify_db_session):
     assert rate == Decimal(0)
 
 
-@freeze_time('2018-10-09T13:30:00') # 10/10/2018 00:30:00 AEDT
+@freeze_time('2018-10-09T13:30:00')  # 10/10/2018 00:30:00 AEDT
 # Note: daylight savings time starts on 2018-10-07
 def test_create_nightly_billing_use_BST(
         notify_db,
@@ -371,7 +371,7 @@ def test_create_nightly_billing_use_BST(
     sample_notification(
         notify_db,
         notify_db_session,
-        created_at=datetime(2018, 10, 6, 14, 30), # 07/10/2018 00:30:00 AEDT
+        created_at=datetime(2018, 10, 6, 14, 30),  # 07/10/2018 00:30:00 AEDT
         service=sample_service,
         template=sample_template,
         status='delivered',
@@ -384,7 +384,7 @@ def test_create_nightly_billing_use_BST(
     sample_notification(
         notify_db,
         notify_db_session,
-        created_at=datetime(2018, 10, 7, 13, 30), # 08/10/2018 00:30:00 AEDT
+        created_at=datetime(2018, 10, 7, 13, 30),  # 08/10/2018 00:30:00 AEDT
         service=sample_service,
         template=sample_template,
         status='delivered',
