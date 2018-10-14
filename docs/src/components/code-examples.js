@@ -23,7 +23,7 @@ const Tabs = styled.div`
   border-top: 1px solid #cfcfcf;
 `
 
-const TabsNav = styled.div`
+const TabsNav = styled.nav`
   border-bottom: 0.35rem solid #e0e0e0;
   width: 100%;
 `
@@ -42,7 +42,7 @@ const NavItem = styled.li`
   display: inline-block;
 `
 
-const NavLink = styled.label`
+const NavLink = styled.a`
   ${linkCSS};
 `
 
@@ -80,8 +80,9 @@ export class CodeExamplesComponent extends React.Component {
         <TabsNav>
           <Ul>
             {codeSnippets.map((s, i) => (
-              <NavItem key={i}>
+              <NavItem key={s.relativePath}>
                 <NavLink
+                  href="javascript:void(0);"
                   onClick={() => this.handleClick(i)}
                   active={this.state.activeTab === i}
                 >
@@ -93,7 +94,7 @@ export class CodeExamplesComponent extends React.Component {
         </TabsNav>
 
         {codeSnippets.map((s, i) => (
-          <TabContent key={i} active={this.state.activeTab === i}>
+          <TabContent key={s.relativePath} active={this.state.activeTab === i}>
             <SyntaxHighligher content={s.content} language={s.extension} />
           </TabContent>
         ))}

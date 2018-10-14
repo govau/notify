@@ -17,9 +17,9 @@ test.each`
   ({ data, path, expectedLength }) => {
     expect(
       filterTransformSortCodeSnippets({
-        codeSnippets: mockGraphQLResponse.allCodeSamples.edges,
-        path: 'sending-emails',
+        codeSnippets: data,
+        path: path,
       })
-    ).toHaveLength(3)
+    ).toHaveLength(expectedLength)
   }
 )
