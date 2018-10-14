@@ -81,7 +81,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
     assert len(records) == records_num
 
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(yesterday)
+        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == Decimal(1.33)
         assert record.billable_units == billable_units
         assert record.rate_multiplier == multiplier[i]
@@ -134,7 +134,7 @@ def test_create_nightly_billing_different_templates(
     billable_units = [0, 1]
     rate = [0, Decimal(1.33)]
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(yesterday)
+        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == rate[i]
         assert record.billable_units == billable_units[i]
         assert record.rate_multiplier == multiplier[i]
@@ -222,7 +222,7 @@ def test_create_nightly_billing_letter(
     assert len(records) == 1
     record = records[0]
     assert record.notification_type == LETTER_TYPE
-    assert record.bst_date == datetime.date(yesterday)
+    assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
     assert record.rate == Decimal(2.1)
     assert record.billable_units == 2
     assert record.rate_multiplier == 2.0
@@ -259,7 +259,7 @@ def test_create_nightly_billing_null_sent_by_sms(
 
     assert len(records) == 1
     record = records[0]
-    assert record.bst_date == datetime.date(yesterday)
+    assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
     assert record.rate == Decimal(1.33)
     assert record.billable_units == 1
     assert record.rate_multiplier == 1
