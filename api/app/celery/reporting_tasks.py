@@ -13,7 +13,6 @@ from sqlalchemy import func, desc, case
 from notifications_utils.statsd_decorators import statsd
 from app import notify_celery
 from flask import current_app
-from app.utils import convert_aet_to_utc
 
 
 def get_rate(non_letter_rates, letter_rates, notification_type, date, crown=None, rate_multiplier=None):
