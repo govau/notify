@@ -714,15 +714,18 @@ def test_dao_fetch_todays_stats_for_all_services_includes_all_services(notify_db
 
 def test_dao_fetch_todays_stats_for_all_services_only_includes_today(notify_db, notify_db_session):
     # just_before_midnight_yesterday
-    with freeze_time('2001-01-01T12:59:00'):
+    # 02/01/2001 23:59:00 AEDT
+    with freeze_time('2001-01-02T12:59:00'):
         create_notification(notify_db, None, to_field='1', status='delivered')
 
     # just_after_midnight_today
-    with freeze_time('2001-01-01T13:01:00'):
+    # 03/01/2001 10:01:00 AEDT
+    with freeze_time('2001-01-02T23:01:00'):
         create_notification(notify_db, None, to_field='2', status='failed')
 
     # today
-    with freeze_time('2001-01-02T13:00:00'):
+    # 03/01/2001 10:00:00 AEDT
+    with freeze_time('2001-01-02T23:00:00'):
         stats = dao_fetch_todays_stats_for_all_services()
 
     stats = {row.status: row.count for row in stats}
