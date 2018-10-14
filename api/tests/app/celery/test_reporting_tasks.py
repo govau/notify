@@ -78,6 +78,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
     create_nightly_billing(yesterday)
     records = FactBilling.query.order_by('rate_multiplier').all()
     assert len(records) == records_num
+
     for i, record in enumerate(records):
         assert record.bst_date == datetime.date(yesterday)
         assert record.rate == Decimal(1.33)
