@@ -230,6 +230,14 @@ jobs:
       - *cf_login_prod
       - run: make status.deploy
 
+  deploy-docs:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make docs.deploy
+
 workflows:
   version: 2
   build-and-deploy:
@@ -320,6 +328,11 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-statuspage:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-docs:
           <<: *master_branch
           requires:
             - unlock-prod-deploy
