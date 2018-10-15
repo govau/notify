@@ -40,7 +40,11 @@ from app.models import (
     TEMPLATE_TYPES,
     LETTER_TYPE,
 )
-from app.utils import get_sydney_month_from_utc_column, get_sydney_midnight_in_utc
+from app.utils import (
+    get_sydney_month_from_utc_column,
+    get_sydney_midnight_in_utc,
+    convert_utc_to_aet,
+)
 
 DEFAULT_SERVICE_PERMISSIONS = [
     SMS_TYPE,
@@ -334,9 +338,9 @@ def dao_fetch_monthly_historical_stats_for_service(service_id, year):
 
 @statsd(namespace='dao')
 def dao_fetch_todays_stats_for_all_services(include_from_test_key=True, only_active=True):
-    today = date.today()
-    start_date = get_sydney_midnight_in_utc(today)
-    end_date = get_sydney_midnight_in_utc(today + timedelta(days=1))
+    today_in_aet = convert_utc_to_aet(datetime.utcnow())
+    start_date = get_sydney_midnight_in_utc(today_in_aet)
+    end_date = get_sydney_midnight_in_utc(today_in_aet + timedelta(days=1))
 
     subquery = db.session.query(
         Notification.notification_type,

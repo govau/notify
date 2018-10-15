@@ -13,6 +13,7 @@ from app.models import LetterRate, Rate
 from app import db
 from freezegun import freeze_time
 from sqlalchemy import desc
+from app.utils import convert_utc_to_aet
 
 
 def test_reporting_should_have_decorated_tasks_functions():
@@ -42,7 +43,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
         billable_units,
         multiplier):
 
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -75,11 +76,12 @@ def test_create_nightly_billing_sms_rate_multiplier(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
     assert len(records) == records_num
+
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(yesterday)
+        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == Decimal(1.33)
         assert record.billable_units == billable_units
         assert record.rate_multiplier == multiplier[i]
@@ -92,7 +94,7 @@ def test_create_nightly_billing_different_templates(
         sample_template,
         sample_email_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -124,7 +126,7 @@ def test_create_nightly_billing_different_templates(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
 
     assert len(records) == 2
@@ -132,7 +134,7 @@ def test_create_nightly_billing_different_templates(
     billable_units = [0, 1]
     rate = [0, Decimal(1.33)]
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(yesterday)
+        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == rate[i]
         assert record.billable_units == billable_units[i]
         assert record.rate_multiplier == multiplier[i]
@@ -145,7 +147,7 @@ def test_create_nightly_billing_different_sent_by(
         sample_template,
         sample_email_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -178,12 +180,12 @@ def test_create_nightly_billing_different_sent_by(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
 
     assert len(records) == 2
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(yesterday)
+        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == Decimal(1.33)
         assert record.billable_units == 1
         assert record.rate_multiplier == 1.0
@@ -195,7 +197,7 @@ def test_create_nightly_billing_letter(
         sample_service,
         sample_letter_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -215,12 +217,12 @@ def test_create_nightly_billing_letter(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.order_by('rate_multiplier').all()
     assert len(records) == 1
     record = records[0]
     assert record.notification_type == LETTER_TYPE
-    assert record.bst_date == datetime.date(yesterday)
+    assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
     assert record.rate == Decimal(2.1)
     assert record.billable_units == 2
     assert record.rate_multiplier == 2.0
@@ -232,7 +234,7 @@ def test_create_nightly_billing_null_sent_by_sms(
         sample_service,
         sample_template,
         mocker):
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.utcnow() - timedelta(days=1)
 
     mocker.patch('app.celery.reporting_tasks.get_rate', side_effect=mocker_get_rate)
 
@@ -252,12 +254,12 @@ def test_create_nightly_billing_null_sent_by_sms(
     records = FactBilling.query.all()
     assert len(records) == 0
 
-    create_nightly_billing(yesterday)
+    create_nightly_billing()
     records = FactBilling.query.all()
 
     assert len(records) == 1
     record = records[0]
-    assert record.bst_date == datetime.date(yesterday)
+    assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
     assert record.rate == Decimal(1.33)
     assert record.billable_units == 1
     assert record.rate_multiplier == 1
@@ -356,9 +358,9 @@ def test_get_rate_for_sms_and_email(notify_db, notify_db_session):
     assert rate == Decimal(0)
 
 
-@freeze_time('2018-03-27T03:30:00')
-# summer time starts on 2018-03-25
-def test_create_nightly_billing_use_BST(
+@freeze_time('2018-10-09T13:30:00')  # 10/10/2018 00:30:00 AEDT
+# Note: daylight savings time starts on 2018-10-07
+def test_create_nightly_billing_use_aet(
         notify_db,
         notify_db_session,
         sample_service,
@@ -370,7 +372,7 @@ def test_create_nightly_billing_use_BST(
     sample_notification(
         notify_db,
         notify_db_session,
-        created_at=datetime(2018, 3, 25, 12, 0),
+        created_at=datetime(2018, 10, 6, 14, 30),  # 07/10/2018 00:30:00 AEDT
         service=sample_service,
         template=sample_template,
         status='delivered',
@@ -383,7 +385,7 @@ def test_create_nightly_billing_use_BST(
     sample_notification(
         notify_db,
         notify_db_session,
-        created_at=datetime(2018, 3, 25, 23, 5),
+        created_at=datetime(2018, 10, 7, 13, 30),  # 08/10/2018 00:30:00 AEDT
         service=sample_service,
         template=sample_template,
         status='delivered',
@@ -402,8 +404,13 @@ def test_create_nightly_billing_use_BST(
     records = FactBilling.query.order_by(FactBilling.bst_date).all()
 
     assert len(records) == 2
-    assert records[0].bst_date == date(2018, 3, 25)
-    assert records[-1].bst_date == date(2018, 3, 26)
+    # The first record's bst_date is 06/10/2018. This is because the current
+    # time is 2018-10-09T13:30:00 UTC, and 3 days earlier than that is
+    # 2018-10-06T13:30:00 UTC which is 06/10/2018 23:30:00 AEST. This falls
+    # outside of daylight savings time and so the bst_date is the 6th, not the
+    # 7th.
+    assert records[0].bst_date == date(2018, 10, 6)
+    assert records[-1].bst_date == date(2018, 10, 8)
 
 
 @freeze_time('2018-01-15T03:30:00')
@@ -438,6 +445,6 @@ def test_create_nightly_billing_update_when_record_exists(
     assert len(records) == 1
     assert records[0].bst_date == date(2018, 1, 14)
 
-    # run again, make sure create_nightly_billing() updates with no error
+    # run again, make sure create_nightly_billing updates with no error
     create_nightly_billing()
     assert len(records) == 1
