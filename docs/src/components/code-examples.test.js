@@ -1,5 +1,3 @@
-import React from 'react'
-import renderer from 'react-test-renderer'
 import { filterTransformSortCodeSnippets } from './code-examples'
 import mockGraphQLResponse from './code-examples.test.fixture'
 

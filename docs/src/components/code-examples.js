@@ -66,7 +66,8 @@ export class CodeExamplesComponent extends React.Component {
     activeTab: 0,
   }
 
-  handleClick = index => {
+  handleClick = index => e => {
+    e.preventDefault()
     this.setState({ activeTab: index })
   }
 
@@ -82,8 +83,8 @@ export class CodeExamplesComponent extends React.Component {
             {codeSnippets.map((s, i) => (
               <NavItem key={s.relativePath}>
                 <NavLink
-                  href="javascript:void(0);"
-                  onClick={() => this.handleClick(i)}
+                  href=""
+                  onClick={this.handleClick(i)}
                   active={this.state.activeTab === i}
                 >
                   {s.name}
