@@ -69,6 +69,7 @@ undeploy-%:
 	-$(CF) delete notify-f-$* -f
 	-$(CF) delete notify-api-f-$* -f
 	-$(CF) delete notify-celery-f-$* -f
+	-$(CF) delete notify-docs-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 
 .PHONY: prune \
