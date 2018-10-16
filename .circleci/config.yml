@@ -115,6 +115,8 @@ jobs:
           root: .
           paths:
             - docs
+            - docs/node_modules
+            - docs/public
 
   test-docs:
     <<: *node_image
@@ -235,7 +237,7 @@ jobs:
     steps:
       - *cf_install
       - *attach_workspace
-      - *cf_login
+      - *cf_login_prod
       - run: make docs.deploy
 
 workflows:
@@ -311,6 +313,7 @@ workflows:
             - deploy-dev-api
             - deploy-dev-admin
             - deploy-dev-celery
+            - deploy-dev-docs
 
       - deploy-prod-admin:
           <<: *master_branch
