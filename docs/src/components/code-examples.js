@@ -81,7 +81,7 @@ export class CodeExamplesComponent extends React.Component {
         <TabsNav>
           <Ul>
             {codeSnippets.map((s, i) => (
-              <NavItem key={s.relativePath}>
+              <NavItem key={s.id}>
                 <NavLink
                   href=""
                   onClick={this.handleClick(i)}
@@ -95,7 +95,7 @@ export class CodeExamplesComponent extends React.Component {
         </TabsNav>
 
         {codeSnippets.map((s, i) => (
-          <TabContent key={s.relativePath} active={this.state.activeTab === i}>
+          <TabContent key={s.id} active={this.state.activeTab === i}>
             <SyntaxHighligher content={s.content} language={s.extension} />
           </TabContent>
         ))}
@@ -111,6 +111,7 @@ export default ({ path }) => (
         allCodeSamples {
           edges {
             node {
+              id
               content
               extension
               relativePath
