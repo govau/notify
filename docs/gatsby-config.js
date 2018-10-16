@@ -16,6 +16,19 @@ module.exports = {
         icon: 'src/images/dta-icon.png', // This path is relative to the root of the site.
       },
     },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `data`,
+        path: `${__dirname}/src/pages/`,
+      },
+    },
+    {
+      resolve: `gatsby-transformer-code-samples`,
+      options: {
+        name: `data`,
+      },
+    },
     'gatsby-mdx',
     'gatsby-plugin-styled-components',
     'gatsby-plugin-offline',

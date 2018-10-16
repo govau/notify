@@ -116,6 +116,13 @@ jobs:
           paths:
             - docs
 
+  test-docs:
+    <<: *node_image
+    steps:
+      - *attach_workspace
+      - run: make docs.setup
+      - run: make docs.test
+
   test-admin:
     <<: *python_node_image
     steps:
@@ -223,6 +230,14 @@ jobs:
       - *cf_login_prod
       - run: make status.deploy
 
+  deploy-docs:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make docs.deploy
+
 workflows:
   version: 2
   build-and-deploy:
@@ -241,6 +256,10 @@ workflows:
             - setup
 
       - build-docs:
+          requires:
+            - setup
+
+      - test-docs:
           requires:
             - setup
 
@@ -309,6 +328,11 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-statuspage:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-docs:
           <<: *master_branch
           requires:
             - unlock-prod-deploy

@@ -1,10 +1,9 @@
 import React from 'react'
 import { MDXProvider } from '@mdx-js/tag'
 import ThemeProvider from './theme'
-
-import Code from './code'
 import P from './core/paragraph'
 import { H1, H2, H3, H4 } from './core/heading'
+import SyntaxHighlighter from './syntax-highlighter'
 
 const getLanguage = props => {
   const re = /language-(\w+)/g
@@ -19,7 +18,7 @@ export default ({ children }) => (
       components={{
         pre: React.Fragment,
         code: ({ children, ...props }) => (
-          <Code language={getLanguage(props)}>{children}</Code>
+          <SyntaxHighlighter language={getLanguage(props)} content={children} />
         ),
         p: P,
         h1: H1,
