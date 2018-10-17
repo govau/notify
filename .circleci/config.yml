@@ -115,8 +115,6 @@ jobs:
           root: .
           paths:
             - docs
-            - docs/node_modules
-            - docs/public
 
   test-docs:
     <<: *node_image
@@ -245,17 +243,17 @@ workflows:
   build-and-deploy:
     jobs:
       - setup
-      - build-admin:
-          requires:
-            - setup
+      # - build-admin:
+      #     requires:
+      #       - setup
 
-      - build-api:
-          requires:
-            - setup
+      # - build-api:
+      #     requires:
+      #       - setup
 
-      - build-utils:
-          requires:
-            - setup
+      # - build-utils:
+      #     requires:
+      #       - setup
 
       - build-docs:
           requires:
@@ -265,33 +263,33 @@ workflows:
           requires:
             - setup
 
-      - test-admin:
-          requires:
-            - setup
+      # - test-admin:
+      #     requires:
+      #       - setup
 
-      - test-api:
-          requires:
-            - setup
+      # - test-api:
+      #     requires:
+      #       - setup
 
-      - test-utils:
-          requires:
-            - setup
+      # - test-utils:
+      #     requires:
+      #       - setup
 
-      - check-vulnerabilities:
-          requires:
-            - setup
+      # - check-vulnerabilities:
+      #     requires:
+      #       - setup
 
-      - deploy-dev-admin:
-          requires:
-            - build-admin
+      # - deploy-dev-admin:
+      #     requires:
+      #       - build-admin
 
-      - deploy-dev-api:
-          requires:
-            - build-api
+      # - deploy-dev-api:
+      #     requires:
+      #       - build-api
 
-      - deploy-dev-celery:
-          requires:
-            - build-api
+      # - deploy-dev-celery:
+      #     requires:
+      #       - build-api
 
       - deploy-dev-docs:
           requires:
@@ -302,40 +300,41 @@ workflows:
             - setup
 
       - unlock-prod-deploy:
-          <<: *master_branch
+          # <<: *master_branch
           type: approval
           requires:
-            - build-utils
-            - test-utils
-            - test-api
-            - test-admin
-            - check-vulnerabilities
-            - deploy-dev-api
-            - deploy-dev-admin
-            - deploy-dev-celery
+            # - build-utils
+            # - test-utils
+            # - test-api
+            # - test-admin
+            # - test-docs
+            # - check-vulnerabilities
+            # - deploy-dev-api
+            # - deploy-dev-admin
+            # - deploy-dev-celery
             - deploy-dev-docs
 
-      - deploy-prod-admin:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
+      # - deploy-prod-admin:
+      #     <<: *master_branch
+      #     requires:
+      #       - unlock-prod-deploy
 
-      - deploy-prod-api:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
+      # - deploy-prod-api:
+      #     <<: *master_branch
+      #     requires:
+      #       - unlock-prod-deploy
 
-      - deploy-prod-celery:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
+      # - deploy-prod-celery:
+      #     <<: *master_branch
+      #     requires:
+      #       - unlock-prod-deploy
 
-      - deploy-statuspage:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
+      # - deploy-statuspage:
+      #     <<: *master_branch
+      #     requires:
+      #       - unlock-prod-deploy
 
       - deploy-docs:
-          <<: *master_branch
+          # <<: *master_branch
           requires:
             - unlock-prod-deploy
