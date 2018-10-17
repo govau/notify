@@ -49,7 +49,7 @@ const Content = styled.div`
   overflow: hidden;
 `
 
-const Layout = ({ children }) => (
+const Layout = ({ sidenav = <Sidenav />, children }) => (
   <Providers>
     <StaticQuery
       query={graphql`
@@ -80,9 +80,7 @@ const Layout = ({ children }) => (
             <Content>{children}</Content>
             <NavWrapper>
               <SkipNavContent id="nav" />
-              <StickyNav>
-                <Sidenav />
-              </StickyNav>
+              <StickyNav>{sidenav}</StickyNav>
             </NavWrapper>
           </Main>
           <Footer />
