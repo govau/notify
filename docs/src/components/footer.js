@@ -44,9 +44,7 @@ const UnorderedList = ({ list }) => (
     <Ul>
       {list.map(i => (
         <li key={i.text}>
-          <External blank href={i.target}>
-            {i.text}
-          </External>
+          <External href={i.href}>{i.text}</External>
         </li>
       ))}
     </Ul>
@@ -54,27 +52,27 @@ const UnorderedList = ({ list }) => (
 )
 
 const firstColumn = [
-  { text: 'Support', target: 'https://notify.gov.au/support' },
-  { text: 'System status', target: 'https://status.notify.gov.au/' },
-  { text: 'Slack channel', target: 'https://ausdta.slack.com/messages/notify' },
-  { text: 'Blog', target: 'https://dta.gov.au/blog' },
+  { text: 'Support', href: 'https://notify.gov.au/support' },
+  { text: 'System status', href: 'https://status.notify.gov.au/' },
+  { text: 'Slack channel', href: 'https://ausdta.slack.com/messages/notify' },
+  { text: 'Blog', href: 'https://dta.gov.au/blog' },
 ]
 
 const secondColumn = [
-  { text: 'Features', target: 'https://notify.gov.au/features' },
-  { text: 'Roadmap', target: 'https://notify.gov.au/features/roadmap' },
-  { text: 'Security', target: 'https://notify.gov.au/features/security' },
-  { text: 'Terms of use', target: 'https://notify.gov.au/features/terms' },
+  { text: 'Features', href: 'https://notify.gov.au/features' },
+  { text: 'Roadmap', href: 'https://notify.gov.au/features/roadmap' },
+  { text: 'Security', href: 'https://notify.gov.au/features/security' },
+  { text: 'Terms of use', href: 'https://notify.gov.au/features/terms' },
   {
     text: 'Using Notify',
-    target: 'https://notify.gov.au/features/using-notify',
+    href: 'https://notify.gov.au/features/using-notify',
   },
 ]
 
 const thirdColumn = [
-  { text: 'Pricing', target: 'https://notify.gov.au/pricing' },
-  { text: 'Cookies', target: 'https://notify.gov.au/cookies' },
-  { text: 'Documentation', target: 'https://notify.gov.au/documentation' },
+  { text: 'Pricing', href: 'https://notify.gov.au/pricing' },
+  { text: 'Cookies', href: 'https://notify.gov.au/cookies' },
+  { text: 'Documentation', href: 'https://notify.gov.au/documentation' },
 ]
 
 export default props => (
