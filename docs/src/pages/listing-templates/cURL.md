@@ -1,4 +1,4 @@
-Return email and sms templates
+Return email and text message templates:
 
 ```sh
 curl \
@@ -7,7 +7,7 @@ curl \
     https://rest-api.notify.gov.au/v2/templates
 ```
 
-Return email templates only
+Return email templates only:
 
 ```sh
 curl \
@@ -16,7 +16,7 @@ curl \
     https://rest-api.notify.gov.au/v2/templates?type=email
 ```
 
-Return sms templates only
+Return text message templates only:
 
 ```sh
 curl \
