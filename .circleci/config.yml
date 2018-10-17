@@ -235,7 +235,7 @@ jobs:
     steps:
       - *cf_install
       - *attach_workspace
-      - *cf_login
+      - *cf_login_prod
       - run: make docs.deploy
 
 workflows:
@@ -307,10 +307,12 @@ workflows:
             - test-utils
             - test-api
             - test-admin
+            - test-docs
             - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
             - deploy-dev-celery
+            - deploy-dev-docs
 
       - deploy-prod-admin:
           <<: *master_branch
