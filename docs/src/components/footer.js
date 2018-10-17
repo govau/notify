@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Flex, Box } from '@rebass/grid'
-import { height, space } from 'styled-system'
+import { height } from 'styled-system'
 
 import { PanelProvider, Wrapper } from './theme'
 import dta from '../images/dta-wordmark-white.svg'
@@ -28,8 +28,6 @@ const StyledFlex = styled(Flex)`
   align-items: start;
   border-bottom: 1px solid #bfc1c3;
   padding-bottom: 4rem;
-
-  ${space};
 `
 
 const Ul = styled.ul`
