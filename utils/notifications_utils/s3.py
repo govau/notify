@@ -38,11 +38,19 @@ def s3upload(
         'Body': contents,
         'ServerSideEncryption': 'AES256',
         'ContentType': content_type,
-        'ACL': acl,
     }
+
+    if acl:
+        put_args['acl'] = acl
 
     if tags:
         tags = urllib.parse.urlencode(tags)
         put_args['Tagging'] = tags
 
-    key.put(**put_args)
+    try:
+        key.put(**put_args)
+    except botocore.exceptions.ClientError as e:
+        current_app.logger.error(
+            "Unable to upload file to S3 bucket {}".format(bucket_name)
+        )
+        raise e
