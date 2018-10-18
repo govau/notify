@@ -28,6 +28,7 @@ notifications-utils = {path = "./../utils", editable = true}
 Telstra_Messaging = {git = "https://github.com/Telstra/MessagingAPI-SDK-python.git"}
 twilio = "~=6.16"
 boto3 = "~=1.8"
+sentry-sdk = {extras = ["flask"]}
 
 [dev-packages]
 bandit = "==1.5.1"

@@ -10,6 +10,7 @@ defaults: &defaults
   env: &defaults_env
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-admin --root aws"
     NOTIFY_ENVIRONMENT: production
+    ADMIN_SENTRY_ENV: dev
   command: make run-gunicorn
 
 applications:

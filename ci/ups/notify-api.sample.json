@@ -1,3 +1,5 @@
 {
-  "FLASK_APP": ""
+  "FLASK_APP": "",
+  "API_SENTRY_DSN": "",
+  "API_SENTRY_ENV": ""
 }

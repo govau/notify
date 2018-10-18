@@ -1,4 +1,5 @@
-def test_owasp_useful_headers_set(client, mocker):
+def test_owasp_useful_headers_set(client, mocker, monkeypatch):
+    monkeypatch.setenv('ADMIN_SENTRY_CSP_URL', 'fakesentry.io/1234/?a=b')
     mocker.patch('app.get_cdn_domain', return_value='static-logos.test.com')
 
     response = client.get('/')
@@ -9,8 +10,9 @@ def test_owasp_useful_headers_set(client, mocker):
     assert response.headers['X-XSS-Protection'] == '1; mode=block'
     assert response.headers['Content-Security-Policy'] == (
         "default-src 'self' 'unsafe-inline';"
+        "report-uri fakesentry.io/1234/?a=b;"
         "script-src 'self' *.google-analytics.com 'unsafe-inline' 'unsafe-eval' data:;"
-        "connect-src 'self' *.google-analytics.com;"
+        "connect-src 'self' https://sentry.io *.google-analytics.com;"
         "object-src 'self';"
         "font-src 'self' data:;"
         "img-src 'self' *.google-analytics.com *.cld.gov.au static-logos.test.com data:;"

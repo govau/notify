@@ -32,14 +32,34 @@ version-file: app/version.py
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
-build-frontend:
-	$(NPM) run build -- --production
+# this is a hack because CircleCI env variables are awful
+ADMIN_SENTRY_DSN ?= $(ADMIN_SENTRY_DSN_DEV)
+ADMIN_SENTRY_ENV ?= $(ADMIN_SENTRY_ENV_DEV)
 
-setup-frontend: ## Setup and build css
+build-frontend:
+	ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN} \
+	ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV} \
+	  $(NPM) run build -- --production
+
+build-frontend-prod:
+	@$(MAKE)\
+	  ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN_PROD} \
+	  ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV_PROD} \
+	  build-frontend
+
+install-frontend:
 	$(NPM) install
+
+setup-frontend: install-frontend ## Setup and build css
 	$(MAKE) build-frontend
 
-setup: setup-frontend version-file ## Setup virtualenv, install python deps, build css
+setup-frontend-prod: install-frontend ## Setup and build css
+	$(MAKE) build-frontend-prod
+
+setup: version-file ## Setup virtualenv, install python deps
+	$(PIPENV) install
+
+setup-prod: setup-frontend-prod version-file
 	$(PIPENV) install
 
 setup-dev: setup-frontend version-file ## Setup everything in dev mode
@@ -61,7 +81,9 @@ check-vulnerabilities:
 	$(RUNNER) bandit -r . -x node_modules,tests -ll
 
 run-gulp: ## Continuously build css
-	$(NPM) run watch
+	ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN} \
+	ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV} \
+	  $(NPM) run watch
 
 run: version-file ## Run a development server (reloading)
 	$(RUNNER) flask run -p $(PORT)

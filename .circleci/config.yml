@@ -81,6 +81,19 @@ jobs:
     steps:
       - *attach_workspace
       - run: make admin.setup
+      - run: make -C admin setup-frontend-prod
+      - run: make admin.build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - admin
+
+  build-dev-admin:
+    <<: *python_node_image
+    steps:
+      - *attach_workspace
+      - run: make admin.setup
+      - run: make -C admin setup-frontend
       - run: make admin.build
       - persist_to_workspace:
           root: .
@@ -247,6 +260,10 @@ workflows:
           requires:
             - setup
 
+      - build-dev-admin:
+          requires:
+            - setup
+
       - build-api:
           requires:
             - setup
@@ -281,7 +298,7 @@ workflows:
 
       - deploy-dev-admin:
           requires:
-            - build-admin
+            - build-dev-admin
 
       - deploy-dev-api:
           requires:

@@ -1,1 +1,5 @@
-{}
+{
+  "ADMIN_SENTRY_DSN": "",
+  "ADMIN_SENTRY_ENV": "",
+  "ADMIN_SENTRY_CSP_URL": ""
+}
