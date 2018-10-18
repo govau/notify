@@ -7,6 +7,7 @@
 // - - - - - - - - - - - - - - -
 import gulp from "gulp";
 import loadPlugins from "gulp-load-plugins";
+import sourcemaps from "gulp-sourcemaps";
 import stylish from "jshint-stylish";
 import { argv } from "yargs";
 
@@ -65,6 +66,7 @@ gulp.task("copy:govuk_template:images", () =>
 gulp.task("javascripts", () =>
   gulp
     .src([
+      paths.src + "javascripts/sentry.js",
       paths.toolkit + "javascripts/govuk/modules.js",
       paths.toolkit + "javascripts/govuk/stop-scrolling-at-footer.js",
       paths.toolkit + "javascripts/govuk/stick-at-top-when-scrolling.js",
@@ -84,13 +86,23 @@ gulp.task("javascripts", () =>
       paths.src + "javascripts/main.js"
     ])
     .pipe(plugins.prettyerror(throwInProduction))
+    .pipe(sourcemaps.init())
     .pipe(
       plugins.babel({
-        presets: ["es2015"]
+        presets: ["es2015"],
+        plugins: [
+          [
+            "transform-inline-environment-variables",
+            {
+              include: ["ADMIN_SENTRY_DSN", "ADMIN_SENTRY_ENV"]
+            }
+          ]
+        ]
       })
     )
     .pipe(
       plugins.addSrc.prepend([
+        paths.npm + "@sentry/browser/build/bundle.min.js",
         paths.npm + "hogan.js/dist/hogan-3.0.2.js",
         paths.npm + "jquery/dist/jquery.min.js",
         paths.npm + "jquery-migrate/dist/jquery-migrate.min.js",
@@ -101,6 +113,7 @@ gulp.task("javascripts", () =>
     )
     .pipe(plugins.uglify())
     .pipe(plugins.concat("all.js"))
+    .pipe(sourcemaps.write("../maps/"))
     .pipe(gulp.dest(paths.dist + "javascripts/"))
 );
 
@@ -171,15 +184,18 @@ gulp.task("lint:js", () =>
 gulp.task("lint", gulp.series("lint:js"));
 
 // Default: compile everything
-gulp.task("default", gulp.series(
-  "copy:govuk_template:images",
-  //'copy:govuk_template:css',
-  "copy:govuk_template:js",
-  "copy:govuk_template:error_page",
-  "javascripts",
-  "sass",
-  "images"
-));
+gulp.task(
+  "default",
+  gulp.series(
+    "copy:govuk_template:images",
+    //'copy:govuk_template:css',
+    "copy:govuk_template:js",
+    "copy:govuk_template:error_page",
+    "javascripts",
+    "sass",
+    "images"
+  )
+);
 
 // Optional: recompile on changes
 gulp.task("watch", gulp.series("default", "watchForChanges"));

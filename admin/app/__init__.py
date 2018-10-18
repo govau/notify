@@ -473,12 +473,16 @@ def useful_headers_after_request(response):
     response.headers.add('X-XSS-Protection', '1; mode=block')
     response.headers.add('Content-Security-Policy', (
         "default-src 'self' 'unsafe-inline';"
+        "report-uri {0};"
         "script-src 'self' *.google-analytics.com 'unsafe-inline' 'unsafe-eval' data:;"
-        "connect-src 'self' *.google-analytics.com;"
+        "connect-src 'self' https://sentry.io *.google-analytics.com;"
         "object-src 'self';"
         "font-src 'self' data:;"
-        "img-src 'self' *.google-analytics.com *.cld.gov.au {} data:;"
-        "frame-src www.youtube.com;".format(get_cdn_domain())
+        "img-src 'self' *.google-analytics.com *.cld.gov.au {1} data:;"
+        "frame-src www.youtube.com;".format(
+            os.getenv("ADMIN_SENTRY_CSP_URL"),
+            get_cdn_domain(),
+        )
     ))
     if 'Cache-Control' in response.headers:
         del response.headers['Cache-Control']
