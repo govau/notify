@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const StyledAnchor = styled.a`
+export const SkipNavLink = styled.a`
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -24,8 +24,5 @@ const StyledAnchor = styled.a`
     clip: auto;
   }
 `
-
-export const SkipNavLink = props =>
-  props.links.map(s => <StyledAnchor href={s.link}>{s.text}</StyledAnchor>)
 
 export const SkipNavContent = props => <div {...props} />

@@ -63,18 +63,8 @@ const Layout = ({ children }) => (
       `}
       render={data => (
         <Root>
-          <SkipNavLink
-            links={[
-              {
-                link: '#content',
-                text: 'Skip to content',
-              },
-              {
-                link: '#nav',
-                text: 'Skip to navigation',
-              },
-            ]}
-          />
+          <SkipNavLink href="#content">Skip to content</SkipNavLink>
+          <SkipNavLink href="#nav">Skip to navigation</SkipNavLink>
           <Helmet
             title={data.site.siteMetadata.title}
             meta={[
