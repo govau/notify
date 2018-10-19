@@ -1,15 +1,29 @@
-import Layout from 'components/layout'
+---
+title: "Listing available templates"
+---
+
 import Button from 'components/button'
 import Examples from 'components/code-examples'
 
+# Listing available templates
 
-## Sending a single email
+Notify allows you to inspect which templates are available. This could allow you
+to build your own interfaces or tooling which operates on Notify.
+
+For example, you could easily build a service which checks for which templates are
+availble, inspects which variables they require, and then presents an operator
+with a form to fill out which could submit and send messages using that
+template.
+
+Another example could be checking all sent messages for a template selected from
+the full set of templates.
+
 
 The following example shows how to send a single email.
 
 <Examples path="listing-templates"/>
 
-### Arguments
+## Arguments
 
 `template_id`
 

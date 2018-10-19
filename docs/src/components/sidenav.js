@@ -130,7 +130,7 @@ export const DynamicSidenav = props => (
             <Option>/setup-client</Option>
             <Option>/sending-email-messages</Option>
             <Option>/sending-text-messages</Option>
-            <Option>/this-is-mdx</Option>
+            <Option>/check-available-templates</Option>
           </NavList>
         </NavWrapper>
       )
