@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from 'gatsby'
 import styled from 'styled-components'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 
 import Header from './header'
 import Footer from './footer'
@@ -12,6 +15,9 @@ import { SkipNavLink, SkipNavContent } from './skip-nav'
 import { Wrapper } from './theme'
 import 'sanitize.css'
 import './core/index.css'
+
+library.add(faBars)
+library.add(faTimes)
 
 const Root = styled.div`
   display: flex;
