@@ -8,6 +8,7 @@ import Header from './header'
 import Footer from './footer'
 import Providers from './providers'
 import Sidenav from './sidenav'
+import { SkipNavLink, SkipNavContent } from './skip-nav'
 import { Wrapper } from './theme'
 import 'sanitize.css'
 import './core/index.css'
@@ -62,6 +63,8 @@ const Layout = ({ children }) => (
       `}
       render={data => (
         <Root>
+          <SkipNavLink href="#content">Skip to content</SkipNavLink>
+          <SkipNavLink href="#nav">Skip to navigation</SkipNavLink>
           <Helmet
             title={data.site.siteMetadata.title}
             meta={[
@@ -73,8 +76,10 @@ const Layout = ({ children }) => (
           </Helmet>
           <Header siteTitle={data.site.siteMetadata.title} />
           <Main>
+            <SkipNavContent id="content" />
             <Content>{children}</Content>
             <NavWrapper>
+              <SkipNavContent id="nav" />
               <StickyNav>
                 <Sidenav />
               </StickyNav>
