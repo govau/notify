@@ -41,7 +41,7 @@ def s3upload(
     }
 
     if acl:
-        put_args['acl'] = acl
+        put_args['ACL'] = acl
 
     if tags:
         tags = urllib.parse.urlencode(tags)
