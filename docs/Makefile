@@ -54,6 +54,7 @@ deploy-dev: manifest-vars-$(STG).yml build
 
 clean:
 	-rm -r public
+	-rm -r .cache
 	-rm manifest-vars-*
 
 clean-full: clean

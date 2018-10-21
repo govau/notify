@@ -10,6 +10,7 @@ import Providers from './providers'
 import Sidenav from './sidenav'
 import { SkipNavLink, SkipNavContent } from './skip-nav'
 import { Wrapper } from './theme'
+import { desktop } from './core/media'
 import 'sanitize.css'
 import './core/index.css'
 
@@ -22,20 +23,31 @@ const Root = styled.div`
 `
 
 const NavWrapper = styled.div`
-  flex: 0 0 300px;
+  @media ${desktop} {
+    flex: 0 0 33rem;
+  }
 `
 
 const StickyNav = styled.div`
-  position: sticky;
-  top: 0;
-  padding: 4rem;
-  overflow-y: auto;
+  margin: 2em -2rem 0;
+
+  @media ${desktop} {
+    position: sticky;
+    top: 0;
+    padding: 4rem;
+    overflow-y: auto;
+  }
 `
 
 const Main = styled(Wrapper)`
   flex: 1 0 auto;
+  flex-direction: column;
   display: flex;
   position: relative;
+
+  @media ${desktop} {
+    flex-direction: row-reverse;
+  }
 `
 
 const Content = styled.div`
@@ -47,6 +59,7 @@ const Content = styled.div`
   justify-content: flex-start;
   align-items: stretch;
   overflow: hidden;
+  margin-bottom: 4em;
 `
 
 const Layout = ({ sidenav = <Sidenav />, children }) => (
@@ -81,11 +94,11 @@ const Layout = ({ sidenav = <Sidenav />, children }) => (
           <Header siteTitle={data.site.siteMetadata.title} />
           <Main role="main">
             <SkipNavContent id="content" />
-            <Content>{children}</Content>
             <NavWrapper>
               <SkipNavContent id="nav" />
               <StickyNav>{sidenav}</StickyNav>
             </NavWrapper>
+            <Content>{children}</Content>
           </Main>
           <Footer />
         </Root>

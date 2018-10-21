@@ -1,0 +1,95 @@
+---
+lang: java
+---
+
+
+```java
+HashMap<String, String> personalisation = new HashMap<String, String>();
+personalisation.put("user_name", "Lisa");
+
+SendEmailResponse response = client.sendEmail(
+    "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx",
+    "lisa@example.com",
+    personalisation,
+    "your-unique-reference-id");
+```
+
+<Panel open label={<H3>Arguments</H3>}>
+<Parameters>
+  <Parameter required name="templateId">
+
+Sign in to GOV.UK Notify and go to the Templates page to find the template ID.
+
+```
+String templateId="f33517ff-2a88-4f6e-b855-c550268ce08a";
+```
+
+  </Parameter>
+  <Parameter required name="templateId">
+
+The ID of the template
+
+You can find this by signing into Notify and
+going to the Templates page.
+
+  </Parameter>
+  <Parameter required name="emailAddress">
+
+The email address of the recipient you want to send to.
+
+  </Parameter>
+
+  <Parameter required name="personalisation">
+
+If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a map. For example:
+
+```
+Map<String, String> personalisation = new HashMap<>();
+personalisation.put("first_name", "Amala");
+personalisation.put("application_date", "2018-01-01");
+```
+
+If a template does not have any placeholder fields for personalised information, you must pass in an empty map or null.
+
+  </Parameter>
+
+  <Parameter required name="reference">
+
+A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
+
+  </Parameter>
+
+  <Parameter optional name="emailReplyToId">
+
+This is an email reply-to address specified by you to receive replies from your users. Your service cannot go live until you set up at least one of these email addresses. To set up:
+
+- Sign into your Notify account.
+- Go to Settings.
+- Go to the Email section and select Manage on the Email reply-to addresses row.
+- Select Change to specify the email address to receive replies, and select Save.
+
+```
+String emailReplyToId='8e222534-7f05-4972-86e3-17c5d9f894e2'
+```
+
+If you do not have an `emailReplyToId`, you can leave out this argument.
+
+  </Parameter>
+</Parameters>
+</Panel>
+<Panel label={<H3>Response</H3>}>
+
+If the request to the client is successful, the client returns a `SendEmailResponse`:
+
+```
+UUID notificationId;
+Optional<String> reference;
+UUID templateId;
+int templateVersion;
+String templateUri;
+String body;
+String subject;
+Optional<String> fromEmail;
+```
+
+</Panel>
