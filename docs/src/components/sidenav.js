@@ -50,8 +50,8 @@ const Contents = ({
 }) =>
   items.length && depth < MAXDepth ? (
     <Container>
-      {items.map((item, i) => (
-        <Fragment key={i}>
+      {items.map(item => (
+        <Fragment key={item.url}>
           <NavLink to={`${pagePath}${item.url}`}>{item.title}</NavLink>
           <Contents pagePath={pagePath} items={item.items} depth={depth + 1} />
         </Fragment>
