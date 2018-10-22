@@ -20,7 +20,14 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `data`,
-        path: `${__dirname}/src/pages/`,
+        path: `${__dirname}/src/code-examples/`,
+      },
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        name: 'markdown-content',
+        path: `${__dirname}/src/content/`,
       },
     },
     {
@@ -29,7 +36,31 @@ module.exports = {
         name: `data`,
       },
     },
-    'gatsby-mdx',
+    {
+      resolve: `gatsby-mdx`,
+      options: {
+        gatsbyRemarkPlugins: [
+          {
+            resolve: 'gatsby-remark-autolink-headers',
+            options: {
+              icon: false,
+            },
+            // this is deprecated but gatbsy-mdx is terrible. it even
+            // documents using options, but the code looks for pluginOptions
+            get pluginOptions() {
+              return this.options
+            },
+          },
+        ],
+      },
+    },
+    {
+      resolve: 'mdx-pages',
+      options: {
+        srcDir: `${__dirname}/src`,
+        layout: `${__dirname}/src/mdx-layout.js`,
+      },
+    },
     'gatsby-plugin-styled-components',
     'gatsby-plugin-offline',
   ],

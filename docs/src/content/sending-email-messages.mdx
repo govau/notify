@@ -1,15 +1,12 @@
-import Layout from '../components/layout'
-import Button from '../components/button'
-import Examples from '../components/code-examples'
-
-export default Layout
+import Button from 'components/button'
+import Examples from 'components/code-examples'
 
 
-## Sending a single text message
+## Sending a single email
 
-The following example shows how to send a single text message.
+The following example shows how to send a single email.
 
-<Examples path="sending-texts"/>
+<Examples path="sending-emails" />
 
 ### Arguments
 
@@ -23,11 +20,11 @@ going to the Templates page.
 ---
 
 
-`phone_number`
+`email_address`
 
 **Required**
 
-The phone number of the recipient of the text message.
+The address of the recipient of the email.
 
 ---
 
@@ -48,14 +45,14 @@ For example:
     "amount_owing": "$15.50"
 }
 ```
+
 ---
 
 `reference`
 
 **Optional**
 
-A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. 
-
+A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
 
 ## Response
 
@@ -66,17 +63,18 @@ following.
 ```json
 {
   "content": {
-    "body": "Hey there. Lisa\n\nPlease pay $15.50 at your earliest convenience",
-    "from_number": "GOVAU"
-  },
+    "body": "Hey there. Lisa\n\nPlease pay us $15.50 at your earliest convenience.\n", 
+    "from_email": "your-service@digital.gov.au", 
+    "subject": "Pay your bill soon."
+  }, 
   "id": "xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn",
-  "reference": "STRING",
-  "scheduled_for": null,
+  "reference": "STRING", 
+  "scheduled_for": null, 
   "template": {
     "id": "xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
     "uri": "https://rest-api.notify.gov.au/services/xxxxxxxx-xxxx-xxxx-xxxx-ssssssssssss/templates/xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "version": 1
-  },
+    "version": 3
+  }, 
   "uri": "https://rest-api.notify.gov.au/v2/notifications/xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn"
 }
 ```

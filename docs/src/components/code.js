@@ -1,7 +1,7 @@
 import React from 'react'
 import SyntaxHighligher from 'react-syntax-highlighter'
-import styled from 'styled-components'
 import { tomorrowNight } from 'react-syntax-highlighter/styles/hljs'
+import styled from 'styled-components'
 
 const Wrapper = styled.div`
   background: ${props => props.theme.dark};
