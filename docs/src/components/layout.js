@@ -79,7 +79,7 @@ const Layout = ({ sidenav = <Sidenav />, children }) => (
             <html lang="en" />
           </Helmet>
           <Header siteTitle={data.site.siteMetadata.title} />
-          <Main>
+          <Main role="main">
             <SkipNavContent id="content" />
             <Content>{children}</Content>
             <NavWrapper>
