@@ -68,6 +68,7 @@ const Layout = ({ sidenav = <Sidenav />, children }) => (
           <Helmet
             title={data.site.siteMetadata.title}
             meta={[
+              { content: 'IE=edge', httpEquiv: 'X-UA-Compatible' },
               { name: 'description', content: 'Sample' },
               { name: 'keywords', content: 'sample, something' },
             ]}
