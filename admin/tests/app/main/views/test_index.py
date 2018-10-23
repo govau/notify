@@ -20,8 +20,8 @@ def test_non_logged_in_user_can_see_homepage(
 
     assert page.select_one('meta[name=description]')['content'].strip() == (
         'Notify.gov.au lets you send emails and text messages '
-        'to your users. Try it now if you work in central government, a '
-        'local authority, or the NHS.'
+        'to your users. Try it now if you work in Australian local, '
+        'state or federal government.'
     )
 
 
