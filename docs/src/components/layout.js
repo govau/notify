@@ -69,8 +69,11 @@ const Layout = ({ sidenav = <Sidenav />, children }) => (
             title={data.site.siteMetadata.title}
             meta={[
               { content: 'IE=edge', httpEquiv: 'X-UA-Compatible' },
-              { name: 'description', content: 'Sample' },
-              { name: 'keywords', content: 'sample, something' },
+              {
+                name: 'description',
+                content:
+                  'Notify.gov.au lets you send emails and text messages to your users. Try it now if you work in Australian local, state or federal government.',
+              },
             ]}
           >
             <html lang="en" />
