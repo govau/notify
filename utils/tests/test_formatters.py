@@ -223,7 +223,7 @@ def test_sms_preview_adds_newlines():
         ],
         [
             notify_email_markdown,
-            'print("hello")'
+            '<pre><code>print("hello")\n</code></pre>\n'
         ],
         [
             notify_plain_text_email_markdown,
@@ -397,11 +397,6 @@ def test_ordered_list(markdown_function, expected):
         '2. two\n'
         '3. three\n'
     ) == expected
-    assert markdown_function(
-        '1.one\n'
-        '2.two\n'
-        '3.three\n'
-    ) == expected
 
 
 @pytest.mark.parametrize('markdown_function, expected', (
@@ -449,11 +444,6 @@ def test_unordered_list(markdown_function, expected):
         '* one\n'
         '* two\n'
         '* three\n'
-    ) == expected
-    assert markdown_function(
-        '*one\n'
-        '*two\n'
-        '*three\n'
     ) == expected
 
 
@@ -589,7 +579,7 @@ def test_autolink(markdown_function, link, expected):
     ],
     [
         notify_email_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">variable called thing</p>'
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">variable called <code>thing</code></p>'
     ],
     [
         notify_plain_text_email_markdown,
@@ -605,11 +595,11 @@ def test_codespan(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_letter_preview_markdown,
-        'something important<div class=\'linebreak-block\'>&nbsp;</div>'
+        'something <strong>important</strong><div class=\'linebreak-block\'>&nbsp;</div>'
     ],
     [
         notify_email_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something **important**</p>'
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">something <strong>important</strong></p>'
     ],
     [
         notify_plain_text_email_markdown,
@@ -645,7 +635,7 @@ def test_emphasis(markdown_function, expected):
 @pytest.mark.parametrize('markdown_function, expected', (
     [
         notify_email_markdown,
-        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">foo ****** bar</p>'
+        '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">foo <strong>**</strong> bar</p>'
     ],
     [
         notify_plain_text_email_markdown,

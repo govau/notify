@@ -10,27 +10,6 @@ import smartypants
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
 mistune.BlockGrammar.block_quote = re.compile(r'^( *\^[^\n]+(\n[^\n]+)*\n*)+')
-mistune.BlockGrammar.list_block = re.compile(
-    r'^( *)([*+-]|\d+\.)[\s\S]+?'
-    r'(?:'
-    r'\n+(?=\1?(?:[-*_] *){3,}(?:\n+|$))'  # hrule
-    r'|\n+(?=%s)'  # def links
-    r'|\n+(?=%s)'  # def footnotes
-    r'|\n{2,}'
-    r'(?! )'
-    r'(?!\1(?:[*+-]|\d+\.) )\n*'
-    r'|'
-    r'\s*$)' % (
-        mistune._pure_pattern(mistune.BlockGrammar.def_links),
-        mistune._pure_pattern(mistune.BlockGrammar.def_footnotes),
-    )
-)
-mistune.BlockGrammar.list_item = re.compile(
-    r'^(( *)(?:[*+-]|\d+\.)[^\n]*'
-    r'(?:\n(?!\2(?:[*+-]|\d+\.))[^\n]*)*)',
-    flags=re.M
-)
-mistune.BlockGrammar.list_bullet = re.compile(r'^ *(?:[*+-]|\d+\.)')
 
 govau_not_a_link = re.compile(
     r'(?<!\.|\/)(GOV)\.(AU)(?!\/|\?)',
@@ -281,9 +260,6 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
     def codespan(self, text):
         return text
 
-    def double_emphasis(self, text):
-        return text
-
     def emphasis(self, text):
         return text
 
@@ -318,7 +294,31 @@ class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):
         return text
 
 
-class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
+class NotifyEmailMarkdownRenderer(mistune.Renderer):
+
+    def table(self, header, body):
+        return ""
+
+    def image(self, src, title, alt_text):
+        return ""
+
+    def block_linebreak(self):
+        return "<div class='linebreak-block'>&nbsp;</div>"
+
+    def newline(self):
+        return self.linebreak()
+
+    def strikethrough(self, text):
+        return text
+
+    def footnote_ref(self, key, index):
+        return ""
+
+    def footnote_item(self, key, text):
+        return text
+
+    def footnotes(self, text):
+        return text
 
     def header(self, text, level, raw=None):
         if level == 1:
@@ -418,16 +418,46 @@ class NotifyEmailMarkdownRenderer(NotifyLetterMarkdownPreviewRenderer):
             link
         )
 
-    def double_emphasis(self, text):
-        return '**{}**'.format(text)
-
     def emphasis(self, text):
         return '*{}*'.format(text)
 
 
-class NotifyPlainTextEmailMarkdownRenderer(NotifyEmailMarkdownRenderer):
+class NotifyPlainTextEmailMarkdownRenderer(mistune.Renderer):
 
     COLUMN_WIDTH = 65
+
+    def block_code(self, code, language=None):
+        return code
+
+    def table(self, header, body):
+        return ""
+
+    def codespan(self, text):
+        return text
+
+    def emphasis(self, text):
+        return '*{}*'.format(text)
+
+    def image(self, src, title, alt_text):
+        return ""
+
+    def block_linebreak(self):
+        return "<div class='linebreak-block'>&nbsp;</div>"
+
+    def newline(self):
+        return self.linebreak()
+
+    def strikethrough(self, text):
+        return text
+
+    def footnote_ref(self, key, index):
+        return ""
+
+    def footnote_item(self, key, text):
+        return text
+
+    def footnotes(self, text):
+        return text
 
     def header(self, text, level, raw=None):
         if level == 1:
@@ -491,6 +521,9 @@ class NotifyPlainTextEmailMarkdownRenderer(NotifyEmailMarkdownRenderer):
 
     def autolink(self, link, is_email=False):
         return link
+
+    def double_emphasis(self, text):
+        return '**{}**'.format(text)
 
 
 notify_email_markdown = mistune.Markdown(
