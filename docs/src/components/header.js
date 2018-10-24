@@ -2,15 +2,15 @@ import React from 'react'
 import styled from 'styled-components'
 import { util } from 'styled-system'
 import { Flex, Box } from '@rebass/grid'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import dta from '../images/coa_white.svg'
+import MenuIcon from './icons/menu-icon'
+import CloseIcon from './icons/close-icon'
+import coa from '../images/coa_white.svg'
 import { Wrapper, PanelProvider } from './theme'
 import { External } from './link'
 
-const notifyBaseUrl = process.env.GATSBY_NOTIFY_BASE_URL
-  ? process.env.GATSBY_NOTIFY_BASE_URL
-  : 'https://notify.gov.au'
+const notifyBaseUrl =
+  process.env.GATSBY_NOTIFY_BASE_URL || 'https://notify.gov.au'
 
 const Root = styled.header`
   background: ${props => props.theme.background};
@@ -21,7 +21,7 @@ const Root = styled.header`
 const BannerLink = styled.a`
   text-decoration: none;
 
-  & :hover {
+  &:hover {
     cursor: pointer;
   }
 `
@@ -106,7 +106,7 @@ const Nav = styled.nav`
   }
 `
 
-const HamburgerIcon = styled.a`
+const OpenMenuLink = styled.a`
   color: #fff;
   align-self: flex-end;
 
@@ -115,7 +115,7 @@ const HamburgerIcon = styled.a`
   }
 `
 
-const CloseIcon = styled.a`
+const CloseLink = styled.a`
   display: block;
   color: #fff;
   text-align: center;
@@ -126,13 +126,13 @@ const CloseIcon = styled.a`
   }
 `
 
-const Navitems = styled.ul`
+const StyledUnsortedList = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
 `
 
-const Navitem = styled.li`
+const StyledListItem = styled.li`
   display: inline;
   padding-right: 1.5rem;
   padding-bottom: 1rem;
@@ -143,7 +143,7 @@ const Navitem = styled.li`
     border-bottom: ${props =>
       props.active ? '0.5rem solid #fff' : '0.5rem solid #45c2f0'};
 
-    & :last-child {
+    &:last-child {
       margin-left: auto;
     }
   }
@@ -158,13 +158,13 @@ const StyledExternalLink = styled(External)`
   }
 `
 
-const MyNavItem = ({ children, href, active, ...props }) => (
+const BoxedListItem = ({ children, href, active, ...props }) => (
   <Box mb={['0.7rem', '0.1rem']} width={[1, 'auto']} {...props}>
-    <Navitem active={active}>
+    <StyledListItem active={active}>
       <StyledExternalLink href={href} active={active}>
         {children}
       </StyledExternalLink>
-    </Navitem>
+    </StyledListItem>
   </Box>
 )
 
@@ -175,48 +175,48 @@ export default () => (
         <Flex justifyContent="space-between">
           <BannerLink to="/">
             <Flex justifyContent="flex-start" p={'3rem 0'} alignItems="center">
-              <Logo src={dta} />
+              <Logo src={coa} />
               <HeaderName>Notify</HeaderName>
               <Badge>Alpha</Badge>
             </Flex>
           </BannerLink>
-          <HamburgerIcon href="#nav" aria-label="Open Navigation">
-            <FontAwesomeIcon icon="bars" />
-          </HamburgerIcon>
+          <OpenMenuLink href="#nav" aria-label="Open navigation">
+            <MenuIcon style={{ height: '20px', width: '20px' }} />
+          </OpenMenuLink>
         </Flex>
 
         <Nav id="nav">
-          <CloseIcon href="#" aria-label="Close Navigation">
-            <FontAwesomeIcon icon="times" className="fa-lg" />
-          </CloseIcon>
-          <Navitems>
+          <CloseLink href="#" aria-label="Close navigation">
+            <CloseIcon />
+          </CloseLink>
+          <StyledUnsortedList>
             <Flex flexWrap="wrap" m={[0, '1rem 0 1rem -1.5rem']}>
               <Box width={[1, 'auto']}>
                 <Flex flexWrap="wrap">
-                  <MyNavItem href={`${notifyBaseUrl}/support`}>
+                  <BoxedListItem href={`${notifyBaseUrl}/support`}>
                     Support
-                  </MyNavItem>
-                  <MyNavItem href={`${notifyBaseUrl}/features`}>
+                  </BoxedListItem>
+                  <BoxedListItem href={`${notifyBaseUrl}/features`}>
                     Features
-                  </MyNavItem>
-                  <MyNavItem href={`${notifyBaseUrl}/pricing`}>
+                  </BoxedListItem>
+                  <BoxedListItem href={`${notifyBaseUrl}/pricing`}>
                     Pricing
-                  </MyNavItem>
-                  <MyNavItem active href="/">
+                  </BoxedListItem>
+                  <BoxedListItem active href="/">
                     Documentation
-                  </MyNavItem>
+                  </BoxedListItem>
                 </Flex>
               </Box>
 
-              <MyNavItem
+              <BoxedListItem
                 ml={[0, 'auto']}
                 mr={[0, '5rem']}
                 href={`${notifyBaseUrl}/sign-in`}
               >
                 Sign in
-              </MyNavItem>
+              </BoxedListItem>
             </Flex>
-          </Navitems>
+          </StyledUnsortedList>
         </Nav>
       </Wrapper>
     </Root>
