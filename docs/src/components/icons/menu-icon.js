@@ -3,8 +3,8 @@ import React from 'react'
 const MenuIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    height="15"
-    width="15"
+    height="16"
+    width="16"
     viewBox="0 0 8 8"
   >
     <path

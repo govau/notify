@@ -27,13 +27,11 @@ const BannerLink = styled.a`
 `
 
 const Logo = styled.img`
-  border-right: 1px solid #a9a9a9;
-  height: 6rem;
-  padding: 0.25rem 0.5rem;
-  margin-left: -1rem;
-  margin-right: 1rem;
+  display: none;
 
   ${util.createMediaQuery(util.defaultBreakpoints[0])} {
+    display: initial;
+    border-right: 1px solid #a9a9a9;
     height: 8rem;
     padding: 0.25rem 2.5rem 0.25rem 0;
     margin-left: -0.5rem;
@@ -108,18 +106,26 @@ const Nav = styled.nav`
 
 const OpenMenuLink = styled.a`
   color: #fff;
-  align-self: flex-end;
+  align-self: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
 
   ${util.createMediaQuery(util.defaultBreakpoints[0])} {
     display: none;
   }
 `
 
+const MenuText = styled.span`
+  margin-right: 0.7rem;
+  font-size: 1.7rem;
+`
+
 const CloseLink = styled.a`
   display: block;
   color: #fff;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2.5rem;
 
   ${util.createMediaQuery(util.defaultBreakpoints[0])} {
     display: none;
@@ -174,14 +180,19 @@ export default () => (
       <Wrapper>
         <Flex justifyContent="space-between">
           <BannerLink to="/">
-            <Flex justifyContent="flex-start" p={'3rem 0'} alignItems="center">
+            <Flex
+              justifyContent="flex-start"
+              p={['1rem 0', '3rem 0']}
+              alignItems="center"
+            >
               <Logo src={coa} />
               <HeaderName>Notify</HeaderName>
               <Badge>Alpha</Badge>
             </Flex>
           </BannerLink>
           <OpenMenuLink href="#nav" aria-label="Open navigation">
-            <MenuIcon style={{ height: '20px', width: '20px' }} />
+            <MenuText>Menu</MenuText>
+            <MenuIcon />
           </OpenMenuLink>
         </Flex>
 
