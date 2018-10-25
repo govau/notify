@@ -7,6 +7,8 @@ STG    ?= dev
 
 SRC     = $(shell find src -type f)
 
+export GATSBY_NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au
+
 # A help target including self-documenting targets (see the awk statement)
 define HELP_TEXT
 Usage: make [TARGET]... [MAKEVAR1=SOMETHING]...
