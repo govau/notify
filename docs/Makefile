@@ -21,11 +21,11 @@ help: ## List common commands and their usage
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / \
 		{printf "\033[36m%-30s\033[0m  %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-setup:
+install:
 	$(NPM) install
 
-setup-dev:
-	$(MAKE) setup
+install-dev:
+	$(MAKE) install
 
 test:
 	$(RUNNER) test
@@ -61,6 +61,6 @@ check-vulnerabilities:
 
 .PHONY:
 	help clean clean-full check-vulnerabilities \
-	setup setup-dev \
+	install install-dev \
 	fmt test run \
 	deploy deploy-dev
