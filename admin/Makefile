@@ -32,6 +32,9 @@ version-file: app/version.py
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
+install-frontend:
+	$(NPM) install
+
 # this is a hack because CircleCI env variables are awful
 ADMIN_SENTRY_DSN ?= $(ADMIN_SENTRY_DSN_DEV)
 ADMIN_SENTRY_ENV ?= $(ADMIN_SENTRY_ENV_DEV)
@@ -41,28 +44,15 @@ build-frontend:
 	ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV} \
 	  $(NPM) run build -- --production
 
-build-frontend-prod:
-	@$(MAKE)\
-	  ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN_PROD} \
-	  ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV_PROD} \
-	  build-frontend
-
-install-frontend:
-	$(NPM) install
-
-setup-frontend: install-frontend ## Setup and build css
+build-frontend-prod: ADMIN_SENTRY_DSN=$(ADMIN_SENTRY_DSN_PROD)
+build-frontend-prod: ADMIN_SENTRY_ENV=$(ADMIN_SENTRY_ENV_PROD)
+build-frontend-prod: install-frontend ## Setup and build css
 	$(MAKE) build-frontend
 
-setup-frontend-prod: install-frontend ## Setup and build css
-	$(MAKE) build-frontend-prod
-
-setup: version-file ## Setup virtualenv, install python deps
+install: install-frontend version-file ## Setup virtualenv, install frontend deps, install python deps
 	$(PIPENV) install
 
-setup-prod: setup-frontend-prod version-file
-	$(PIPENV) install
-
-setup-dev: setup-frontend version-file ## Setup everything in dev mode
+install-dev: install-frontend version-file ## Setup everything in dev mode
 	$(PIPENV) install --dev
 
 test: version-file ## Run linter, python tests, node tests
@@ -127,7 +117,8 @@ clean:
 .PHONY:
 	help clean \
 	test fmt tests \
-	setup-frontend setup setup-dev \
+	install install-dev \
+	build-frontend build-frontend-prod \
 	run run-gunicorn \
 	deploy build-linux-wheels \
 	check-vulnerabilities

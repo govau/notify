@@ -19,10 +19,10 @@ help: ## List common commands and their usage
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / \
 		{printf "\033[36m%-30s\033[0m  %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-setup: ## Setup ruby gems
+install: ## Setup ruby gems
 	$(BUNDLE) install
 
-setup-dev: setup
+install-dev: install
 
 setup-db:
 	$(RUNNER) rake db:setup
@@ -49,4 +49,4 @@ check-vulnerabilities:
 
 clean:
 
-.PHONY: setup setup-dev run deploy create-service-mysql setup-db migrate-db help clean check-vulnerabilities
+.PHONY: install install-dev run deploy create-service-mysql setup-db migrate-db help clean check-vulnerabilities

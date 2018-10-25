@@ -26,7 +26,7 @@ ifneq ($(BRANCH), $(FEATURE))
 	export STG ?= f-$(FEATURE)
 endif
 
-all: setup
+all: install
 
 # this is a hack because CircleCI env variables are awful
 CF_USERNAME ?= $(CF_Y_USER)
@@ -49,7 +49,7 @@ cf-login-prod:
 	  cf-login
 
 DIRS        = api admin utils status docs
-TARGETS     = setup setup-dev build check-vulnerabilities clean deploy deploy-dev test
+TARGETS     = install install-dev build check-vulnerabilities clean deploy deploy-dev test
 API_TARGETS = deploy-celery deploy-dev-celery
 CI_TARGETS  = create-service-psql
 ANY_TARGETS = $(TARGETS) $(API_TARGETS) $(CI_TARGETS)

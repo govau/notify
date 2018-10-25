@@ -49,10 +49,10 @@ version-file: ${APP_VERSION_FILE}
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
-setup: version-file ## Setup virtualenv and install python dependencies
+install: version-file ## Setup virtualenv and install python dependencies
 	$(PIPENV) install
 
-setup-dev: ## Setup everything in dev mode for testing
+install-dev: ## Setup everything in dev mode for testing
 	$(PIPENV) install --dev
 
 setup-db: version-file ## Run database migrations
@@ -163,7 +163,7 @@ clean:
 	-rm -r vendor
 
 .PHONY:
-	setup setup-dev setup-db \
+	install install-dev setup-db \
 	setup-test-db test lint fmt tests $(APP_TESTS) $(DAO_TESTS) test-roots \
 	run run-celery \
 	deploy deploy-api deploy-celery \

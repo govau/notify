@@ -80,8 +80,8 @@ jobs:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make admin.setup
-      - run: make -C admin setup-frontend-prod
+      - run: make admin.install
+      - run: make -C admin build-frontend-prod
       - run: make admin.build
       - persist_to_workspace:
           root: .
@@ -92,8 +92,8 @@ jobs:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make admin.setup
-      - run: make -C admin setup-frontend
+      - run: make admin.install
+      - run: make -C admin build-frontend
       - run: make admin.build
       - persist_to_workspace:
           root: .
@@ -104,7 +104,7 @@ jobs:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make api.setup
+      - run: make api.install
       - run: make api.build
       - persist_to_workspace:
           root: .
@@ -115,14 +115,14 @@ jobs:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make utils.setup
+      - run: make utils.install
       - run: make utils.build
 
   build-docs:
     <<: *node_image
     steps:
       - *attach_workspace
-      - run: make docs.setup
+      - run: make docs.install
       - run: make docs.build
       - persist_to_workspace:
           root: .
@@ -133,14 +133,14 @@ jobs:
     <<: *node_image
     steps:
       - *attach_workspace
-      - run: make docs.setup
+      - run: make docs.install
       - run: make docs.test
 
   test-admin:
     <<: *python_node_image
     steps:
       - *attach_workspace
-      - run: make admin.setup-dev
+      - run: make admin.install-dev
       - run: echo 're-enable tests here'
       - run: echo 'make admin.test'
 
@@ -148,14 +148,14 @@ jobs:
     <<: *python_node_postgres_images
     steps:
       - *attach_workspace
-      - run: make api.setup-dev
+      - run: make api.install-dev
       - run: make api.test
 
   test-utils:
     <<: *python_node_postgres_images
     steps:
       - *attach_workspace
-      - run: make utils.setup-dev
+      - run: make utils.install-dev
       - run: echo 're-enable tests here'
       - run: echo 'make utils.test'
 
@@ -163,9 +163,9 @@ jobs:
     <<: *python_node_postgres_images
     steps:
       - *attach_workspace
-      - run: make admin.setup-dev
-      - run: make api.setup-dev
-      - run: make utils.setup-dev
+      - run: make admin.install-dev
+      - run: make api.install-dev
+      - run: make utils.install-dev
       - run: make check-vulnerabilities
 
   cleanup-old-deploys:

@@ -17,7 +17,7 @@ homebrew, apt, or most easily-- pip.
 
 ## Testing
 
-First, run `make setup-dev` to get an environment ready for testing.
+First, run `make install-dev` to get an environment ready for testing.
 
 Then issue the following command to run code analysis using flake8 and our
 entire test suite:

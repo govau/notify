@@ -15,10 +15,10 @@ help: ## List common commands and their usage
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / \
 		{printf "\033[36m%-30s\033[0m  %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-setup: ## Setup virtualenv and install python dependencies
+install: ## Setup virtualenv and install python dependencies
 	$(PIPENV) install
 
-setup-dev: ## Setup everything in dev mode for testing
+install-dev: ## Setup everything in dev mode for testing
 	$(PIPENV) install --dev
 
 build:
@@ -48,4 +48,4 @@ clean-full:
 	-$(MAKE) clean
 	-$(PIPENV) --rm
 
-.PHONY: help build setup setup-dev test lint fmt tests clean clean-full check-vulnerabilities
+.PHONY: help build install install-dev test lint fmt tests clean clean-full check-vulnerabilities
