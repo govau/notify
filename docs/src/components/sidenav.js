@@ -131,6 +131,7 @@ export const DynamicSidenav = props => (
             <Option>/sending-email-messages</Option>
             <Option>/sending-text-messages</Option>
             <Option>/check-available-templates</Option>
+            <Option>/integration-testing</Option>
           </NavList>
         </NavWrapper>
       )

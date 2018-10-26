@@ -3,6 +3,7 @@ import { MDXProvider } from '@mdx-js/tag'
 import ThemeProvider from './theme'
 import P from './core/paragraph'
 import { H1, H2, H3, H4 } from './core/heading'
+import { Table } from './core/table'
 import SyntaxHighlighter from './syntax-highlighter'
 
 const getLanguage = props => {
@@ -25,6 +26,7 @@ export default ({ children }) => (
         h2: H2,
         h3: H3,
         h4: H4,
+        table: Table
       }}
     >
       {children}
