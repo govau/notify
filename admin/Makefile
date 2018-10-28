@@ -36,8 +36,8 @@ install-frontend:
 	$(NPM) install
 
 # this is a hack because CircleCI env variables are awful
-ADMIN_SENTRY_DSN ?= $(ADMIN_SENTRY_DSN_DEV)
-ADMIN_SENTRY_ENV ?= $(ADMIN_SENTRY_ENV_DEV)
+export ADMIN_SENTRY_DSN ?= $(ADMIN_SENTRY_DSN_DEV)
+export ADMIN_SENTRY_ENV ?= $(ADMIN_SENTRY_ENV_DEV)
 
 build-frontend:
 	ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN} \
