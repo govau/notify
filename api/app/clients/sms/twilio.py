@@ -57,7 +57,7 @@ class TwilioSMSClient(SmsClient):
 
         start_time = monotonic()
         from_number = self._from_number
-        callback_url = "{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference)
+        callback_url = "{}/notifications/sms/twilio/{}".format(self._callback_notify_url_host, reference) if self._callback_notify_url_host else ""
         try:
             message = self._client.messages.create(
                 to=to,
