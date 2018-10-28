@@ -22,6 +22,7 @@ whitenoise = "==3.3.1"
 notifications-python-client = "==4.8.1"
 notifications-utils = {path = "./../utils", editable = true}
 sentry-sdk = {extras = ["flask"]}
+itsdangerous = "==1.1.0"
 
 [dev-packages]
 bandit = "==1.5.1"

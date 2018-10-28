@@ -29,6 +29,7 @@ Telstra_Messaging = {git = "https://github.com/Telstra/MessagingAPI-SDK-python.g
 twilio = "~=6.16"
 boto3 = "~=1.8"
 sentry-sdk = {extras = ["flask"]}
+itsdangerous = "==1.1.0"
 
 [dev-packages]
 bandit = "==1.5.1"
