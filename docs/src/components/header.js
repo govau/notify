@@ -134,17 +134,21 @@ const CloseLink = styled.a`
 
 const StyledUnsortedList = styled.ul`
   list-style: none;
-  margin: 0;
+  margin: 0 0 0 -1.5rem;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
 `
 
-const StyledListItem = styled.li`
-  display: inline;
+const ListItem = styled.li`
   padding-right: 1.5rem;
   padding-bottom: 1rem;
   padding-left: 1.5rem;
+  width: 100%;
 
   ${util.createMediaQuery(util.defaultBreakpoints[0])} {
+    width: auto;
+    margin-bottom: -0.5rem;
     padding-bottom: 1.5rem;
     border-bottom: ${props =>
       props.active ? '0.5rem solid #fff' : '0.5rem solid #45c2f0'};
@@ -155,7 +159,7 @@ const StyledListItem = styled.li`
   }
 `
 
-const StyledExternalLink = styled(External)`
+const ExternalLink = styled(External)`
   text-decoration: none;
   color: ${props => (props.active ? '#45c2f0' : '#fff')};
 
@@ -163,16 +167,6 @@ const StyledExternalLink = styled(External)`
     color: white;
   }
 `
-
-const BoxedListItem = ({ children, href, active, ...props }) => (
-  <Box mb={['0.7rem', '0.1rem']} width={[1, 'auto']} {...props}>
-    <StyledListItem active={active}>
-      <StyledExternalLink href={href} active={active}>
-        {children}
-      </StyledExternalLink>
-    </StyledListItem>
-  </Box>
-)
 
 export default () => (
   <PanelProvider>
@@ -201,32 +195,31 @@ export default () => (
             <CloseIcon />
           </CloseLink>
           <StyledUnsortedList>
-            <Flex flexWrap="wrap" m={[0, '1rem 0 1rem -1.5rem']}>
-              <Box width={[1, 'auto']}>
-                <Flex flexWrap="wrap">
-                  <BoxedListItem href={`${notifyBaseUrl}/support`}>
-                    Support
-                  </BoxedListItem>
-                  <BoxedListItem href={`${notifyBaseUrl}/features`}>
-                    Features
-                  </BoxedListItem>
-                  <BoxedListItem href={`${notifyBaseUrl}/pricing`}>
-                    Pricing
-                  </BoxedListItem>
-                  <BoxedListItem active href="/">
-                    Documentation
-                  </BoxedListItem>
-                </Flex>
-              </Box>
-
-              <BoxedListItem
-                ml={[0, 'auto']}
-                mr={[0, '5rem']}
-                href={`${notifyBaseUrl}/sign-in`}
-              >
+            <ListItem>
+              <ExternalLink href={`${notifyBaseUrl}/support`}>
+                Support
+              </ExternalLink>
+            </ListItem>
+            <ListItem>
+              <ExternalLink href={`${notifyBaseUrl}/features`}>
+                Features
+              </ExternalLink>
+            </ListItem>
+            <ListItem>
+              <ExternalLink href={`${notifyBaseUrl}/pricing`}>
+                Pricing
+              </ExternalLink>
+            </ListItem>
+            <ListItem active>
+              <ExternalLink active href="/">
+                Documentation
+              </ExternalLink>
+            </ListItem>
+            <ListItem>
+              <ExternalLink href={`${notifyBaseUrl}/sign-in`}>
                 Sign in
-              </BoxedListItem>
-            </Flex>
+              </ExternalLink>
+            </ListItem>
           </StyledUnsortedList>
         </Nav>
       </Wrapper>
