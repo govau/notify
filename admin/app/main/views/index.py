@@ -114,11 +114,6 @@ def documentation():
     return render_template('views/documentation.html')
 
 
-@main.route('/integration-testing')
-def integration_testing():
-    return render_template('views/integration-testing.html')
-
-
 @main.route('/callbacks')
 def callbacks():
     return render_template('views/callbacks.html')
