@@ -114,11 +114,6 @@ def documentation():
     return render_template('views/documentation.html')
 
 
-@main.route('/integration-testing')
-def integration_testing():
-    return render_template('views/integration-testing.html')
-
-
 @main.route('/callbacks')
 def callbacks():
     return render_template('views/callbacks.html')
@@ -174,7 +169,6 @@ def using_notify():
 @main.route('/information-security', endpoint='information_security')
 @main.route('/using_notify', endpoint='old_using_notify')
 @main.route('/information-risk-management', endpoint='information_risk_management')
-@main.route('/integration_testing', endpoint='old_integration_testing')
 def old_page_redirects():
     redirects = {
         'main.old_roadmap': 'main.roadmap',
@@ -182,6 +176,5 @@ def old_page_redirects():
         'main.information_security': 'main.using_notify',
         'main.old_using_notify': 'main.using_notify',
         'main.information_risk_management': 'main.security',
-        'main.old_integration_testing': 'main.integration_testing',
     }
     return redirect(url_for(redirects[request.endpoint]), code=301)
