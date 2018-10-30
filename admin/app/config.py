@@ -16,6 +16,7 @@ class Config(object):
     ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://localhost:6012')
 
     CDN_BASE_URL = os.environ.get('CDN_BASE_URL', 'https://notify-static-logos-staging.static.cld.gov.au')
+    DOCS_BASE_URL = os.environ.get('DOCS_BASE_URL', 'https://docs.notify.gov.au')
 
     TEMPLATE_PREVIEW_API_HOST = os.environ.get('TEMPLATE_PREVIEW_API_HOST', 'http://localhost:6013')
     TEMPLATE_PREVIEW_API_KEY = os.environ.get('TEMPLATE_PREVIEW_API_KEY', 'my-secret-key')
