@@ -21,4 +21,3 @@ applications:
       ADMIN_BASE_URL: https://notify-((stg)).apps.y.cld.gov.au
       DOCS_BASE_URL: https://notify-docs-((stg)).apps.y.cld.gov.au/
       API_HOST_NAME: https://notify-api-((stg)).apps.y.cld.gov.au
-      
