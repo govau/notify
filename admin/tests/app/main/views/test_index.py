@@ -40,7 +40,7 @@ def test_logged_in_user_redirects_to_choose_account(
 
 
 @pytest.mark.parametrize('view', [
-    'cookies', 'using_notify', 'pricing', 'terms', 'integration_testing', 'roadmap',
+    'cookies', 'using_notify', 'pricing', 'terms', 'roadmap',
     'features', 'callbacks', 'documentation', 'security'
 ])
 def test_static_pages(
@@ -71,7 +71,6 @@ def test_old_static_pages_redirect_to_using_notify_with_anchor(
 
 @pytest.mark.parametrize('view, expected_view', [
     ('information_risk_management', 'security'),
-    ('old_integration_testing', 'integration_testing'),
     ('old_roadmap', 'roadmap'),
     ('information_risk_management', 'security'),
     ('old_terms', 'terms'),
