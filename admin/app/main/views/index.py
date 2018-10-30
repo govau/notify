@@ -1,4 +1,4 @@
-from flask import abort, redirect, render_template, request, url_for
+from flask import abort, current_app, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from notifications_utils.international_billing_rates import (
     INTERNATIONAL_BILLING_RATES,
@@ -111,7 +111,7 @@ def email_template():
 
 @main.route('/documentation')
 def documentation():
-    return render_template('views/documentation.html')
+    return render_template('views/documentation.html', docs_base_url=current_app.config['DOCS_BASE_URL'])
 
 
 @main.route('/callbacks')
