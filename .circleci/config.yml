@@ -203,11 +203,12 @@ jobs:
       - run: make api.deploy-dev-celery
 
   deploy-dev-docs:
-    <<: *deploy_image
+    <<: *node_image
     steps:
       - *cf_install
       - *attach_workspace
       - *cf_login
+      - run: make docs.build
       - run: make docs.deploy-dev
 
   deploy-prod-admin:
@@ -244,11 +245,15 @@ jobs:
       - run: make status.deploy
 
   deploy-docs:
-    <<: *deploy_image
+    <<: *node_image
     steps:
       - *cf_install
       - *attach_workspace
       - *cf_login_prod
+      - run:
+          command: make docs.build
+          environment:
+            GATSBY_NOTIFY_BASE_URL: https://notify.gov.au
       - run: make docs.deploy
 
 workflows:
