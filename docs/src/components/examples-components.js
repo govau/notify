@@ -1,3 +1,8 @@
+// export any components here that you want to be able to use in code-examples
+// mdx files.
+//
+// This is an unfortunate workaround for mdx renderer and gatsby
+
 import React from 'react'
 
 export { React }

@@ -23,6 +23,7 @@ const Ul = styled.ul`
 
 export const { Provider, Consumer } = createContext([])
 
+// Consume a provided table of contents. mdx-layout knows how to provide this
 export default ({ title = 'Contents', children }) => (
   <Contents>
     <H2 appearAs={H4}>{title}</H2>
