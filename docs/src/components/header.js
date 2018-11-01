@@ -20,6 +20,7 @@ const Root = styled.header`
 
 const BannerLink = styled.a`
   text-decoration: none;
+  color: #fff;
 
   &:hover {
     cursor: pointer;
@@ -173,7 +174,7 @@ export default () => (
     <Root>
       <Wrapper>
         <Flex justifyContent="space-between">
-          <BannerLink to="/">
+          <BannerLink href={notifyBaseUrl}>
             <Flex
               justifyContent="flex-start"
               p={['1rem 0', '3rem 0']}
