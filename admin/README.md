@@ -1,4 +1,4 @@
-# notifications-admin
+# Notify admin
 
 GOV.AU Notify admin application.
 

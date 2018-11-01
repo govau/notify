@@ -1,4 +1,4 @@
-# notifications-api
+# Notify API
 
 ## Setting Up
 
