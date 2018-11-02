@@ -56,7 +56,7 @@ GEM
       activerecord (>= 2.3.0)
       rake (~> 10.4.2, >= 10.4.2)
     arel (9.0.0)
-    authie (3.1.5)
+    authie (3.2.0)
     bcrypt (3.1.12)
     builder (3.2.3)
     chronic (0.10.2)
@@ -104,7 +104,7 @@ GEM
       temple (>= 0.8.0)
       tilt
     htmlentities (4.3.4)
-    i18n (1.0.1)
+    i18n (1.1.1)
       concurrent-ruby (~> 1.0)
     i18n_data (0.8.0)
     jquery-rails (4.3.3)
@@ -126,10 +126,10 @@ GEM
     kaminari-core (1.1.1)
     log_logins (1.0.2)
       activerecord
-    loofah (2.2.2)
+    loofah (2.2.3)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
-    mail (2.7.0)
+    mail (2.7.1)
       mini_mime (>= 0.1.1)
     marcel (0.3.3)
       mimemagic (~> 0.3.2)
@@ -138,8 +138,8 @@ GEM
     mini_mime (1.0.1)
     mini_portile2 (2.3.0)
     minitest (5.11.3)
-    money (6.12.0)
-      i18n (>= 0.6.4, < 1.1)
+    money (6.13.1)
+      i18n (>= 0.6.4, <= 2)
     moonrope (2.0.1)
       deep_merge (~> 1.0)
       json (~> 1.7)
@@ -151,7 +151,7 @@ GEM
       activerecord (>= 3.0.0)
       activesupport (>= 3.0.0)
     nio4r (2.3.1)
-    nokogiri (1.8.4)
+    nokogiri (1.8.5)
       mini_portile2 (~> 2.3.0)
     numerizer (0.1.1)
     phony (2.16.5)
@@ -263,4 +263,4 @@ DEPENDENCIES
   uglifier
 
 BUNDLED WITH
-   1.16.1
+   1.17.1
