@@ -52,7 +52,7 @@
           {{ top_nav_item(
             url_for('main.show_accounts_or_dashboard'),
             'Services',
-            active=request.path.startswith('/accounts'))
+            active=request.path.startswith('/services'))
           }}
           {% endif %}
           {{ top_nav_item(url_for('main.support'), 'Support') }}
