@@ -24,8 +24,14 @@ applications:
     routes:
       - route: rest-api.notify.gov.au
       - route: notify-api.apps.b.cld.gov.au
-  - name: notify-celery
+  - name: notify-celery-worker
     <<: *defaults
     health-check-type: process
     no-route: true
-    command: make run-celery
+    command: make run-celery-worker
+  - name: notify-celery-beat
+    <<: *defaults
+    memory: 256M
+    health-check-type: process
+    no-route: true
+    command: make run-celery-beat
