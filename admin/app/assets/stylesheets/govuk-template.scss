@@ -172,17 +172,42 @@ main .product-page-section .grid-row {
   }
 }
 
-#content main .grid-row {
+#content .navigation-service,
+#content main:not(.column-three-quarters) {
   padding: 0 1.5rem;
   margin-right: 0;
 
   @media (min-width: 641px) {
     margin: 0;
-    padding: 0;
+    padding: 0 1.5rem;
   }
 
   @media (min-width: 769px) {
     margin-left: 2rem;
+  }
+}
+
+#content .navigation-service {
+  padding-top: 2rem;
+}
+
+
+.au-navigation {
+
+  @media (min-width: 641px) {
+    padding-right: 0;
+  }
+
+  @media (min-width: 769px) {
+    margin-left: 2.5rem;
+  }
+}
+
+#content div.grid-row main.column-three-quarters {
+  margin: 0 1.5rem;
+
+  @media (min-width: 641px) {
+    margin: 0;
   }
 }
 
