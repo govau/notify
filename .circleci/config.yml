@@ -193,14 +193,23 @@ jobs:
       - run: make ci.create-service-psql
       - run: make api.deploy-dev
 
-  deploy-dev-celery:
+  deploy-dev-celery-worker:
     <<: *deploy_image
     steps:
       - *cf_install
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
-      - run: make api.deploy-dev-celery
+      - run: make api.deploy-dev-celery-worker
+
+  deploy-dev-celery-beat:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make api.deploy-dev-celery-beat
 
   deploy-dev-docs:
     <<: *node_image
@@ -227,13 +236,21 @@ jobs:
       - *cf_login_prod
       - run: make api.deploy
 
-  deploy-prod-celery:
+  deploy-prod-celery-worker:
     <<: *deploy_image
     steps:
       - *cf_install
       - *attach_workspace
       - *cf_login_prod
-      - run: make api.deploy-celery
+      - run: make api.deploy-celery-worker
+
+  deploy-prod-celery-beat:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-beat
 
   deploy-statuspage:
     docker:
@@ -309,7 +326,11 @@ workflows:
           requires:
             - build-api
 
-      - deploy-dev-celery:
+      - deploy-dev-celery-worker:
+          requires:
+            - build-api
+
+      - deploy-dev-celery-beat:
           requires:
             - build-api
 
@@ -333,7 +354,8 @@ workflows:
             - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
-            - deploy-dev-celery
+            - deploy-dev-celery-worker
+            - deploy-dev-celery-beat
             - deploy-dev-docs
 
       - deploy-prod-admin:
@@ -346,7 +368,12 @@ workflows:
           requires:
             - unlock-prod-deploy
 
-      - deploy-prod-celery:
+      - deploy-prod-celery-worker:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery-beat:
           <<: *master_branch
           requires:
             - unlock-prod-deploy
