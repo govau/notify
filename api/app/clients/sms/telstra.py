@@ -48,7 +48,8 @@ class TelstraSMSClient(SmsClient):
         start_time = monotonic()
         try:
             resp = api_instance.send_sms(payload)
-            self.logger.info("Telstra send SMS request for {} succeeded: {}".format(reference, resp))
+            message = resp.messages[0]
+            self.logger.info("Telstra send SMS request for {} succeeded: {}".format(reference, message.message_id))
         except Exception as e:
             self.logger.error("Telstra send SMS request for {} failed".format(reference))
             raise e
