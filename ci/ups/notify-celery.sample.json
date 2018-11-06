@@ -1,0 +1,4 @@
+{
+  "CELERY_SENTRY_DSN": "",
+  "CELERY_SENTRY_ENV": ""
+}
