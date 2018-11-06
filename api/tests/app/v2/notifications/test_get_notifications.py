@@ -16,8 +16,8 @@ from tests.app.conftest import (
 
 
 @pytest.mark.parametrize('billable_units, provider', [
-    (1, 'mmg'),
-    (0, 'mmg'),
+    (1, 'twilio'),
+    (0, 'twilio'),
     (1, None)
 ])
 def test_get_notification_by_id_returns_200(

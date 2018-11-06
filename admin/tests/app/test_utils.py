@@ -194,9 +194,9 @@ def test_generate_notifications_csv_calls_twice_if_next_link(
         return_value="""
             phone_number
             07700900000
-            07700900001
-            07700900002
-            07700900003
+            0409000001
+            0409000002
+            0409000003
             07700900004
             07700900005
             07700900006

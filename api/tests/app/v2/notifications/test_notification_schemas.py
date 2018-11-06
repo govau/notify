@@ -176,7 +176,7 @@ def test_post_sms_schema_with_personalisation_that_is_not_a_dict():
     ('61515111111', 'phone_number Not an AU mobile number'),
     ('61415111*11', 'phone_number Must not contain letters or symbols'),
     ('notaphoneumber', 'phone_number Must not contain letters or symbols'),
-    (7700900001, 'phone_number 7700900001 is not of type string'),
+    (409000001, 'phone_number 409000001 is not of type string'),
     (None, 'phone_number None is not of type string'),
     ([], 'phone_number [] is not of type string'),
     ({}, 'phone_number {} is not of type string'),

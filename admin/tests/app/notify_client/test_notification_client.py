@@ -44,7 +44,7 @@ def test_send_notification(mocker, logged_in_client, active_user_with_permission
     NotificationApiClient().send_notification(
         'foo',
         template_id='bar',
-        recipient='07700900001',
+        recipient='0409000001',
         personalisation=None,
         sender_id=None
     )
@@ -52,7 +52,7 @@ def test_send_notification(mocker, logged_in_client, active_user_with_permission
         url='/service/foo/send-notification',
         data={
             'template_id': 'bar',
-            'to': '07700900001',
+            'to': '0409000001',
             'personalisation': None,
             'created_by': active_user_with_permissions.id
         }

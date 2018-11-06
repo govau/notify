@@ -43,9 +43,9 @@ def validate_schema(schema):
     return decorator
 
 
-@letter_callback_blueprint.route('/notifications/letter/dvla', methods=['POST'])
+@letter_callback_blueprint.route('/notifications/letter/dvla/<reference>', methods=['POST'])
 @validate_schema(dvla_sns_callback_schema)
-def process_letter_response():
+def process_letter_response(reference):
     req_json = request.get_json(force=True)
     current_app.logger.debug('Received SNS callback: {}'.format(req_json))
     if not autoconfirm_subscription(req_json):
