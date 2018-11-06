@@ -37,7 +37,7 @@ def mmg_post(client, data):
 
 def dvla_post(client, data):
     return client.post(
-        path='/notifications/letter/dvla',
+        path='/notifications/letter/dvla/example-ref',
         data=data,
         headers=[('Content-Type', 'application/json')]
     )

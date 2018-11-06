@@ -248,7 +248,7 @@ def test_register_from_email_auth_invite(
     data = {
         'name': 'invited user',
         'email_address': sample_invite['email_address'],
-        'mobile_number': '07700900001',
+        'mobile_number': '0409000001',
         'password': 'FSLKAJHFNvdzxgfyst',
         'service': sample_invite['service'],
         'auth_type': 'email_auth',

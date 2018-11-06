@@ -523,7 +523,7 @@ def test_existing_email_auth_user_with_phone_can_set_sms_auth(
     service_one['permissions'].append('email_auth')
     sample_invite['auth_type'] = 'sms_auth'
     api_user_active.auth_type = 'email_auth'
-    api_user_active.mobile_number = '07700900001'
+    api_user_active.mobile_number = '0409000001'
 
     mocker.patch('app.main.views.invites.user_api_client.get_user_by_email', return_value=api_user_active)
     mocker.patch('app.main.views.invites.service_api_client.get_service', return_value={'data': service_one})

@@ -241,7 +241,7 @@ def test_get_inbound_sms_summary_with_no_inbound(admin_request, sample_service):
 
 def test_get_inbound_sms_by_id_returns_200(admin_request, notify_db_session):
     service = create_service_with_inbound_number(inbound_number='12345')
-    inbound = create_inbound_sms(service=service, user_number='447700900001')
+    inbound = create_inbound_sms(service=service, user_number='61409000001')
 
     response = admin_request.get(
         'inbound_sms.get_inbound_by_id',
@@ -249,7 +249,7 @@ def test_get_inbound_sms_by_id_returns_200(admin_request, notify_db_session):
         inbound_sms_id=inbound.id,
     )
 
-    assert response['user_number'] == '447700900001'
+    assert response['user_number'] == '61409000001'
     assert response['service_id'] == str(service.id)
 
 
