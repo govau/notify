@@ -9,8 +9,8 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from app import notify_celery, create_app  # noqa
 
 sentry_sdk.init(
-    dsn=os.getenv("API_SENTRY_DSN"),
-    environment=os.getenv("API_SENTRY_ENV"),
+    dsn=os.getenv("CELERY_SENTRY_DSN"),
+    environment=os.getenv("CELERY_SENTRY_ENV"),
     integrations=[FlaskIntegration()]
 )
 
