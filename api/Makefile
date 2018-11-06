@@ -111,10 +111,12 @@ run-gunicorn: version-file ## Run a production server
 	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
 run-celery-worker: version-file ## Run background workers
-	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
+	NOTIFY_CELERY_CMD=worker \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
 
 run-celery-beat: version-file ## Run scheduled tasks
-	$(RUNNER) celery -A run_celery.notify_celery beat --loglevel=INFO
+	NOTIFY_CELERY_CMD=beat \
+		$(RUNNER) celery -A run_celery.notify_celery beat --loglevel=INFO
 
 run-ngrok:
 	ngrok http 6011
