@@ -43,16 +43,14 @@
 {% block proposition_header %}
   <div class="header-proposition">
     <div class="content">
+      <a href="#proposition-links" class="js-header-toggle menu">Menu</a>
       <nav id="proposition-menu">
-        <a href="#" id="close-navigation" aria-label="Close navigation">
-          <img src="{{ asset_path }}images/navigation-close.svg" alt="Close navigation"/>
-        </a>
         <ul id="proposition-links">
           {% if current_user.is_authenticated %}
           {{ top_nav_item(
             url_for('main.show_accounts_or_dashboard'),
             'Services',
-            active=request.path.startswith('/accounts'))
+            active=request.path.startswith('/services'))
           }}
           {% endif %}
           {{ top_nav_item(url_for('main.support'), 'Support') }}
@@ -69,15 +67,13 @@
           {% endif %}
         </ul>
 
-        <div class="signin-signout">
-          {% block header_sign_in_out %}
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.sign_out')}}">Sign out</a>
-          {% else %}
-            <a href="{{ url_for('main.sign_in' )}}">Sign in</a>
-          {% endif %}
-          {% endblock %}
-        </div>
+        {% block header_sign_in_out %}
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('main.sign_out')}}">Sign out</a>
+        {% else %}
+          <a href="{{ url_for('main.sign_in' )}}">Sign in</a>
+        {% endif %}
+        {% endblock %}
       </nav>
     </div>
   </div>
