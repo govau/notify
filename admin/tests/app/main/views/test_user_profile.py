@@ -141,7 +141,7 @@ def test_should_show_authenticate_after_mobile_number_change(
     logged_in_client,
 ):
     with logged_in_client.session_transaction() as session:
-        session['new-mob'] = '+441234123123'
+        session['new-mob'] = '+61412345678'
     response = logged_in_client.get(
         url_for('main.user_profile_mobile_number_authenticate'))
 
@@ -156,7 +156,7 @@ def test_should_redirect_after_mobile_number_authenticate(
     mock_send_verify_code,
 ):
     with logged_in_client.session_transaction() as session:
-        session['new-mob'] = '+441234123123'
+        session['new-mob'] = '+61412345678'
     data = {'password': '12345667'}
     response = logged_in_client.post(
         url_for('main.user_profile_mobile_number_authenticate'),

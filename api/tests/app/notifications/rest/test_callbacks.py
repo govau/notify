@@ -116,7 +116,7 @@ def test_dvla_ack_calls_does_not_call_letter_notifications_task(client, mocker):
 
 def test_firetext_callback_should_not_need_auth(client, mocker):
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&status=0&reference=send-sms-code&time=2016-03-10 14:17:00'
+    data = 'mobile=61412345678&status=0&reference=send-sms-code&time=2016-03-10 14:17:00'
 
     response = firetext_post(client, data)
     assert response.status_code == 200
@@ -124,7 +124,7 @@ def test_firetext_callback_should_not_need_auth(client, mocker):
 
 def test_firetext_callback_should_return_400_if_empty_reference(client, mocker):
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&status=0&reference=&time=2016-03-10 14:17:00'
+    data = 'mobile=61412345678&status=0&reference=&time=2016-03-10 14:17:00'
     response = firetext_post(client, data)
 
     json_resp = json.loads(response.get_data(as_text=True))
@@ -135,7 +135,7 @@ def test_firetext_callback_should_return_400_if_empty_reference(client, mocker):
 
 def test_firetext_callback_should_return_400_if_no_reference(client, mocker):
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&status=0&time=2016-03-10 14:17:00'
+    data = 'mobile=61412345678&status=0&time=2016-03-10 14:17:00'
     response = firetext_post(client, data)
     json_resp = json.loads(response.get_data(as_text=True))
     assert response.status_code == 400
@@ -145,7 +145,7 @@ def test_firetext_callback_should_return_400_if_no_reference(client, mocker):
 
 def test_firetext_callback_should_return_200_if_send_sms_reference(client, mocker):
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&status=0&time=2016-03-10 14:17:00&reference=send-sms-code'
+    data = 'mobile=61412345678&status=0&time=2016-03-10 14:17:00&reference=send-sms-code'
     response = firetext_post(client, data)
     json_resp = json.loads(response.get_data(as_text=True))
     assert response.status_code == 200
@@ -155,7 +155,7 @@ def test_firetext_callback_should_return_200_if_send_sms_reference(client, mocke
 
 def test_firetext_callback_should_return_400_if_no_status(client, mocker):
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&time=2016-03-10 14:17:00&reference=send-sms-code'
+    data = 'mobile=61412345678&time=2016-03-10 14:17:00&reference=send-sms-code'
     response = firetext_post(client, data)
     json_resp = json.loads(response.get_data(as_text=True))
     assert response.status_code == 400
@@ -169,7 +169,7 @@ def test_firetext_callback_should_set_status_technical_failure_if_status_unknown
         notify_db, notify_db_session, status='sending', sent_at=datetime.utcnow()
     )
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&status=99&time=2016-03-10 14:17:00&reference={}'.format(notification.id)
+    data = 'mobile=61412345678&status=99&time=2016-03-10 14:17:00&reference={}'.format(notification.id)
     with pytest.raises(ClientException) as e:
         firetext_post(client, data)
     assert get_notification_by_id(notification.id).status == 'technical-failure'
@@ -178,7 +178,7 @@ def test_firetext_callback_should_set_status_technical_failure_if_status_unknown
 
 def test_firetext_callback_returns_200_when_notification_id_is_not_a_valid_uuid(client, mocker):
     mocker.patch('app.statsd_client.incr')
-    data = 'mobile=441234123123&status=0&time=2016-03-10 14:17:00&reference=1234'
+    data = 'mobile=61412345678&status=0&time=2016-03-10 14:17:00&reference=1234'
     response = firetext_post(client, data)
     json_resp = json.loads(response.get_data(as_text=True))
     assert response.status_code == 400
@@ -194,7 +194,7 @@ def test_callback_should_return_200_if_cannot_find_notification_id(
 ):
     mocker.patch('app.statsd_client.incr')
     missing_notification_id = uuid.uuid4()
-    data = 'mobile=441234123123&status=0&time=2016-03-10 14:17:00&reference={}'.format(
+    data = 'mobile=61412345678&status=0&time=2016-03-10 14:17:00&reference={}'.format(
         missing_notification_id)
     response = firetext_post(client, data)
 
@@ -220,7 +220,7 @@ def test_firetext_callback_should_update_notification_status(
 
     original = get_notification_by_id(notification.id)
     assert original.status == 'sending'
-    data = 'mobile=441234123123&status=0&time=2016-03-10 14:17:00&reference={}'.format(
+    data = 'mobile=61412345678&status=0&time=2016-03-10 14:17:00&reference={}'.format(
         notification.id)
     response = firetext_post(client, data)
 
@@ -254,7 +254,7 @@ def test_firetext_callback_should_update_notification_status_failed(
     original = get_notification_by_id(notification.id)
     assert original.status == 'sending'
 
-    data = 'mobile=441234123123&status=1&time=2016-03-10 14:17:00&reference={}'.format(
+    data = 'mobile=61412345678&status=1&time=2016-03-10 14:17:00&reference={}'.format(
         notification.id)
     response = firetext_post(client, data)
 
@@ -277,7 +277,7 @@ def test_firetext_callback_should_update_notification_status_pending(client, not
     )
     original = get_notification_by_id(notification.id)
     assert original.status == 'sending'
-    data = 'mobile=441234123123&status=2&time=2016-03-10 14:17:00&reference={}'.format(
+    data = 'mobile=61412345678&status=2&time=2016-03-10 14:17:00&reference={}'.format(
         notification.id)
     response = firetext_post(client, data)
 
@@ -486,7 +486,7 @@ def test_firetext_callback_should_record_statsd(client, notify_db, notify_db_ses
             notify_db, notify_db_session, status='sending', sent_at=datetime.utcnow()
         )
 
-        data = 'mobile=441234123123&status=0&time=2016-03-10 14:17:00&code=101&reference={}'.format(
+        data = 'mobile=61412345678&status=0&time=2016-03-10 14:17:00&code=101&reference={}'.format(
             notification.id)
         firetext_post(client, data)
 
