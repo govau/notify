@@ -9,7 +9,7 @@ from notifications_utils.recipients import validate_and_format_phone_number
 from requests import HTTPError
 
 import app
-from app import telstra_sms_client, twilio_sms_client
+from app import twilio_sms_client
 from app.dao import (provider_details_dao, notifications_dao)
 from app.dao.provider_details_dao import dao_switch_sms_provider_to_provider_with_identifier
 from app.delivery import send_to_providers
@@ -35,7 +35,10 @@ from tests.app.db import (
 )
 
 
-def test_should_return_highest_priority_active_provider(restore_provider_details):
+def test_should_return_highest_priority_active_provider(
+    restore_provider_details,
+    with_active_telstra_provider,
+):
     providers = provider_details_dao.get_provider_details_by_notification_type('sms')
 
     first = providers[0]
@@ -549,7 +552,7 @@ def test_should_send_sms_to_international_providers(
 ):
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
 
-    dao_switch_sms_provider_to_provider_with_identifier('telstra')
+    dao_switch_sms_provider_to_provider_with_identifier('twilio')
 
     db_notification_au = create_notification(
         template=sample_sms_template_with_html,
@@ -570,13 +573,12 @@ def test_should_send_sms_to_international_providers(
     )
 
     mocker.patch('app.twilio_sms_client.send_sms')
-    mocker.patch('app.telstra_sms_client.send_sms')
 
     send_to_providers.send_sms_to_provider(
         db_notification_au
     )
 
-    telstra_sms_client.send_sms.assert_called_once_with(
+    twilio_sms_client.send_sms.assert_called_with(
         to="61412888999",
         content=ANY,
         reference=str(db_notification_au.id),
@@ -587,7 +589,7 @@ def test_should_send_sms_to_international_providers(
         db_notification_international
     )
 
-    twilio_sms_client.send_sms.assert_called_once_with(
+    twilio_sms_client.send_sms.assert_called_with(
         to="61412111222",
         content=ANY,
         reference=str(db_notification_international.id),
@@ -598,7 +600,7 @@ def test_should_send_sms_to_international_providers(
     notification_int = Notification.query.filter_by(id=db_notification_international.id).one()
 
     assert notification_au.status == 'sending'
-    assert notification_au.sent_by == 'telstra'
+    assert notification_au.sent_by == 'twilio'
     assert notification_int.status == 'sent'
     assert notification_int.sent_by == 'twilio'
 
