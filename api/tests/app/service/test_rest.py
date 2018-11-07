@@ -2142,7 +2142,7 @@ def test_send_one_off_notification(sample_service, admin_request, mocker):
         service_id=sample_service.id,
         _data={
             'template_id': str(template.id),
-            'to': '07700900001',
+            'to': '0409000001',
             'created_by': str(sample_service.created_by_id)
         },
         _expected_status=201

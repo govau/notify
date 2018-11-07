@@ -70,7 +70,8 @@ environment.sh
 .env_test
 .envrc
 
-celerybeat-schedule
+celerybeat-schedule.db
+celerybeat.pid
 
 # CloudFoundry
 .cf

@@ -110,8 +110,13 @@ run: version-file ## Run a development server (reloading)
 run-gunicorn: version-file ## Run a production server
 	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
-run-celery: version-file ## Run background workers
-	$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
+run-celery-worker: version-file ## Run background workers
+	NOTIFY_CELERY_CMD=worker \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
+
+run-celery-beat: version-file ## Run scheduled tasks
+	NOTIFY_CELERY_CMD=beat \
+		$(RUNNER) celery -A run_celery.notify_celery beat --loglevel=INFO
 
 run-ngrok:
 	ngrok http 6011
@@ -148,11 +153,17 @@ deploy: vendor requirements.txt ## Deploy prod application
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
-deploy-celery:
-	APP=notify-celery $(MAKE) deploy
+deploy-celery-worker:
+	APP=notify-celery-worker $(MAKE) deploy
 
-deploy-dev-celery:
-	APP=notify-celery $(MAKE) deploy-dev
+deploy-dev-celery-worker:
+	APP=notify-celery-worker $(MAKE) deploy-dev
+
+deploy-celery-beat:
+	APP=notify-celery-beat $(MAKE) deploy
+
+deploy-dev-celery-beat:
+	APP=notify-celery-beat $(MAKE) deploy-dev
 
 create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
@@ -165,7 +176,7 @@ clean:
 .PHONY:
 	install install-dev setup-db \
 	setup-test-db test lint fmt tests $(APP_TESTS) $(DAO_TESTS) test-roots \
-	run run-celery \
-	deploy deploy-api deploy-celery \
+	run run-celery-worker run-celery-beat \
+	deploy deploy-api deploy-celery-worker deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat \
 	run-production \
 	create-migration help clean check-vulnerabilities

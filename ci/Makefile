@@ -11,7 +11,7 @@ CLD_B         ?= b.cld.gov.au
 CLD_HOST      ?= $(CLD_Y)
 STG           ?= dev
 
-SERVICES       = notify-shared notify-api notify-admin aws smtp telstra twilio
+SERVICES       = notify-shared notify-api notify-admin notify-celery aws smtp telstra twilio
 SVC_APPLIED    = $(SERVICES:%=apply-service-%)
 SVC_CREATED    = $(SERVICES:%=create-service-%)
 SVC_DIFFED     = $(SERVICES:%=diff-service-%)
@@ -65,10 +65,14 @@ undeploy-feature-branches:
 
 undeploy-%:
 	-$(CF) unbind-service notify-api-f-$* notify-psql-f-$*
-	-$(CF) unbind-service notify-celery-f-$* notify-psql-f-$*
+	-$(CF) unbind-service notify-celery-f-$* notify-psql-f-$* # TODO: can remove once all such applications are cleaned up
+	-$(CF) unbind-service notify-celery-worker-f-$* notify-psql-f-$*
+	-$(CF) unbind-service notify-celery-beat-f-$* notify-psql-f-$*
 	-$(CF) delete notify-f-$* -f
 	-$(CF) delete notify-api-f-$* -f
-	-$(CF) delete notify-celery-f-$* -f
+	-$(CF) delete notify-celery-f-$* -f # TODO: can remove once all such applications are cleaned up
+	-$(CF) delete notify-celery-worker-f-$* -f
+	-$(CF) delete notify-celery-beat-f-$* -f
 	-$(CF) delete notify-docs-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 

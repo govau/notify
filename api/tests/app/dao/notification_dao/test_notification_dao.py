@@ -1647,7 +1647,7 @@ def test_slow_provider_delivery_returns_for_delivered_notifications_only(
         create_notification,
         template=sample_template,
         sent_at=now,
-        sent_by='firetext',
+        sent_by='twilio',
         created_at=now,
         updated_at=five_minutes_from_now
     )
@@ -1658,7 +1658,7 @@ def test_slow_provider_delivery_returns_for_delivered_notifications_only(
 
     slow_delivery = is_delivery_slow_for_provider(
         sent_at=now,
-        provider='firetext',
+        provider='twilio',
         threshold=2,
         delivery_time=timedelta(minutes=5),
         service_id=sample_template.service.id,

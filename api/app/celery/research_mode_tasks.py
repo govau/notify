@@ -11,34 +11,26 @@ from app.models import SMS_TYPE
 from app.config import QueueNames
 from app.celery.process_ses_receipts_tasks import process_ses_results
 
-temp_fail = "7700900003"
-perm_fail = "7700900002"
-delivered = "7700900001"
+temp_fail = "409000003"
+perm_fail = "409000002"
+delivered = "409000001"
 
 delivered_email = "delivered@simulator.notify"
 perm_fail_email = "perm-fail@simulator.notify"
 temp_fail_email = "temp-fail@simulator.notify"
 
 
-def send_sms_response(provider, reference, to):
-    if provider == "mmg":
-        body = mmg_callback(reference, to)
+def send_sms_response(provider, notification_id, to):
+    if provider == "telstra":
         headers = {"Content-type": "application/json"}
-    else:
+        body = telstra_callback(notification_id, to)
+    elif provider == "twilio":
         headers = {"Content-type": "application/x-www-form-urlencoded"}
-        body = firetext_callback(reference, to)
-        # to simulate getting a temporary_failure from firetext
-        # we need to send a pending status updated then a permanent-failure
-        if body['status'] == '2':  # pending status
-            make_request(SMS_TYPE, provider, body, headers)
-            # 1 is a declined status for firetext, will result in a temp-failure
-            body = {'mobile': to,
-                    'status': "1",
-                    'time': '2016-03-10 14:17:00',
-                    'reference': reference
-                    }
+        body = twilio_callback(notification_id, to)
+    else:
+        raise ValueError("Invalid provider: {}".format(provider))
 
-    make_request(SMS_TYPE, provider, body, headers)
+    make_request(SMS_TYPE, provider, notification_id, body, headers)
 
 
 def send_email_response(reference, to):
@@ -52,8 +44,8 @@ def send_email_response(reference, to):
     process_ses_results.apply_async([body], queue=QueueNames.RESEARCH_MODE)
 
 
-def make_request(notification_type, provider, data, headers):
-    api_call = "{}/notifications/{}/{}".format(current_app.config["API_HOST_NAME"], notification_type, provider)
+def make_request(notification_type, provider, notification_id, data, headers):
+    api_call = "{}/notifications/{}/{}/{}".format(current_app.config["API_HOST_NAME"], notification_type, provider, notification_id)
 
     try:
         response = request(
@@ -79,43 +71,37 @@ def make_request(notification_type, provider, data, headers):
     return response.json()
 
 
-def mmg_callback(notification_id, to):
-    """
-        status: 3 - delivered
-        status: 4 - expired (temp failure)
-        status: 5 - rejected (perm failure)
-    """
-
+def telstra_callback(notification_id, to):
     if to.strip().endswith(temp_fail):
-        status = "4"
+        status = "REJECTED"
     elif to.strip().endswith(perm_fail):
-        status = "5"
+        status = "UNDVBL"
     else:
-        status = "3"
+        status = "DELIVRD"
 
-    return json.dumps({"reference": "mmg_reference",
-                       "CID": str(notification_id),
-                       "MSISDN": to,
-                       "status": status,
-                       "deliverytime": "2016-04-05 16:01:07"})
+    return json.dumps({
+        "messageId": "XXXX",
+        "to": to,
+        "deliveryStatus": status,
+    })
 
 
-def firetext_callback(notification_id, to):
-    """
-        status: 0 - delivered
-        status: 1 - perm failure
-    """
-    if to.strip().endswith(perm_fail):
-        status = "1"
-    elif to.strip().endswith(temp_fail):
-        status = "2"
+def twilio_callback(notification_id, to):
+    if to.strip().endswith(temp_fail):
+        status = "failed"
+    elif to.strip().endswith(perm_fail):
+        status = "undelivered"
     else:
-        status = "0"
+        status = "delivered"
     return {
-        'mobile': to,
-        'status': status,
-        'time': '2016-03-10 14:17:00',
-        'reference': notification_id
+        "AccountSid": "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "ApiVersion": "2010-04-01",
+        "From": "+14155552345",
+        "MessageSid": "SMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "MessageStatus": status,
+        "SmsSid": "SMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "SmsStatus": status,
+        "To": to,
     }
 
 
@@ -136,7 +122,7 @@ def create_fake_letter_response_file(self, reference):
 
     # on development we can't trigger SNS callbacks so we need to manually hit the DVLA callback endpoint
     if current_app.config['NOTIFY_ENVIRONMENT'] == 'development':
-        make_request('letter', 'dvla', _fake_sns_s3_callback(upload_file_name), None)
+        make_request('letter', 'dvla', reference, _fake_sns_s3_callback(upload_file_name), None)
 
 
 def _fake_sns_s3_callback(filename):

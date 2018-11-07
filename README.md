@@ -37,7 +37,6 @@ make install-dev
 make test
 ```
 
-
 You can also work with a specific project from the root level by prefixing the
 command with the project name, and a full stop separator.
 
@@ -47,20 +46,23 @@ For instance, running the API in dev mode is done with
 make api.run
 ```
 
-Alternatively, you can change into the `api` directory and issue the `make
-run` command directly.
-
+Alternatively, you can change into the `api` directory and issue the `make run` command directly.
 
 To start the whole app from nothing, you'll need to run the following in
 different shells.
 
 ```
-make api.run
-make api.run-celery
+make api.run-celery-worker
 make admin.run
 ```
 
 ... then hit up http://localhost:6012 to get going.
+
+Optionally you can also run this target to run the scheduled tasks:
+
+```
+make api.run-celery-beat
+```
 
 ## Requirements
 
@@ -72,7 +74,6 @@ You'll need Node.js for the frontend and docs,
 
 And we've got a simple open source status page that's written in Ruby, but
 we don't usually run it locally.
-
 
 ## Credits
 
