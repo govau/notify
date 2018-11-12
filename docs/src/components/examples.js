@@ -1,8 +1,8 @@
-import React, { createContext } from 'react'
+import React, { createContext, Fragment } from 'react'
 import { StaticQuery, graphql } from 'gatsby'
 import MDXRenderer from 'gatsby-mdx/mdx-renderer'
 
-import { CurrentLanguage } from './language-selector'
+import LanguageSelector, { CurrentLanguage } from './language-selector'
 
 import * as scope from './examples-components'
 
@@ -58,22 +58,25 @@ export const Provider = ({ source = 'data', ...props }) => (
 )
 
 export default ({ reference }) => (
-  <Context.Consumer>
-    {examples => (
-      <CurrentLanguage>
-        {language => {
-          const ex = (examples.get(reference) || []).find(
-            example => example.frontmatter.lang === language
-          )
+  <Fragment>
+    <LanguageSelector />
+    <Context.Consumer>
+      {examples => (
+        <CurrentLanguage>
+          {language => {
+            const ex = (examples.get(reference) || []).find(
+              example => example.frontmatter.lang === language
+            )
 
-          if (!ex) {
-            console.warn(`couldnt find example ${reference} for ${language}`)
-            return null
-          }
+            if (!ex) {
+              console.warn(`couldnt find example ${reference} for ${language}`)
+              return null
+            }
 
-          return <MDXRenderer scope={scope}>{ex.code.body}</MDXRenderer>
-        }}
-      </CurrentLanguage>
-    )}
-  </Context.Consumer>
+            return <MDXRenderer scope={scope}>{ex.code.body}</MDXRenderer>
+          }}
+        </CurrentLanguage>
+      )}
+    </Context.Consumer>
+  </Fragment>
 )
