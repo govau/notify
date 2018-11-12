@@ -7,8 +7,6 @@ STG    ?= dev
 
 SRC     = $(shell find src -type f)
 
-export GATSBY_NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au
-
 # A help target including self-documenting targets (see the awk statement)
 define HELP_TEXT
 Usage: make [TARGET]... [MAKEVAR1=SOMETHING]...
@@ -38,10 +36,15 @@ fmt:
 run:
 	$(RUNNER) develop
 
-build: public/index.html
 
-public/index.html: $(SRC)
+build: public/index.html
+	
+public/index.html: $(SRC) .env.production
 	$(RUNNER) build
+
+.env.production: NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au
+.env.production:
+	echo NOTIFY_BASE_URL=$(NOTIFY_BASE_URL) >> .env.production
 
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
@@ -66,4 +69,5 @@ check-vulnerabilities:
 	help clean clean-full check-vulnerabilities \
 	install install-dev \
 	fmt test run \
-	deploy deploy-dev
+	deploy deploy-dev \
+	.env.production
