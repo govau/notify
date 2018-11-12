@@ -57,7 +57,6 @@ module.exports = {
     {
       resolve: 'mdx-pages',
       options: {
-        srcDir: `${__dirname}/src`,
         layout: `${__dirname}/src/mdx-layout.js`,
       },
     },

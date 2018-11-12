@@ -1,80 +1,55 @@
+---
+title: "Send a message"
+---
+
 import Button from 'components/button'
-import Examples from 'components/code-examples'
+import Examples from 'components/examples'
+import Contents from 'components/table-of-contents'
+
+# Send a message
+
+You can use Notify to send text messages, emails and letters.
+
+This API allows you to send text or email notifications to users and track
+their progress. You might send out notifications in response to some
+user-generated event, like sending someone a receipt after they apply to your
+service. You might also send out notifications as a reminder, like if a payment
+is due.
+
+<Contents />
+
+## Getting ready
+
+To send an email message in Notify, you'll need to set up a template in the user
+interface. Go to **Services › Templates › Add a template** to get started.
+
+Once you've got a template ready, find the template ID associated with
+it. You'll need that ID to specify which template you want to use when you call
+our API.
 
 
-## Sending a single email
+## Personalisation
 
-The following example shows how to send a single email.
+Personalisation allows you to customise what information shows up in a specific email
+as it gets sent out. You might use this to address a user by their name, provide
+them with a specific link to click, or give them a receipt number so they have a
+reference to a transaction.
 
-<Examples path="sending-emails" />
+Any personalisations that you set up in your template will be necessary to
+include when you go to send a message through the API.
 
-### Arguments
+## Sending an email
 
-`template_id`
+Notify allows you to send email messages one-by-one. Each message should be
+configured in your service.
 
-**Required**
-
-The ID of the template. You can find this by signing into Notify and
-going to the Templates page.
-
----
-
-
-`email_address`
-
-**Required**
-
-The address of the recipient of the email.
-
----
+<Examples reference="sending-emails" />
 
 
-`personalisation`
+## Sending a SMS
 
-**Optional** depending on template
+Sending an SMS is similar to sending an email. Send them one-by-one to a
+recipient. If you set up a reply number in the Notify interface, you'll be able
+to capture replies from your users.
 
-If a template has placeholder fields for personalised information such as name
-or reference number, you need to provide their values in a map with key
-and value pairs.
-
-For example:
-
-```json
-{
-    "first_name": "Lisa",
-    "amount_owing": "$15.50"
-}
-```
-
----
-
-`reference`
-
-**Optional**
-
-A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
-
-## Response
-
-If successful, the shape of the response you recieve will resemble the
-following.
-
-
-```json
-{
-  "content": {
-    "body": "Hey there. Lisa\n\nPlease pay us $15.50 at your earliest convenience.\n", 
-    "from_email": "your-service@digital.gov.au", 
-    "subject": "Pay your bill soon."
-  }, 
-  "id": "xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn",
-  "reference": "STRING", 
-  "scheduled_for": null, 
-  "template": {
-    "id": "xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "uri": "https://rest-api.notify.gov.au/services/xxxxxxxx-xxxx-xxxx-xxxx-ssssssssssss/templates/xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "version": 3
-  }, 
-  "uri": "https://rest-api.notify.gov.au/v2/notifications/xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn"
-}
-```
+<Examples reference="sending-texts" />
