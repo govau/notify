@@ -20,7 +20,6 @@ const linkCSS = css`
 
 const Tabs = styled.div`
   margin-top: 1rem;
-  border-top: 1px solid #cfcfcf;
 `
 
 const TabsNav = styled.nav`

@@ -1,7 +1,6 @@
 const componentWithMDXScope = require('gatsby-mdx/component-with-mdx-scope')
 
-const createMDXPagePath = node =>
-  `/${node.parent.name}`
+const createMDXPagePath = node => `/${node.parent.name}`
 
 // Relate an MDX node with the page that we create below.
 //
@@ -73,16 +72,4 @@ const createPages = (
   })
 }
 
-// mdx pages don't seem to get access to our environment unless we do this sort
-// of thing.
-// makes all imports absolute instead of relative for MDX pages.
-// not sure.
-const onCreateWebpackConfig = ({ actions }, options) => {
-  actions.setWebpackConfig({
-    resolve: {
-      modules: [options.srcDir, 'node_modules'],
-    },
-  })
-}
-
-module.exports = { createPages, onCreateWebpackConfig, onCreateNode }
+module.exports = { createPages, onCreateNode }
