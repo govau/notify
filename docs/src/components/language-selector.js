@@ -1,5 +1,27 @@
 import React, { createContext } from 'react'
-import Select from 'react-select'
+import styled, { css } from 'styled-components'
+
+const Nav = styled.nav``
+
+const LanguageLink = styled.span`
+  cursor: pointer;
+  font-size: 0.8em;
+
+  ${props =>
+    props.active
+      ? css`
+          text-decoration: underline;
+          font-weight: bold;
+        `
+      : css``};
+`
+
+// spearate wrapper to get around props interpolation on LanguageLink
+const NavLanguageLink = styled(LanguageLink)`
+  & + & {
+    margin-left: 1em;
+  }
+`
 
 const Context = createContext({
   current: '',
@@ -51,11 +73,17 @@ const getLanguageLabel = language => languages[language]
 const Languages = props => (
   <Context.Consumer>
     {({ current, changeLanguage }) => (
-      <Select
-        value={createLanguageOption(current)}
-        options={languageOptions}
-        onChange={({ value }) => changeLanguage(value)}
-      />
+      <Nav>
+        {languageOptions.map(({ value, label }) => (
+          <NavLanguageLink
+            active={value === current}
+            key={label}
+            onClick={e => changeLanguage(value)}
+          >
+            {label}
+          </NavLanguageLink>
+        ))}
+      </Nav>
     )}
   </Context.Consumer>
 )

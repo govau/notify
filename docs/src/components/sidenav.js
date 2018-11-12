@@ -2,7 +2,6 @@ import React, { Fragment } from 'react'
 import { StaticQuery, graphql } from 'gatsby'
 import styled, { css } from 'styled-components'
 
-import LanguageSelector from './language-selector'
 import Link from './link'
 
 const NavWrapper = styled.nav`
@@ -126,7 +125,6 @@ export const DynamicSidenav = ({ current, ...props }) => (
 
       return (
         <Fragment>
-          <LanguageSelector />
           <NavWrapper>
             <NavList>
               <Option>/installation</Option>
