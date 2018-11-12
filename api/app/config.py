@@ -249,31 +249,32 @@ class Config(object):
             'options': {'queue': QueueNames.PERIODIC},
             'kwargs': {'job_types': [LETTER_TYPE]}
         },
-        'remove_transformed_dvla_files': {
-            'task': 'remove_transformed_dvla_files',
-            'schedule': crontab(hour=4, minute=40),
-            'options': {'queue': QueueNames.PERIODIC}
-        },
+        # 'remove_transformed_dvla_files': {
+        #     'task': 'remove_transformed_dvla_files',
+        #     'schedule': crontab(hour=4, minute=40),
+        #     'options': {'queue': QueueNames.PERIODIC}
+        # },
         'populate_monthly_billing': {
             'task': 'populate_monthly_billing',
             'schedule': crontab(hour=5, minute=10),
             'options': {'queue': QueueNames.PERIODIC}
         },
-        'raise-alert-if-letter-notifications-still-sending': {
-            'task': 'raise-alert-if-letter-notifications-still-sending',
-            'schedule': crontab(hour=16, minute=30),
-            'options': {'queue': QueueNames.PERIODIC}
-        },
-        'trigger-letter-pdfs-for-day': {
-            'task': 'trigger-letter-pdfs-for-day',
-            'schedule': crontab(hour=17, minute=50),
-            'options': {'queue': QueueNames.PERIODIC}
-        },
-        'raise-alert-if-no-letter-ack-file': {
-            'task': 'raise-alert-if-no-letter-ack-file',
-            'schedule': crontab(hour=23, minute=00),
-            'options': {'queue': QueueNames.PERIODIC}
-        },
+        # 'raise-alert-if-letter-notifications-still-sending': {
+        #     'task': 'raise-alert-if-letter-notifications-still-sending',
+        #     'schedule': crontab(hour=16, minute=30),
+        #     'options': {'queue': QueueNames.PERIODIC}
+        # },
+        # 'trigger-letter-pdfs-for-day': {
+        #     'task': 'trigger-letter-pdfs-for-day',
+        #     'schedule': crontab(hour=17, minute=50),
+        #     'options': {'queue': QueueNames.PERIODIC}
+        # },
+        # 'raise-alert-if-no-letter-ack-file': {
+        #     'task': 'raise-alert-if-no-letter-ack-file',
+        #     # 'schedule': crontab(hour=23, minute=00),
+        #     'schedule': crontab(),
+        #     'options': {'queue': QueueNames.PERIODIC}
+        # },
         'check-job-status': {
             'task': 'check-job-status',
             'schedule': crontab(),
