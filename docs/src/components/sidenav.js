@@ -2,9 +2,12 @@ import React, { Fragment } from 'react'
 import { StaticQuery, graphql } from 'gatsby'
 import styled, { css } from 'styled-components'
 
+import LanguageSelector from './language-selector'
 import Link from './link'
 
-const NavWrapper = styled.nav``
+const NavWrapper = styled.nav`
+  line-height: 1.8em;
+`
 
 const NavList = styled.ol`
   margin: 0;
@@ -59,7 +62,7 @@ const Contents = ({
     </Container>
   ) : null
 
-export const DynamicSidenav = props => (
+export const DynamicSidenav = ({ current, ...props }) => (
   <StaticQuery
     query={graphql`
       {
@@ -105,35 +108,35 @@ export const DynamicSidenav = props => (
         const { page } = edge
 
         return page.frontmatter.title ? (
-          <Fragment>
-            <NavLink to={page.fields.pagePath}>
-              {page.frontmatter.title}
-            </NavLink>
-            <Contents
-              pagePath={page.fields.pagePath}
-              items={page.tableOfContents.items}
-            />
-          </Fragment>
+          <NavLink
+            active={current === page.fields.pagePath}
+            to={page.fields.pagePath}
+          >
+            {page.frontmatter.title}
+          </NavLink>
         ) : (
-          <Contents
-            container={Fragment}
-            pagePath={page.fields.pagePath}
-            items={page.tableOfContents.items}
-          />
+          <NavLink
+            active={current === page.fields.pagePath}
+            to={page.fields.pagePath}
+          >
+            {page.headings[0].value}
+          </NavLink>
         )
       }
 
       return (
-        <NavWrapper>
-          <NavList>
-            <Option>/installation</Option>
-            <Option>/setup-client</Option>
-            <Option>/sending-email-messages</Option>
-            <Option>/sending-text-messages</Option>
-            <Option>/check-available-templates</Option>
-            <Option>/integration-testing</Option>
-          </NavList>
-        </NavWrapper>
+        <Fragment>
+          <LanguageSelector />
+          <NavWrapper>
+            <NavList>
+              <Option>/installation</Option>
+              <Option>/setup-client</Option>
+              <Option>/sending-email-messages</Option>
+              <Option>/sending-text-messages</Option>
+              <Option>/check-available-templates</Option>
+            </NavList>
+          </NavWrapper>
+        </Fragment>
       )
     }}
   />

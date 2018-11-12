@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { util } from 'styled-system'
-import { Flex, Box } from '@rebass/grid'
+import { Flex } from '@rebass/grid'
 
 import MenuIcon from './icons/menu-icon'
 import CloseIcon from './icons/close-icon'

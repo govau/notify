@@ -4,14 +4,15 @@ import styled, { css } from 'styled-components'
 
 const styles = css`
   & {
-    color: ${props => props.theme.content};
+    color: ${props => props.theme.link};
     text-decoration: underline;
   }
 
   &:hover,
   &:focus,
   &:active {
-    background-color: ${props => props.theme.highlight};
+    text-decoration: none;
+    color: ${props => props.theme.content};
   }
 `
 

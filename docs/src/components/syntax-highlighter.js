@@ -3,6 +3,7 @@ import SyntaxHighligher from 'react-syntax-highlighter'
 import ReactMarkdown from 'react-markdown'
 
 const customStyle = { margin: 0 }
+
 export default ({ content, language }) => {
   if (language && language.toLowerCase() === 'md') {
     return (
