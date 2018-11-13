@@ -9,4 +9,3 @@ export const BlockQuote = styled.blockquote`
     margin: 1.5rem 0;
   }
 `
-
