@@ -38,13 +38,15 @@ from notifications_utils.take import Take
 from notifications_utils.template_change import TemplateChange
 
 
-template_env = Environment(autoescape=select_autoescape(['html', 'htm', 'xml']),
+template_env = Environment(
+    autoescape=select_autoescape(['html', 'htm', 'xml']),
     loader=FileSystemLoader(
         path.join(
             path.dirname(path.abspath(__file__)),
             'jinja_templates',
         )
-))
+    )
+)
 
 
 class Template():
