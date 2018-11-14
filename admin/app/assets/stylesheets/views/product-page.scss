@@ -24,6 +24,14 @@
 
     .button-container {
       line-height: 45px;
+
+      .button + .button {
+        margin-top: 10px;
+
+        @media (min-width: 641px) {
+          margin-top: 0;
+        }
+      }
     }
 
     .button {
