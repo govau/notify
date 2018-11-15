@@ -34,7 +34,7 @@ The email address of the recipient you want to send to.
 
 If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a map. For example:
 
-```
+```java inline
 Map<String, String> personalisation = new HashMap<>();
 personalisation.put("first_name", "Amala");
 personalisation.put("application_date", "2018-01-01");
@@ -59,7 +59,7 @@ This is an email reply-to address specified by you to receive replies from your 
 - Go to the Email section and select Manage on the Email reply-to addresses row.
 - Select Change to specify the email address to receive replies, and select Save.
 
-```
+```java inline
 String emailReplyToId='8e222534-7f05-4972-86e3-17c5d9f894e2'
 ```
 
@@ -72,7 +72,7 @@ If you do not have an `emailReplyToId`, you can leave out this argument.
 
 If the request to the client is successful, the client returns a `SendEmailResponse`:
 
-```
+```java
 UUID notificationId;
 Optional<String> reference;
 UUID templateId;

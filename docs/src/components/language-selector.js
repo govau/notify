@@ -1,25 +1,38 @@
-import React, { createContext } from 'react'
+import React, { createContext, Fragment } from 'react'
 import styled, { css } from 'styled-components'
+import Select from 'react-select'
 
-const Nav = styled.nav``
+import { H3 } from './core/heading'
 
-const LanguageLink = styled.span`
+const Nav = styled.nav`
+  display: flex;
+  border-bottom: 4px solid #313131;
+`
+
+const LanguageLink = styled.button`
   cursor: pointer;
-  font-size: 0.8em;
+  border: 0;
+  background-color: #e8fafc;
 
   ${props =>
     props.active
       ? css`
           text-decoration: underline;
           font-weight: bold;
+          background-color: #313131;
+          color: white;
         `
       : css``};
 `
 
 // spearate wrapper to get around props interpolation on LanguageLink
 const NavLanguageLink = styled(LanguageLink)`
+  padding: 1em 1em;
+  flex: 1 1 auto;
+  text-align: center;
+
   & + & {
-    margin-left: 1em;
+    margin-left: 2px;
   }
 `
 
@@ -53,9 +66,9 @@ class Provider extends React.Component {
 const languages = {
   python: 'Python',
   java: 'Java',
-  ruby: 'Ruby',
   node: 'Node.js',
-  dotnet: '.NET',
+  //ruby: 'Ruby',
+  //dotnet: '.NET',
 }
 
 const createLanguageOption = language => ({
@@ -73,17 +86,38 @@ const getLanguageLabel = language => languages[language]
 const Languages = props => (
   <Context.Consumer>
     {({ current, changeLanguage }) => (
-      <Nav>
-        {languageOptions.map(({ value, label }) => (
-          <NavLanguageLink
-            active={value === current}
-            key={label}
-            onClick={e => changeLanguage(value)}
-          >
-            {label}
-          </NavLanguageLink>
-        ))}
-      </Nav>
+      <Fragment>
+        <H3>Select language</H3>
+        <Nav>
+          {languageOptions.map(({ value, label }) => (
+            <NavLanguageLink
+              active={value === current}
+              key={label}
+              onClick={e => changeLanguage(value)}
+            >
+              {label}
+            </NavLanguageLink>
+          ))}
+        </Nav>
+      </Fragment>
+    )}
+  </Context.Consumer>
+)
+
+const Selector = props => (
+  <Context.Consumer>
+    {({ current, changeLanguage }) => (
+      <Select
+        isSearchable={false}
+        styles={{
+          control: provided => ({
+            ...provided,
+          }),
+        }}
+        value={createLanguageOption(current)}
+        options={languageOptions}
+        onChange={({ value }) => changeLanguage(value)}
+      />
     )}
   </Context.Consumer>
 )
@@ -93,4 +127,10 @@ const CurrentLanguage = ({ children }) => (
   <Context.Consumer>{({ current }) => children(current)}</Context.Consumer>
 )
 
-export { Languages as default, CurrentLanguage, Provider, getLanguageLabel }
+export {
+  Languages as default,
+  Selector,
+  CurrentLanguage,
+  Provider,
+  getLanguageLabel,
+}

@@ -127,11 +127,11 @@ export const DynamicSidenav = ({ current, ...props }) => (
         <Fragment>
           <NavWrapper>
             <NavList>
+              <NavLink to="/">Documentation</NavLink>
               <Option>/installation</Option>
-              <Option>/setup-client</Option>
-              <Option>/sending-email-messages</Option>
-              <Option>/sending-text-messages</Option>
-              <Option>/check-available-templates</Option>
+              <Option>/sending-messages</Option>
+              {/*<Option>/check-available-templates</Option>*/}
+              <Option>/integration-testing</Option>
             </NavList>
           </NavWrapper>
         </Fragment>

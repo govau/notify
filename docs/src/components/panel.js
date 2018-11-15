@@ -1,9 +1,15 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const Details = styled.details``
+const Details = styled.details`
+  & > * {
+    padding: 0 2rem;
+  }
+`
 
 const Summary = styled.summary`
+  background-color: #f3f5f5;
+
   &::-webkit-details-marker {
     display: none;
   }
@@ -18,11 +24,11 @@ const Summary = styled.summary`
   }
 
   &:after {
-    content: '↓ more';
+    content: '↓ show';
   }
 
   ${Details}[open] &:after {
-    content: '↑ less';
+    content: '↑ hide';
   }
 `
 

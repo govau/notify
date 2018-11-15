@@ -1,18 +1,40 @@
 ---
-title: "Installing client libraries"
+title: "Getting started"
 ---
 
-import Examples from 'components/code-examples'
+import Examples from 'components/examples'
+import Contents from 'components/table-of-contents'
 
-# Installing client libraries
+# Getting started
 
-Install the client libraries in your choice of programming language
+Notify offers client libraries in a range of languages to make integration easy.
+Get started right away by installing a client that matches your development
+environment.
 
-<Examples path="installation"/>
+<Contents />
 
-# Unsupported languages
 
-We detail how to roll-your-own client in the Getting
-started section. Together with the `cURL` examples on
-any given page, you should be able to build up a client on your own by
-accessing the REST API directly.
+## Installing your Notify library
+
+<Examples reference="setup-install"/>
+
+## Set up Notify client
+
+The Notify client needs to be set up so that it can access your
+organisation's service. Log in to Notify and create or find the service you want
+to use, go to **Services › API integration › API keys** to create or manage API
+keys.
+
+Create an API key by navigating to **API keys › Create an API key**.
+You and your team will lose the ability to view this key in the dashboard after
+you create it as a security precaution. You'll need to generate a new key if you
+ever lose track of them.
+
+<Examples reference="setup-configure"/>
+
+## Unsupported languages
+
+We're not ready to expose our REST API directly. If you use a programming
+language that we don't support, please 
+[get in touch](mailto:notify-support@digital.gov.au) with us and we can work something
+out.

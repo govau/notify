@@ -1,0 +1,63 @@
+---
+lang: node
+---
+
+
+```javascript
+client.sendEmail(templateId, emailAddress, {
+  personalisation: personalisation,
+  reference: reference,
+  emailReplyToId: emailReplyToId,
+})
+```
+
+<Panel open label={<H3>Arguments</H3>}>
+
+#### Ordered arguments
+
+<Parameters>
+  <Parameter required name="templateId">
+
+The ID of the template
+
+You can find this by signing into Notify and
+going to the Templates page.
+
+  </Parameter>
+  <Parameter required name="emailAddress">
+
+The email address of the recipient you want to send to.
+
+  </Parameter>
+</Parameters>
+
+
+#### Named arguments
+
+<Parameters>
+  <Parameter optional name="personalisation">
+
+If a template has placeholder fields for personalised information such as name
+or reference number, you must provide their values in an object.
+
+The object should be structured such that they key is the name
+of the value in your template, and the value is what you expect to be
+substituted in the message.
+
+For example:
+
+```json inline
+{
+    "first_name": "Lisa",
+    "amount_owing": "$15.50"
+}
+```
+
+  </Parameter>
+  <Parameter required name="reference">
+
+A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
+
+  </Parameter>
+</Parameters>
+</Panel>

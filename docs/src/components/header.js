@@ -198,7 +198,9 @@ export default () => (
               <ExternalLink href={notifyUrl('/support')}>Support</ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={notifyUrl('/features')}>Features</ExternalLink>
+              <ExternalLink href={notifyUrl('/features')}>
+                Features
+              </ExternalLink>
             </ListItem>
             <ListItem>
               <ExternalLink href={notifyUrl('/pricing')}>Pricing</ExternalLink>

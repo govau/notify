@@ -2,94 +2,23 @@
 title: "Listing available templates"
 ---
 
-import Button from 'components/button'
-import Examples from 'components/code-examples'
+import Examples from 'components/examples'
+import Contents from 'components/table-of-contents'
 
 # Listing available templates
 
 Notify allows you to inspect which templates are available. This could allow you
-to build your own interfaces or tooling which operates on Notify.
+to build your own interfaces or integrate with tools that use Notify.
 
-For example, you could easily build a service which checks for which templates are
+For example, you could build a service which checks for which templates are
 availble, inspects which variables they require, and then presents an operator
 with a form to fill out which could submit and send messages using that
 template.
 
-Another example could be checking all sent messages for a template selected from
-the full set of templates.
+<Contents />
 
+## Filtering
 
-The following example shows how to send a single email.
+## Get all templates
 
-<Examples path="listing-templates"/>
-
-## Arguments
-
-`template_id`
-
-**Required**
-
-The ID of the template. You can find this by signing into Notify and
-going to the Templates page.
-
----
-
-
-`email_address`
-
-**Required**
-
-The address of the recipient of the email.
-
----
-
-
-`personalisation`
-
-**Optional** depending on template
-
-If a template has placeholder fields for personalised information such as name
-or reference number, you need to provide their values in a map with key
-and value pairs.
-
-For example:
-
-```json
-{
-    "first_name": "Lisa",
-    "amount_owing": "$15.50"
-}
-```
-
----
-
-`reference`
-
-**Optional**
-
-A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
-
-## Response
-
-If successful, the shape of the response you recieve will resemble the
-following.
-
-
-```json
-{
-  "content": {
-    "body": "Hey there. Lisa\n\nPlease pay us $15.50 at your earliest convenience.\n", 
-    "from_email": "your-service@digital.gov.au", 
-    "subject": "Pay your bill soon."
-  }, 
-  "id": "xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn",
-  "reference": "STRING", 
-  "scheduled_for": null, 
-  "template": {
-    "id": "xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "uri": "https://rest-api.notify.gov.au/services/xxxxxxxx-xxxx-xxxx-xxxx-ssssssssssss/templates/xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "version": 3
-  }, 
-  "uri": "https://rest-api.notify.gov.au/v2/notifications/xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn"
-}
-```
+<Examples reference="listing-templates" />

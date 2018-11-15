@@ -29,12 +29,13 @@ const NavWrapper = styled.div`
 `
 
 const StickyNav = styled.div`
-  margin: 2em -2rem 0;
+  margin: 2rem -2rem 0;
 
   @media ${desktop} {
+    margin: 0 -2rem 0;
     position: sticky;
     top: 0;
-    padding: 4rem;
+    padding: 6rem 4rem;
     overflow-y: auto;
   }
 `
@@ -59,7 +60,17 @@ const Content = styled.div`
   justify-content: flex-start;
   align-items: stretch;
   overflow: hidden;
-  margin-bottom: 4em;
+  margin-bottom: 4rem;
+
+  & > :first-child {
+    margin-top: 1em;
+  }
+
+  @media ${desktop} {
+    & > :first-child {
+      margin-top: 6rem;
+    }
+  }
 `
 
 const Layout = ({ sidenav = <Sidenav />, children }) => (
