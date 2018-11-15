@@ -7,8 +7,6 @@ STG    ?= dev
 
 SRC     = $(shell find src -type f)
 
-export GATSBY_NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au
-
 # A help target including self-documenting targets (see the awk statement)
 define HELP_TEXT
 Usage: make [TARGET]... [MAKEVAR1=SOMETHING]...
@@ -40,6 +38,7 @@ run:
 
 build: public/index.html
 
+public/index.html: export GATSBY_NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au	
 public/index.html: $(SRC)
 	$(RUNNER) build
 
