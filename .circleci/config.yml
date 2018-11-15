@@ -269,7 +269,7 @@ jobs:
       - run:
           command: make docs.build
           environment:
-            NOTIFY_BASE_URL: https://notify.gov.au
+            GATSBY_NOTIFY_BASE_URL: https://notify.gov.au
       - run: make docs.deploy
 
 workflows:

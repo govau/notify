@@ -21,7 +21,7 @@ const Summary = styled.summary`
     content: '↓ more';
   }
 
-  ${Details} [open] &:after {
+  ${Details}[open] &:after {
     content: '↑ less';
   }
 `

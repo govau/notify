@@ -1,18 +1,9 @@
-const baseUrl = process.env.NOTIFY_BASE_URL || 'https://notify.gov.au'
+const baseUrl = process.env.GATSBY_NOTIFY_BASE_URL || 'https://notify.gov.au'
 
-const stripLeadingSlash = input => {
-  if (typeof input === 'string') return input.replace(/^[\/]*/, '')
-
-  return input
-}
-
-const stripTrailingSlash = input => {
-  if (typeof input === 'string') return input.replace(/[\/]*$/, '')
-
-  return input
-}
+const ensureOneLeadingSlash = input => `/${(input || '').replace(/^[\/]*/, '')}`
+const stripTrailingSlash = input => (input || '').replace(/[\/]*$/, '')
 
 const notifyUrl = relativePath =>
-  `${stripTrailingSlash(baseUrl)}/${stripLeadingSlash(relativePath)}`
+  `${stripTrailingSlash(baseUrl)}${ensureOneLeadingSlash(relativePath)}`
 
 export { notifyUrl as default, stripTrailingSlash }

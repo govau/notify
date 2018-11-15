@@ -25,6 +25,8 @@ test.each`
   ${'one'}         | ${'https://notify.gov.au/one'}
   ${'one/two'}     | ${'https://notify.gov.au/one/two'}
   ${'one//two'}    | ${'https://notify.gov.au/one//two'}
+  ${''}            | ${'https://notify.gov.au/'}
+  ${'/'}           | ${'https://notify.gov.au/'}
 `(
   'stripLeadingSlash should return $expected from $input',
   ({ input, expected }) => {

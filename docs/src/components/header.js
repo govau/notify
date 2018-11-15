@@ -172,7 +172,7 @@ export default () => (
     <Root>
       <Wrapper>
         <Flex justifyContent="space-between">
-          <BannerLink href={notifyUrl('')}>
+          <BannerLink href={notifyUrl('/')}>
             <Flex
               justifyContent="flex-start"
               p={['1rem 0', '3rem 0']}
@@ -195,13 +195,13 @@ export default () => (
           </CloseLink>
           <StyledUnsortedList>
             <ListItem>
-              <ExternalLink href={notifyUrl('support')}>Support</ExternalLink>
+              <ExternalLink href={notifyUrl('/support')}>Support</ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={notifyUrl('features')}>Features</ExternalLink>
+              <ExternalLink href={notifyUrl('/features')}>Features</ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={notifyUrl('pricing')}>Pricing</ExternalLink>
+              <ExternalLink href={notifyUrl('/pricing')}>Pricing</ExternalLink>
             </ListItem>
             <ListItem active>
               <ExternalLink active href="/">
@@ -209,7 +209,7 @@ export default () => (
               </ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={notifyUrl('sign-in')}>Sign in</ExternalLink>
+              <ExternalLink href={notifyUrl('/sign-in')}>Sign in</ExternalLink>
             </ListItem>
           </StyledUnsortedList>
         </Nav>

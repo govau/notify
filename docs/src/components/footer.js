@@ -51,27 +51,27 @@ const UnorderedList = ({ list }) => (
 )
 
 const firstColumn = [
-  { text: 'Support', href: notifyUrl('support') },
+  { text: 'Support', href: notifyUrl('/support') },
   { text: 'System status', href: 'https://status.notify.gov.au/' },
   { text: 'Slack channel', href: 'https://ausdta.slack.com/messages/notify' },
   { text: 'Blog', href: 'https://dta.gov.au/blog' },
 ]
 
 const secondColumn = [
-  { text: 'Features', href: notifyUrl('features') },
-  { text: 'Roadmap', href: notifyUrl('features/roadmap') },
-  { text: 'Security', href: notifyUrl('features/security') },
-  { text: 'Terms of use', href: notifyUrl('features/terms') },
+  { text: 'Features', href: notifyUrl('/features') },
+  { text: 'Roadmap', href: notifyUrl('/features/roadmap') },
+  { text: 'Security', href: notifyUrl('/features/security') },
+  { text: 'Terms of use', href: notifyUrl('/features/terms') },
   {
     text: 'Using Notify',
-    href: notifyUrl('features/using-notify'),
+    href: notifyUrl('/features/using-notify'),
   },
 ]
 
 const thirdColumn = [
-  { text: 'Pricing', href: notifyUrl('pricing') },
-  { text: 'Cookies', href: notifyUrl('cookies') },
-  { text: 'Documentation', href: notifyUrl('documentation') },
+  { text: 'Pricing', href: notifyUrl('/pricing') },
+  { text: 'Cookies', href: notifyUrl('/cookies') },
+  { text: 'Documentation', href: notifyUrl('/documentation') },
 ]
 
 export default props => (
