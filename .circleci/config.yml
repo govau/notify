@@ -118,12 +118,11 @@ jobs:
       - run: make utils.install
       - run: make utils.build
 
-  build-docs:
+  install-docs:
     <<: *node_image
     steps:
       - *attach_workspace
       - run: make docs.install
-      - run: make docs.build
       - persist_to_workspace:
           root: .
           paths:
@@ -294,7 +293,7 @@ workflows:
           requires:
             - setup
 
-      - build-docs:
+      - install-docs:
           requires:
             - setup
 
@@ -336,7 +335,7 @@ workflows:
 
       - deploy-dev-docs:
           requires:
-            - build-docs
+            - install-docs
 
       - cleanup-old-deploys:
           requires:

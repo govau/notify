@@ -6,6 +6,7 @@ import { height } from 'styled-system'
 import { PanelProvider, Wrapper } from './theme'
 import dta from '../images/dta-wordmark-white.svg'
 import { External } from './link'
+import notifyUrl from './core/notify-url'
 
 const Logo = styled.img`
   padding-left: 0;
@@ -50,27 +51,27 @@ const UnorderedList = ({ list }) => (
 )
 
 const firstColumn = [
-  { text: 'Support', href: 'https://notify.gov.au/support' },
+  { text: 'Support', href: notifyUrl('/support') },
   { text: 'System status', href: 'https://status.notify.gov.au/' },
   { text: 'Slack channel', href: 'https://ausdta.slack.com/messages/notify' },
   { text: 'Blog', href: 'https://dta.gov.au/blog' },
 ]
 
 const secondColumn = [
-  { text: 'Features', href: 'https://notify.gov.au/features' },
-  { text: 'Roadmap', href: 'https://notify.gov.au/features/roadmap' },
-  { text: 'Security', href: 'https://notify.gov.au/features/security' },
-  { text: 'Terms of use', href: 'https://notify.gov.au/features/terms' },
+  { text: 'Features', href: notifyUrl('/features') },
+  { text: 'Roadmap', href: notifyUrl('/features/roadmap') },
+  { text: 'Security', href: notifyUrl('/features/security') },
+  { text: 'Terms of use', href: notifyUrl('/features/terms') },
   {
     text: 'Using Notify',
-    href: 'https://notify.gov.au/features/using-notify',
+    href: notifyUrl('/features/using-notify'),
   },
 ]
 
 const thirdColumn = [
-  { text: 'Pricing', href: 'https://notify.gov.au/pricing' },
-  { text: 'Cookies', href: 'https://notify.gov.au/cookies' },
-  { text: 'Documentation', href: 'https://notify.gov.au/documentation' },
+  { text: 'Pricing', href: notifyUrl('/pricing') },
+  { text: 'Cookies', href: notifyUrl('/cookies') },
+  { text: 'Documentation', href: notifyUrl('/documentation') },
 ]
 
 export default props => (

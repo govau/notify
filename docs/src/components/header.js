@@ -8,9 +8,7 @@ import CloseIcon from './icons/close-icon'
 import coa from '../images/coa_white.svg'
 import { Wrapper, PanelProvider } from './theme'
 import { External } from './link'
-
-const notifyBaseUrl =
-  process.env.GATSBY_NOTIFY_BASE_URL || 'https://notify.gov.au'
+import notifyUrl from './core/notify-url'
 
 const Root = styled.header`
   background: ${props => props.theme.background};
@@ -174,7 +172,7 @@ export default () => (
     <Root>
       <Wrapper>
         <Flex justifyContent="space-between">
-          <BannerLink href={notifyBaseUrl}>
+          <BannerLink href={notifyUrl('/')}>
             <Flex
               justifyContent="flex-start"
               p={['1rem 0', '3rem 0']}
@@ -197,19 +195,13 @@ export default () => (
           </CloseLink>
           <StyledUnsortedList>
             <ListItem>
-              <ExternalLink href={`${notifyBaseUrl}/support`}>
-                Support
-              </ExternalLink>
+              <ExternalLink href={notifyUrl('/support')}>Support</ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={`${notifyBaseUrl}/features`}>
-                Features
-              </ExternalLink>
+              <ExternalLink href={notifyUrl('/features')}>Features</ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={`${notifyBaseUrl}/pricing`}>
-                Pricing
-              </ExternalLink>
+              <ExternalLink href={notifyUrl('/pricing')}>Pricing</ExternalLink>
             </ListItem>
             <ListItem active>
               <ExternalLink active href="/">
@@ -217,9 +209,7 @@ export default () => (
               </ExternalLink>
             </ListItem>
             <ListItem>
-              <ExternalLink href={`${notifyBaseUrl}/sign-in`}>
-                Sign in
-              </ExternalLink>
+              <ExternalLink href={notifyUrl('/sign-in')}>Sign in</ExternalLink>
             </ListItem>
           </StyledUnsortedList>
         </Nav>
