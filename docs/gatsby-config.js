@@ -58,6 +58,7 @@ module.exports = {
       resolve: 'mdx-pages',
       options: {
         layout: `${__dirname}/src/mdx-layout.js`,
+        name: 'markdown-content',
       },
     },
     'gatsby-plugin-styled-components',
