@@ -276,7 +276,7 @@ template_update = """
     SET name = '{}', subject = '{}', content = '{}'
     WHERE id = '{}'
 """
-template_history_updae = """
+template_history_update = """
     UPDATE templates_history
     SET name = '{}', subject = '{}', content = '{}'
     WHERE id = '{}'
@@ -285,10 +285,10 @@ template_history_updae = """
 def upgrade():
     for t in templates:
         op.execute(template_update.format(t['new_name'], t['new_subject'], t['new_content'], t['id']))
-        op.execute(template_history_updae.format(t['new_name'], t['new_subject'], t['new_content'], t['id']))
+        op.execute(template_history_update.format(t['new_name'], t['new_subject'], t['new_content'], t['id']))
 
 
 def downgrade():
     for t in templates:
         op.execute(template_update.format(t['old_name'], t['old_subject'], t['old_content'], t['id']))
-        op.execute(template_history_updae.format(t['old_name'], t['old_subject'], t['old_content'], t['id']))
+        op.execute(template_history_update.format(t['old_name'], t['old_subject'], t['old_content'], t['id']))
