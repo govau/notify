@@ -952,8 +952,8 @@ button:focus {
 }
 
 #content .bottom-gutter,
-#content .bottom-gutter-2-3 {
-  & > * {
+#content .bottom-gutter-2-3  {
+  & > *:not(.banner-default-with-tick) {
     padding-left: 0;
   }
 }
