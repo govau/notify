@@ -106,6 +106,7 @@ jobs:
       - *attach_workspace
       - run: make api.install
       - run: make api.build
+      - run: make -C api newrelic.ini
       - persist_to_workspace:
           root: .
           paths:
