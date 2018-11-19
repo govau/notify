@@ -63,6 +63,10 @@ const createPages = (
     }
 
     result.data.allMdx.edges.forEach(({ node }) => {
+      if (node.parent.sourceInstanceName !== options.name) {
+        return
+      }
+
       createPage({
         path: createMDXPagePath(node),
         component: componentWithMDXScope(options.layout, node.code.scope),
