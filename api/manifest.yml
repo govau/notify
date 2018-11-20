@@ -13,6 +13,7 @@ defaults: &defaults
     - smtp
   env:
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-api --root notify-celery --root aws --root telstra --root twilio --root smtp"
+    NEW_RELIC_CMD: "NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program"
     FLASK_APP: application.py
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify.gov.au
