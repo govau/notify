@@ -2,7 +2,6 @@
 title: "Send a message"
 ---
 
-import Button from 'components/button'
 import Examples from 'components/examples'
 import Contents from 'components/table-of-contents'
 
@@ -30,18 +29,20 @@ our API.
 
 ## Personalisation
 
-Personalisation allows you to customise what information shows up in a specific email
-as it gets sent out. You might use this to address a user by their name, provide
-them with a specific link to click, or give them a receipt number so they have a
-reference to a transaction.
+Personalisation allows you to change what shows up in a specific message as it
+gets sent out. You might use personalisation to:
 
-Any personalisations that you set up in your template will be necessary to
-include when you go to send a message through the API.
+- Address a user by their name
+- Provide users with a specific link to click
+- Send a unique transaction number as a follow up
+
+Your API call must include any fields that have been set up as personalisations.
+
 
 ## Sending an email
 
-Notify allows you to send email messages one-by-one. Each message should be
-configured in your service.
+Notify allows you to send email messages one-by-one. You should configure these
+messages in user interface for each service.
 
 <Examples reference="sending-emails" />
 

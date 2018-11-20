@@ -3,6 +3,8 @@ lang: python
 ---
 
 
+<Panel open label={<H3>Code example</H3>}>
+
 ```python
 notifications_client.send_email_notification(
     email_address='lisa@example.com',
@@ -14,7 +16,9 @@ notifications_client.send_email_notification(
 )
 ```
 
-<Panel open label={<H3>Arguments</H3>}>
+</Panel>
+
+<Panel label={<H3>Arguments</H3>}>
 <Parameters>
   <Parameter required name="template_id">
 
@@ -41,7 +45,7 @@ substituted in the message.
 
 For example,
 
-```json
+```json inline
 {
     "first_name": "Lisa",
     "amount_owing": "$15.50"

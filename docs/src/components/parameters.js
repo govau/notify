@@ -26,6 +26,15 @@ const Description = styled.dd`
 
   @media ${desktop} {
     grid-column-start: 2;
+
+    /*
+    * prevents this cell from overflowing the css grid because code examples
+    * stretch everything out.
+    *
+    * https://stackoverflow.com/questions/43311943/prevent-content-from-expanding-grid-items
+    */
+    overflow: hidden;
+    min-width: 0;
   }
 `
 
@@ -56,6 +65,10 @@ const Parameters = styled.dl`
     grid-template-columns: max-content auto;
     grid-row-gap: 1em;
     grid-column-gap: 2em;
+
+    /* prevent cell from overflowing. see 'Description' */
+    min-height: 0;
+    min-width: 0;
   }
 `
 

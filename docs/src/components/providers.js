@@ -17,16 +17,21 @@ const getLanguage = props => {
   return props.lang ? props.lang : matches ? matches[1] : undefined
 }
 
+// https://github.com/mdx-js/mdx/blob/e6a7b03fc7df49de4e05b6ff1bf4d7b693ff39b7/packages/mdx/test/index.test.js#L84
+const getMetadata = ({ className, ...metadata }) => metadata
+
 export default ({ children }) => (
   <ThemeProvider>
     <ExampleProvider>
       <LanguageProvider>
         <MDXProvider
           components={{
+            wrapper: React.Fragment,
             pre: React.Fragment,
             code: ({ children, ...props }) => (
               <SyntaxHighlighter
                 language={getLanguage(props)}
+                metadata={getMetadata(props)}
                 content={children}
               />
             ),

@@ -1,0 +1,38 @@
+---
+lang: java
+---
+
+<Panel open label={<H3>Code example using Gradle</H3>}>
+
+```groovy
+repositories {
+    jcenter()
+}
+...
+compile 'au.gov.notify:notify-client-java:4.0.0-RELEASE'
+```
+
+</Panel>
+
+<Panel open label={<H3>Code example using Maven</H3>}>
+
+#### Using Maven
+
+```xml
+<repositories>
+  <repository>
+    <id>central</id>
+    <name>bintray</name>
+    <url>http://jcenter.bintray.com</url>
+  </repository>
+</repositories>
+...
+<dependency>
+  <groupId>au.gov.notify</groupId>
+  <artifactId>notify-client-java</artifactId>
+  <version>4.0.0-RELEASE</version>
+  <type>pom</type>
+</dependency>
+```
+
+</Panel>
