@@ -4,11 +4,11 @@ lang: node
 
 
 ```javascript
-client.sendEmail(templateId, emailAddress, {
-  personalisation: personalisation,
-  reference: reference,
-  emailReplyToId: emailReplyToId,
-})
+client.sendSms(templateId, phoneNumber, {
+    personalisation: personalisation,
+    reference: reference,
+    smsSenderId: smsSenderId
+  })
 ```
 
 <Panel label={<H3>Arguments</H3>}>
@@ -24,9 +24,9 @@ You can find this by signing into Notify and
 going to the Templates page.
 
   </Parameter>
-  <Parameter required name="emailAddress">
+  <Parameter required name="phoneNumber">
 
-The email address of the recipient you want to send to.
+The phone number of the recipient, required for SMS notifications.
 
   </Parameter>
 </Parameters>
@@ -40,14 +40,14 @@ The email address of the recipient you want to send to.
 A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
 
   </Parameter>
-  <Parameter optional name="emailReplyToId">
+  <Parameter optional name="smsSenderId">
 
-Optional. Specifies the identifier of the email reply-to address to set for the
+Specifies the identifier of the SMS sender to set for the
 notification. The identifiers are found in your service Settings, when you
-'Manage' your 'Email reply to addresses'.
+'Manage' your 'Text message sender'.
 
-If you omit this argument your default email reply-to address will be set for
-the notification.
+If you omit this argument your default SMS sender will be set for the
+notification.
 
   </Parameter>
   <Parameter optional name="personalisation">
@@ -62,9 +62,9 @@ substituted in the message.
 For example:
 
 ```json inline
-{
-    "first_name": "Lisa",
-    "amount_owing": "$15.50"
+personalisation = {
+  first_name: "Amala",
+  reference_number: "300241"
 }
 ```
 
@@ -81,15 +81,14 @@ If the request is successful, the response will be an object.
     "id": "bfb50d92-100d-4b8b-b559-14fa3b091cda",
     "reference": null,
     "content": {
-        "subject": "Licence renewal",
-        "body": "Dear Bill, your licence is due for renewal on 3 January 2016.",
-        "from_email": "the_service@gov.au"
+        "body": "Some words",
+        "from_number": "40604"
     },
     "uri": "https://rest-api.notify.gov.au/v2/notifications/ceb50d92-100d-4b8b-b559-14fa3b091cd",
     "template": {
         "id": "ceb50d92-100d-4b8b-b559-14fa3b091cda",
-        "version": 1,
-        "uri": "https://rest-api.notify.gov.au/service/your_service_id/templates/bfb50d92-100d-4b8b-b559-14fa3b091cda"
+       "version": 1,
+       "uri": "https://rest-api.notify.gov.au/v2/templates/bfb50d92-100d-4b8b-b559-14fa3b091cda"
     }
 }
 ```
