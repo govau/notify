@@ -383,6 +383,28 @@ def test_switch_current_sms_provider_on_slow_delivery_does_not_run_if_config_uns
     assert toggle_sms_mock.called is False
 
 
+class Getter(object):
+    def __init__(self, **items):
+        self._items = items
+
+    def __getattr__(self, name):
+        return self._items[name]
+
+
+def test_switch_providers_on_slow_delivery_should_not_throw_if_providers_updated_at_is_none(
+        notify_api, mocker, capsys):
+    with capsys.disabled():
+        mocker.patch('app.celery.scheduled_tasks.is_delivery_slow_for_provider', return_value=[])
+        mocker.patch('app.celery.scheduled_tasks.get_current_provider',
+                     return_value=Getter(identifier="123", updated_at=None))
+
+        with set_config_values(notify_api, {
+            'FUNCTIONAL_TEST_PROVIDER_SERVICE_ID': '7954469d-8c6d-43dc-b8f7-86be2d69f5f3',
+            'FUNCTIONAL_TEST_PROVIDER_SMS_TEMPLATE_ID': '331a63e6-f1aa-4588-ad3f-96c268788ae7'
+        }):
+            switch_current_sms_provider_on_slow_delivery()
+
+
 @pytest.mark.skip(reason="We currently do not support sms fallback functionality")
 def test_switch_providers_on_slow_delivery_runs_if_config_set(
     notify_api,

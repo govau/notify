@@ -281,10 +281,15 @@ def switch_current_sms_provider_on_slow_delivery():
 
     if functional_test_provider_service_id and functional_test_provider_template_id:
         current_provider = get_current_provider('sms')
+
+        sent_at = datetime.utcnow() - timedelta(minutes=10)
+        if current_provider.updated_at is not None:
+            sent_at = max(sent_at, current_provider.updated_at)
+
         slow_delivery_notifications = is_delivery_slow_for_provider(
             provider=current_provider.identifier,
             threshold=2,
-            sent_at=max(datetime.utcnow() - timedelta(minutes=10), current_provider.updated_at),
+            sent_at=sent_at,
             delivery_time=timedelta(minutes=4),
             service_id=functional_test_provider_service_id,
             template_id=functional_test_provider_template_id
