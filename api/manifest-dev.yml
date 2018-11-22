@@ -26,14 +26,20 @@ applications:
   - name: notify-api-((stg))
     <<: *defaults
     command: make run-production
+    env:
+      CF_APP_NAME: notify-api-((stg))
   - name: notify-celery-worker-((stg))
     <<: *defaults
     health-check-type: process
     no-route: true
     command: make run-celery-worker
+    env:
+      CF_APP_NAME: notify-celery-worker-((stg))
   - name: notify-celery-beat-((stg))
     <<: *defaults
     memory: 256M
     health-check-type: process
     no-route: true
     command: make run-celery-beat
+    env:
+      CF_APP_NAME: notify-celery-beat-((stg))

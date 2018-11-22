@@ -14,6 +14,9 @@ sentry_sdk.init(
     integrations=[FlaskIntegration()]
 )
 
+with sentry_sdk.configure_scope() as scope:
+    scope.set_tag("cf_app", os.environ.get('CF_APP_NAME'))
+
 application = Flask('app')
 
 create_app(application)
