@@ -12,7 +12,7 @@ defaults: &defaults
     - telstra
     - twilio
     - smtp
-  env:
+  env: &defaults_env
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-api --root notify-celery --root aws --root telstra --root twilio --root smtp"
     FLASK_APP: application.py
     NOTIFY_ENVIRONMENT: production
@@ -27,6 +27,7 @@ applications:
     <<: *defaults
     command: make run-production
     env:
+      <<: *defaults_env
       CF_APP_NAME: notify-api-((stg))
   - name: notify-celery-worker-((stg))
     <<: *defaults
@@ -34,6 +35,7 @@ applications:
     no-route: true
     command: make run-celery-worker
     env:
+      <<: *defaults_env
       CF_APP_NAME: notify-celery-worker-((stg))
   - name: notify-celery-beat-((stg))
     <<: *defaults
@@ -42,4 +44,5 @@ applications:
     no-route: true
     command: make run-celery-beat
     env:
+      <<: *defaults_env
       CF_APP_NAME: notify-celery-beat-((stg))

@@ -11,7 +11,7 @@ defaults: &defaults
     - telstra
     - twilio
     - smtp
-  env:
+  env: &defaults_env
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-api --root notify-celery --root aws --root telstra --root twilio --root smtp"
     NEW_RELIC_CMD: "NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program"
     FLASK_APP: application.py
@@ -27,13 +27,15 @@ applications:
       - route: rest-api.notify.gov.au
       - route: notify-api.apps.b.cld.gov.au
     env:
-      CF_APP_NAME: notify-api  
+      <<: *defaults_env
+      CF_APP_NAME: notify-api
   - name: notify-celery-worker
     <<: *defaults
     health-check-type: process
     no-route: true
     command: make run-celery-worker
     env:
+      <<: *defaults_env
       CF_APP_NAME: notify-celery-worker
   - name: notify-celery-beat
     <<: *defaults
@@ -42,4 +44,5 @@ applications:
     no-route: true
     command: make run-celery-beat
     env:
+      <<: *defaults_env
       CF_APP_NAME: notify-celery-beat
