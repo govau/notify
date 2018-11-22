@@ -432,15 +432,15 @@ def migrate_data_to_ft_billing(start_date, end_date):
         # migrate data into ft_billing, ignore if records already exist - do not do upsert
         sql = \
             """
-            insert into ft_billing (bst_date, template_id, service_id, notification_type, provider, rate_multiplier,
+            insert into ft_billing (aet_date, template_id, service_id, notification_type, provider, rate_multiplier,
                 international, billable_units, notifications_sent, rate)
-                select bst_date, template_id, service_id, notification_type, provider, rate_multiplier, international,
+                select aet_date, template_id, service_id, notification_type, provider, rate_multiplier, international,
                     sum(billable_units) as billable_units, sum(notifications_sent) as notification_sent,
                     case when notification_type = 'sms' then sms_rate else letter_rate end as rate
                 from (
                     select
                         n.id,
-                        da.bst_date,
+                        da.aet_date,
                         coalesce(n.template_id, '00000000-0000-0000-0000-000000000000') as template_id,
                         coalesce(n.service_id, '00000000-0000-0000-0000-000000000000') as service_id,
                         n.notification_type,
@@ -475,9 +475,9 @@ def migrate_data_to_ft_billing(start_date, end_date):
                         at time zone 'UTC'
                         and n.created_at < (date :end + time '00:00:00') at time zone 'Europe/London' at time zone 'UTC'
                     ) as individual_record
-                group by bst_date, template_id, service_id, notification_type, provider, rate_multiplier, international,
+                group by aet_date, template_id, service_id, notification_type, provider, rate_multiplier, international,
                     sms_rate, letter_rate
-                order by bst_date
+                order by aet_date
             on conflict on constraint ft_billing_pkey do update set
              billable_units = excluded.billable_units,
              notifications_sent = excluded.notifications_sent,

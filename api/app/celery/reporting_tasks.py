@@ -83,7 +83,7 @@ def create_nightly_billing():
 
         for data in transit_data:
             update_count = FactBilling.query.filter(
-                FactBilling.bst_date == datetime.date(process_day_in_aet),
+                FactBilling.aet_date == datetime.date(process_day_in_aet),
                 FactBilling.template_id == data.template_id,
                 FactBilling.service_id == data.service_id,
                 FactBilling.provider == data.sent_by,  # This could be zero - this is a bug that needs to be fixed.
@@ -97,7 +97,7 @@ def create_nightly_billing():
 
             if update_count == 0:
                 billing_record = FactBilling(
-                    bst_date=process_day_in_aet,
+                    aet_date=process_day_in_aet,
                     template_id=data.template_id,
                     service_id=data.service_id,
                     notification_type=data.notification_type,
