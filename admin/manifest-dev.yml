@@ -14,10 +14,11 @@ defaults: &defaults
   command: make run-gunicorn
 
 applications:
-  - name: notify
+  - name: notify-((stg))
     <<: *defaults
     env:
       <<: *defaults_env
       ADMIN_BASE_URL: https://notify-((stg)).apps.y.cld.gov.au
       DOCS_BASE_URL: https://notify-docs-((stg)).apps.y.cld.gov.au
       API_HOST_NAME: https://notify-api-((stg)).apps.y.cld.gov.au
+      CF_APP_NAME: notify-((stg))

@@ -21,3 +21,4 @@ applications:
       <<: *defaults_env
       ADMIN_BASE_URL: https://notify.gov.au
       API_HOST_NAME: https://rest-api.notify.gov.au
+      CF_APP_NAME: notify

@@ -16,6 +16,7 @@ sentry_sdk.init(
 
 with sentry_sdk.configure_scope() as scope:
     scope.set_tag("celery_cmd", os.environ['NOTIFY_CELERY_CMD'])
+    scope.set_tag("cf_app", os.environ.get('CF_APP_NAME'))
 
 application = Flask('delivery')
 create_app(application)

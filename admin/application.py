@@ -13,6 +13,9 @@ sentry_sdk.init(
     integrations=[FlaskIntegration()]
 )
 
+with sentry_sdk.configure_scope() as scope:
+    scope.set_tag("cf_app", os.environ.get('CF_APP_NAME'))
+
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'app', 'static')
 STATIC_URL = 'static/'
