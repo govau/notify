@@ -19,4 +19,4 @@ application = Flask('app')
 create_app(application)
 
 with sentry_sdk.configure_scope() as scope:
-    scope.set_tag("app_name", os.environ['APP_NAME'])
+    scope.set_tag("cf_app", os.environ['CF_APP_NAME'])

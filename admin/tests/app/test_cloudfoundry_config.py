@@ -16,4 +16,4 @@ def test_extract_cloudfoundry_config_populates_other_vars():
 
     assert os.environ['NOTIFY_ENVIRONMENT'] == '🚀🌌'
     assert os.environ['NOTIFY_LOG_PATH'] == '/home/vcap/logs/app.log'
-    assert os.environ['APP_NAME'] == 'Mooooooooo'
+    assert os.environ['CF_APP_NAME'] == 'Mooooooooo'

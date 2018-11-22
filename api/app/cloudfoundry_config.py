@@ -16,4 +16,4 @@ def extract_cloudfoundry_config():
 def set_config_env_vars(vcap_services, vcap_application):
     # Postgres config
     os.environ['SQLALCHEMY_DATABASE_URI'] = vcap_services['postgres'][0]['credentials']['uri']
-    os.environ['APP_NAME'] = vcap_application['application_name']
+    os.environ['CF_APP_NAME'] = vcap_application['application_name']

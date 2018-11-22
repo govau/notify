@@ -20,4 +20,4 @@ application.app_context().push()
 
 with sentry_sdk.configure_scope() as scope:
     scope.set_tag("celery_cmd", os.environ['NOTIFY_CELERY_CMD'])
-    scope.set_tag("app_name", os.environ['APP_NAME'])
+    scope.set_tag("cf_app", os.environ['CF_APP_NAME'])

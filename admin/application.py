@@ -23,4 +23,4 @@ create_app(app)
 application = WhiteNoise(app, STATIC_ROOT, STATIC_URL)
 
 with sentry_sdk.configure_scope() as scope:
-    scope.set_tag("app_name", os.environ['APP_NAME'])
+    scope.set_tag("cf_app", os.environ['CF_APP_NAME'])

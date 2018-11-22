@@ -35,7 +35,7 @@ def test_extract_cloudfoundry_config_populates_other_vars():
     extract_cloudfoundry_config()
 
     assert os.environ['SQLALCHEMY_DATABASE_URI'] == 'postgres uri'
-    assert os.environ['APP_NAME'] == 'Moooooo'
+    assert os.environ['CF_APP_NAME'] == 'Moooooo'
 
 
 @pytest.mark.usefixtures('os_environ', 'cloudfoundry_environ')
