@@ -36,6 +36,26 @@ const NavLanguageLink = styled(LanguageLink)`
   }
 `
 
+const languages = {
+  python: 'Python',
+  java: 'Java',
+  node: 'Node.js',
+  //ruby: 'Ruby',
+  //dotnet: '.NET',
+}
+
+const createLanguageOption = language => ({
+  value: language,
+  label: languages[language],
+})
+
+const languageOptions = Object.keys(languages)
+  .sort()
+  .map(createLanguageOption)
+
+// Pretty-print the current language
+const getLanguageLabel = language => languages[language]
+
 const Context = createContext({
   current: '',
   changeLanguage: language => {},
@@ -44,7 +64,7 @@ const Context = createContext({
 // Wrap everything in this to give access to a current language. You can nest
 // this to give a sub-current-language.
 class Provider extends React.Component {
-  state = { current: this.props.initial || 'python' }
+  state = { current: this.props.initial || languageOptions[0].value }
 
   changeLanguage = current => {
     this.setState({ current })
@@ -62,24 +82,6 @@ class Provider extends React.Component {
     )
   }
 }
-
-const languages = {
-  python: 'Python',
-  java: 'Java',
-  node: 'Node.js',
-  //ruby: 'Ruby',
-  //dotnet: '.NET',
-}
-
-const createLanguageOption = language => ({
-  value: language,
-  label: languages[language],
-})
-
-const languageOptions = Object.keys(languages).map(createLanguageOption)
-
-// Pretty-print the current language
-const getLanguageLabel = language => languages[language]
 
 // Language selector. Pop this anywhere inside a provider context to allow for
 // language selection.
