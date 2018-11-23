@@ -1772,7 +1772,7 @@ class DailySortedLetter(db.Model):
 class FactBilling(db.Model):
     __tablename__ = "ft_billing"
 
-    bst_date = db.Column(db.Date, nullable=False, primary_key=True, index=True)
+    aet_date = db.Column(db.Date, nullable=False, primary_key=True, index=True)
     template_id = db.Column(UUID(as_uuid=True), nullable=False, primary_key=True, index=True)
     service_id = db.Column(UUID(as_uuid=True), nullable=False, index=True)
     notification_type = db.Column(db.Text, nullable=False, primary_key=True)
@@ -1786,7 +1786,7 @@ class FactBilling(db.Model):
 
 class DateTimeDimension(db.Model):
     __tablename__ = "dm_datetime"
-    bst_date = db.Column(db.Date, nullable=False, primary_key=True, index=True)
+    aet_date = db.Column(db.Date, nullable=False, primary_key=True, index=True)
     year = db.Column(db.Integer(), nullable=False)
     month = db.Column(db.Integer(), nullable=False)
     month_name = db.Column(db.Text(), nullable=False)

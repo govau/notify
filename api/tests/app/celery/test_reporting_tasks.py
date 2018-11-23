@@ -81,7 +81,7 @@ def test_create_nightly_billing_sms_rate_multiplier(
     assert len(records) == records_num
 
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
+        assert record.aet_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == Decimal(1.33)
         assert record.billable_units == billable_units
         assert record.rate_multiplier == multiplier[i]
@@ -134,7 +134,7 @@ def test_create_nightly_billing_different_templates(
     billable_units = [0, 1]
     rate = [0, Decimal(1.33)]
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
+        assert record.aet_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == rate[i]
         assert record.billable_units == billable_units[i]
         assert record.rate_multiplier == multiplier[i]
@@ -185,7 +185,7 @@ def test_create_nightly_billing_different_sent_by(
 
     assert len(records) == 2
     for i, record in enumerate(records):
-        assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
+        assert record.aet_date == datetime.date(convert_utc_to_aet(yesterday))
         assert record.rate == Decimal(1.33)
         assert record.billable_units == 1
         assert record.rate_multiplier == 1.0
@@ -222,7 +222,7 @@ def test_create_nightly_billing_letter(
     assert len(records) == 1
     record = records[0]
     assert record.notification_type == LETTER_TYPE
-    assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
+    assert record.aet_date == datetime.date(convert_utc_to_aet(yesterday))
     assert record.rate == Decimal(2.1)
     assert record.billable_units == 2
     assert record.rate_multiplier == 2.0
@@ -259,7 +259,7 @@ def test_create_nightly_billing_null_sent_by_sms(
 
     assert len(records) == 1
     record = records[0]
-    assert record.bst_date == datetime.date(convert_utc_to_aet(yesterday))
+    assert record.aet_date == datetime.date(convert_utc_to_aet(yesterday))
     assert record.rate == Decimal(1.33)
     assert record.billable_units == 1
     assert record.rate_multiplier == 1
@@ -298,11 +298,11 @@ def test_create_nightly_billing_consolidate_from_3_days_delta(
     assert len(records) == 0
 
     create_nightly_billing()
-    records = FactBilling.query.order_by(FactBilling.bst_date).all()
+    records = FactBilling.query.order_by(FactBilling.aet_date).all()
 
     assert len(records) == 3
-    assert records[0].bst_date == date(2018, 1, 12)
-    assert records[-1].bst_date == date(2018, 1, 14)
+    assert records[0].aet_date == date(2018, 1, 12)
+    assert records[-1].aet_date == date(2018, 1, 14)
 
 
 def test_get_rate_for_letter_latest(notify_db, notify_db_session):
@@ -401,16 +401,16 @@ def test_create_nightly_billing_use_aet(
     assert len(records) == 0
 
     create_nightly_billing()
-    records = FactBilling.query.order_by(FactBilling.bst_date).all()
+    records = FactBilling.query.order_by(FactBilling.aet_date).all()
 
     assert len(records) == 2
-    # The first record's bst_date is 06/10/2018. This is because the current
+    # The first record's aet_date is 06/10/2018. This is because the current
     # time is 2018-10-09T13:30:00 UTC, and 3 days earlier than that is
     # 2018-10-06T13:30:00 UTC which is 06/10/2018 23:30:00 AEST. This falls
-    # outside of daylight savings time and so the bst_date is the 6th, not the
+    # outside of daylight savings time and so the aet_date is the 6th, not the
     # 7th.
-    assert records[0].bst_date == date(2018, 10, 6)
-    assert records[-1].bst_date == date(2018, 10, 8)
+    assert records[0].aet_date == date(2018, 10, 6)
+    assert records[-1].aet_date == date(2018, 10, 8)
 
 
 @freeze_time('2018-01-15T03:30:00')
@@ -440,10 +440,10 @@ def test_create_nightly_billing_update_when_record_exists(
     assert len(records) == 0
 
     create_nightly_billing()
-    records = FactBilling.query.order_by(FactBilling.bst_date).all()
+    records = FactBilling.query.order_by(FactBilling.aet_date).all()
 
     assert len(records) == 1
-    assert records[0].bst_date == date(2018, 1, 14)
+    assert records[0].aet_date == date(2018, 1, 14)
 
     # run again, make sure create_nightly_billing updates with no error
     create_nightly_billing()
