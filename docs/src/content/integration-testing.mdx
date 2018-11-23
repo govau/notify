@@ -1,9 +1,8 @@
 ---
-title: "Integration testing"
+title: 'Integration testing'
 ---
 
 import Contents from 'components/table-of-contents'
-
 
 # Integration testing
 
@@ -11,14 +10,13 @@ There are different types of API keys that let you do functional or performance 
 
 <Contents />
 
-
 ## Types of API keys
 
- |
---- | ---
-Live | sends to anyone
-Team and whitelist | limits who you can send to
-Test | pretends to send messages
+|                    |                            |
+| ------------------ | -------------------------- |
+| Live               | sends to anyone            |
+| Team and whitelist | limits who you can send to |
+| Test               | pretends to send messages  |
 
 ## Live key
 
@@ -28,10 +26,7 @@ Messages sent with a live key show up on your dashboard and count against your t
 
 You should revoke and re-create these keys on a regular basis. You can have more than one active key at a time. To revoke a key click the revoke button on the API Key page.
 
-
 > You should never send test messages to invalid numbers or addresses using a live key. This will lead to your API key being revoked.
-
-
 
 ## Team and whitelist key
 
@@ -53,28 +48,26 @@ By default, all messages sent with a test key will result in a delivered status.
 
 If you want to test failure responses with a test key, use the following numbers and addresses:
 
-| | |
---- | ---
-0409000003 | temporary failure
-0409000002 | permanent failure
-temp-fail@simulator.notify | temporary failure
-perm-fail@simulator.notify | permanent failure
-any other valid number or address | delivered
-
+|                                   |                   |
+| --------------------------------- | ----------------- |
+| 0409000003                        | temporary failure |
+| 0409000002                        | permanent failure |
+| temp-fail@simulator.notify        | temporary failure |
+| perm-fail@simulator.notify        | permanent failure |
+| any other valid number or address | delivered         |
 
 ## Smoke testing your integration
 
 If you need to smoke test your integration with Notify on a regular basis, you should use the smoke test numbers and addresses below.
 
-| |
----|
-07700900111 |
-07700900222 |
-07700900333 |
-simulate-delivered@notify.digital.gov.au |
-simulate-delivered-2@notify.digital.gov.au |
-simulate-delivered-3@notify.digital.gov.au |
-
+|                                            |
+| ------------------------------------------ |
+| 07700900111                                |
+| 07700900222                                |
+| 07700900333                                |
+| simulate-delivered@notify.digital.gov.au   |
+| simulate-delivered-2@notify.digital.gov.au |
+| simulate-delivered-3@notify.digital.gov.au |
 
 The smoke test numbers and addresses will immediately return a successful response, but won’t send a real message and won’t produce a delivery receipt. The notification ID is not a real ID, you will not be able to fetch the notification by ID.
 
