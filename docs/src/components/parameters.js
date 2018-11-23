@@ -11,6 +11,12 @@ const Requirement = styled.span`
   font-size: 0.8em;
 `
 
+const RequirementKind = styled.span`
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 1px 4px;
+`
+
 const Required = styled(Requirement)`
   background-color: #ddefbc;
   color: #466709;
@@ -45,6 +51,7 @@ const Term = styled.dt`
 
   @media ${nondesktop} {
     display: flex;
+    flex-flow: row wrap;
     justify-content: space-between;
 
     ${Description} + & {
@@ -80,15 +87,35 @@ const Code = styled.code`
   }
 `
 
-const Parameter = ({ required = false, optional = false, name, children }) => (
+const Kind = ({ children }) =>
+  children ? (
+    <Fragment>
+      {' '}
+      <RequirementKind>{children}</RequirementKind>
+    </Fragment>
+  ) : null
+
+const Parameter = ({
+  required = false,
+  optional = false,
+  kind,
+  name,
+  children,
+}) => (
   <Fragment>
     <Term>
       <Code>{name}</Code>
       <Requirements>
         {required ? (
-          <Required>Required</Required>
+          <Required>
+            Required
+            <Kind>{kind}</Kind>
+          </Required>
         ) : optional ? (
-          <Optional>Optional</Optional>
+          <Optional>
+            Optional
+            <Kind>{kind}</Kind>
+          </Optional>
         ) : null}
       </Requirements>
     </Term>

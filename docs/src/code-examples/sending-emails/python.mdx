@@ -3,8 +3,6 @@ lang: python
 ---
 
 
-<Panel open label={<H3>Code example</H3>}>
-
 ```python
 notifications_client.send_email_notification(
     email_address='lisa@example.com',
@@ -15,8 +13,6 @@ notifications_client.send_email_notification(
     }
 )
 ```
-
-</Panel>
 
 <Panel label={<H3>Arguments</H3>}>
 <Parameters>
@@ -58,6 +54,14 @@ For example,
 A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
 
   </Parameter>
+  <Parameter optional name="email_reply_to_id">
+
+An optional identifier that you can get from the service email_reply_to ids found in the service settings / manage email reply to addresses page.
+
+You can omit this argument if you want to use the default service email reply to otherwise add the id from the list of email_reply_to ids associated with the service.
+
+  </Parameter>
+
 </Parameters>
 </Panel>
 
@@ -69,20 +73,19 @@ following.
 
 ```json
 {
+  "id": "740e5834-3a29-46b4-9a6f-16142fde533a",
+  "reference": None,
   "content": {
-    "body": "Hey there. Lisa\n\nPlease pay us $15.50 at your earliest convenience.\n", 
-    "from_email": "your-service@digital.gov.au", 
-    "subject": "Pay your bill soon."
-  }, 
-  "id": "xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn",
-  "reference": "STRING", 
-  "scheduled_for": null, 
+    "subject": "Licence renewal",
+    "body": "Dear Bill, your licence is due for renewal on 3 January 2016.",
+    "from_email": "the_service@notify.gov.au"
+  },
+  "uri": "https://rest-api.notify.gov.au/v2/notifications/740e5834-3a29-46b4-9a6f-16142fde533a",
   "template": {
-    "id": "xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "uri": "https://rest-api.notify.gov.au/services/xxxxxxxx-xxxx-xxxx-xxxx-ssssssssssss/templates/xxxxxxxx-xxxx-xxxx-xxxx-tttttttttttt",
-    "version": 3
-  }, 
-  "uri": "https://rest-api.notify.gov.au/v2/notifications/xxxxxxxx-xxxx-xxxx-xxxx-nnnnnnnnnnnn"
+    "id": "f33517ff-2a88-4f6e-b855-c550268ce08a",
+    "version": 1,
+    "uri": "https://rest-api.notify.gov.au/v2/template/f33517ff-2a88-4f6e-b855-c550268ce08a"
+  }
 }
 ```
 
