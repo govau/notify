@@ -1,2 +1,4 @@
-// Polyfills
-require('core-js/fn/array/find')
+exports.onClientEntry = () => {
+  // Polyfills
+  require('core-js/fn/array/find')
+}
