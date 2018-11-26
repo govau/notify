@@ -1,6 +1,5 @@
 defaults: &defaults
   buildpack: python_buildpack
-  instances: 1
   memory: 1G
   services:
     - notify-psql
@@ -22,6 +21,7 @@ defaults: &defaults
 applications:
   - name: notify-api
     <<: *defaults
+    instances: 2
     command: make run-production
     routes:
       - route: rest-api.notify.gov.au
@@ -31,6 +31,7 @@ applications:
       CF_APP_NAME: notify-api
   - name: notify-celery-worker
     <<: *defaults
+    instances: 1
     health-check-type: process
     no-route: true
     command: make run-celery-worker
@@ -39,6 +40,7 @@ applications:
       CF_APP_NAME: notify-celery-worker
   - name: notify-celery-beat
     <<: *defaults
+    instances: 1
     memory: 256M
     health-check-type: process
     no-route: true
