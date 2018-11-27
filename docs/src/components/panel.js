@@ -1,12 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const Details = styled.details`
-  & > * {
-    padding: 0 2rem;
-  }
-`
-
 const Summary = styled.summary`
   background-color: #f3f5f5;
 
@@ -22,12 +16,18 @@ const Summary = styled.summary`
   & > * {
     display: inline-block;
   }
+`
 
-  &:after {
+const Details = styled.details`
+  & > * {
+    padding: 0 2rem;
+  }
+
+  ${Summary}:after {
     content: '↓ show';
   }
 
-  ${Details}[open] &:after {
+  &[open] ${Summary}:after {
     content: '↑ hide';
   }
 `
