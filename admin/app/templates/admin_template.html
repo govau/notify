@@ -57,7 +57,7 @@
           {% endif %}
           {{ top_nav_item(url_for('main.support'), 'Support') }}
           {% if current_user.is_authenticated %}
-            {{ top_nav_item(url_for('main.documentation'), 'Documentation') }}
+            {{ top_nav_item(docs_base_url, 'Documentation') }}
             {{ top_nav_item(url_for('main.user_profile'), current_user.name) }}
             {% if current_user.platform_admin %}
               {{ top_nav_item(url_for('main.platform_admin'), 'Platform admin') }}
@@ -65,7 +65,7 @@
           {% else %}
             {{ top_nav_item(url_for('main.features'), 'Features') }}
             {{ top_nav_item(url_for('main.pricing' ), 'Pricing') }}
-            {{ top_nav_item(url_for('main.documentation'), 'Documentation') }}
+            {{ top_nav_item(docs_base_url, 'Documentation') }}
           {% endif %}
         </ul>
 
@@ -119,7 +119,7 @@
           <ul>
             <li><a href="{{ url_for("main.pricing") }}">Pricing</a></li>
             <li><a href="{{ url_for("main.cookies") }}">Cookies</a></li>
-            <li><a href="{{ url_for("main.documentation") }}">Documentation</a></li>
+            <li><a href="{{ docs_base_url }}">Documentation</a></li>
             {% if current_service.research_mode %}
             <li><span id="research-mode" class="research-mode">research mode</span></li>
             {% endif %}

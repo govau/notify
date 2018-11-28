@@ -6,6 +6,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    current_app,
 )
 from flask_login import current_user, login_required
 
@@ -51,7 +52,7 @@ def api_integration(service_id):
 @login_required
 @user_has_permissions('manage_api_keys')
 def api_documentation(service_id):
-    return redirect(url_for('.documentation'), code=301)
+    return redirect(current_app.config["DOCS_BASE_URL"], code=301)
 
 
 @main.route("/services/<service_id>/api/whitelist", methods=['GET', 'POST'])

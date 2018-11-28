@@ -109,11 +109,6 @@ def email_template():
     ))
 
 
-@main.route('/documentation')
-def documentation():
-    return render_template('views/documentation.html', docs_base_url=current_app.config['DOCS_BASE_URL'])
-
-
 @main.route('/callbacks')
 def callbacks():
     return render_template('views/callbacks.html')
@@ -169,6 +164,7 @@ def using_notify():
 @main.route('/information-security', endpoint='information_security')
 @main.route('/using_notify', endpoint='old_using_notify')
 @main.route('/information-risk-management', endpoint='information_risk_management')
+@main.route('/documentation', endpoint='old_documentation')
 def old_page_redirects():
     redirects = {
         'main.old_roadmap': 'main.roadmap',
@@ -177,4 +173,13 @@ def old_page_redirects():
         'main.old_using_notify': 'main.using_notify',
         'main.information_risk_management': 'main.security',
     }
-    return redirect(url_for(redirects[request.endpoint]), code=301)
+
+    redirects_external = {
+        'main.old_documentation': current_app.config['DOCS_BASE_URL'],
+    }
+
+    redirects_url = (redirects_external[request.endpoint]
+                     if (redirects.get(request.endpoint, None) is None)
+                     else url_for(redirects[request.endpoint]))
+
+    return redirect(redirects_url, code=301)
