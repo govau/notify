@@ -127,7 +127,7 @@ export const DynamicSidenav = ({ current, ...props }) => (
         <Fragment>
           <NavWrapper>
             <NavList>
-              <NavLink to="/">Documentation</NavLink>
+              <NavLink to="/">Using Notify</NavLink>
               <Option>/installation</Option>
               <Option>/sending-messages</Option>
               {/*<Option>/check-available-templates</Option>*/}
