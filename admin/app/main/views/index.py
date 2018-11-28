@@ -114,6 +114,11 @@ def callbacks():
     return render_template('views/callbacks.html')
 
 
+@main.route('/documentation')
+def documentation():
+    return redirect(current_app.config['DOCS_BASE_URL'], code=301)
+
+
 # --- Features page set --- #
 
 @main.route('/features')
@@ -164,7 +169,6 @@ def using_notify():
 @main.route('/information-security', endpoint='information_security')
 @main.route('/using_notify', endpoint='old_using_notify')
 @main.route('/information-risk-management', endpoint='information_risk_management')
-@main.route('/documentation', endpoint='old_documentation')
 def old_page_redirects():
     redirects = {
         'main.old_roadmap': 'main.roadmap',
@@ -174,12 +178,4 @@ def old_page_redirects():
         'main.information_risk_management': 'main.security',
     }
 
-    redirects_external = {
-        'main.old_documentation': current_app.config['DOCS_BASE_URL'],
-    }
-
-    redirects_url = (redirects_external[request.endpoint]
-                     if (redirects.get(request.endpoint, None) is None)
-                     else url_for(redirects[request.endpoint]))
-
-    return redirect(redirects_url, code=301)
+    return redirect(url_for(redirects[request.endpoint]), code=301)
