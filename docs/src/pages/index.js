@@ -8,7 +8,7 @@ import P from '../components/core/paragraph'
 export default () => {
   return (
     <Layout>
-      <H1>Documentation</H1>
+      <H1>Using Notify</H1>
       <P>
         Notify is a service developed by the DTA that lets government agencies
         to send and receive text messages and email messages.
