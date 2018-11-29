@@ -3,7 +3,7 @@ import { MDXProvider } from '@mdx-js/tag'
 
 import ThemeProvider from './theme'
 import P from './core/paragraph'
-import { H1, H2, H3, H4 } from './core/heading'
+import { H3, H4, AnchoredH1, AnchoredH2 } from './core/heading'
 import { Table } from './core/table'
 import SyntaxHighlighter from './syntax-highlighter'
 import { BlockQuote } from './core/blockquote'
@@ -36,8 +36,8 @@ export default ({ children }) => (
               />
             ),
             p: P,
-            h1: H1,
-            h2: H2,
+            h1: AnchoredH1,
+            h2: AnchoredH2,
             h3: H3,
             h4: H4,
             table: Table,

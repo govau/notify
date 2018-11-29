@@ -3,12 +3,79 @@ lang: java
 ---
 
 ```java
-HashMap<String, String> personalisation = new HashMap<>();
-personalisation.put("user_name", "Lisa");
-
-SendSmsResponse response = client.sendSms(
-    "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx",
-    "+61 423 555 555",
-    personalisation,
-    "your-unique-reference-id");
+SendSmsResponse response = client.sendSms(templateId, phoneNumber, personalisation, reference);
+SendSmsResponse response = client.sendSms(templateId, phoneNumber, personalisation, reference, smsSenderId);
 ```
+
+<Panel label={<H3>Arguments</H3>}>
+<Parameters>
+  <Parameter required name="templateId" kind="String">
+
+The ID of the template
+
+You can find this by signing into Notify and
+going to the Templates page.
+
+  </Parameter>
+  <Parameter required name="phoneNumber" kind="String">
+
+The email address of the recipient you want to send to.
+
+  </Parameter>
+
+  <Parameter required name="personalisation" kind="Map<String, String>">
+
+If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a map. For example:
+
+```java inline
+Map<String, String> personalisation = new HashMap<>();
+personalisation.put("first_name", "Amala");
+personalisation.put("application_date", "2018-01-01");
+```
+
+If a template does not have any placeholder fields for personalised information, you must pass in an empty map or null.
+
+  </Parameter>
+
+  <Parameter required name="reference" kind="String">
+
+A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
+
+  </Parameter>
+
+  <Parameter optional name="smsSenderId" kind="String">
+
+A unique identifier of the sender of the text message notification. To find this information, go to the Text Message sender settings screen:
+
+1. Sign in to your GOV.AU Notify account.
+1. Go to Settings.
+1. If you need to change to another service, select Switch service in the top right corner of the screen and select the correct one.
+1. Go to the Text Messages section and select Manage on the Text Message sender row.
+
+In this screen, you can then either:
+
+- copy the sender ID that you want to use and paste it into the method
+- select Change to change the default sender that the service will use, and select Save
+
+If you do not have a smsSenderId, you can leave out this argument.
+
+
+  </Parameter>
+</Parameters>
+</Panel>
+<Panel label={<H3>Response</H3>}>
+
+If the request to the client is successful, the client returns a `SendSmsResponse`:
+
+```java
+UUID notificationId;
+Optional<String> reference;
+UUID templateId;
+int templateVersion;
+String templateUri;
+String body;
+Optional<String> fromNumber;
+```
+
+</Panel>
+
