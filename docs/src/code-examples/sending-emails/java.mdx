@@ -2,24 +2,9 @@
 lang: java
 ---
 
-
 ```java
-HashMap<String, String> personalisation = new HashMap<String, String>();
-personalisation.put("user_name", "Lisa");
-
-SendEmailResponse response = client.sendEmail(
-    templateId,
-    emailAddress,
-    personalisation,
-    reference,
-    emailReplyToId
-);
-
-SendEmailResponse response = client.sendEmail(
-    "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx",
-    "lisa@example.com",
-    personalisation,
-    "your-unique-reference-id");
+SendEmailResponse response = client.sendEmail(templateId, emailAddress, personalisation, reference);
+SendEmailResponse response = client.sendEmail(templateId, emailAddress, personalisation, reference, emailReplyToId);
 ```
 
 <Panel label={<H3>Arguments</H3>}>

@@ -3,21 +3,8 @@ lang: java
 ---
 
 ```java
-HashMap<String, String> personalisation = new HashMap<>();
-personalisation.put("user_name", "Lisa");
-
-SendSmsResponse response = client.sendSms(
-    templateId,
-    phoneNumber,
-    personalisation,
-    reference,
-    smsSenderId
-);
-SendSmsResponse response = client.sendSms(
-    "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx",
-    "+61 423 555 555",
-    personalisation,
-    "your-unique-reference-id");
+SendSmsResponse response = client.sendSms(templateId, phoneNumber, personalisation, reference);
+SendSmsResponse response = client.sendSms(templateId, phoneNumber, personalisation, reference, smsSenderId);
 ```
 
 <Panel label={<H3>Arguments</H3>}>
