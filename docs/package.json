@@ -24,7 +24,7 @@
     "gatsby-transformer-remark": "^2.1.4",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^23.6.0",
-    "prettier": "^1.14.2",
+    "prettier": "^1.15.2",
     "react": "^16.5.1",
     "react-dom": "^16.5.1",
     "react-helmet": "^5.2.0",
@@ -40,8 +40,8 @@
   "scripts": {
     "build": "gatsby build",
     "develop": "gatsby develop",
-    "fmt": "prettier --write \"**/*.{js,json,jsx,md,ts,tsx}\"",
-    "fmt-check": "prettier --list-different \"**/*.{js,json,jsx,md,ts,tsx}\"",
+    "fmt": "prettier --write \"**/*.{js,json,jsx,md,mdx,ts,tsx}\"",
+    "fmt-check": "prettier --list-different \"**/*.{js,json,jsx,md,mdx,ts,tsx}\"",
     "test": "jest"
   },
   "jest": {

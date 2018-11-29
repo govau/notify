@@ -2,7 +2,6 @@
 lang: node
 ---
 
-
 ```javascript
 client.sendEmail(templateId, emailAddress, {
   personalisation: personalisation,
@@ -30,7 +29,6 @@ The email address of the recipient you want to send to.
 
   </Parameter>
 </Parameters>
-
 
 #### Named arguments
 
@@ -63,8 +61,8 @@ For example:
 
 ```json inline
 {
-    "first_name": "Lisa",
-    "amount_owing": "$15.50"
+  "first_name": "Lisa",
+  "amount_owing": "$15.50"
 }
 ```
 
@@ -78,19 +76,19 @@ If the request is successful, the response will be an object.
 
 ```json
 {
-    "id": "bfb50d92-100d-4b8b-b559-14fa3b091cda",
-    "reference": null,
-    "content": {
-        "subject": "Licence renewal",
-        "body": "Dear Bill, your licence is due for renewal on 3 January 2016.",
-        "from_email": "the_service@gov.au"
-    },
-    "uri": "https://rest-api.notify.gov.au/v2/notifications/ceb50d92-100d-4b8b-b559-14fa3b091cd",
-    "template": {
-        "id": "ceb50d92-100d-4b8b-b559-14fa3b091cda",
-        "version": 1,
-        "uri": "https://rest-api.notify.gov.au/service/your_service_id/templates/bfb50d92-100d-4b8b-b559-14fa3b091cda"
-    }
+  "id": "bfb50d92-100d-4b8b-b559-14fa3b091cda",
+  "reference": null,
+  "content": {
+    "subject": "Licence renewal",
+    "body": "Dear Bill, your licence is due for renewal on 3 January 2016.",
+    "from_email": "the_service@gov.au"
+  },
+  "uri": "https://rest-api.notify.gov.au/v2/notifications/ceb50d92-100d-4b8b-b559-14fa3b091cd",
+  "template": {
+    "id": "ceb50d92-100d-4b8b-b559-14fa3b091cda",
+    "version": 1,
+    "uri": "https://rest-api.notify.gov.au/service/your_service_id/templates/bfb50d92-100d-4b8b-b559-14fa3b091cda"
+  }
 }
 ```
 
