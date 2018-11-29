@@ -3,20 +3,13 @@ lang: java
 ---
 
 ```java
-HashMap<String, String> personalisation = new HashMap<String, String>();
-personalisation.put("user_name", "Lisa");
-
-SendEmailResponse response = client.sendEmail(
-    "f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx",
-    "lisa@example.com",
-    personalisation,
-    "your-unique-reference-id"
-);
+SendEmailResponse response = client.sendEmail(templateId, emailAddress, personalisation, reference);
+SendEmailResponse response = client.sendEmail(templateId, emailAddress, personalisation, reference, emailReplyToId);
 ```
 
-<Panel open label={<H3>Arguments</H3>}>
+<Panel label={<H3>Arguments</H3>}>
 <Parameters>
-  <Parameter required name="templateId">
+  <Parameter required name="templateId" kind="String">
 
 The ID of the template
 
@@ -24,13 +17,13 @@ You can find this by signing into Notify and
 going to the Templates page.
 
   </Parameter>
-  <Parameter required name="emailAddress">
+  <Parameter required name="emailAddress" kind="String">
 
 The email address of the recipient you want to send to.
 
   </Parameter>
 
-  <Parameter required name="personalisation">
+  <Parameter required name="personalisation" kind="Map<String, String>">
 
 If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a map. For example:
 
@@ -43,23 +36,22 @@ personalisation.put("application_date", "2018-01-01");
 If a template does not have any placeholder fields for personalised information, you must pass in an empty map or null.
 
   </Parameter>
-
-  <Parameter required name="reference">
+  <Parameter required name="reference" kind="String">
 
 A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
 
   </Parameter>
 
-  <Parameter optional name="emailReplyToId">
+  <Parameter optional name="emailReplyToId" kind="String">
 
 This is an email reply-to address specified by you to receive replies from your users. Your service cannot go live until you set up at least one of these email addresses. To set up:
 
-- Sign into your Notify account.
-- Go to Settings.
-- Go to the Email section and select Manage on the Email reply-to addresses row.
-- Select Change to specify the email address to receive replies, and select Save.
+1. Sign into your Notify account.
+1. Go to Settings.
+1. Go to the Email section and select Manage on the Email reply-to addresses row.
+1. Select Change to specify the email address to receive replies, and select Save.
 
-```java inline
+```java inline nonumbers
 String emailReplyToId='8e222534-7f05-4972-86e3-17c5d9f894e2'
 ```
 
