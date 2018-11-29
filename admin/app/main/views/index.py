@@ -109,14 +109,14 @@ def email_template():
     ))
 
 
-@main.route('/documentation')
-def documentation():
-    return render_template('views/documentation.html', docs_base_url=current_app.config['DOCS_BASE_URL'])
-
-
 @main.route('/callbacks')
 def callbacks():
     return render_template('views/callbacks.html')
+
+
+@main.route('/documentation')
+def documentation():
+    return redirect(current_app.config['DOCS_BASE_URL'], code=301)
 
 
 # --- Features page set --- #
@@ -177,4 +177,5 @@ def old_page_redirects():
         'main.old_using_notify': 'main.using_notify',
         'main.information_risk_management': 'main.security',
     }
+
     return redirect(url_for(redirects[request.endpoint]), code=301)

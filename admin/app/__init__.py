@@ -183,6 +183,7 @@ def init_app(application):
         return {
             'asset_path': '/static/',
             'header_colour': application.config['HEADER_COLOUR'],
+            'docs_base_url': application.config['DOCS_BASE_URL'],
             'asset_url': asset_fingerprinter.get_url
         }
 

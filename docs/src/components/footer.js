@@ -71,7 +71,7 @@ const secondColumn = [
 const thirdColumn = [
   { text: 'Pricing', href: notifyUrl('/pricing') },
   { text: 'Cookies', href: notifyUrl('/cookies') },
-  { text: 'Documentation', href: notifyUrl('/documentation') },
+  { text: 'Documentation', href: '/' },
 ]
 
 export default props => (
