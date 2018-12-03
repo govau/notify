@@ -192,6 +192,7 @@ def submit_request_to_go_live(service_id):
             data = dict(
                 service_name=current_service['name'],
                 service_url=url_for('main.service_dashboard', service_id=current_service['id'], _external=True),
+                requested_by="{} ({})".format(current_user.name, current_user.email_address),
                 organisation_type=current_service['organisation_type'],
                 agreement_signed=AgreementInfo.from_current_user().as_human_readable,
                 channel=formatted_list(filter(None, (
