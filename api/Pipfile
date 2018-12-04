@@ -30,7 +30,6 @@ twilio = "~=6.16"
 boto3 = "~=1.8"
 sentry-sdk = {extras = ["flask"]}
 itsdangerous = "==1.1.0"
-newrelic = "*"
 
 [dev-packages]
 bandit = "==1.5.1"

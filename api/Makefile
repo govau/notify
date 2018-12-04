@@ -107,15 +107,12 @@ create-docker-test-db:
 run: version-file ## Run a development server (reloading)
 	$(RUNNER) flask run -p $(PORT)
 
-newrelic.ini:
-	$(RUNNER) newrelic-admin generate-config $(NEW_RELIC_LICENSE_KEY) newrelic.ini
-
 run-gunicorn: version-file ## Run a production server
-	$(NEW_RELIC_CMD) $(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
+	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
 run-celery-worker: version-file ## Run background workers
 	NOTIFY_CELERY_CMD=worker \
-		$(NEW_RELIC_CMD) $(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
 
 run-celery-beat: version-file ## Run scheduled tasks
 	NOTIFY_CELERY_CMD=beat \
