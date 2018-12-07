@@ -63,8 +63,8 @@ def register_from_org_invite():
     form.auth_type.data = 'sms_auth'
 
     if form.validate_on_submit():
-        if (form.organisation.data != invited_org_user['organisation'] or
-                form.email_address.data != invited_org_user['email_address']):
+        if (form.organisation.data != invited_org_user['organisation']
+                or form.email_address.data != invited_org_user['email_address']):
             abort(400)
         _do_registration(form, send_email=False, send_sms=True, organisation_id=invited_org_user['organisation'])
         org_invite_api_client.accept_invite(invited_org_user['organisation'], invited_org_user['id'])
@@ -92,6 +92,10 @@ def _do_registration(form, send_sms=True, send_email=True, organisation_id=None)
 
         if send_sms:
             user_api_client.send_verify_code(user.id, 'sms', user.mobile_number)
+
+        if form.research_consent.data:
+            user_api_client.send_research_consent_email(user.id)
+
         session['expiry_date'] = str(datetime.utcnow() + timedelta(hours=1))
         session['user_details'] = {"email": user.email_address, "id": user.id}
     if organisation_id:
