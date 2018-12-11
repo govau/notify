@@ -170,6 +170,10 @@ def organisation_type():
     )
 
 
+def research_consent():
+    return BooleanField('I consent to being contacted about my experience using Notify for the purposes of research and product improvement.')
+
+
 class StripWhitespaceForm(Form):
     class Meta:
         def bind_field(self, form, unbound_field, options):
@@ -211,6 +215,7 @@ class RegisterUserForm(StripWhitespaceForm):
     email_address = email_address()
     mobile_number = international_phone_number()
     password = password()
+    research_consent = research_consent()
     # always register as sms type
     auth_type = HiddenField('auth_type', default='sms_auth')
 
@@ -229,6 +234,7 @@ class RegisterUserFromInviteForm(StripWhitespaceForm):
     )
     mobile_number = InternationalPhoneNumber('Mobile number', validators=[])
     password = password()
+    research_consent = research_consent()
     service = HiddenField('service')
     email_address = HiddenField('email_address')
     auth_type = HiddenField('auth_type', validators=[DataRequired()])
@@ -252,6 +258,7 @@ class RegisterUserFromOrgInviteForm(StripWhitespaceForm):
 
     mobile_number = InternationalPhoneNumber('Mobile number', validators=[DataRequired(message='Can’t be empty')])
     password = password()
+    research_consent = research_consent()
     organisation = HiddenField('organisation')
     email_address = HiddenField('email_address')
     auth_type = HiddenField('auth_type', validators=[DataRequired()])
@@ -878,13 +885,13 @@ def get_placeholder_form_instance(
 ):
 
     if (
-        Columns.make_key(placeholder_name) == 'emailaddress' and
-        template_type == 'email'
+        Columns.make_key(placeholder_name) == 'emailaddress'
+        and template_type == 'email'
     ):
         field = email_address(label=placeholder_name, gov_user=False)
     elif (
-        Columns.make_key(placeholder_name) == 'phonenumber' and
-        template_type == 'sms'
+        Columns.make_key(placeholder_name) == 'phonenumber'
+        and template_type == 'sms'
     ):
         if allow_international_phone_numbers:
             field = international_phone_number(label=placeholder_name)

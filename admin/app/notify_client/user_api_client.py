@@ -107,6 +107,10 @@ class UserApiClient(NotifyAdminAPIClient):
         endpoint = '/user/{0}/email-verification'.format(user_id)
         self.post(endpoint, data=data)
 
+    def send_research_consent_email(self, user_id):
+        endpoint = '/user/{0}/email-research-consent'.format(user_id)
+        self.put(endpoint, data=None)
+
     def send_already_registered_email(self, user_id, to):
         data = {'email': to}
         endpoint = '/user/{0}/email-already-registered'.format(user_id)

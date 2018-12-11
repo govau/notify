@@ -295,6 +295,33 @@ def send_new_user_email_verification(user_id):
     return jsonify({}), 204
 
 
+@user_blueprint.route('/<uuid:user_id>/email-research-consent', methods=['PUT'])
+def send_support_user_research_consent(user_id):
+    user = get_user_by_id(user_id=user_id)
+
+    template = dao_get_template_by_id(current_app.config['RESEARCH_CONSENT_TEMPLATE_ID'])
+    service = Service.query.get(current_app.config['NOTIFY_SERVICE_ID'])
+
+    notification = persist_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=current_app.config['NOTIFY_SUPPORT_EMAIL'],
+        service=service,
+        personalisation={
+            'name': user.name,
+            'email_address': user.email_address,
+            'phone_number': user.mobile_number
+        },
+        notification_type=template.template_type,
+        api_key_id=None,
+        key_type=KEY_TYPE_NORMAL,
+        reply_to_text=service.get_default_reply_to_email_address()
+    )
+    send_notification_to_queue(notification, False, queue=QueueNames.NOTIFY)
+
+    return jsonify({}), 204
+
+
 @user_blueprint.route('/<uuid:user_id>/email-already-registered', methods=['POST'])
 def send_already_registered_email(user_id):
     to, errors = email_data_request_schema.load(request.get_json())
@@ -457,8 +484,8 @@ def get_orgs_and_services(user):
                 # include services that either aren't in an organisation, or are in an organisation,
                 # but not one that the user can see.
                 (
-                    not service.organisation or
-                    service.organisation not in user.organisations
+                    not service.organisation
+                    or service.organisation not in user.organisations
                 )
             )
         ]

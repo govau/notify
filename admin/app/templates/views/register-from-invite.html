@@ -1,5 +1,6 @@
 {% extends "withoutnav_template.html" %}
 {% from "components/textbox.html" import textbox %}
+{% from "components/checkbox.html" import checkbox %}
 {% from "components/page-footer.html" import page_footer %}
 
 {% block per_page_title %}
@@ -20,6 +21,7 @@ Create an account
         </div>
       {% endif %}
       {{ textbox(form.password, hint="At least 8 characters", width='3-4') }}
+      {{ checkbox(form.research_consent) }}
       {{ page_footer("Continue") }}
       {{form.service}}
       {{form.email_address}}
