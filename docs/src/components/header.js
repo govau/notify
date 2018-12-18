@@ -180,7 +180,7 @@ export default () => (
             >
               <Logo src={coa} />
               <HeaderName>Notify</HeaderName>
-              <Badge>Alpha</Badge>
+              <Badge>Beta</Badge>
             </Flex>
           </BannerLink>
           <OpenMenuLink href="#nav" aria-label="Open navigation">
