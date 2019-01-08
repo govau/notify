@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-notifications-utils = {editable = true, path = "."}
+notifications-utils = {editable = true,path = "."}
 itsdangerous = "==1.1.0"
 
 [dev-packages]
@@ -15,6 +15,10 @@ pytest-cov = "*"
 requests-mock = "*"
 freezegun = "*"
 "flake8" = "*"
+pyyaml = ">=4.2b4"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
