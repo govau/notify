@@ -20,7 +20,7 @@ NOTES:
 
 - If you want to see delivery status updated locally or are testing provider webhooks, run [ngrok](https://ngrok.com) and set `API_HOST_NAME` to be the output of `pipenv run python scripts/export-ngrok.py`
 - Replace the placeholder key and prefix values as appropriate
-- The SECRET_KEY and DANGEROUS_SALT should match those in the [notifications-admin](https://github.com/alphagov/notifications-admin) app.
+- The `SECRET_KEY` and `DANGEROUS_SALT` should match those in the `admin` app.
 - The unique prefix for the queue names prevents clashing with others' queues in shared amazon environment and enables filtering by queue name in the SQS interface.
 
 ### Postgres
