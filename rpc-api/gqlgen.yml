@@ -1,0 +1,25 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- schema.graphql
+exec:
+  filename: generated.go
+model:
+  filename: models_gen.go
+resolver:
+  filename: resolver.go
+  type: Resolver
+models:
+  Permission: 
+    model: github.com/govau/notify/rpc-api/cmd.Permission
+  Template:
+    model: github.com/govau/notify/rpc-api/cmd.Template
+  Service:
+    model: github.com/govau/notify/rpc-api/cmd.Service
+  User:
+    model: github.com/govau/notify/rpc-api/cmd.User
+  ServiceUser:
+    model: github.com/govau/notify/rpc-api/cmd.ServiceUser

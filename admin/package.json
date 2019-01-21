@@ -32,6 +32,7 @@
     "gulp-uglify": "3.0.0",
     "hogan": "1.0.2",
     "jquery": "1.12.4",
+    "natives": "^1.1.6",
     "query-command-supported": "1.0.0",
     "timeago": "1.6.1"
   },
