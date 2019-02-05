@@ -43,10 +43,10 @@ class Config(object):
 
     DEFAULT_SERVICE_LIMIT = 50
     DEFAULT_FREE_SMS_FRAGMENT_LIMITS = {
-        'central': 250000,
+        'central': 25000,
         'local': 25000,
         'nhs': 25000,
-        'federal': 250000,
+        'federal': 25000,
         'state': 25000,
     }
     EMAIL_EXPIRY_SECONDS = 3600  # 1 hour

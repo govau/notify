@@ -319,7 +319,7 @@ class Config(object):
         'notification': '{}-dvla-letter-api-files'.format(os.getenv('NOTIFY_ENVIRONMENT'))
     }
 
-    FREE_SMS_TIER_FRAGMENT_COUNT = 250000
+    FREE_SMS_TIER_FRAGMENT_COUNT = 25000
 
     SMS_INBOUND_WHITELIST = json.loads(os.environ.get('SMS_INBOUND_WHITELIST', '[]'))
     FIRETEXT_INBOUND_SMS_AUTH = json.loads(os.environ.get('FIRETEXT_INBOUND_SMS_AUTH', '[]'))

@@ -340,7 +340,7 @@ def test_switch_service_to_live(
         service_id=service_one['id'], _external=True)
     mock_update_service.assert_called_with(
         service_one['id'],
-        message_limit=250000,
+        message_limit=25000,
         restricted=False
     )
 
@@ -1614,7 +1614,7 @@ def test_should_show_page_to_set_organisation_type(
 
 @pytest.mark.skip(reason="not sure where failing")
 @pytest.mark.parametrize('organisation_type, free_allowance', [
-    ('central', 250000),
+    ('central', 25000),
     ('state', 25000),
     ('local', 25000),
     pytest.mark.xfail(('private sector', 1000))
@@ -1664,7 +1664,7 @@ def test_should_show_page_to_set_sms_allowance(
 @freeze_time("2017-04-01 11:09:00.061258")
 @pytest.mark.parametrize('given_allowance, expected_api_argument', [
     ('1', 1),
-    ('250000', 250000),
+    ('25000', 25000),
     pytest.mark.xfail(('foo', 'foo')),
 ])
 def test_should_set_sms_allowance(
