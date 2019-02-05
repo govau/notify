@@ -228,7 +228,7 @@ def service_switch_live(service_id):
         current_service['id'],
         # TODO This limit should be set depending on the agreement signed by
         # with Notify.
-        message_limit=250000 if current_service['restricted'] else 50,
+        message_limit=25000 if current_service['restricted'] else 50,
         restricted=(not current_service['restricted'])
     )
     return redirect(url_for('.service_settings', service_id=service_id))

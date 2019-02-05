@@ -1127,7 +1127,7 @@ def test_aggregate_status_types(dict_in, expected_failed, expected_requested):
     ]
 )
 def test_get_free_paid_breakdown_for_billable_units(now, expected_number_of_months):
-    sms_allowance = 250000
+    sms_allowance = 25000
     with now:
         billing_units = get_free_paid_breakdown_for_billable_units(
             2016, sms_allowance, [

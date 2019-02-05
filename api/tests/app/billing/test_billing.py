@@ -411,7 +411,7 @@ def test_get_free_sms_fragment_limit_future_year_not_exist(client, sample_servic
 
 def test_update_free_sms_fragment_limit_data(client, sample_service):
     current_year = get_current_financial_year_start_year()
-    create_annual_billing(sample_service.id, free_sms_fragment_limit=250000, financial_year_start=current_year - 1)
+    create_annual_billing(sample_service.id, free_sms_fragment_limit=25000, financial_year_start=current_year - 1)
 
     update_free_sms_fragment_limit_data(sample_service.id, 9999, current_year)
 
