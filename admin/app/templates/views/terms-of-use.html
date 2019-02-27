@@ -13,46 +13,393 @@ Terms of use
     {{ sub_navigation(navigation_links) }}
   </div>
   <div class="column-two-thirds">
-
     <h1 class="heading-large">Terms of use</h1>
-
+    <h2 class="heading-medium" id="introduction">
+      Introduction
+    </h2>
     <p>
-      These terms apply to your service’s use of Notify. You must be the service manager to accept them.
+      Notify is the online notifications service offered by the Digital
+      Transformation Agency (DTA), that provides government entities the
+      capability to send emails and text messages to their users. Notify is
+      currently in a Beta testing stage.
     </p>
-
     <p>
-      {{ agreement_info.as_terms_of_use_paragraph(
-        download_link=url_for('.agreement'),
-        contact_link=url_for('.feedback', ticket_type='ask-question-give-feedback', body='agreement-with-owner')
-      )}}
+      A notification typically takes the form of status updates, requests for
+      action, acknowledgement of receipt of applications or supporting
+      information, and reminders. Notify makes it easier to keep people updated,
+      by helping service teams across government send text messages and emails
+      to their users.
     </p>
-
-    <h2 class="heading-medium">When using Notify</h2>
-    <p>You must:</p>
+    <p>
+      Government entities will continue to collect, manage and control their
+      users contact information and preferences. Notify simply processes the
+      notification to users of the service at the request of the service team.
+      Notify is not a contact database for Australian citizens.
+    </p>
+    <h2 class="heading-medium" id="terms">Terms</h2>
+    <p>
+      The purpose of these DTA Terms of Use is to set out the terms on which
+      service teams can subscribe and use Notify and will govern all access to
+      and use of Notify. These terms apply to your service’s use of Notify. You
+      must have the appropriate authorisation to accept them.
+    </p>
+    <p>
+      By accessing Notify, you agree to be bound by these Terms of Use. If you
+      do not agree to be bound by all these Terms of Use, do not access or use
+      Notify.
+    </p>
+    <p>
+      By accepting the Terms of Use, you must:
+    </p>
     <ul class="list list-bullet">
-      <li>complete your organisation’s information assurance process (you don’t need to include Notify or our delivery partners, we’ve already done that)</li>
-      <li>tell us immediately if you have any security breaches</li>
+      <li>
+        complete and provide your organisation’s information assurance processes
+      </li>
+      <li>
+        inform us immediately of any security breaches
+      </li>
       <li>keep your API keys secure</li>
-      <li>get the right levels of consent (to send messages and to use data)</li>
-      <li>not send unsolicited messages, only ones related to a transaction or something the user has subscribed to be updated about</li>
-      <li>send messages that meet the <a href="https://www.dta.gov.au/standard/">Digital Service Standard</a></li>
-      <li>not send messages containing any personally or commercially sensitive information</li>
-      <li>check that the data you add to Notify is accurate and complies with Data Protection Act principles</li>
+      <li>
+        get the right levels of consent (to send messages and to use data)
+      </li>
+      <li>
+        not send unsolicited messages, only ones related to the transaction or
+        relevant information the user has subscribed to (as per the
+        <a href="https://www.legislation.gov.au/Series/C2004A01214"
+          >Spam Act 2003</a
+        >)
+      </li>
+      <li>
+        send messages that adhere to the
+        <a
+          href="https://www.dta.gov.au/help-and-advice/about-digital-service-standard"
+          >Digital Service Standard</a
+        >
+      </li>
+      <li>
+        not send messages containing any personally or commercially sensitive
+        information
+      </li>
+      <li>
+        check that the data you add to Notify is accurate and complies with
+        relevant Australian data laws and principles
+      </li>
     </ul>
-    <p>If you don’t keep to these terms, we might have to stop sending your messages.</p>
-
+    <p>
+      If you <strong>don’t</strong> keep to these terms, we may cancel your
+      subscription and your messages may not be sent.
+    </p>
     <p>Notify will:</p>
     <ul class="list list-bullet">
-      <li>send all the messages you pass to us, as long as they meet our guidelines</li>
-      <li>show how Notify is performing through our <a href="https://status.notify.gov.au/">status</a> page.</li>
-      <li>keep your data <a href="{{ url_for('.security') }}">secure</a></li>
-      <li>give you one month’s notice by email if we change our terms of use or delivery providers</li>
+      <li>
+        send all the messages provided that they meet the terms of use
+      </li>
+      <li>
+        show how Notify is performing through our
+        <a href="https://status.notify.gov.au/">status</a>
+        page
+      </li>
+      <li>keep your data secure</li>
+      <li>
+        give one month’s notice, by email, if we change our Terms of Use or
+        delivery providers
+      </li>
     </ul>
-
-    <h2 class="heading-medium">Leaving Notify</h2>
-    <p>You can leave Notify at any time. Just <a href="{{url_for('.feedback', ticket_type='ask-question-give-feedback')}}">contact us</a> and we’ll close your account.</p>
-    <p>When you leave Notify, all your data will be deleted.</p>
-
+    <p>
+      The DTA may change these Terms of Use from time to time and will advise
+      users of any changes by email or telephone.
+    </p>
+    <p>
+      If you have any questions or feedback about these Terms of Use, please
+      <a href="mailto:notify-support@digital.gov.au">contact us</a>.
+    </p>
+    <h2 class="heading-medium" id="subscribe">Subscribe</h2>
+    <p>
+      The Notify service is open to Commonwealth, State, Territory and Local
+      government bodies.
+    </p>
+    <h3><strong>Trial mode</strong></h3>
+    <p>
+      <a href="mailto:notify-support@digital.gov.au">Contact us</a> to set up a
+      free trial account for your service and begin using it immediately. In
+      trial mode:
+    </p>
+    <ul class="list list-bullet">
+      <li>
+        you can only send messages to yourself
+      </li>
+      <li>
+        you can add people to your team, then you can send messages to them too
+      </li>
+      <li>
+        you can only send 50 messages per day
+      </li>
+    </ul>
+    <h3><strong>Go live</strong></h3>
+    <p>
+      You can request to go live, when you have:
+    </p>
+    <ol class="list list-number">
+      <li>
+        Accepted our terms of use
+      </li>
+      <li>
+        Have more than one team member with the ‘Manage service’ permission
+      </li>
+      <li>
+        Create templates showing the kind of messages you plan to send
+      </li>
+    </ol>
+    <h2 class="heading-medium" id="features">Features</h2>
+    <p>With Notify, you can:</p>
+    <ul class="list list-bullet">
+      <li>Send emails</li>
+      <li>
+        Send and receive text messages (Australia and internationally)
+      </li>
+      <li>
+        Create messages and templates quickly and easily
+      </li>
+      <li>Customise your branding</li>
+      <li>
+        Send messages in bulk or individually
+      </li>
+      <li>Track your activity</li>
+      <li>Manage your team</li>
+      <li>Send messages reliably</li>
+    </ul>
+    <p>
+      You don’t need any technical knowledge to use Notify. See our
+      <a href="/features">features </a>page to find out more.
+    </p>
+    <h2 class="heading-medium" id="training">Training</h2>
+    <p>
+      The DTA may provide training sessions for service teams and team leaders
+      at the request of a subscribed service. These training sessions can be
+      conducted online, at a DTA office, or at another venue depending on staff
+      availability and location.
+    </p>
+    <h2 class="heading-medium" id="support">Support</h2>
+    <p>
+      The DTA will provide support during business hours 9am-5pm (local Sydney
+      time) Monday to Friday, excluding NSW public holidays.
+    </p>
+    <p>
+      We will give you our level 1 support mobile phone number when we approve
+      your transition from a trial account to a live account.
+    </p>
+    <p>
+      All support is subject to DTA resourcing constraints.
+    </p>
+    <h2 class="heading-medium" id="fees">Fees</h2>
+    <p>To use Notify, there is no:</p>
+    <ul class="list list-bullet">
+      <li>procurement cost</li>
+      <li>monthly charge</li>
+      <li>setup fee to use</li>
+    </ul>
+    <p>
+      <strong>Emails</strong> are free to send through Notify via
+      <a href="http://cloud.gov.au/">Cloud.gov.au</a>
+      using their SMTP Mail server.
+    </p>
+    <p>
+      <strong>Text messages</strong>—while Notify is in Beta, each service will
+      have a free allowance of 25,000 text messages per financial year. If you
+      exceed this limit, the additional cost will be borne by your organisation.
+    </p>
+    <p><strong>Long text messages</strong></p>
+    <p>
+      Charges vary depending on the length of a text message:
+    </p>
+    <table>
+      <tbody>
+        <tr>
+          <td colspan="1" rowspan="1">
+            <p>Message length</p>
+          </td>
+          <td colspan="1" rowspan="1">
+            <p>Charge</p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" rowspan="1">
+            <p>Up to 160 characters</p>
+          </td>
+          <td colspan="1" rowspan="1">
+            <p>1 text message</p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" rowspan="1">
+            <p>Up to 306 characters</p>
+          </td>
+          <td colspan="1" rowspan="1">
+            <p>2 text messages</p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" rowspan="1">
+            <p>Up to 459 characters</p>
+          </td>
+          <td colspan="1" rowspan="1">
+            <p>3 text messages</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>How to pay</strong></p>
+    <p>
+      <a href="mailto:notify-support@digital.gov.au">Contact us</a> to find out
+      more.
+    </p>
+    <h2 class="heading-medium" id="security">Security</h2>
+    <p>
+      Notify is built for the needs of government services. It has processes in
+      place to:
+    </p>
+    <ul class="list list-bullet">
+      <li>protect user data</li>
+      <li>keep systems secure</li>
+      <li>
+        manage risks around information
+      </li>
+    </ul>
+    <p>
+      System administrators of Notify have, at a minimum, a Baseline Level
+      security clearance as issued by the Australian Government Security Vetting
+      Agency.
+    </p>
+    <p>
+      <a href="mailto:notify-support@digital.gov.au">Contact us</a> to request a
+      copy of the Notify penetration test summary.
+    </p>
+    <p>
+      <strong>
+        Permissions and Two-factor authentication
+      </strong>
+    </p>
+    <p>
+      You can set different user permissions in Notify to control who in your
+      team has access to certain parts of the service.
+    </p>
+    <p>
+      Notify uses two-factor authentication. To sign in to Notify, you’ll need
+      to enter:
+    </p>
+    <ul class="list list-bullet">
+      <li>
+        your government email address and your Notify password
+      </li>
+      <li>
+        a text message code that Notify sends to your mobile phone
+      </li>
+    </ul>
+    <p><strong>Open source</strong></p>
+    <p>
+      In line with the Digital Service Standard, all code behind Notify is open
+      source and available on
+      <a href="https://github.com/govau/notify">our GitHub repository</a>.
+      Notify uses JSON Web Tokens, so API keys aren’t sent over the wire.
+    </p>
+    <p><strong>How we manage risks on Notify</strong></p>
+    <p>
+      Things we do to manage risks on Notify include:
+    </p>
+    <ul class="list list-bullet">
+      <li>regular privacy reviews</li>
+      <li>security impact assessments</li>
+    </ul>
+    <p><strong>Raising issues</strong></p>
+    <p>
+      Anyone can raise an issue for Notify. You can
+      <a href="mailto:notify-support@digital.gov.au">contact us</a> us to:
+    </p>
+    <ul class="list list-bullet">
+      <li>report a bug</li>
+      <li>request a feature</li>
+      <li>raise a security concern</li>
+    </ul>
+    <p>
+      Our service standard to responding to raised issues is 48 hours. We will
+      endeavour to address critical issues as soon possible, dependent on
+      resourcing restraints.
+    </p>
+    <h2 class="heading-medium" id="privacy-and-data-controls">
+      Privacy and data controls
+    </h2>
+    <p>
+      In Notify, your organisation is the data controller and the DTA the data
+      processor. Both parties are legally responsible for compliance with the
+      Privacy Act 1988 (Cth) and other relevant legislation.
+    </p>
+    <p>In Notify, data is encrypted:</p>
+    <ul class="list list-bullet">
+      <li>
+        when it passes through the service
+      </li>
+      <li>
+        when it’s stored on the service
+      </li>
+    </ul>
+    <p>
+      Any user data you upload is only held for 7 days, after which time it will
+      be deleted.
+    </p>
+    <p>Notify complies with:</p>
+    <ul class="list list-bullet">
+      <li>
+        the obligations under the Privacy Act 1988 (Cth)
+      </li>
+      <li>
+        Australian Government Agencies
+        <a
+          href="https://www.oaic.gov.au/privacy-law/australian-government-agencies-privacy-code/"
+          >Privacy Code</a
+        >
+      </li>
+    </ul>
+    <p><strong>Protect sensitive information</strong></p>
+    <p>
+      Notify makes a copy of messages you send available through the dashboard
+      for 7 days after sending.
+    </p>
+    <p>
+      Some messages that you send include sensitive information like security
+      codes or password reset links. Messages you send will likely also include
+      personal information.
+    </p>
+    <p>
+      If you’re sending a message with sensitive information or personal
+      information, you can choose to hide those details from view through the
+      Notify dashboard. This means that only the message recipient will be able
+      to see that information, while service team users of Notify will not.
+    </p>
+    <p>
+      You can read more about your obligations for managing personal information
+      on the
+      <a href="https://www.oaic.gov.au/"
+        >website for the Office of the Australian Information Commissioner.</a
+      >
+    </p>
+    <h2 class="heading-medium" id="leaving-notify">Leaving Notify</h2>
+    <p>
+      You can leave Notify at any time. Just
+      <a href="mailto:notify-support@digital.gov.au">contact us</a> and we will
+      close your account.
+    </p>
+    <p>
+      If you decide to leave, we will delete all your data from Notify.
+    </p>
+    <h2 class="heading-medium" id="termination">Termination</h2>
+    <p>
+      The DTA can terminate Notify at any time and for any reason by providing
+      30 days’ notice to your organisation’s technical representative.
+    </p>
+    <p>
+      If the DTA terminates Notify, the DTA will work cooperatively with your
+      organisation to offboard your service.
+    </p>
   </div>
 </div>
 
