@@ -1,3 +1,5 @@
+{% from "components/table.html" import mapping_table, row, text_field, field, row_heading %}
+
 {% extends "withoutnav_template.html" %}
 {% from "components/banner.html" import banner_wrapper %}
 {% from "components/sub-navigation.html" import sub_navigation %}
@@ -118,7 +120,7 @@ Terms of use
       The Notify service is open to Commonwealth, State, Territory and Local
       government bodies.
     </p>
-    <h3><strong>Trial mode</strong></h3>
+    <h3 class="heading-small">Trial mode</h3>
     <p>
       <a href="mailto:notify-support@digital.gov.au">Contact us</a> to set up a
       free trial account for your service and begin using it immediately. In
@@ -135,7 +137,7 @@ Terms of use
         you can only send 50 messages per day
       </li>
     </ul>
-    <h3><strong>Go live</strong></h3>
+    <h3 class="heading-small">Go live</h3>
     <p>
       You can request to go live, when you have:
     </p>
@@ -212,43 +214,24 @@ Terms of use
     <p>
       Charges vary depending on the length of a text message:
     </p>
-    <table>
-      <tbody>
-        <tr>
-          <td colspan="1" rowspan="1">
-            <p>Message length</p>
-          </td>
-          <td colspan="1" rowspan="1">
-            <p>Charge</p>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="1">
-            <p>Up to 160 characters</p>
-          </td>
-          <td colspan="1" rowspan="1">
-            <p>1 text message</p>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="1">
-            <p>Up to 306 characters</p>
-          </td>
-          <td colspan="1" rowspan="1">
-            <p>2 text messages</p>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="1">
-            <p>Up to 459 characters</p>
-          </td>
-          <td colspan="1" rowspan="1">
-            <p>3 text messages</p>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p><strong>How to pay</strong></p>
+    {% call mapping_table(
+      caption='Text message pricing',
+      field_headings=['Message length', 'Charge'],
+      field_headings_visible=True,
+      caption_visible=False
+    ) %}
+      {% for message_length, charge in [
+        ('Up to 160 characters', '1 text message'),
+        ('Up to 306 characters', '2 text messages'),
+        ('Up to 459 characters', '3 text messages')
+      ] %}
+        {% call row() %}
+          {{ text_field(message_length) }}
+          {{ text_field(charge) }}
+        {% endcall %}
+      {% endfor %}
+    {% endcall %}
+    <h3 class="heading-small">How to pay</h3>
     <p>
       <a href="mailto:notify-support@digital.gov.au">Contact us</a> to find out
       more.
@@ -274,11 +257,9 @@ Terms of use
       <a href="mailto:notify-support@digital.gov.au">Contact us</a> to request a
       copy of the Notify penetration test summary.
     </p>
-    <p>
-      <strong>
-        Permissions and Two-factor authentication
-      </strong>
-    </p>
+    <h3 class="heading-small">
+      Permissions and two-factor authentication
+    </h3>
     <p>
       You can set different user permissions in Notify to control who in your
       team has access to certain parts of the service.
@@ -295,14 +276,14 @@ Terms of use
         a text message code that Notify sends to your mobile phone
       </li>
     </ul>
-    <p><strong>Open source</strong></p>
+    <h3 class="heading-small">Open source</h3>
     <p>
       In line with the Digital Service Standard, all code behind Notify is open
       source and available on
       <a href="https://github.com/govau/notify">our GitHub repository</a>.
       Notify uses JSON Web Tokens, so API keys aren’t sent over the wire.
     </p>
-    <p><strong>How we manage risks on Notify</strong></p>
+    <h3 class="heading-small">How we manage risks on Notify</h3>
     <p>
       Things we do to manage risks on Notify include:
     </p>
@@ -310,7 +291,7 @@ Terms of use
       <li>regular privacy reviews</li>
       <li>security impact assessments</li>
     </ul>
-    <p><strong>Raising issues</strong></p>
+    <h3 class="heading-small">Raising issues</h3>
     <p>
       Anyone can raise an issue for Notify. You can
       <a href="mailto:notify-support@digital.gov.au">contact us</a> us to:
@@ -359,7 +340,7 @@ Terms of use
         >
       </li>
     </ul>
-    <p><strong>Protect sensitive information</strong></p>
+    <h3 class="heading-small">Protect sensitive information</h3>
     <p>
       Notify makes a copy of messages you send available through the dashboard
       for 7 days after sending.
