@@ -11,7 +11,7 @@ export default () => {
       <H1>Using Notify</H1>
       <P>
         Notify is a service developed by the DTA that lets government agencies
-        to send and receive text messages and email messages.
+        send and receive text messages and email messages.
       </P>
 
       <div className="prevent-next-paragraphs-from-getting-hero-text" />
