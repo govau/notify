@@ -107,6 +107,7 @@ def register_blueprint(application):
     from app.service.callback_rest import service_callback_blueprint
     from app.user.rest import user_blueprint
     from app.template.rest import template_blueprint
+    from app.support.support import support as support_blueprint
     from app.status.healthcheck import status as status_blueprint
     from app.job.rest import job_blueprint
     from app.notifications.rest import notifications as notifications_blueprint
@@ -137,6 +138,9 @@ def register_blueprint(application):
 
     template_blueprint.before_request(requires_admin_auth)
     application.register_blueprint(template_blueprint)
+
+    support_blueprint.before_request(requires_no_auth)
+    application.register_blueprint(support_blueprint)
 
     status_blueprint.before_request(requires_no_auth)
     application.register_blueprint(status_blueprint)

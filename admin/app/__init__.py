@@ -44,6 +44,7 @@ from app.notify_client.api_key_api_client import ApiKeyApiClient
 from app.notify_client.invite_api_client import InviteApiClient
 from app.notify_client.job_api_client import JobApiClient
 from app.notify_client.notification_api_client import NotificationApiClient
+from app.notify_client.support_api_client import SupportApiClient
 from app.notify_client.status_api_client import StatusApiClient
 from app.notify_client.template_statistics_api_client import TemplateStatisticsApiClient
 from app.notify_client.user_api_client import UserApiClient
@@ -69,6 +70,7 @@ user_api_client = UserApiClient()
 api_key_api_client = ApiKeyApiClient()
 job_api_client = JobApiClient()
 notification_api_client = NotificationApiClient()
+support_api_client = SupportApiClient()
 status_api_client = StatusApiClient()
 invite_api_client = InviteApiClient()
 template_statistics_client = TemplateStatisticsApiClient()
@@ -110,6 +112,7 @@ def create_app(application):
     api_key_api_client.init_app(application)
     job_api_client.init_app(application)
     notification_api_client.init_app(application)
+    support_api_client.init_app(application)
     status_api_client.init_app(application)
     invite_api_client.init_app(application)
     org_invite_api_client.init_app(application)
