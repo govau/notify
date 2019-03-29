@@ -3,13 +3,13 @@ from datetime import datetime
 import pytz
 from flask import abort, redirect, render_template, request, session, url_for
 from flask_login import current_user
-from notifications_utils.clients import DeskproError
+from notifications_python_client.errors import HTTPError
 
 from app import (
     convert_to_boolean,
     current_service,
-    deskpro_client,
     service_api_client,
+    support_api_client
 )
 from app.main import main
 from app.main.forms import Feedback, Problem, SupportType, Triage
@@ -137,16 +137,16 @@ def feedback(ticket_type):
         )
 
         try:
-            deskpro_client.create_ticket(
+            support_api_client.post_support_ticket(dict(
                 subject='Notify feedback {}'.format(user_name),
                 message=feedback_msg,
                 ticket_type=ticket_type,
                 urgency=10 if urgent else 1,
                 user_email=user_email,
                 user_name=user_name
-            )
-        except DeskproError:
-            abort(500, "Feedback submission failed")
+            ))
+        except HTTPError:
+            abort(500, "Support submission failed")
         return redirect(url_for('.thanks', urgent=urgent, anonymous=anonymous))
 
     if not form.feedback.data:
