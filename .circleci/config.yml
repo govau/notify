@@ -4,6 +4,8 @@ references:
   node_image: &node_image
     docker:
       - image: circleci/node:10
+        environment:
+          SHARP_DIST_BASE_URL: https://s3-us-west-2.amazonaws.com/sharp-distro/
 
   python_node_image: &python_node_image
     docker:

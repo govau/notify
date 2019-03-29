@@ -5,10 +5,10 @@ from flask import (
     current_app
 )
 
-from app import db, version
 from app.service.sender import send_notification_to_notify_support
 
 support = Blueprint('support', __name__)
+
 
 @support.route('/support', methods=['POST'])
 def support_request():
