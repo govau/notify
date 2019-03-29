@@ -91,6 +91,7 @@ def test_should_set_cache_value_as_value_from_database_if_cache_not_set(
         )
 
 
+@pytest.mark.skip(reason="always check rate limits until redis support")
 def test_should_not_access_database_if_redis_disabled(notify_api, sample_service, mocker):
     with set_config(notify_api, 'REDIS_ENABLED', False):
         db_mock = mocker.patch('app.notifications.validators.services_dao')
