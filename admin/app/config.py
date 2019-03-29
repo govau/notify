@@ -138,9 +138,6 @@ class Live(Config):
     NOTIFY_ENVIRONMENT = 'live'
     CHECK_PROXY_HEADER = False
 
-    BASIC_AUTH_USER = 'notify'
-    BASIC_AUTH_PASS = 'notify'
-
 
 class CloudFoundryConfig(Config):
     pass
