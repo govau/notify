@@ -479,7 +479,7 @@ def useful_headers_after_request(response):
         "default-src 'self' 'unsafe-inline';"
         "report-uri {0};"
         "script-src 'self' *.google-analytics.com 'unsafe-inline' 'unsafe-eval' data:;"
-        "connect-src 'self' https://sentry.io *.google-analytics.com;"
+        "connect-src 'self' https://sentry.cloud.gov.au *.google-analytics.com;"
         "object-src 'self';"
         "font-src 'self' data:;"
         "img-src 'self' *.google-analytics.com *.cld.gov.au {1} data:;"
