@@ -94,7 +94,7 @@ gulp.task("javascripts", () =>
           [
             "transform-inline-environment-variables",
             {
-              include: ["ADMIN_SENTRY_DSN", "ADMIN_SENTRY_ENV"]
+              include: ["ADMIN_SENTRY_DSN", "ADMIN_SENTRY_ENV", "CIRCLE_SHA1"]
             }
           ]
         ]
