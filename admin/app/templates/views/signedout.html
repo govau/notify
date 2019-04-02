@@ -45,7 +45,7 @@
         </h2>
         <p>
           You don’t need any technical knowledge to create email,
-          text&nbsp;message or letter templates.
+          text message or letter templates.
         </p>
       </div>
       <div class="column-half">
@@ -72,6 +72,7 @@
       </div>
     </div>
   </div>
+
   <div class="product-page-section">
     <h2 class="with-keyline">
       Send messages manually or automatically
@@ -79,8 +80,8 @@
     <div class="grid-row">
       <div class="column-half">
         <p>
-          Upload a spreadsheet of email&nbsp;addresses or
-          phone&nbsp;numbers and Notify sends the messages.
+          Upload a spreadsheet of email addresses or
+          phone numbers and Notify sends the messages.
         </p>
         <img
           src="/static/images/product/03-spreadsheet.svg"
@@ -89,7 +90,7 @@
       </div>
       <div class="column-half">
         <p>
-          Integrate the Notify API with your web&nbsp;application or
+          Integrate the Notify API with your web application or
           back office system.
         </p>
         <img
@@ -100,5 +101,107 @@
     </div>
   </div>
 
+  <div class="product-page-section">
+      <div class="with-keyline bottom-gutter-2">
+          <h2>Help us shape Notify</h2>
+          <div class="grid-row bottom-gutter">
+              <div class="column-half">
+                  <p>
+                  Notify is an online notifications service that provides
+                  government entities the capability to
+                  send emails and text messages to their users.
+                  </p>
+              </div>
+              <div class="column-half">
+                  <p>
+                  Notify is currently in a Beta testing stage.
+                  We are inviting agencies to trial the service. 
+                  <a href='{{ url_for('.support')}}'>Feedback</a>
+                  collected during this trial will help us make improvements.
+                  </p>
+              </div>
+          </div>
+      </div>
+  </div>
 
+  <div class="product-page-section">
+   <div class="with-keyline bottom-gutter-2">
+      <h2>Who’s using Notify</h2>
+
+      <div class="grid-row bottom-gutter">
+        <div class="column-half">
+          <h3 class="visually-hidden">Services</h3>
+          <div class="product-page-big-number">16</div>
+          Federal government
+        </div>
+        <div class="column-half">
+          <h3 class="visually-hidden">Organisations</h3>
+          <div class="product-page-big-number">1</div>
+          State and Territory government
+        </div>
+      </div>
+
+      <div class="grid-row bottom-gutter">
+        <div class="column-half">
+          <h3 class="visually-hidden">Services</h3>
+          <div class="product-page-big-number">2</div>
+          Local government
+        </div>
+        <div class="column-half">
+          <h3 class="visually-hidden">Organisations</h3>
+          <div class="product-page-big-number">2</div>
+          Other government bodies
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="product-page-section">
+    <div class="with-keyline bottom-gutter-2">
+      <h2>Pricing</h2>
+      <div class="grid-row bottom-gutter">
+        <div class="column-half">
+          <div class="product-page-big-number">No setup cost</div>
+          There’s no monthly charge, no setup fee and no procurement
+          process.<br>
+          <p>For more information, see our <a href='{{ url_for('.pricing')}}'>pricing</a></p>
+        </div>
+        <div class="column-half">
+          <h3 class="visually-hidden">Emails</h3>
+          <div class="product-page-big-number">Unlimited email</div>
+          It's free to send email through Notify.
+        </div>
+
+      </div>
+
+      <div class="grid-row bottom-gutter">
+
+        <div class="column-half">
+          <h3 class="visually-hidden">Text messages</h3>
+          <div class="product-page-big-number">25,000 messages</div>
+          While in Beta, you have a free allowance of text messages each
+          financial year.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="product-page-section">
+    <div class="with-keyline bottom-gutter-2">
+      <h2>The team</h2>
+        <div class="grid-row">
+          <div class="column-half">
+            <p>
+            Notify is maintained by the Digital Transformation Agency
+            and is supported during business hours.
+            </p>
+            <p>
+            <a href="{{ url_for('main.support') }}">Contact the team</a> if you have a question or want
+            to give feedback.
+            </p>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
