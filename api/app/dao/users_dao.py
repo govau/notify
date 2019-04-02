@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 
 from app import db
 from app.models import (User, VerifyCode)
+from string import ascii_uppercase, digits
 
 
 def _remove_values_for_keys_if_present(dict, keys):
@@ -14,7 +15,7 @@ def _remove_values_for_keys_if_present(dict, keys):
 
 
 def create_secret_code():
-    return ''.join(map(str, [SystemRandom().randrange(10) for i in range(5)]))
+    return ''.join(SystemRandom().choice(ascii_uppercase + digits) for _ in range(6))
 
 
 def save_user_attribute(usr, update_dict={}):
@@ -106,6 +107,19 @@ def increment_failed_login_count(user):
 def reset_failed_login_count(user):
     if user.failed_login_count > 0:
         user.failed_login_count = 0
+        db.session.add(user)
+        db.session.commit()
+
+
+def increment_failed_verify_count(user):
+    user.failed_verify_count += 1
+    db.session.add(user)
+    db.session.commit()
+
+
+def reset_failed_verify_count(user):
+    if user.failed_verify_count > 0:
+        user.failed_verify_count = 0
         db.session.add(user)
         db.session.commit()
 

@@ -54,7 +54,7 @@ class Config(object):
     EMAIL_2FA_EXPIRY_SECONDS = 1800  # 30 Minutes
     HEADER_COLOUR = '#9263de'  # DTA design system purple
     HTTP_PROTOCOL = 'http'
-    MAX_FAILED_LOGIN_COUNT = 10
+    MAX_FAILED_LOGIN_COUNT = 5
     NOTIFY_APP_NAME = 'admin'
     NOTIFY_LOG_LEVEL = 'DEBUG'
     PERMANENT_SESSION_LIFETIME = 20 * 60 * 60  # 20 hours

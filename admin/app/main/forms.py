@@ -151,7 +151,7 @@ def password(label='Password'):
 
 
 def sms_code():
-    verify_code = '^\d{5}$'
+    verify_code = '^[a-zA-Z0-9]{6}$'
     return StringField('Text message code',
                        validators=[DataRequired(message='Can’t be empty'),
                                    Regexp(regex=verify_code,

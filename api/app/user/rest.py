@@ -14,7 +14,9 @@ from app.dao.users_dao import (
     get_user_code,
     use_user_code,
     increment_failed_login_count,
+    increment_failed_verify_count,
     reset_failed_login_count,
+    reset_failed_verify_count,
     get_user_by_email,
     create_secret_code,
     save_user_attribute,
@@ -104,6 +106,7 @@ def activate_user(user_id):
 def user_reset_failed_login_count(user_id):
     user_to_update = get_user_by_id(user_id=user_id)
     reset_failed_login_count(user_to_update)
+    reset_failed_verify_count(user_to_update)
     return jsonify(data=user_to_update.serialize()), 200
 
 
@@ -135,21 +138,21 @@ def verify_user_code(user_id):
 
     user_to_verify = get_user_by_id(user_id=user_id)
 
-    code = get_user_code(user_to_verify, data['code'], data['code_type'])
-    if user_to_verify.failed_login_count >= current_app.config.get('MAX_VERIFY_CODE_COUNT'):
+    code = get_user_code(user_to_verify, data['code'].upper(), data['code_type'])
+    if user_to_verify.failed_verify_count >= current_app.config.get('MAX_FAILED_VERIFY_COUNT'):
         raise InvalidRequest("Code not found", status_code=404)
     if not code:
         # only relevant from sms
-        increment_failed_login_count(user_to_verify)
+        increment_failed_verify_count(user_to_verify)
         raise InvalidRequest("Code not found", status_code=404)
     if datetime.utcnow() > code.expiry_datetime or code.code_used:
         # sms and email
-        increment_failed_login_count(user_to_verify)
+        increment_failed_verify_count(user_to_verify)
         raise InvalidRequest("Code has expired", status_code=400)
 
     user_to_verify.current_session_id = str(uuid.uuid4())
     user_to_verify.logged_in_at = datetime.utcnow()
-    user_to_verify.failed_login_count = 0
+    user_to_verify.failed_verify_count = 0
     save_model_user(user_to_verify)
 
     use_user_code(code.id)
