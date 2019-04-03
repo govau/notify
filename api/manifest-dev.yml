@@ -3,6 +3,7 @@ defaults: &defaults
     - python_buildpack
   instances: 1
   memory: 512M
+  disk_quota: 500MB
   services:
     - notify-psql-((stg))
     - notify-shared
