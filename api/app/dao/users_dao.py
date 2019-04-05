@@ -6,7 +6,6 @@ from sqlalchemy.orm import joinedload
 
 from app import db
 from app.models import (User, VerifyCode)
-from string import ascii_uppercase, digits
 
 
 def _remove_values_for_keys_if_present(dict, keys):
@@ -15,7 +14,7 @@ def _remove_values_for_keys_if_present(dict, keys):
 
 
 def create_secret_code():
-    return ''.join(SystemRandom().choice(ascii_uppercase + digits) for _ in range(6))
+    return ''.join(map(str, [SystemRandom().randrange(10) for i in range(6)]))
 
 
 def save_user_attribute(usr, update_dict={}):

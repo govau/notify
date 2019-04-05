@@ -180,7 +180,7 @@ def test_send_user_sms_code(client,
         dao_update_service(notify_service)
 
     auth_header = create_authorization_header()
-    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123ABC')
+    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123456')
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     resp = client.post(
@@ -190,10 +190,10 @@ def test_send_user_sms_code(client,
     assert resp.status_code == 204
 
     assert mocked.call_count == 1
-    assert VerifyCode.query.one().check_code('123ABC')
+    assert VerifyCode.query.one().check_code('123456')
 
     notification = Notification.query.one()
-    assert notification.personalisation == {'verify_code': '123ABC'}
+    assert notification.personalisation == {'verify_code': '123456'}
     assert notification.to == sample_user.mobile_number
     assert str(notification.service_id) == current_app.config['NOTIFY_SERVICE_ID']
     assert notification.reply_to_text == notify_service.get_default_sms_sender()
@@ -213,7 +213,7 @@ def test_send_user_code_for_sms_with_optional_to_field(client,
     Tests POST endpoint /user/<user_id>/sms-code with optional to field
     """
     to_number = '+447119876757'
-    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123ABC')
+    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123456')
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
     auth_header = create_authorization_header()
 

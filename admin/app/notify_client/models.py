@@ -55,7 +55,7 @@ def translate_permissions_from_admin_roles_to_db(permissions):
 
 
 class User(UserMixin):
-    def __init__(self, fields, max_failed_login_count=3):
+    def __init__(self, fields, max_failed_login_count=3, max_failed_verify_count=3):
         self.id = fields.get('id')
         self.name = fields.get('name')
         self.email_address = fields.get('email_address')
@@ -67,6 +67,7 @@ class User(UserMixin):
         self.failed_verify_count = fields.get('failed_verify_count')
         self.state = fields.get('state')
         self.max_failed_login_count = max_failed_login_count
+        self.max_failed_verify_count = max_failed_verify_count
         self.platform_admin = fields.get('platform_admin')
         self.current_session_id = fields.get('current_session_id')
         self.services = fields.get('services', [])
