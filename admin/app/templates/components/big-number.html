@@ -1,9 +1,9 @@
-{% macro big_number(number, label, link=None, currency='', smaller=False, smallest=False) %}
+{% macro big_number(number, label, link=None, currency='', smaller=False, smallest=False, muted=False) %}
   {% if link %}
     <a class="big-number-link" href="{{ link }}">
   {% endif %}
   <div class="big-number{% if smaller %}-smaller{% endif %}{% if smallest %}-smallest{% endif %}">
-    <div class="big-number-number">
+    <div class="big-number-number{% if muted %} big-number-number-muted{% endif %}">
       {% if number is number %}
         {% if currency %}
           {{ "{}{:,.2f}".format(currency, number) }}
@@ -36,7 +36,7 @@
   smaller=False,
   smallest=False
 ) %}
-  <div class="big-number-with-status">
+  <div class="big-number-with-status big-number-centered">
     {{ big_number(number, label, link=link, smaller=smaller, smallest=smallest) }}
     {% if show_failures %}
       <div class="big-number-status{% if danger_zone %}-failing{% endif %}">

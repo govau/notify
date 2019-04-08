@@ -3,7 +3,6 @@
   display: block;
   margin: 2rem;
   font-size: 2em;
-  text-align: center;
   font-weight: bold;
 
   &-number {
@@ -16,8 +15,12 @@
   &-label {
     display: inline-block;
     padding-bottom: 10px;
-    font-size: 0.5em;
+    font-size: 0.475em;
     font-weight: normal;
+  }
+
+  &-centered {
+    text-align: center;
   }
 }
 
@@ -25,7 +28,6 @@
   @extend %big-number;
 
   margin: 0;
-  text-align: left;
 
   .big-number-number {
     @include core-strong;
@@ -38,7 +40,6 @@
   @extend %big-number;
 
   margin: 0;
-  text-align: left;
 
   .big-number-number {
     @include core-strong;
@@ -60,7 +61,7 @@
   }
 
   .big-number-label {
-    font-size: 0.5em;
+    font-size: 0.475em;
   }
 
   %big-number-status,
