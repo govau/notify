@@ -214,7 +214,7 @@ def submit_request_to_go_live(service_id):
         except HTTPError:
             flash('Error processing your request. Please try again later.', 'error')
         else:
-            flash('We’ve received your request to go live', 'default')
+            flash('We’ll respond to your request to go live within 48 business hours.', 'default')
             return redirect(url_for('.service_settings', service_id=service_id))
 
     return render_template('views/service-settings/submit-request-to-go-live.html', form=form)
