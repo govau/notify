@@ -416,7 +416,7 @@ def test_send_email_code_returns_404_for_bad_input_data(admin_request):
 
 @freeze_time('2016-01-01T12:00:00')
 def test_user_verify_email_code(admin_request, sample_user):
-    magic_code = str(uuid.uuid4()).upper()
+    magic_code = str(uuid.uuid4())
     verify_code = create_user_code(sample_user, magic_code, EMAIL_TYPE)
 
     data = {
@@ -439,7 +439,7 @@ def test_user_verify_email_code(admin_request, sample_user):
 @pytest.mark.parametrize('code_type', [EMAIL_TYPE, SMS_TYPE])
 @freeze_time('2016-01-01T12:00:00')
 def test_user_verify_email_code_fails_if_code_already_used(admin_request, sample_user, code_type):
-    magic_code = str(uuid.uuid4()).upper()
+    magic_code = str(uuid.uuid4())
     verify_code = create_user_code(sample_user, magic_code, code_type)
     verify_code.code_used = True
 

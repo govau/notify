@@ -22,7 +22,8 @@ from app.dao.users_dao import (
     save_user_attribute,
     update_user_password,
     count_user_verify_codes,
-    get_user_and_accounts
+    get_user_and_accounts,
+    set_verify_codes_to_used
 )
 from app.dao.permissions_dao import permission_dao
 from app.dao.services_dao import dao_fetch_service_by_id
@@ -138,7 +139,7 @@ def verify_user_code(user_id):
 
     user_to_verify = get_user_by_id(user_id=user_id)
 
-    code = get_user_code(user_to_verify, data['code'].upper(), data['code_type'])
+    code = get_user_code(user_to_verify, data['code'], data['code_type'])
     if user_to_verify.failed_verify_count >= current_app.config.get('MAX_FAILED_VERIFY_COUNT'):
         raise InvalidRequest("Code not found", status_code=404)
     if not code:
@@ -164,18 +165,17 @@ def send_user_2fa_code(user_id, code_type):
     user_to_send_to = get_user_by_id(user_id=user_id)
 
     if count_user_verify_codes(user_to_send_to) >= current_app.config.get('MAX_VERIFY_CODE_COUNT'):
-        # Prevent more than `MAX_VERIFY_CODE_COUNT` active verify codes at a time
-        current_app.logger.warn('Too many verify codes created for user {}'.format(user_to_send_to.id))
+        set_verify_codes_to_used(user_id)
+
+    data = request.get_json()
+    if code_type == SMS_TYPE:
+        validate(data, post_send_user_sms_code_schema)
+        send_user_sms_code(user_to_send_to, data)
+    elif code_type == EMAIL_TYPE:
+        validate(data, post_send_user_email_code_schema)
+        send_user_email_code(user_to_send_to, data)
     else:
-        data = request.get_json()
-        if code_type == SMS_TYPE:
-            validate(data, post_send_user_sms_code_schema)
-            send_user_sms_code(user_to_send_to, data)
-        elif code_type == EMAIL_TYPE:
-            validate(data, post_send_user_email_code_schema)
-            send_user_email_code(user_to_send_to, data)
-        else:
-            abort(404)
+        abort(404)
 
     return '{}', 204
 

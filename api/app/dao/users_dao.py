@@ -78,6 +78,11 @@ def delete_user_verify_codes(user):
     db.session.commit()
 
 
+def set_verify_codes_to_used(user_id):
+    db.session.query(VerifyCode).filter(VerifyCode.user_id == user_id).update({'code_used': True})
+    db.session.commit()
+
+
 def count_user_verify_codes(user):
     query = VerifyCode.query.filter(
         VerifyCode.user == user,
