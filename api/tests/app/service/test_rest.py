@@ -1510,9 +1510,9 @@ def test_get_services_with_detailed_flag(client, notify_db, notify_db_session):
     assert data[0]['name'] == 'Sample service'
     assert data[0]['id'] == str(notifications[0].service_id)
     assert data[0]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 3},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 3, 'templates': 3},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
 
 
@@ -1533,9 +1533,9 @@ def test_get_services_with_detailed_flag_excluding_from_test_key(notify_api, not
     data = json.loads(resp.get_data(as_text=True))['data']
     assert len(data) == 1
     assert data[0]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 2},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 2, 'templates': 5},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
 
 
@@ -1590,15 +1590,15 @@ def test_get_detailed_services_groups_by_service(notify_db, notify_db_session):
     assert len(data) == 2
     assert data[0]['id'] == str(service_1.id)
     assert data[0]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 1, 'failed': 0, 'requested': 3},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 1, 'failed': 0, 'requested': 3, 'templates': 3},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
     assert data[1]['id'] == str(service_2.id)
     assert data[1]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 1},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 1, 'templates': 1},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
 
 
@@ -1617,15 +1617,15 @@ def test_get_detailed_services_includes_services_with_no_notifications(notify_db
     assert len(data) == 2
     assert data[0]['id'] == str(service_1.id)
     assert data[0]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 1},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 1, 'templates': 1},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
     assert data[1]['id'] == str(service_2.id)
     assert data[1]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
 
 
@@ -1643,9 +1643,9 @@ def test_get_detailed_services_only_includes_todays_notifications(notify_db, not
 
     assert len(data) == 1
     assert data[0]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 3},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 3, 'templates': 4},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
 
 
@@ -1670,9 +1670,9 @@ def test_get_detailed_services_for_date_range(notify_db, notify_db_session, set_
 
     assert len(data) == 1
     assert data[0]['statistics'] == {
-        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0},
-        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 2},
-        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0}
+        EMAIL_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0},
+        SMS_TYPE: {'delivered': 0, 'failed': 0, 'requested': 2, 'templates': 4},
+        LETTER_TYPE: {'delivered': 0, 'failed': 0, 'requested': 0, 'templates': 0}
     }
 
 

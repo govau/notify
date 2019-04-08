@@ -26,10 +26,14 @@ from app.dao.service_sms_sender_dao import (
     dao_get_sms_senders_by_service_id,
     update_existing_sms_sender_with_inbound_number
 )
+from app.dao.templates_dao import (
+    dao_get_all_templates_for_service
+)
 from app.dao.services_dao import (
     dao_add_user_to_service,
     dao_archive_service,
     dao_create_service,
+    dao_fetch_active_users_for_service,
     dao_fetch_all_services,
     dao_fetch_all_services_by_user,
     dao_fetch_monthly_historical_stats_for_service,
@@ -68,7 +72,13 @@ from app.errors import (
     InvalidRequest,
     register_errors
 )
-from app.models import Service, EmailBranding
+from app.models import (
+    Service,
+    EmailBranding,
+    SMS_TYPE,
+    EMAIL_TYPE,
+    LETTER_TYPE
+)
 from app.schema_validation import validate
 from app.service import statistics
 from app.service.service_senders_schema import (
@@ -442,15 +452,30 @@ def get_detailed_services(start_date, end_date, only_active=False, include_from_
             s = statistics.create_zeroed_stats_dicts()
         else:
             s = statistics.format_statistics(rows)
+        sid = str(rows[0].service_id)
+
+        s[EMAIL_TYPE]['templates'] = len(dao_get_all_templates_for_service(sid, EMAIL_TYPE))
+        s[SMS_TYPE]['templates'] = len(dao_get_all_templates_for_service(sid, SMS_TYPE))
+        s[LETTER_TYPE]['templates'] = len(dao_get_all_templates_for_service(sid, LETTER_TYPE))
+
+        domains = []
+        for user in dao_fetch_active_users_for_service(sid):
+            parts = user.email_address.split('@')
+            if len(parts) != 2:
+                continue
+            domains.append(parts[1])
+
         results.append({
-            'id': str(rows[0].service_id),
+            'id': sid,
             'name': rows[0].name,
             'notification_type': rows[0].notification_type,
             'research_mode': rows[0].research_mode,
             'restricted': rows[0].restricted,
             'active': rows[0].active,
             'created_at': rows[0].created_at,
-            'statistics': s
+            'statistics': s,
+            'domains': domains,
+            'organisation_type': rows[0].organisation_type
         })
     return results
 

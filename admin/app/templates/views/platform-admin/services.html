@@ -6,22 +6,30 @@
 {% from "components/message-count-label.html" import message_count_label %}
 {% from "components/table.html" import mapping_table, field, stats_fields, row_group, row, right_aligned_field_heading, hidden_field_heading, text_field %}
 
-{% macro stats_fields(channel, data) -%}
+{% macro maybe_muted_number(number) -%}
+<span{% if number == 0 %} class="text-muted"{% endif %}>{{ number }}</span>
+{% endmacro %}
+
+{% macro stats_fields(channel, channel_label, data) -%}
 
   {% call field(border=False) %}
-      <span class="heading-medium">{{ channel.title() }}</span>
+      <strong>{{ channel_label }}</strong>
   {% endcall %}
 
   {% call field(align='right', border=False) %}
-    {{ big_number(data[channel]['sending'], smaller=True) }}
+    {{ maybe_muted_number(data[channel]['sending']) }}
   {% endcall %}
 
   {% call field(align='right', border=False) %}
-    {{ big_number(data[channel]['delivered'], smaller=True) }}
+  {{ maybe_muted_number(data[channel]['delivered']) }}
   {% endcall %}
 
   {% call field(align='right', status='error' if data[channel]['failed'], border=False) %}
-    {{ big_number(data[channel]['failed'], smaller=True) }}
+  {{ maybe_muted_number(data[channel]['failed']) }}
+  {% endcall %}
+
+  {% call field(align='right', border=False) %}
+  {{ maybe_muted_number(data[channel]['templates']) }}
   {% endcall %}
 
 {%- endmacro %}
@@ -31,11 +39,14 @@
     caption=caption,
     caption_visible=False,
     field_headings=[
+    'Type',
+    'Domains',
     'Service',
     hidden_field_heading('Type'),
     right_aligned_field_heading('Sending'),
     right_aligned_field_heading('Delivered'),
-    right_aligned_field_heading('Failed')
+    right_aligned_field_heading('Failed'),
+    right_aligned_field_heading('Templates')
     ],
     field_headings_visible=True
   ) %}
@@ -46,40 +57,47 @@
 
         {% call row() %}
           {% call field(border=False) %}
-            <a href="{{ url_for('main.service_dashboard', service_id=service['id']) }}" class="browse-list-link">{{ service['name'] }}</a>
+            {% if service['organisation_type'] %}
+              {{ service['organisation_type'].title() }}
+            {% else %}
+              <em>N/A</em>
+            {% endif %}
           {% endcall %}
 
-          {{ stats_fields('email', service['stats']) }}
+          {% call field(border=False) %}
+            {{ service['domains'] }}
+          {% endcall %}
+
+          {% call field(border=False) %}
+            <a href="{{ url_for('main.service_dashboard', service_id=service['id']) }}"><strong>{{ service['name'] }}</strong></a>
+          {% endcall %}
+
+          {{ stats_fields('email', 'Email', service['stats']) }}
         {% endcall %}
 
         {% call row() %}
+          {% call field(border=False) %}{% endcall %}
+          {% call field(border=False) %}{% endcall %}
+
           {% if not service['active'] %}
             {% call field(status='default', border=False) %}
-              <span class="heading-medium">archived</span>
+              <span class="archived">Archived</span>
             {% endcall %}
           {% elif service['research_mode'] %}
             {% call field(border=False) %}
-              <span class="research-mode">research mode</span>
+              <span class="research-mode">Research mode</span>
             {% endcall %}
           {% elif not service['restricted'] %}
             {% call field(status='error', border=False) %}
-              <span class="heading-medium">Live</span>
+              <span class="live">Live</span>
             {% endcall %}
           {% else %}
             {% call field(border=False) %}
+              <span class="trial">Trial</span>
             {% endcall %}
           {% endif %}
 
-          {{ stats_fields('sms', service['stats']) }}
-        {% endcall %}
-
-        {% call row() %}
-
-          {% call field(border=False) %}
-
-          {% endcall %}
-            {{ stats_fields('letter', service['stats']) }}
-
+          {{ stats_fields('sms', 'SMS', service['stats']) }}
         {% endcall %}
 
       {% endcall %}

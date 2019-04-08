@@ -352,12 +352,21 @@ def get_template(
                 redact_missing_personalisation=redact_missing_personalisation,
             )
 
+# AET is Australian Eastern Time (https://www.timeanddate.com/time/zones/aet).
+aet_tz_str = "Australia/Sydney"
+aet_tz = pytz.timezone(aet_tz_str)
+
+def convert_utc_to_local(utc_dt, local_tz):
+    return pytz.utc.localize(utc_dt).astimezone(local_tz).replace(tzinfo=None)
+
+def convert_utc_to_aet(utc_dt):
+    return convert_utc_to_local(utc_dt, aet_tz)
 
 def get_current_financial_year():
-    now = datetime.utcnow()
+    now = convert_utc_to_aet(datetime.utcnow())
     current_month = int(now.strftime('%-m'))
     current_year = int(now.strftime('%Y'))
-    return current_year if current_month > 3 else current_year - 1
+    return current_year if current_month > 6 else current_year - 1
 
 
 def get_time_left(created_at):

@@ -1,8 +1,31 @@
-.research-mode {
+.trial,
+.live,
+.research-mode,
+.archived {
   font-weight: bold;
   display: inline-block;
-  padding: 5px 10px;
+  padding: 0 5px;
   background: $govuk-blue;
   color: $white;
   border-radius: 2px;
+}
+
+.trial {
+  background: $orange;
+  color: $white;
+}
+
+.live {
+  background: $green;
+  color: $white;
+}
+
+.research-mode {
+  background: $govuk-blue;
+  color: $white;
+}
+
+.archived {
+  background: $grey-2;
+  color: $white;
 }
