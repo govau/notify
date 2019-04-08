@@ -243,7 +243,7 @@ def test_send_sms_code_returns_404_for_bad_input_data(client):
     assert json.loads(resp.get_data(as_text=True))['message'] == 'No result found'
 
 
-def test_send_sms_code_returns_204_when_too_many_codes_already_created(client, sample_user):
+def test_send_sms_code_returns_204_when_too_many_codes_already_created(client, sample_user, sms_code_template, mocker):
     for i in range(10):
         verify_code = VerifyCode(
             code_type='sms',
@@ -256,12 +256,17 @@ def test_send_sms_code_returns_204_when_too_many_codes_already_created(client, s
         db.session.commit()
     assert VerifyCode.query.count() == 10
     auth_header = create_authorization_header()
+
+    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123456')
+    mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
+
     resp = client.post(
         url_for('user.send_user_2fa_code', code_type='sms', user_id=sample_user.id),
         data=json.dumps({}),
         headers=[('Content-Type', 'application/json'), auth_header])
+    assert mocked.call_count == 1
     assert resp.status_code == 204
-    assert VerifyCode.query.count() == 10
+    assert VerifyCode.query.count() == 11
 
 
 def test_send_new_user_email_verification(client,
