@@ -55,7 +55,7 @@ def translate_permissions_from_admin_roles_to_db(permissions):
 
 
 class User(UserMixin):
-    def __init__(self, fields, max_failed_login_count=3):
+    def __init__(self, fields, max_failed_login_count=3, max_failed_verify_count=3):
         self.id = fields.get('id')
         self.name = fields.get('name')
         self.email_address = fields.get('email_address')
@@ -64,8 +64,10 @@ class User(UserMixin):
         self._set_permissions(fields.get('permissions', {}))
         self.auth_type = fields.get('auth_type')
         self.failed_login_count = fields.get('failed_login_count')
+        self.failed_verify_count = fields.get('failed_verify_count')
         self.state = fields.get('state')
         self.max_failed_login_count = max_failed_login_count
+        self.max_failed_verify_count = max_failed_verify_count
         self.platform_admin = fields.get('platform_admin')
         self.current_session_id = fields.get('current_session_id')
         self.services = fields.get('services', [])
@@ -144,7 +146,7 @@ class User(UserMixin):
         return permission in self._permissions.get(service_id, [])
 
     def is_locked(self):
-        return self.failed_login_count >= self.max_failed_login_count
+        return self.failed_login_count >= self.max_failed_login_count or self.failed_verify_count >= self.max_failed_verify_count
 
     def serialize(self):
         dct = {
@@ -155,6 +157,7 @@ class User(UserMixin):
             "password_changed_at": self.password_changed_at,
             "state": self.state,
             "failed_login_count": self.failed_login_count,
+            "failed_verify_count": self.failed_verify_count,
             "permissions": [x for x in self._permissions],
             "organisations": self.organisations,
             "current_session_id": self.current_session_id

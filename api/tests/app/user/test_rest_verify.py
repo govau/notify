@@ -57,8 +57,7 @@ def test_user_verify_code_missing_code(client,
     assert User.query.get(sample_sms_code.user.id).failed_login_count == 0
 
 
-def test_user_verify_code_bad_code_and_increments_failed_login_count(client,
-                                                                     sample_sms_code):
+def test_user_verify_code_bad_code_and_increments_failed_verify_count(client, sample_sms_code):
     assert not VerifyCode.query.first().code_used
     data = json.dumps({
         'code_type': sample_sms_code.code_type,
@@ -70,10 +69,10 @@ def test_user_verify_code_bad_code_and_increments_failed_login_count(client,
         headers=[('Content-Type', 'application/json'), auth_header])
     assert resp.status_code == 404
     assert not VerifyCode.query.first().code_used
-    assert User.query.get(sample_sms_code.user.id).failed_login_count == 1
+    assert User.query.get(sample_sms_code.user.id).failed_verify_count == 1
 
 
-def test_user_verify_code_expired_code_and_increments_failed_login_count(
+def test_user_verify_code_expired_code_and_increments_failed_verify_count(
         client,
         sample_sms_code):
     assert not VerifyCode.query.first().code_used
@@ -91,7 +90,7 @@ def test_user_verify_code_expired_code_and_increments_failed_login_count(
         headers=[('Content-Type', 'application/json'), auth_header])
     assert resp.status_code == 400
     assert not VerifyCode.query.first().code_used
-    assert User.query.get(sample_sms_code.user.id).failed_login_count == 1
+    assert User.query.get(sample_sms_code.user.id).failed_verify_count == 1
 
 
 @freeze_time("2016-01-01 10:00:00.000000")
@@ -181,7 +180,7 @@ def test_send_user_sms_code(client,
         dao_update_service(notify_service)
 
     auth_header = create_authorization_header()
-    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='11111')
+    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123456')
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     resp = client.post(
@@ -191,10 +190,10 @@ def test_send_user_sms_code(client,
     assert resp.status_code == 204
 
     assert mocked.call_count == 1
-    assert VerifyCode.query.one().check_code('11111')
+    assert VerifyCode.query.one().check_code('123456')
 
     notification = Notification.query.one()
-    assert notification.personalisation == {'verify_code': '11111'}
+    assert notification.personalisation == {'verify_code': '123456'}
     assert notification.to == sample_user.mobile_number
     assert str(notification.service_id) == current_app.config['NOTIFY_SERVICE_ID']
     assert notification.reply_to_text == notify_service.get_default_sms_sender()
@@ -214,7 +213,7 @@ def test_send_user_code_for_sms_with_optional_to_field(client,
     Tests POST endpoint /user/<user_id>/sms-code with optional to field
     """
     to_number = '+447119876757'
-    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='11111')
+    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123456')
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
     auth_header = create_authorization_header()
 
@@ -244,7 +243,7 @@ def test_send_sms_code_returns_404_for_bad_input_data(client):
     assert json.loads(resp.get_data(as_text=True))['message'] == 'No result found'
 
 
-def test_send_sms_code_returns_204_when_too_many_codes_already_created(client, sample_user):
+def test_send_sms_code_returns_204_when_too_many_codes_already_created(client, sample_user, sms_code_template, mocker):
     for i in range(10):
         verify_code = VerifyCode(
             code_type='sms',
@@ -257,12 +256,17 @@ def test_send_sms_code_returns_204_when_too_many_codes_already_created(client, s
         db.session.commit()
     assert VerifyCode.query.count() == 10
     auth_header = create_authorization_header()
+
+    mocked = mocker.patch('app.user.rest.create_secret_code', return_value='123456')
+    mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
+
     resp = client.post(
         url_for('user.send_user_2fa_code', code_type='sms', user_id=sample_user.id),
         data=json.dumps({}),
         headers=[('Content-Type', 'application/json'), auth_header])
+    assert mocked.call_count == 1
     assert resp.status_code == 204
-    assert VerifyCode.query.count() == 10
+    assert VerifyCode.query.count() == 11
 
 
 def test_send_new_user_email_verification(client,
@@ -300,7 +304,7 @@ def test_send_email_verification_returns_404_for_bad_input_data(client, notify_d
 
 
 def test_user_verify_user_code_returns_404_when_code_is_right_but_user_account_is_locked(client, sample_sms_code):
-    sample_sms_code.user.failed_login_count = 10
+    sample_sms_code.user.failed_verify_count = 5
     data = json.dumps({
         'code_type': sample_sms_code.code_type,
         'code': sample_sms_code.txt_code})
@@ -309,12 +313,12 @@ def test_user_verify_user_code_returns_404_when_code_is_right_but_user_account_i
         data=data,
         headers=[('Content-Type', 'application/json'), create_authorization_header()])
     assert resp.status_code == 404
-    assert sample_sms_code.user.failed_login_count == 10
+    assert sample_sms_code.user.failed_verify_count == 5
     assert not sample_sms_code.code_used
 
 
-def test_user_verify_user_code_valid_code_resets_failed_login_count(client, sample_sms_code):
-    sample_sms_code.user.failed_login_count = 1
+def test_user_verify_user_code_valid_code_resets_failed_verify_count(client, sample_sms_code):
+    sample_sms_code.user.failed_verify_count = 1
     data = json.dumps({
         'code_type': sample_sms_code.code_type,
         'code': sample_sms_code.txt_code})
@@ -323,7 +327,7 @@ def test_user_verify_user_code_valid_code_resets_failed_login_count(client, samp
         data=data,
         headers=[('Content-Type', 'application/json'), create_authorization_header()])
     assert resp.status_code == 204
-    assert sample_sms_code.user.failed_login_count == 0
+    assert sample_sms_code.user.failed_verify_count == 0
     assert sample_sms_code.code_used
 
 
