@@ -137,6 +137,6 @@ def format_stats_by_service(services):
             'research_mode': service['research_mode'],
             'created_at': service['created_at'],
             'active': service['active'],
-            'domains': ', '.join(service['domains']),
+            'domains': service['domains'],
             'organisation_type': service['organisation_type']
         }
