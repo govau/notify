@@ -31,6 +31,8 @@ migrate = Migrate()
 ma = Marshmallow()
 notify_celery = NotifyCelery()
 telstra_sms_client = TelstraSMSClient(
+    notify_service_client_id=os.getenv('NOTIFY_SERVICE_TELSTRA_MESSAGING_CLIENT_ID'),
+    notify_service_client_secret=os.getenv('NOTIFY_SERVICE_TELSTRA_MESSAGING_CLIENT_SECRET'),
     client_id=os.getenv('TELSTRA_MESSAGING_CLIENT_ID'),
     client_secret=os.getenv('TELSTRA_MESSAGING_CLIENT_SECRET'),
 )
@@ -76,6 +78,7 @@ def create_app(application):
     logging.init_app(application, statsd_client)
     telstra_sms_client.init_app(
         logger=application.logger,
+        notify_service_id=application.config["NOTIFY_SERVICE_ID"],
         callback_notify_url_host=application.config["API_HOST_NAME"]
     )
     twilio_sms_client.init_app(

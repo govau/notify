@@ -43,7 +43,7 @@ def test_can_get_sms_non_international_providers(restore_provider_details):
 
 def test_can_get_sms_international_providers(restore_provider_details):
     sms_providers = get_provider_details_by_notification_type('sms', True)
-    assert len(sms_providers) == 1
+    assert len(sms_providers) == 2
     assert all('sms' == prov.notification_type for prov in sms_providers)
     assert all(prov.supports_international for prov in sms_providers)
 
@@ -115,11 +115,11 @@ def test_update_sms_provider_to_inactive_sets_inactive(restore_provider_details)
 
 
 def test_get_current_sms_provider_returns_correct_provider(restore_provider_details):
-    set_primary_sms_provider('twilio')
+    set_primary_sms_provider('telstra')
 
     provider = get_current_provider('sms')
 
-    assert provider.identifier == 'twilio'
+    assert provider.identifier == 'telstra'
 
 
 @pytest.mark.parametrize('provider_identifier', ['twilio', 'telstra'])
@@ -154,11 +154,11 @@ def test_switch_sms_provider_to_inactive_provider_does_not_switch(
     assert new_provider.identifier == current_sms_provider.identifier
 
 
+@pytest.mark.skip(reason="there is only one active sms provider so can't test toggling")
 def test_toggle_sms_provider_switches_provider(
     mocker,
     restore_provider_details,
     current_sms_provider,
-    with_active_telstra_provider,
     sample_user
 
 ):
@@ -172,10 +172,10 @@ def test_toggle_sms_provider_switches_provider(
     assert new_provider.priority < old_starting_provider.priority
 
 
+@pytest.mark.skip(reason="there is only one active sms provider so can't test toggling")
 def test_toggle_sms_provider_switches_when_provider_priorities_are_equal(
     mocker,
     restore_provider_details,
-    with_active_telstra_provider,
     sample_user
 ):
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
@@ -193,11 +193,11 @@ def test_toggle_sms_provider_switches_when_provider_priorities_are_equal(
     assert new_provider.priority < old_starting_provider.priority
 
 
+@pytest.mark.skip(reason="there is only one active sms provider so can't test toggling")
 def test_toggle_sms_provider_updates_provider_history(
     mocker,
     restore_provider_details,
     current_sms_provider,
-    with_active_telstra_provider,
     sample_user
 ):
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
@@ -219,10 +219,10 @@ def test_toggle_sms_provider_updates_provider_history(
     assert updated_provider_history_rows[0].version - provider_history_rows[0].version == 1
 
 
+@pytest.mark.skip(reason="there is only one active sms provider so can't test toggling")
 def test_toggle_sms_provider_switches_provider_stores_notify_user_id(
     restore_provider_details,
     sample_user,
-    with_active_telstra_provider,
     mocker
 ):
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
@@ -236,10 +236,10 @@ def test_toggle_sms_provider_switches_provider_stores_notify_user_id(
     assert new_provider.created_by_id == sample_user.id
 
 
+@pytest.mark.skip(reason="there is only one active sms provider so can't test toggling")
 def test_toggle_sms_provider_switches_provider_stores_notify_user_id_in_history(
     restore_provider_details,
     sample_user,
-    with_active_telstra_provider,
     mocker
 ):
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
@@ -268,18 +268,21 @@ def test_toggle_sms_provider_switches_provider_stores_notify_user_id_in_history(
 
 
 def test_can_get_all_provider_history(current_sms_provider):
-    assert len(dao_get_provider_versions(current_sms_provider.id)) == 2
+    assert len(dao_get_provider_versions(current_sms_provider.id)) == 3
 
 
 def test_get_sms_provider_with_equal_priority_returns_provider(
-    restore_provider_details,
-    with_active_telstra_provider
+    restore_provider_details
 ):
     current_provider = get_current_provider('sms')
     new_provider = get_alternative_sms_provider(current_provider.identifier)
 
     current_provider.priority = new_provider.priority
     dao_update_provider_details(current_provider)
+
+    # Ensure that the alternative provider is active
+    new_provider.active = True
+    dao_update_provider_details(new_provider)
 
     conflicting_provider = \
         dao_get_sms_provider_with_equal_priority(current_provider.identifier, current_provider.priority)
