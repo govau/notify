@@ -24,6 +24,12 @@
   </table>
 {%- endmacro %}
 
+{% macro table_overflow() -%}
+  <div class="table-overflow">
+    {{ caller() }}
+  </div>
+{%- endmacro %}
+
 {% macro list_table(items, caption='', empty_message='', field_headings=[], field_headings_visible=True, caption_visible=True, equal_length=False) -%}
   {% set parent_caller = caller %}
 
