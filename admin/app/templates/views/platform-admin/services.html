@@ -65,7 +65,7 @@
           {% endcall %}
 
           {% call field(border=False) %}
-            {{ service['domains'] }}
+            {{'<br/>'.join(service['domains'])|safe}}
           {% endcall %}
 
           {% call field(border=False) %}

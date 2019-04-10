@@ -458,12 +458,12 @@ def get_detailed_services(start_date, end_date, only_active=False, include_from_
         s[SMS_TYPE]['templates'] = len(dao_get_all_templates_for_service(sid, SMS_TYPE))
         s[LETTER_TYPE]['templates'] = len(dao_get_all_templates_for_service(sid, LETTER_TYPE))
 
-        domains = []
+        domains = set()
         for user in dao_fetch_active_users_for_service(sid):
             parts = user.email_address.split('@')
             if len(parts) != 2:
                 continue
-            domains.append(parts[1])
+            domains.add(parts[1].lower())
 
         results.append({
             'id': sid,
@@ -474,7 +474,7 @@ def get_detailed_services(start_date, end_date, only_active=False, include_from_
             'active': rows[0].active,
             'created_at': rows[0].created_at,
             'statistics': s,
-            'domains': domains,
+            'domains': sorted(list(domains)),
             'organisation_type': rows[0].organisation_type
         })
     return results
