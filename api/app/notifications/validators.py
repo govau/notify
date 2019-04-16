@@ -83,7 +83,7 @@ def service_can_send_to_recipient(send_to, key_type, service, allow_whitelisted_
         else:
             message = (
                 'Can’t send to this recipient when service is in trial mode '
-                '– see https://www.notifications.service.gov.uk/trial-mode'
+                '– see https://notify.gov.au/features/using-notify'
             )
         raise BadRequestError(message=message)
 
