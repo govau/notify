@@ -57,6 +57,10 @@ SMS_AUTH_TYPE = 'sms_auth'
 EMAIL_AUTH_TYPE = 'email_auth'
 USER_AUTH_TYPE = [SMS_AUTH_TYPE, EMAIL_AUTH_TYPE]
 
+DELIVERY_STATUS_CALLBACK_TYPE = 'delivery_status'
+COMPLAINT_CALLBACK_TYPE = 'complaint'
+SERVICE_CALLBACK_TYPES = [DELIVERY_STATUS_CALLBACK_TYPE, COMPLAINT_CALLBACK_TYPE]
+
 
 def filter_null_value_fields(obj):
     return dict(
@@ -1808,3 +1812,29 @@ class DateTimeDimension(db.Model):
 
 
 Index('ix_dm_datetime_yearmonth', DateTimeDimension.year, DateTimeDimension.month)
+
+
+class Complaint(db.Model):
+    __tablename__ = 'complaints'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    notification_id = db.Column(UUID(as_uuid=True), db.ForeignKey('notification_history.id'),
+                                index=True, nullable=False)
+    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), unique=False, index=True, nullable=False)
+    service = db.relationship(Service, backref=db.backref('complaints'))
+    ses_feedback_id = db.Column(db.Text, nullable=True)
+    complaint_type = db.Column(db.Text, nullable=True)
+    complaint_date = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+    def serialize(self):
+        return {
+            'id': str(self.id),
+            'notification_id': str(self.notification_id),
+            'service_id': str(self.service_id),
+            'service_name': self.service.name,
+            'ses_feedback_id': str(self.ses_feedback_id),
+            'complaint_type': self.complaint_type,
+            'complaint_date': self.complaint_date.strftime(DATETIME_FORMAT) if self.complaint_date else None,
+            'created_at': self.created_at.strftime(DATETIME_FORMAT),
+        }

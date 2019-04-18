@@ -57,6 +57,10 @@ from app.notify_client.org_invite_api_client import OrgInviteApiClient
 from app.notify_client.letter_jobs_client import LetterJobsClient
 from app.notify_client.inbound_number_client import InboundNumberClient
 from app.notify_client.billing_api_client import BillingAPIClient
+from app.notify_client.complaint_api_client import complaint_api_client
+from app.notify_client.platform_stats_api_client import (
+    platform_stats_api_client,
+)
 from app.commands import setup_commands
 from app.utils import requires_auth
 from app.utils import get_cdn_domain
@@ -124,6 +128,8 @@ def create_app(application):
     letter_jobs_client.init_app(application)
     inbound_number_client.init_app(application)
     billing_api_client.init_app(application)
+    complaint_api_client.init_app(application)
+    platform_stats_api_client.init_app(application)
 
     login_manager.init_app(application)
     login_manager.login_view = 'main.sign_in'

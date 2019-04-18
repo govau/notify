@@ -34,6 +34,7 @@ from app.models import (
     AnnualBilling,
     LetterRate,
     InvitedOrganisationUser,
+    Complaint,
 )
 from app.dao.users_dao import save_model_user
 from app.dao.notifications_dao import (
@@ -524,3 +525,92 @@ def create_daily_sorted_letter(billing_day=date(2018, 1, 18),
     db.session.commit()
 
     return daily_sorted_letter
+
+
+def create_complaint(service=None,
+                     notification=None,
+                     created_at=None):
+    if not service:
+        service = create_service()
+    if not notification:
+        template = create_template(service=service, template_type='email')
+        notification = create_notification(template=template)
+
+    complaint = Complaint(notification_id=notification.id,
+                          service_id=service.id,
+                          ses_feedback_id=str(uuid.uuid4()),
+                          complaint_type='abuse',
+                          complaint_date=datetime.utcnow(),
+                          created_at=created_at if created_at else datetime.now()
+                          )
+    db.session.add(complaint)
+    db.session.commit()
+    return complaint
+
+
+def ses_complaint_callback_malformed_message_id():
+    return {
+        'Signature': 'bb',
+        'SignatureVersion': '1', 'MessageAttributes': {}, 'MessageId': '98c6e927-af5d-5f3b-9522-bab736f2cbde',
+        'UnsubscribeUrl': 'https://sns.eu-west-1.amazonaws.com',
+        'TopicArn': 'arn:ses_notifications', 'Type': 'Notification',
+        'Timestamp': '2018-06-05T14:00:15.952Z', 'Subject': None,
+        'Message': '{"notificationType":"Complaint","complaint":{"complainedRecipients":[{"emailAddress":"recipient1@example.com"}],"timestamp":"2018-06-05T13:59:58.000Z","feedbackId":"ses_feedback_id"},"mail":{"timestamp":"2018-06-05T14:00:15.950Z","source":"\\"Some Service\\" <someservicenotifications.service.gov.uk>","sourceArn":"arn:identity/notifications.service.gov.uk","sourceIp":"52.208.24.161","sendingAccountId":"888450439860","badMessageId":"ref1","destination":["recipient1@example.com"]}}',  # noqa
+        'SigningCertUrl': 'https://sns.pem'
+    }
+
+
+def ses_complaint_callback_with_missing_complaint_type():
+    """
+    https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html#complaint-object
+    """
+    return {
+        'Signature': 'bb',
+        'SignatureVersion': '1', 'MessageAttributes': {}, 'MessageId': '98c6e927-af5d-5f3b-9522-bab736f2cbde',
+        'UnsubscribeUrl': 'https://sns.eu-west-1.amazonaws.com',
+        'TopicArn': 'arn:ses_notifications', 'Type': 'Notification',
+        'Timestamp': '2018-06-05T14:00:15.952Z', 'Subject': None,
+        'Message': '{"notificationType":"Complaint","complaint":{"complainedRecipients":[{"emailAddress":"recipient1@example.com"}],"timestamp":"2018-06-05T13:59:58.000Z","feedbackId":"ses_feedback_id"},"mail":{"timestamp":"2018-06-05T14:00:15.950Z","source":"\\"Some Service\\" <someservicenotifications.service.gov.uk>","sourceArn":"arn:identity/notifications.service.gov.uk","sourceIp":"52.208.24.161","sendingAccountId":"888450439860","messageId":"ref1","destination":["recipient1@example.com"]}}',  # noqa
+        'SigningCertUrl': 'https://sns.pem'
+    }
+
+
+def ses_complaint_callback():
+    """
+    https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html#complaint-object
+    """
+    return {
+        'Signature': 'bb',
+        'SignatureVersion': '1', 'MessageAttributes': {}, 'MessageId': '98c6e927-af5d-5f3b-9522-bab736f2cbde',
+        'UnsubscribeUrl': 'https://sns.eu-west-1.amazonaws.com',
+        'TopicArn': 'arn:ses_notifications', 'Type': 'Notification',
+        'Timestamp': '2018-06-05T14:00:15.952Z', 'Subject': None,
+        'Message': '{"notificationType":"Complaint","complaint":{"complaintFeedbackType": "abuse", "complainedRecipients":[{"emailAddress":"recipient1@example.com"}],"timestamp":"2018-06-05T13:59:58.000Z","feedbackId":"ses_feedback_id"},"mail":{"timestamp":"2018-06-05T14:00:15.950Z","source":"\\"Some Service\\" <someservicenotifications.service.gov.uk>","sourceArn":"arn:identity/notifications.service.gov.uk","sourceIp":"52.208.24.161","sendingAccountId":"888450439860","messageId":"ref1","destination":["recipient1@example.com"]}}',  # noqa
+        'SigningCertUrl': 'https://sns.pem'
+    }
+
+
+def ses_notification_callback():
+    return '{\n  "Type" : "Notification",\n  "MessageId" : "ref1",' \
+           '\n  "TopicArn" : "arn:aws:sns:eu-west-1:123456789012:testing",' \
+           '\n  "Message" : "{\\"notificationType\\":\\"Delivery\\",' \
+           '\\"mail\\":{\\"timestamp\\":\\"2016-03-14T12:35:25.909Z\\",' \
+           '\\"source\\":\\"test@test-domain.com\\",' \
+           '\\"sourceArn\\":\\"arn:aws:ses:eu-west-1:123456789012:identity/testing-notify\\",' \
+           '\\"sendingAccountId\\":\\"123456789012\\",' \
+           '\\"messageId\\":\\"ref1\\",' \
+           '\\"destination\\":[\\"testing@digital.cabinet-office.gov.uk\\"]},' \
+           '\\"delivery\\":{\\"timestamp\\":\\"2016-03-14T12:35:26.567Z\\",' \
+           '\\"processingTimeMillis\\":658,' \
+           '\\"recipients\\":[\\"testing@digital.cabinet-office.gov.uk\\"],' \
+           '\\"smtpResponse\\":\\"250 2.0.0 OK 1457958926 uo5si26480932wjc.221 - gsmtp\\",' \
+           '\\"reportingMTA\\":\\"a6-238.smtp-out.eu-west-1.amazonses.com\\"}}",' \
+           '\n  "Timestamp" : "2016-03-14T12:35:26.665Z",\n  "SignatureVersion" : "1",' \
+           '\n  "Signature" : "X8d7eTAOZ6wlnrdVVPYanrAlsX0SMPfOzhoTEBnQqYkrNWTqQY91C0f3bxtPdUhUt' \
+           'OowyPAOkTQ4KnZuzphfhVb2p1MyVYMxNKcBFB05/qaCX99+92fjw4x9LeUOwyGwMv5F0Vkfi5qZCcEw69uVrhYL' \
+           'VSTFTrzi/yCtru+yFULMQ6UhbY09GwiP6hjxZMVr8aROQy5lLHglqQzOuSZ4KeD85JjifHdKzlx8jjQ+uj+FLzHXPMA' \
+           'PmPU1JK9kpoHZ1oPshAFgPDpphJe+HwcJ8ezmk+3AEUr3wWli3xF+49y8Z2anASSVp6YI2YP95UT8Rlh3qT3T+V9V8rbSVislxA==",' \
+           '\n  "SigningCertURL" : "https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-bb750' \
+           'dd426d95ee9390147a5624348ee.pem",' \
+           '\n  "UnsubscribeURL" : "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&S' \
+           'subscriptionArn=arn:aws:sns:eu-west-1:302763885840:preview-emails:d6aad3ef-83d6-4cf3-a470-54e2e75916da"\n}'
