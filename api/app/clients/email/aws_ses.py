@@ -49,7 +49,8 @@ class AwsSesClient(EmailClient):
     '''
 
     def init_app(self, region, aws_access_key_id, aws_secret_access_key, statsd_client, *args, **kwargs):
-        self._client = boto3.client('ses',
+        self._client = boto3.client(
+            'ses',
             region_name=region,
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key

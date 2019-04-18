@@ -67,6 +67,7 @@ def send_delivery_status_to_service(self, notification_id,
                      for notification: {}""".format(notification_id)
                 )
 
+
 @notify_celery.task(bind=True, name="send-complaint", max_retries=5, default_retry_delay=300)
 @statsd(namespace="tasks")
 def send_complaint_to_service(self, complaint_data):
@@ -87,6 +88,48 @@ def send_complaint_to_service(self, complaint_data):
         complaint['service_callback_api_bearer_token'],
         'send_complaint_to_service'
     )
+
+
+def _send_data_to_service_callback_api(self, data, service_callback_url, token, function_name):
+    notification_id = (data["notification_id"] if "notification_id" in data else data["id"])
+    try:
+        response = request(
+            method="POST",
+            url=service_callback_url,
+            data=json.dumps(data),
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer {}'.format(token)
+            },
+            timeout=60
+        )
+        current_app.logger.info('{} sending {} to {}, response {}'.format(
+            function_name,
+            notification_id,
+            service_callback_url,
+            response.status_code
+        ))
+        response.raise_for_status()
+    except RequestException as e:
+        current_app.logger.warning(
+            "{} request failed for notification_id: {} and url: {}. exc: {}".format(
+                function_name,
+                notification_id,
+                service_callback_url,
+                e
+            )
+        )
+        if not isinstance(e, HTTPError) or e.response.status_code >= 500:
+            try:
+                self.retry(queue=QueueNames.RETRY)
+            except self.MaxRetriesExceededError:
+                current_app.logger.error(
+                    "Retry: {} has retried the max num of times for callback url {} and notification_id: {}".format(
+                        function_name,
+                        service_callback_url,
+                        notification_id
+                    )
+                )
 
 
 def create_encrypted_callback_data(notification, service_callback_api):

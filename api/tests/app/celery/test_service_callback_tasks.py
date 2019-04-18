@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytest
 import requests_mock
+from freezegun import freeze_time
 
 from app import (DATETIME_FORMAT, encryption)
 from app.celery.service_callback_tasks import send_delivery_status_to_service, send_complaint_to_service
