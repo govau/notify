@@ -24,7 +24,46 @@
     <p>It’s free to send emails through Notify.</p>
 
     <h2 class="heading-medium">Text messages</h2>
-    <p>While in Beta, you have a free allowance of 25,000 text messages each financial year.</p>
+    <p>
+      While in Beta, you have a free allowance of 25,000 text messages each financial year. 
+      All text messages above this allowance will be at the cost of the customer.
+    </p>
+
+    <p>Current Notify pricing:</p>
+
+    <div class="bottom-gutter-3-2">
+      {% call mapping_table(
+        caption='Letter pricing',
+        field_headings=['SMS costs', 'Price excludes GST'],
+        field_headings_visible=True,
+        caption_visible=False
+      ) %}
+        {% for message_length, charge in [
+          ('Domestic SMS', '6¢'),
+          ('International SMS', '13¢'),
+          ('SMS Receipt', '1¢'),
+          ('MMS (less than 600KB)', '25¢'),
+          ('MMS (600KB+)', '40¢'),
+          ('MMS Receipt', '1¢'),
+          ('International MMS', '40¢'),
+          ('International MMS (600KB+)', '60¢'),
+          ('International MMS Receipt', '1.5¢')
+        ] %}
+          {% call row() %}
+            {{ text_field(message_length) }}
+            {{ text_field(charge) }}
+          {% endcall %}
+        {% endfor %}
+      {% endcall %}
+    </div>
+
+
+    <p>Note that these are current text message costs. Notify pricing may change as more telco providers are integrated onto Notify.</p>
+    <p>Customers will be notified when Notify pricing changes.</p>
+    <p>
+        Notify uses authorised Telco Providers from the 
+        <a target="_blank" href="https://www.dta.gov.au/help-and-advice/ict-procurement/tools-sourcing-digital-products-and-services/ict-panels-and-arrangements/buying-cloud-services">Cloud Services Panel.</a>
+    </p>
 
     <h3 class="heading-small">Multiple services</h3>
     <p>If your organisation offers multiple services, each service will get its own free message allowance.</p>
@@ -122,8 +161,9 @@
     #}
 
     <h2 class="heading-medium" id="paying">How to pay</h2>
-    <p>There will be associated costs if you exceed your free allowance.</p>
-    <p>Please <a href="mailto:notify-support@digital.gov.au">contact us</a> to discuss pricing.</p>
+    <p>
+      If you go over the free text message allowance, the DTA will send you an invoice with detailed usage on a quarterly basis. 
+    </p>
   </div>
 </div>
 
