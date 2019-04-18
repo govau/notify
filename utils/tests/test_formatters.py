@@ -19,6 +19,10 @@ from notifications_utils.formatters import (
     tweak_dvla_list_markup,
     remove_trailing_linebreak,
     nl2li,
+    strip_whitespace,
+    strip_and_remove_obscure_whitespace,
+    remove_smart_quotes_from_email_addresses,
+    strip_unsupported_characters,
 )
 from notifications_utils.template import (
     HTMLEmailTemplate,
@@ -966,3 +970,45 @@ def test_make_list_from_linebreaks():
         '<li>c</li>'
         '</ul>'
     )
+
+
+@pytest.mark.parametrize('value', [
+    'bar',
+    ' bar ',
+    """
+        \t    bar
+    """,
+    ' \u180E\u200B \u200C bar \u200D \u2060\uFEFF ',
+])
+def test_strip_whitespace(value):
+    assert strip_whitespace(value) == 'bar'
+
+
+@pytest.mark.parametrize('value', [
+    'notifications-email',
+    '  \tnotifications-email \x0c ',
+    '\rn\u200Coti\u200Dfi\u200Bcati\u2060ons-\u180Eemai\uFEFFl\uFEFF',
+])
+def test_strip_and_remove_obscure_whitespace(value):
+    assert strip_and_remove_obscure_whitespace(value) == 'notifications-email'
+
+
+def test_strip_and_remove_obscure_whitespace_only_removes_normal_whitespace_from_ends():
+    sentence = '   words \n over multiple lines with \ttabs\t   '
+    assert strip_and_remove_obscure_whitespace(sentence) == 'words \n over multiple lines with \ttabs'
+
+
+def test_remove_smart_quotes_from_email_addresses():
+    assert remove_smart_quotes_from_email_addresses("""
+        line one’s quote
+        first.o’last@example.com is someone’s email address
+        line ‘three’
+    """) == ("""
+        line one’s quote
+        first.o'last@example.com is someone’s email address
+        line ‘three’
+    """)
+
+
+def test_strip_unsupported_characters():
+    assert strip_unsupported_characters("line one\u2028line two") == ("line oneline two")

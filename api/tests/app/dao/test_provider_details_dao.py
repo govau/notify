@@ -32,7 +32,7 @@ def set_primary_sms_provider(identifier):
 
 
 def test_can_get_all_providers(restore_provider_details):
-    assert len(get_provider_details()) == 7
+    assert len(get_provider_details()) == 8
 
 
 def test_can_get_sms_non_international_providers(restore_provider_details):
@@ -57,11 +57,11 @@ def test_can_get_sms_providers_in_order_of_priority(restore_provider_details):
 def test_can_get_email_providers_in_order_of_priority(restore_provider_details):
     providers = get_provider_details_by_notification_type('email')
 
-    assert providers[0].identifier == "smtp"
+    assert providers[0].identifier == "ses"
 
 
 def test_can_get_email_providers(restore_provider_details):
-    assert len(get_provider_details_by_notification_type('email')) == 1
+    assert len(get_provider_details_by_notification_type('email')) == 2
     types = [provider.notification_type for provider in get_provider_details_by_notification_type('email')]
     assert all('email' == notification_type for notification_type in types)
 
@@ -74,33 +74,34 @@ def test_should_not_error_if_any_provider_in_code_not_in_database(restore_provid
 
 @freeze_time('2000-01-01T00:00:00')
 def test_update_adds_history(restore_provider_details):
-    smtp = ProviderDetails.query.filter(ProviderDetails.identifier == 'smtp').one()
-    smtp_history = ProviderDetailsHistory.query.filter(ProviderDetailsHistory.id == smtp.id).one()
+    provider = ProviderDetails.query.filter(ProviderDetails.identifier == 'ses').one()
 
-    assert smtp.version == 1
-    assert smtp_history.version == 1
-    assert smtp.updated_at is None
+    provider_history = ProviderDetailsHistory.query.filter(ProviderDetailsHistory.id == provider.id).one()
 
-    smtp.active = False
+    assert provider.version == 1
+    assert provider_history.version == 1
+    assert provider.updated_at is None
 
-    dao_update_provider_details(smtp)
+    provider.active = False
 
-    assert not smtp.active
-    assert smtp.updated_at == datetime(2000, 1, 1, 0, 0, 0)
+    dao_update_provider_details(provider)
 
-    smtp_history = ProviderDetailsHistory.query.filter(
-        ProviderDetailsHistory.id == smtp.id
+    assert not provider.active
+    assert provider.updated_at == datetime(2000, 1, 1, 0, 0, 0)
+
+    provider_history = ProviderDetailsHistory.query.filter(
+        ProviderDetailsHistory.id == provider.id
     ).order_by(
         ProviderDetailsHistory.version
     ).all()
 
-    assert smtp_history[0].active
-    assert smtp_history[0].version == 1
-    assert smtp_history[0].updated_at is None
+    assert provider_history[0].active
+    assert provider_history[0].version == 1
+    assert provider_history[0].updated_at is None
 
-    assert not smtp_history[1].active
-    assert smtp_history[1].version == 2
-    assert smtp_history[1].updated_at == datetime(2000, 1, 1, 0, 0, 0)
+    assert not provider_history[1].active
+    assert provider_history[1].version == 2
+    assert provider_history[1].updated_at == datetime(2000, 1, 1, 0, 0, 0)
 
 
 def test_update_sms_provider_to_inactive_sets_inactive(restore_provider_details):

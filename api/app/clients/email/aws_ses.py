@@ -48,8 +48,13 @@ class AwsSesClient(EmailClient):
     Amazon SES email client.
     '''
 
-    def init_app(self, region, statsd_client, *args, **kwargs):
-        self._client = boto3.client('ses', region_name=region)
+    def init_app(self, region, aws_access_key_id, aws_secret_access_key, statsd_client, *args, **kwargs):
+        self._client = boto3.client(
+            'ses',
+            region_name=region,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key
+        )
         super(AwsSesClient, self).__init__(*args, **kwargs)
         self.name = 'ses'
         self.statsd_client = statsd_client
@@ -115,4 +120,8 @@ class AwsSesClient(EmailClient):
             current_app.logger.info("AWS SES request finished in {}".format(elapsed_time))
             self.statsd_client.timing("clients.ses.request-time", elapsed_time)
             self.statsd_client.incr("clients.ses.success")
-            return response['MessageId']
+            # Avoid circular imports by importing this file later.
+            from app.models import (
+                NOTIFICATION_SENDING
+            )
+            return response['MessageId'], NOTIFICATION_SENDING

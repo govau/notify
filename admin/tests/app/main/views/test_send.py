@@ -2607,7 +2607,7 @@ TRIAL_MODE_MSG = (
     'Can’t send to this recipient when service is in trial mode – '
     'see https://notify.gov.au/features/using-notify'
 )
-TOO_LONG_MSG = 'Content for template has a character count greater than the limit of 495'
+TOO_LONG_MSG = 'Content for template has a character count greater than the limit of 612'
 SERVICE_DAILY_LIMIT_MSG = 'Exceeded send limits (1000) for today'
 
 

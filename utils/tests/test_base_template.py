@@ -148,7 +148,9 @@ def test_get_character_count_of_content(content, prefix, template_cls, expected_
         (307, 3),
         (459, 3),
         (460, 4),
-        (461, 4)
+        (461, 4),
+        (612, 4),
+        (613, 5),
     ])
 def test_sms_fragment_count(char_count, expected_sms_fragment_count):
     with patch(

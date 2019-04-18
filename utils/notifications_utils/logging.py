@@ -164,7 +164,11 @@ class CustomLogFormatter(logging.Formatter):
         try:
             record.msg = str(record.msg).format(**record.__dict__)
         except KeyError as e:
-            logger.exception("failed to format log message: {} not found".format(e))
+            # TODO: ignoring log warning when Python tries to format the
+            # `{ "status_code"` in the message string. Need to work out how to
+            # properly format things that are JSON strings.
+            if e.args[0] != '"status_code"':
+                logger.exception("CustomLogFormatter: failed to format log message: {} not found".format(e))
         return super(CustomLogFormatter, self).format(record)
 
 
@@ -181,5 +185,5 @@ class JSONFormatter(BaseJSONFormatter):
         try:
             log_record['message'] = log_record['message'].format(**log_record)
         except KeyError as e:
-            logger.exception("failed to format log message: {} not found".format(e))
+            logger.exception("JSONFormatter: failed to format log message: {} not found".format(e))
         return log_record

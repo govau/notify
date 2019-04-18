@@ -29,6 +29,15 @@ references:
     attach_workspace:
       at: .
 
+  aws_install: &aws_install
+    run:
+      command: |
+        curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+        unzip awscli-bundle.zip
+        ./awscli-bundle/install -b ~/bin/aws
+        echo export PATH="$HOME/bin:\$PATH" >> $BASH_ENV
+        source $BASH_ENV
+
   cf_install: &cf_install
     run:
       command: |
@@ -170,6 +179,7 @@ jobs:
   cleanup-old-deploys:
     <<: *undeploy_image
     steps:
+      - *aws_install
       - *cf_install
       - *attach_workspace
       - *cf_login
@@ -186,11 +196,14 @@ jobs:
   deploy-dev-api:
     <<: *deploy_image
     steps:
+      - *aws_install
       - *cf_install
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
       - run: make api.deploy-dev
+      # Need the API to be running so that the callback can auto-subscribe.
+      - run: make ci.setup-ses-callback
 
   deploy-dev-celery-worker:
     <<: *deploy_image

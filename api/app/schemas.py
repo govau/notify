@@ -236,6 +236,7 @@ class ServiceSchema(BaseSchema):
             'monthly_billing',
             'reply_to_email_addresses',
             'letter_contacts',
+            'complaints',
         )
         strict = True
 

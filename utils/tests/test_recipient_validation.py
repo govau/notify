@@ -117,7 +117,6 @@ valid_email_addresses = (
     'info@german-financial-services.vermögensberatung',
     'info@german-financial-services.reallylongarbitrarytldthatiswaytoohugejustincase',
     'japanese-info@例え.テスト',
-    'technically..valid@domain.com',
 )
 invalid_email_addresses = (
     'email@123.123.123.123',
@@ -135,6 +134,7 @@ invalid_email_addresses = (
     '"quoted-local-part"@domain.com',
     '"quoted@domain.com"',
     'lots-of-dots@domain..gov..uk',
+    'two-dots..in-local@domain.com',
     'multiple@domains@domain.com',
     'spaces in local@domain.com',
     'spaces-in-domain@dom ain.com',
@@ -146,6 +146,7 @@ invalid_email_addresses = (
     'local-with-’-apostrophe@domain.com',
     'local-with-”-quotes@domain.com',
     'domain-starts-with-a-dot@.domain.com',
+    'brackets(in)local@domain.com',
 )
 
 

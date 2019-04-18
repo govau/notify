@@ -1,3 +1,4 @@
+import string
 import re
 import urllib
 
@@ -5,8 +6,19 @@ import mistune
 import bleach
 from itertools import count
 from flask import Markup
+from . import email_with_smart_quotes_regex
 from notifications_utils import gsm
 import smartypants
+
+
+OBSCURE_WHITESPACE = (
+    '\u180E'  # Mongolian vowel separator
+    '\u200B'  # zero width space
+    '\u200C'  # zero width non-joiner
+    '\u200D'  # zero width joiner
+    '\u2060'  # word joiner
+    '\uFEFF'  # zero width non-breaking space
+)
 
 mistune._block_quote_leading_pattern = re.compile(r'^ *\^ ?', flags=re.M)
 mistune.BlockGrammar.block_quote = re.compile(r'^( *\^[^\n]+(\n[^\n]+)*\n*)+')
@@ -17,7 +29,7 @@ govau_not_a_link = re.compile(
 )
 
 dvla_markup_tags = re.compile(
-    str('|'.join('\<{}\>'.format(tag) for tag in {
+    str('|'.join('<{}>'.format(tag) for tag in {
         'cr', 'h1', 'h2', 'p', 'normal', 'op', 'np', 'bul', 'tab'
     })),
     re.IGNORECASE
@@ -226,6 +238,37 @@ def remove_trailing_linebreak(value):
         )
     else:
         return value
+
+
+def remove_smart_quotes_from_email_addresses(value):
+
+    def remove_smart_quotes(match):
+        value = match.group(0)
+        for character in '‘’':
+            value = value.replace(character, "'")
+        return value
+
+    return email_with_smart_quotes_regex.sub(
+        remove_smart_quotes,
+        value,
+    )
+
+
+def strip_whitespace(value, extra_characters=''):
+    if value is not None and hasattr(value, 'strip'):
+        return value.strip(string.whitespace + OBSCURE_WHITESPACE + extra_characters)
+    return value
+
+
+def strip_and_remove_obscure_whitespace(value):
+    for character in OBSCURE_WHITESPACE:
+        value = value.replace(character, '')
+
+    return value.strip(string.whitespace)
+
+
+def strip_unsupported_characters(value):
+    return value.replace('\u2028', '')
 
 
 class NotifyLetterMarkdownPreviewRenderer(mistune.Renderer):

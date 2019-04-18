@@ -612,13 +612,15 @@ def fetch_aggregate_stats_by_date_range_for_all_services(start_date, end_date, i
     query = db.session.query(
         table.notification_type,
         table.status,
+        table.key_type,
         func.count(table.id).label('count')
     ).filter(
         table.created_at >= start_date,
         table.created_at < end_date
     ).group_by(
         table.notification_type,
-        table.status
+        table.status,
+        table.key_type
     ).order_by(
         table.notification_type
     )

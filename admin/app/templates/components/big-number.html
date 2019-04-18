@@ -55,3 +55,9 @@
     {% endif %}
   </div>
 {% endmacro %}
+
+{% macro big_number_simple(number, label) %}
+  <div class="big-number-with-status big-number-centered">
+    {{ big_number(number, label) }}
+  </div>
+{% endmacro %}

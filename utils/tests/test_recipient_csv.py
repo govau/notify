@@ -3,6 +3,7 @@ import itertools
 from functools import partial
 from orderedset import OrderedSet
 
+from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.recipients import RecipientCSV
 from notifications_utils.template import SMSMessageTemplate
 
@@ -228,8 +229,6 @@ def test_get_rows_with_errors():
             a@b.com,
             a@b.com,
             a@b.com,
-
-
         """,
         template_type='email',
         placeholders=['name'],
@@ -271,6 +270,20 @@ def test_big_list():
     assert len(list(big_csv.initial_rows_with_errors)) == 100
     assert len(list(big_csv.rows)) == RecipientCSV.max_rows
     assert big_csv.has_errors
+
+
+def test_overly_big_list():
+    big_csv = RecipientCSV(
+        "phonenumber,name\n" + ("07700900123,example\n" * (RecipientCSV.max_rows + 1)),
+        template_type='sms',
+        placeholders=['name'],
+    )
+    assert len(big_csv) == 50001
+    assert big_csv.too_many_rows is True
+    assert big_csv.has_errors is True
+    assert list(big_csv.rows_with_missing_data) == []
+    assert list(big_csv.rows_with_bad_recipients) == []
+    assert list(big_csv.rows_with_message_too_long) == []
 
 
 @pytest.mark.parametrize(
@@ -663,9 +676,9 @@ def test_detects_rows_which_result_in_overly_long_messages():
             07700900462,{exactly}
             07700900463,{one_over}
         """.format(
-            one_under='a' * 458,
-            exactly='a' * 459,
-            one_over='a' * 460,
+            one_under='a' * (SMS_CHAR_COUNT_LIMIT - 1),
+            exactly='a' * SMS_CHAR_COUNT_LIMIT,
+            one_over='a' * (SMS_CHAR_COUNT_LIMIT + 1),
         ),
         template_type=template.template_type,
         template=template

@@ -107,6 +107,7 @@ def notify_db_session(notify_db):
         "service_permission_types",
         "auth_type",
         "invite_status_type",
+        "service_callback_type",
     ]
 
     for tbl in reversed(notify_db.metadata.sorted_tables):

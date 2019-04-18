@@ -101,6 +101,11 @@ class Config(object):
 
     AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-2')
 
+    # AWS SES
+    AWS_SES_REGION = os.getenv('AWS_SES_REGION', 'ap-southeast-2')
+    AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
+    AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
+
     # Performance platform
     PERFORMANCE_PLATFORM_ENABLED = False
     PERFORMANCE_PLATFORM_URL = 'https://www.performance.service.gov.uk/data/govuk-notify/'
@@ -127,7 +132,7 @@ class Config(object):
     ###########################
 
     NOTIFY_ENVIRONMENT = 'development'
-    NOTIFY_EMAIL_DOMAIN = 'digital.gov.au'
+    NOTIFY_EMAIL_DOMAIN = os.getenv('NOTIFY_EMAIL_DOMAIN', 'staging-notify.digital.gov.au')
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
 
     INVITATION_EXPIRATION_DAYS = 2
@@ -140,7 +145,6 @@ class Config(object):
     SQLALCHEMY_POOL_RECYCLE = 300
     PAGE_SIZE = 50
     API_PAGE_SIZE = 250
-    SMS_CHAR_COUNT_LIMIT = 495
     TEST_MESSAGE_FILENAME = 'Test message'
     ONE_OFF_MESSAGE_FILENAME = 'Report'
     MAX_VERIFY_CODE_COUNT = 1
@@ -384,14 +388,14 @@ class Development(Config):
 
 
 class Test(Development):
-    NOTIFY_EMAIL_DOMAIN = 'notifytest.gov.au'
+    NOTIFY_EMAIL_DOMAIN = 'test-notify.digital.gov.au'
     FROM_NUMBER = 'testing'
     NOTIFY_ENVIRONMENT = 'test'
     TESTING = True
 
     LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'test-test-letters'
-    DVLA_RESPONSE_BUCKET_NAME = 'notifytest.gov.au-ftp'
+    DVLA_RESPONSE_BUCKET_NAME = 'test-notify.digital.gov.au-ftp'
     LETTERS_PDF_BUCKET_NAME = 'test-letters-pdf'
     LETTERS_SCAN_BUCKET_NAME = 'test-letters-scan'
 
