@@ -82,6 +82,12 @@ def create_app(application):
         logger=application.logger,
         callback_notify_url_host=application.config["API_HOST_NAME"]
     )
+    aws_ses_client.init_app(
+        application.config['AWS_SES_REGION'],
+        application.config['AWS_SES_ACCESS_KEY_ID'],
+        application.config['AWS_SES_SECRET_ACCESS_KEY'],
+        statsd_client=statsd_client
+    )
     smtp_client.init_app(application, statsd_client=statsd_client)
     notify_celery.init_app(application)
     encryption.init_app(application)
@@ -89,7 +95,7 @@ def create_app(application):
     performance_platform_client.init_app(application)
     clients.init_app(
         sms_clients=[twilio_sms_client, telstra_sms_client],
-        email_clients=[smtp_client]
+        email_clients=[aws_ses_client, smtp_client]
     )
 
     register_blueprint(application)

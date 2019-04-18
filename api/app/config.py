@@ -101,6 +101,11 @@ class Config(object):
 
     AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-2')
 
+    # AWS SES
+    AWS_SES_REGION = os.getenv('AWS_SES_REGION', 'ap-southeast-2')
+    AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
+    AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
+
     # Performance platform
     PERFORMANCE_PLATFORM_ENABLED = False
     PERFORMANCE_PLATFORM_URL = 'https://www.performance.service.gov.uk/data/govuk-notify/'
