@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 notifications-utils = {editable = true,path = "."}
 itsdangerous = "==1.1.0"
+urllib3 = ">=1.24.2"
 
 [dev-packages]
 bandit = "==1.5.1"
