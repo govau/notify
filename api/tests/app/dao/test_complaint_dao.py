@@ -103,13 +103,13 @@ def test_fetch_count_of_complaints(sample_email_notification):
                      created_at=datetime(2018, 6, 6, 23, 00, 00))
     create_complaint(service=sample_email_notification.service,
                      notification=sample_email_notification,
-                     created_at=datetime(2018, 6, 7, 00, 00, 00))
+                     created_at=datetime(2018, 6, 7, 10, 00, 00))
     create_complaint(service=sample_email_notification.service,
                      notification=sample_email_notification,
-                     created_at=datetime(2018, 6, 7, 13, 00, 00))
+                     created_at=datetime(2018, 6, 7, 23, 00, 00))
     create_complaint(service=sample_email_notification.service,
                      notification=sample_email_notification,
-                     created_at=datetime(2018, 6, 7, 23))
+                     created_at=datetime(2018, 6, 8, 9))
 
     count_of_complaints = fetch_count_of_complaints(start_date=datetime(2018, 6, 7),
                                                     end_date=datetime(2018, 6, 7))
