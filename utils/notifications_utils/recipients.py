@@ -10,6 +10,7 @@ from orderedset import OrderedSet
 
 from flask import current_app
 
+from . import EMAIL_REGEX_PATTERN, hostname_part, tld_part
 from notifications_utils.formatters import formatted_list, strip_and_remove_obscure_whitespace, strip_whitespace, OBSCURE_WHITESPACE
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns, Row, Cell
