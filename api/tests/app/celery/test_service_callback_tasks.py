@@ -21,7 +21,7 @@ from tests.app.db import (
 def test_send_delivery_status_to_service_post_https_request_to_service_with_encrypted_data(
         notify_db_session, notification_type):
 
-    callback_api, template = _set_up_test_data(notification_type)
+    callback_api, template = _set_up_test_data(notification_type, "delivery_status")
     datestr = datetime(2017, 6, 20)
 
     notification = create_notification(template=template,
@@ -30,7 +30,7 @@ def test_send_delivery_status_to_service_post_https_request_to_service_with_encr
                                        sent_at=datestr,
                                        status='sent'
                                        )
-    encrypted_status_update = _set_up_encrypted_data(callback_api, notification)
+    encrypted_status_update = _set_up_data_for_status_update(callback_api, notification)
     with requests_mock.Mocker() as request_mock:
         request_mock.post(callback_api.url,
                           json={},
@@ -88,10 +88,10 @@ def test_send_complaint_to_service_posts_https_request_to_service_with_encrypted
 
 @pytest.mark.parametrize("notification_type",
                          ["email", "letter", "sms"])
-def test_send_delivery_status_to_service_retries_if_request_returns_500_with_encrypted_data(
+def test__send_data_to_service_callback_api_retries_if_request_returns_500_with_encrypted_data(
         notify_db_session, mocker, notification_type
 ):
-    callback_api, template = _set_up_test_data(notification_type)
+    callback_api, template = _set_up_test_data(notification_type, "delivery_status")
     datestr = datetime(2017, 6, 20)
     notification = create_notification(template=template,
                                        created_at=datestr,
@@ -99,7 +99,7 @@ def test_send_delivery_status_to_service_retries_if_request_returns_500_with_enc
                                        sent_at=datestr,
                                        status='sent'
                                        )
-    encrypted_data = _set_up_encrypted_data(callback_api, notification)
+    encrypted_data = _set_up_data_for_status_update(callback_api, notification)
     mocked = mocker.patch('app.celery.service_callback_tasks.send_delivery_status_to_service.retry')
     with requests_mock.Mocker() as request_mock:
         request_mock.post(callback_api.url,
@@ -113,12 +113,12 @@ def test_send_delivery_status_to_service_retries_if_request_returns_500_with_enc
 
 @pytest.mark.parametrize("notification_type",
                          ["email", "letter", "sms"])
-def test_send_delivery_status_to_service_does_not_retries_if_request_returns_404_with_encrypted_data(
+def test__send_data_to_service_callback_api_does_not_retry_if_request_returns_404_with_encrypted_data(
         notify_db_session,
         mocker,
         notification_type
 ):
-    callback_api, template = _set_up_test_data(notification_type)
+    callback_api, template = _set_up_test_data(notification_type, "delivery_status")
     datestr = datetime(2017, 6, 20)
     notification = create_notification(template=template,
                                        created_at=datestr,
@@ -126,7 +126,7 @@ def test_send_delivery_status_to_service_does_not_retries_if_request_returns_404
                                        sent_at=datestr,
                                        status='sent'
                                        )
-    encrypted_data = _set_up_encrypted_data(callback_api, notification)
+    encrypted_data = _set_up_data_for_status_update(callback_api, notification)
     mocked = mocker.patch('app.celery.service_callback_tasks.send_delivery_status_to_service.retry')
     with requests_mock.Mocker() as request_mock:
         request_mock.post(callback_api.url,
@@ -141,7 +141,7 @@ def test_send_delivery_status_to_service_succeeds_if_sent_at_is_none(
         notify_db_session,
         mocker
 ):
-    callback_api, template = _set_up_test_data('email')
+    callback_api, template = _set_up_test_data('email', "delivery_status")
     datestr = datetime(2017, 6, 20)
     notification = create_notification(template=template,
                                        created_at=datestr,
@@ -149,7 +149,7 @@ def test_send_delivery_status_to_service_succeeds_if_sent_at_is_none(
                                        sent_at=None,
                                        status='technical-failure'
                                        )
-    encrypted_data = _set_up_encrypted_data(callback_api, notification)
+    encrypted_data = _set_up_data_for_status_update(callback_api, notification)
     mocked = mocker.patch('app.celery.service_callback_tasks.send_delivery_status_to_service.retry')
     with requests_mock.Mocker() as request_mock:
         request_mock.post(callback_api.url,
@@ -168,7 +168,7 @@ def _set_up_test_data(notification_type, callback_type):
     return callback_api, template
 
 
-def _set_up_encrypted_data(callback_api, notification):
+def _set_up_data_for_status_update(callback_api, notification):
     data = {
         "notification_id": str(notification.id),
         "notification_client_reference": notification.client_reference,
