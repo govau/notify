@@ -117,7 +117,7 @@ def test_create_nightly_billing_different_templates(
         service=sample_service,
         template=sample_email_template,
         status='delivered',
-        sent_by='smtp',
+        sent_by='ses',
         international=False,
         rate_multiplier=0,
         billable_units=0,
