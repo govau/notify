@@ -1,3 +1,4 @@
+import string
 import re
 import sys
 import csv
@@ -11,7 +12,7 @@ from orderedset import OrderedSet
 from flask import current_app
 
 from . import EMAIL_REGEX_PATTERN, hostname_part, tld_part
-from notifications_utils.formatters import formatted_list, strip_and_remove_obscure_whitespace, strip_whitespace, OBSCURE_WHITESPACE
+from notifications_utils.formatters import strip_and_remove_obscure_whitespace, strip_whitespace, OBSCURE_WHITESPACE
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns, Row, Cell
 from notifications_utils.international_billing_rates import (
@@ -61,7 +62,7 @@ class RecipientCSV():
         remaining_messages=sys.maxsize,
         international_sms=False,
     ):
-        self.file_data = file_data.strip(', \n\r\t')
+        self.file_data = strip_whitespace(file_data, extra_characters=',')
         self.template_type = template_type
         self.placeholders = placeholders
         self.max_errors_shown = max_errors_shown
@@ -323,7 +324,7 @@ class InvalidAddressError(InvalidEmailError):
 
 def normalise_phone_number(number):
 
-    for character in ['(', ')', ' ', '-', '+']:
+    for character in string.whitespace + OBSCURE_WHITESPACE + '()-+':
         number = number.replace(character, '')
 
     try:
@@ -490,18 +491,11 @@ def validate_and_format_email_address(email_address):
 
 
 def validate_address(address_line, column):
-    if address_line:
-        invalid_chars = sorted(set(c for c in address_line if ord(c) > 255))
-        if invalid_chars:
-            raise InvalidAddressError(
-                "Can’t include {}".format(
-                    formatted_list(items=invalid_chars, before_each='', after_each='', conjunction='or')))
-
     if Columns.make_key(column) in Columns.from_keys(optional_address_columns).keys():
         return address_line
     if Columns.make_key(column) not in Columns.from_keys(first_column_headings['letter']).keys():
         raise TypeError
-    if not address_line or not address_line.strip():
+    if not address_line or not strip_whitespace(address_line):
         raise InvalidAddressError('Missing')
     return address_line
 
