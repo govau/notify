@@ -1,5 +1,6 @@
 from datetime import date, datetime
 
+import pytest
 from freezegun import freeze_time
 
 from app.models import SMS_TYPE, EMAIL_TYPE
@@ -9,6 +10,11 @@ from tests.app.db import (
     # create_ft_notification_status, # TODO: wait for FactNotificationStatus to exist
     create_notification
 )
+
+
+# TODO: wait for FactNotificationStatus to exist
+def create_ft_notification_status():
+    pass
 
 
 @freeze_time('2018-06-01')
