@@ -594,14 +594,19 @@ class ServiceInboundApi(db.Model, Versioned):
 class ServiceCallbackApi(db.Model, Versioned):
     __tablename__ = 'service_callback_api'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=False, unique=True)
+    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=False)
     service = db.relationship('Service', backref='service_callback_api')
     url = db.Column(db.String(), nullable=False)
+    callback_type = db.Column(db.String(), db.ForeignKey('service_callback_type.name'), nullable=True)
     _bearer_token = db.Column("bearer_token", db.String(), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=True)
     updated_by = db.relationship('User')
     updated_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), index=True, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('service_id', 'callback_type', name='uix_service_callback_type'),
+    )
 
     @property
     def bearer_token(self):
@@ -623,6 +628,12 @@ class ServiceCallbackApi(db.Model, Versioned):
             "created_at": self.created_at.strftime(DATETIME_FORMAT),
             "updated_at": self.updated_at.strftime(DATETIME_FORMAT) if self.updated_at else None
         }
+
+
+class ServiceCallbackType(db.Model):
+    __tablename__ = 'service_callback_type'
+
+    name = db.Column(db.String, primary_key=True)
 
 
 class ApiKey(db.Model, Versioned):
