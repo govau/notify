@@ -613,6 +613,7 @@ def notifications_not_yet_sent(should_be_sending_after_seconds, notification_typ
     ).all()
     return notifications
 
+
 def guess_notification_type(search_term):
     if set(search_term) & set(string.ascii_letters + '@'):
         return EMAIL_TYPE
