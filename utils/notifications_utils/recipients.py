@@ -10,7 +10,7 @@ from orderedset import OrderedSet
 
 from flask import current_app
 
-from notifications_utils.formatters import formatted_list
+from notifications_utils.formatters import formatted_list, strip_and_remove_obscure_whitespace, strip_whitespace, OBSCURE_WHITESPACE
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns, Row, Cell
 from notifications_utils.international_billing_rates import (
@@ -452,17 +452,18 @@ def validate_email_address(email_address, column=None):  # noqa (C901 too comple
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
     # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
-    email_address = email_address.strip()
-    match = re.match(email_regex, email_address)
+    email_address = strip_and_remove_obscure_whitespace(email_address)
+    match = re.match(EMAIL_REGEX_PATTERN, email_address)
 
     # not an email
     if not match:
         raise InvalidEmailError
 
-    hostname = match.group(1)
-    # don't allow consecutive periods in domain names
-    if '..' in hostname:
+    # don't allow consecutive periods in either part
+    if '..' in email_address:
         raise InvalidEmailError
+
+    hostname = match.group(1)
 
     # idna = "Internationalized domain name" - this encode/decode cycle converts unicode into its accurate ascii
     # representation as the web uses. '例え.テスト'.encode('idna') == b'xn--r8jz45g.xn--zckzah'
@@ -488,7 +489,7 @@ def validate_email_address(email_address, column=None):  # noqa (C901 too comple
 
 
 def format_email_address(email_address):
-    return email_address.lower()
+    return strip_and_remove_obscure_whitespace(email_address.lower())
 
 
 def validate_and_format_email_address(email_address):
