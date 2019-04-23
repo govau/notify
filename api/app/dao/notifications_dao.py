@@ -612,3 +612,25 @@ def notifications_not_yet_sent(should_be_sending_after_seconds, notification_typ
         Notification.status == NOTIFICATION_CREATED
     ).all()
     return notifications
+
+def guess_notification_type(search_term):
+    if set(search_term) & set(string.ascii_letters + '@'):
+        return EMAIL_TYPE
+    else:
+        return SMS_TYPE
+
+
+def _duplicate_update_warning(notification, status):
+    current_app.logger.info(
+        (
+            'Duplicate callback received. Notification id {id} received a status update to {new_status}'
+            '{time_diff} after being set to {old_status}. {type} sent by {sent_by}'
+        ).format(
+            id=notification.id,
+            old_status=notification.status,
+            new_status=status,
+            time_diff=datetime.utcnow() - (notification.updated_at or notification.created_at),
+            type=notification.notification_type,
+            sent_by=notification.sent_by
+        )
+    )
