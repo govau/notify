@@ -311,9 +311,10 @@ def create_service_inbound_api(
 
 
 def create_service_callback_api(
-    service,
-    url="https://something.com",
-    bearer_token="some_super_secret",
+        service,
+        url="https://something.com",
+        bearer_token="some_super_secret",
+        callback_type="delivery_status"
 ):
     service_callback_api = ServiceCallbackApi(service_id=service.id,
                                               url=url,
