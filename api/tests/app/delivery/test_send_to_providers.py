@@ -110,14 +110,14 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
         personalisation={'name': 'Jo'}
     )
 
-    mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
+    mocker.patch('app.aws_ses_client.send_email', return_value='reference')
 
     send_to_providers.send_email_to_provider(
         db_notification
     )
 
-    app.smtp_client.send_email.assert_called_once_with(
-        '"Sample service" <sample.service@notifytest.gov.au>',
+    app.aws_ses_client.send_email.assert_called_once_with(
+        '"Sample service" <sample.service@test.notify.com>',
         'jo.smith@example.com',
         'Jo <em>some HTML</em>',
         body='Hello Jo\nThis is an email from GOV.\u200bAU with <em>some HTML</em>\n',
@@ -125,11 +125,11 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
         reply_to_address=None
     )
 
-    assert '<!DOCTYPE html' in app.smtp_client.send_email.call_args[1]['html_body']
-    assert '&lt;em&gt;some HTML&lt;/em&gt;' in app.smtp_client.send_email.call_args[1]['html_body']
+    assert '<!DOCTYPE html' in app.aws_ses_client.send_email.call_args[1]['html_body']
+    assert '&lt;em&gt;some HTML&lt;/em&gt;' in app.aws_ses_client.send_email.call_args[1]['html_body']
 
     notification = Notification.query.filter_by(id=db_notification.id).one()
-    assert notification.status == 'sent'
+    assert notification.status == 'sending'
     assert notification.sent_at <= datetime.utcnow()
     assert notification.sent_by == 'ses'
     assert notification.personalisation == {"name": "Jo"}
