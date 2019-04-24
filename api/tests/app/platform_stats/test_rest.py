@@ -25,7 +25,7 @@ def test_get_platform_stats_uses_todays_date_if_no_start_or_end_date_is_provided
 
     admin_request.get('platform_stats.get_platform_stats')
 
-    dao_mock.assert_called_once_with(start_date=today, end_date=today)
+    dao_mock.assert_called_once_with(start_date=today, end_date=today, include_from_test_key=False)
 
 
 def test_get_platform_stats_can_filter_by_date(admin_request, mocker):
@@ -36,7 +36,7 @@ def test_get_platform_stats_can_filter_by_date(admin_request, mocker):
 
     admin_request.get('platform_stats.get_platform_stats', start_date=start_date, end_date=end_date)
 
-    dao_mock.assert_called_once_with(start_date=start_date, end_date=end_date)
+    dao_mock.assert_called_once_with(start_date=start_date, end_date=end_date, include_from_test_key=False)
 
 
 def test_get_platform_stats_validates_the_date(admin_request):
