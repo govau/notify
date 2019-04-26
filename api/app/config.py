@@ -132,7 +132,7 @@ class Config(object):
     ###########################
 
     NOTIFY_ENVIRONMENT = 'development'
-    NOTIFY_EMAIL_DOMAIN = 'digital.gov.au'
+    NOTIFY_EMAIL_DOMAIN = 'notify.gov.au'
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
 
     INVITATION_EXPIRATION_DAYS = 2
