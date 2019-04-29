@@ -39,6 +39,9 @@ def handle_complaint(ses_message):
     complaint = Complaint(
         notification_id=notification.id,
         service_id=notification.service_id,
+        # TODO: this ID is unique, we should make it a unique index so we don't
+        # store duplicate complaints.
+        # See https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html#complaint-object
         ses_feedback_id=ses_complaint.get('feedbackId', None) if ses_complaint else None,
         complaint_type=ses_complaint.get('complaintFeedbackType', None) if ses_complaint else None,
         complaint_date=ses_complaint.get('timestamp', None) if ses_complaint else None
