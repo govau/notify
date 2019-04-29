@@ -122,7 +122,6 @@ class AwsSesClient(EmailClient):
             self.statsd_client.incr("clients.ses.success")
             # Avoid circular imports by importing this file later.
             from app.models import (
-                NOTIFICATION_SENT
+                NOTIFICATION_SENDING
             )
-            # TODO: make this SENDING not SENT
-            return response['MessageId'], NOTIFICATION_SENT
+            return response['MessageId'], NOTIFICATION_SENDING
