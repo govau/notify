@@ -16,5 +16,6 @@ def process_ses_results_task(self, response):
         ok, retry = process_ses_results(response)
         if retry:
             self.retry(queue=QueueNames.RETRY)
+        return ok
     except Retry:
         raise

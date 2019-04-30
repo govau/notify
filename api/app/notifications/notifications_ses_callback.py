@@ -85,16 +85,16 @@ def process_ses_results(response):
         except NoResultFound:
             message_time = iso8601.parse_date(ses_message['mail']['timestamp']).replace(tzinfo=None)
             if datetime.utcnow() - message_time < timedelta(minutes=5):
-                return False, True
+                return None, True
 
             current_app.logger.warning(
                 "notification not found for reference: {} (update to {})".format(reference, notification_status)
             )
-            return True, False
+            return None, False
 
         if notification.status not in {NOTIFICATION_SENDING, NOTIFICATION_PENDING}:
             notifications_dao._duplicate_update_warning(notification, notification_status)
-            return True, False
+            return None, False
 
         notifications_dao._update_notification_status(notification=notification, status=notification_status)
 
@@ -119,7 +119,7 @@ def process_ses_results(response):
         return True, False
     except Exception as e:
         current_app.logger.exception('Error processing SES results: {}'.format(type(e)))
-        return False, True
+        return None, True
 
 
 def determine_notification_bounce_type(notification_type, ses_message):
