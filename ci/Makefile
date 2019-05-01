@@ -3,6 +3,7 @@ GIT_REMOTE    ?= https://github.com/govau/notify
 PIPENV        ?= pipenv
 RUNNER        ?= $(PIPENV) run
 CF            ?= cf
+AWS           ?= aws
 JQ            ?= jq
 DIFF          ?= diff
 
@@ -51,6 +52,15 @@ $(SVC_FETCHED): fetch-service-%:
 create-service-psql:
 	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
 
+setup-ses-callback:
+	AWS_ACCESS_KEY_ID=$(SES_CALLBACK_AWS_ACCESS_KEY_ID) \
+	AWS_SECRET_ACCESS_KEY=$(SES_CALLBACK_AWS_SECRET_ACCESS_KEY) \
+	$(AWS) sns subscribe \
+		--region $(SES_CALLBACK_AWS_REGION) \
+		--topic-arn "$(SES_CALLBACK_AWS_SNS_TOPIC_ARN)" \
+		--protocol https \
+		--notification-endpoint "https://notify-api-$(STG).apps.y.cld.gov.au/notifications/email/ses"
+
 list-branches:
 	git ls-remote --heads ${GIT_REMOTE} | egrep "/feat-.*" | $(RUNNER) python remove_feat_prefix.py
 
@@ -80,4 +90,5 @@ undeploy-%:
 	list-branches list-apps\
 	list-services list-deployed-features\
 	create-service-psql\
+	setup-ses-callback\
 	$(SVC_APPLIED) $(SVC_CREATED) $(SVC_DIFFED) $(SVC_FETCHED)
