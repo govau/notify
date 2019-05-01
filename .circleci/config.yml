@@ -155,8 +155,7 @@ jobs:
     steps:
       - *attach_workspace
       - run: make utils.install-dev
-      - run: echo 're-enable tests here'
-      - run: echo 'make utils.test'
+      - run: make utils.test
 
   check-vulnerabilities:
     <<: *python_node_postgres_images
