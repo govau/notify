@@ -73,6 +73,9 @@ teardown-ses-callback-%:
 		--topic-arn "$(TOPIC_ARN)" \
 		| $(JQ) -r '.Subscriptions[] | select(.Endpoint == "https://notify-api-f-$*.apps.y.cld.gov.au/notifications/email/ses").SubscriptionArn'`; \
 
+	echo $*; \
+	echo $$SUB_ARN; \
+
 	$(AWS) sns unsubscribe \
 		--region $(AWS_REGION) \
 		--subscription-arn "$$SUB_ARN" > /dev/null
