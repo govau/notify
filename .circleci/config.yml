@@ -200,8 +200,9 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
-      - run: make ci.setup-ses-callback
       - run: make api.deploy-dev
+      # Need the API to be running so that the callback can auto-subscribe.
+      - run: make ci.setup-ses-callback
 
   deploy-dev-celery-worker:
     <<: *deploy_image
