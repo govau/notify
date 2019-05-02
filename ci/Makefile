@@ -61,7 +61,7 @@ setup-ses-callback:
 		--region $(AWS_REGION) \
 		--topic-arn "$(TOPIC_ARN)" \
 		--protocol https \
-		--notification-endpoint "https://notify-api-$(STG).apps.y.cld.gov.au/notifications/email/ses"
+		--notification-endpoint "https://notify-api-$(STG).apps.y.cld.gov.au/notifications/email/ses" > /dev/null
 
 teardown-ses-callback-%: export AWS_ACCESS_KEY_ID = $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
 teardown-ses-callback-%: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
@@ -75,7 +75,7 @@ teardown-ses-callback-%:
 
 	$(AWS) sns unsubscribe \
 		--region $(AWS_REGION) \
-		--subscription-arn "$$SUB_ARN"
+		--subscription-arn "$$SUB_ARN" > /dev/null
 
 list-branches:
 	git ls-remote --heads ${GIT_REMOTE} | egrep "/feat-.*" | $(RUNNER) python remove_feat_prefix.py
