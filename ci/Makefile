@@ -68,17 +68,12 @@ teardown-ses-callback-%: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRE
 teardown-ses-callback-%: export AWS_REGION = $(SES_CALLBACK_AWS_REGION)
 teardown-ses-callback-%: export TOPIC_ARN = $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
 teardown-ses-callback-%:
-	@SUB_ARN=`$(AWS) sns list-subscriptions-by-topic \
-		--region $(AWS_REGION) \
-		--topic-arn "$(TOPIC_ARN)" \
-		| $(JQ) -r '.Subscriptions[] | select(.Endpoint == "https://notify-api-f-$*.apps.y.cld.gov.au/notifications/email/ses").SubscriptionArn'`; \
-
-	echo $*; \
-	echo $$SUB_ARN; \
-
 	$(AWS) sns unsubscribe \
 		--region $(AWS_REGION) \
-		--subscription-arn "$$SUB_ARN" > /dev/null
+		--subscription-arn `$(AWS) sns list-subscriptions-by-topic \
+			--region $(AWS_REGION) \
+			--topic-arn "$(TOPIC_ARN)" \
+			| $(JQ) -r '.Subscriptions[] | select(.Endpoint == "https://notify-api-f-$*.apps.y.cld.gov.au/notifications/email/ses").SubscriptionArn'`
 
 list-branches:
 	git ls-remote --heads ${GIT_REMOTE} | egrep "/feat-.*" | $(RUNNER) python remove_feat_prefix.py
