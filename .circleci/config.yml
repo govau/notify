@@ -179,6 +179,7 @@ jobs:
   cleanup-old-deploys:
     <<: *undeploy_image
     steps:
+      - *aws_install
       - *cf_install
       - *attach_workspace
       - *cf_login
