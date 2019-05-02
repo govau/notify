@@ -57,7 +57,7 @@ setup-ses-callback: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRET_ACC
 setup-ses-callback: export AWS_REGION = $(SES_CALLBACK_AWS_REGION)
 setup-ses-callback: export TOPIC_ARN = $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
 setup-ses-callback:
-	$(AWS) sns subscribe \
+	@$(AWS) sns subscribe \
 		--region $(AWS_REGION) \
 		--topic-arn "$(TOPIC_ARN)" \
 		--protocol https \

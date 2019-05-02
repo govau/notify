@@ -35,8 +35,6 @@ references:
         curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
         unzip awscli-bundle.zip
         ./awscli-bundle/install -b ~/bin/aws
-        ls -la ~/.local/lib/
-        ls -la $HOME/bin/
         echo export PATH="$HOME/bin:\$PATH" >> $BASH_ENV
         source $BASH_ENV
 
