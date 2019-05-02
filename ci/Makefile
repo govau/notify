@@ -52,23 +52,39 @@ $(SVC_FETCHED): fetch-service-%:
 create-service-psql:
 	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
 
+setup-ses-callback: export AWS_ACCESS_KEY_ID = $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
+setup-ses-callback: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
+setup-ses-callback: export AWS_REGION = $(SES_CALLBACK_AWS_REGION)
+setup-ses-callback: export TOPIC_ARN = $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
 setup-ses-callback:
-	AWS_ACCESS_KEY_ID=$(SES_CALLBACK_AWS_ACCESS_KEY_ID) \
-	AWS_SECRET_ACCESS_KEY=$(SES_CALLBACK_AWS_SECRET_ACCESS_KEY) \
 	$(AWS) sns subscribe \
-		--region $(SES_CALLBACK_AWS_REGION) \
-		--topic-arn "$(SES_CALLBACK_AWS_SNS_TOPIC_ARN)" \
+		--region $(AWS_REGION) \
+		--topic-arn "$(TOPIC_ARN)" \
 		--protocol https \
 		--notification-endpoint "https://notify-api-$(STG).apps.y.cld.gov.au/notifications/email/ses"
+
+teardown-ses-callback-%: export AWS_ACCESS_KEY_ID = $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
+teardown-ses-callback-%: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
+teardown-ses-callback-%: export AWS_REGION = $(SES_CALLBACK_AWS_REGION)
+teardown-ses-callback-%: export TOPIC_ARN = $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
+teardown-ses-callback-%:
+	@SUB_ARN=`$(AWS) sns list-subscriptions-by-topic \
+		--region $(AWS_REGION) \
+		--topic-arn "$(TOPIC_ARN)" \
+		| $(JQ) -r '.Subscriptions[] | select(.Endpoint == "https://notify-api-f-$*.apps.y.cld.gov.au/notifications/email/ses").SubscriptionArn'`; \
+
+	$(AWS) sns unsubscribe \
+		--region $(AWS_REGION) \
+		--subscription-arn "$$SUB_ARN"
 
 list-branches:
 	git ls-remote --heads ${GIT_REMOTE} | egrep "/feat-.*" | $(RUNNER) python remove_feat_prefix.py
 
 list-apps:
-	$(CF) curl "/v2/spaces/${CF_SPACE_ID}/apps" | jq -r ".resources[].entity.name"
+	$(CF) curl "/v2/spaces/${CF_SPACE_ID}/apps" | $(JQ) -r ".resources[].entity.name"
 
 list-services:
-	$(CF) curl "/v2/spaces/${CF_SPACE_ID}/service_instances" | jq -r ".resources[].entity.name"
+	$(CF) curl "/v2/spaces/${CF_SPACE_ID}/service_instances" | $(JQ) -r ".resources[].entity.name"
 
 undeploy-feature-branches:
 	$(RUNNER) python undeploy_closed_branches.py
@@ -86,9 +102,11 @@ undeploy-%:
 	-$(CF) delete notify-docs-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 
+	-$(MAKE) teardown-ses-callback-$*
+
 .PHONY: prune \
-	list-branches list-apps\
-	list-services list-deployed-features\
-	create-service-psql\
-	setup-ses-callback\
+	list-branches list-apps \
+	list-services list-deployed-features \
+	create-service-psql \
+	setup-ses-callback \
 	$(SVC_APPLIED) $(SVC_CREATED) $(SVC_DIFFED) $(SVC_FETCHED)
