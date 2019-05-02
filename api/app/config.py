@@ -132,7 +132,7 @@ class Config(object):
     ###########################
 
     NOTIFY_ENVIRONMENT = 'development'
-    NOTIFY_EMAIL_DOMAIN = 'staging-notify.service.gov.au'
+    NOTIFY_EMAIL_DOMAIN = os.getenv('NOTIFY_EMAIL_DOMAIN', 'staging-notify.service.gov.au')
     ADMIN_CLIENT_USER_NAME = 'notify-admin'
 
     INVITATION_EXPIRATION_DAYS = 2
@@ -447,7 +447,6 @@ class Staging(Config):
 
 class Live(Config):
     NOTIFY_ENVIRONMENT = 'live'
-    NOTIFY_EMAIL_DOMAIN = 'notify.gov.au'
     LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
     TEST_LETTERS_BUCKET_NAME = 'production-test-letters'
     DVLA_RESPONSE_BUCKET_NAME = 'notifications.service.gov.uk-ftp'
