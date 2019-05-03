@@ -129,11 +129,14 @@ def format_stats_by_service(services):
                     'sending': stats['requested'] - stats['delivered'] - stats['failed'],
                     'delivered': stats['delivered'],
                     'failed': stats['failed'],
+                    'templates': stats['templates']
                 }
                 for msg_type, stats in service['statistics'].items()
             },
             'restricted': service['restricted'],
             'research_mode': service['research_mode'],
             'created_at': service['created_at'],
-            'active': service['active']
+            'active': service['active'],
+            'domains': service['domains'],
+            'organisation_type': service['organisation_type']
         }

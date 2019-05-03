@@ -53,7 +53,6 @@ const UnorderedList = ({ list }) => (
 const firstColumn = [
   { text: 'Support', href: notifyUrl('/support') },
   { text: 'System status', href: 'https://status.notify.gov.au/' },
-  { text: 'Slack channel', href: 'https://ausdta.slack.com/messages/notify' },
   { text: 'Blog', href: 'https://dta.gov.au/blog' },
 ]
 

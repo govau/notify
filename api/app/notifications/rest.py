@@ -180,7 +180,7 @@ def _service_allowed_to_send_to(notification, service):
         else:
             message = (
                 'Can’t send to this recipient when service is in trial mode '
-                '– see https://www.notifications.service.gov.uk/trial-mode'
+                '– see https://notify.gov.au/features/using-notify'
             )
         raise InvalidRequest(
             {'to': [message]},

@@ -14,7 +14,7 @@ def _remove_values_for_keys_if_present(dict, keys):
 
 
 def create_secret_code():
-    return ''.join(map(str, [SystemRandom().randrange(10) for i in range(5)]))
+    return ''.join(map(str, [SystemRandom().randrange(10) for i in range(6)]))
 
 
 def save_user_attribute(usr, update_dict={}):
@@ -78,6 +78,11 @@ def delete_user_verify_codes(user):
     db.session.commit()
 
 
+def set_verify_codes_to_used(user_id):
+    db.session.query(VerifyCode).filter(VerifyCode.user_id == user_id).update({'code_used': True})
+    db.session.commit()
+
+
 def count_user_verify_codes(user):
     query = VerifyCode.query.filter(
         VerifyCode.user == user,
@@ -106,6 +111,19 @@ def increment_failed_login_count(user):
 def reset_failed_login_count(user):
     if user.failed_login_count > 0:
         user.failed_login_count = 0
+        db.session.add(user)
+        db.session.commit()
+
+
+def increment_failed_verify_count(user):
+    user.failed_verify_count += 1
+    db.session.add(user)
+    db.session.commit()
+
+
+def reset_failed_verify_count(user):
+    if user.failed_verify_count > 0:
+        user.failed_verify_count = 0
         db.session.add(user)
         db.session.commit()
 

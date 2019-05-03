@@ -91,6 +91,7 @@ def test_should_set_cache_value_as_value_from_database_if_cache_not_set(
         )
 
 
+@pytest.mark.skip(reason="always check rate limits until redis support")
 def test_should_not_access_database_if_redis_disabled(notify_api, sample_service, mocker):
     with set_config(notify_api, 'REDIS_ENABLED', False):
         db_mock = mocker.patch('app.notifications.validators.services_dao')
@@ -240,7 +241,7 @@ def test_service_can_send_to_recipient_fails_when_ignoring_whitelist(
 @pytest.mark.parametrize('key_type, error_message',
                          [('team', 'Can’t send to this recipient using a team-only API key'),
                           ('normal',
-                           "Can’t send to this recipient when service is in trial mode – see https://www.notifications.service.gov.uk/trial-mode")])  # noqa
+                           "Can’t send to this recipient when service is in trial mode – see https://notify.gov.au/features/using-notify")])  # noqa
 def test_service_can_send_to_recipient_fails_when_recipient_is_not_on_team(recipient, key_type, error_message,
                                                                            notify_db, notify_db_session):
     trial_mode_service = create_service(notify_db, notify_db_session, service_name='trial mode', restricted=True)

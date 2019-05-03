@@ -41,11 +41,12 @@ a {
   width: 100%;
 }
 
-.form-control-5em {
+
+.form-control-6em {
   width: 100%;
 
   @include media(tablet) {
-    width: 5em;
+    width: 6em;
   }
 }
 
@@ -220,4 +221,8 @@ details .arrow {
     background-position: 0px 0, 5px 5px;
     background-size: 2px 2px, 2px 2px;
   }
+}
+
+.text-muted {
+  opacity: 0.25;
 }

@@ -3,7 +3,7 @@ lang: python
 ---
 
 ```python
-notifications_client.send_sms_notification(
+notify_client.send_sms_notification(
     phone_number='+61423 555 555',
     template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',
     personalisation={
@@ -23,9 +23,9 @@ You can find this by signing into Notify and
 going to the Templates page.
 
   </Parameter>
-  <Parameter required name="email_address">
+  <Parameter required name="phone_number">
 
-The email address of the recipient you want to send to.
+The phone number of the recipient you want to send to.
 
   </Parameter>
   <Parameter optional name="personalisation">

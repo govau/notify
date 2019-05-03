@@ -7,6 +7,10 @@
   margin: 40px 0 $gutter-half 0;
 }
 
+.table-overflow {
+  overflow: auto;
+}
+
 .dashboard-table {
   .heading-medium {
     margin-bottom: 5px;

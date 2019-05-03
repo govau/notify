@@ -33,12 +33,23 @@ def check_service_over_api_rate_limit(service, api_key):
 
 
 def check_service_over_daily_message_limit(key_type, service):
-    if key_type != KEY_TYPE_TEST and current_app.config['REDIS_ENABLED']:
-        cache_key = daily_limit_cache_key(service.id)
-        service_stats = redis_store.get(cache_key)
-        if not service_stats:
-            service_stats = services_dao.fetch_todays_total_message_count(service.id)
-            redis_store.set(cache_key, service_stats, ex=3600)
+    if key_type != KEY_TYPE_TEST:
+        if current_app.config['REDIS_ENABLED']:
+            cache_key = daily_limit_cache_key(service.id)
+            service_stats = redis_store.get(cache_key)
+            if not service_stats:
+                service_stats = services_dao.fetch_todays_total_message_count(service.id)
+                redis_store.set(cache_key, service_stats, ex=3600)
+            if int(service_stats) >= service.message_limit:
+                current_app.logger.error(
+                    "service {} has been rate limited for daily use sent {} limit {}".format(
+                        service.id, int(service_stats), service.message_limit)
+                )
+                raise TooManyRequestsError(service.message_limit)
+            return
+
+        # TODO: remove this block when redis is re-enabled in live
+        service_stats = services_dao.fetch_todays_total_message_count(service.id)
         if int(service_stats) >= service.message_limit:
             current_app.logger.error(
                 "service {} has been rate limited for daily use sent {} limit {}".format(
@@ -72,7 +83,7 @@ def service_can_send_to_recipient(send_to, key_type, service, allow_whitelisted_
         else:
             message = (
                 'Can’t send to this recipient when service is in trial mode '
-                '– see https://www.notifications.service.gov.uk/trial-mode'
+                '– see https://notify.gov.au/features/using-notify'
             )
         raise BadRequestError(message=message)
 

@@ -23,6 +23,7 @@ class UserApiClient(NotifyAdminAPIClient):
         super().init_app(app)
 
         self.max_failed_login_count = app.config["MAX_FAILED_LOGIN_COUNT"]
+        self.max_failed_verify_count = app.config["MAX_FAILED_VERIFY_COUNT"]
         self.admin_url = app.config['ADMIN_BASE_URL']
 
     def register_user(self, name, email_address, mobile_number, password, auth_type):
@@ -34,16 +35,16 @@ class UserApiClient(NotifyAdminAPIClient):
             "auth_type": auth_type
         }
         user_data = self.post("/user", data)
-        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def get_user(self, id):
         url = "/user/{}".format(id)
         user_data = self.get(url)
-        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def get_user_by_email(self, email_address):
         user_data = self.get('/user/email', params={'email': email_address})
-        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def get_user_by_email_or_none(self, email_address):
         try:
@@ -56,7 +57,7 @@ class UserApiClient(NotifyAdminAPIClient):
         users_data = self.get("/user")['data']
         users = []
         for user in users_data:
-            users.append(User(user, max_failed_login_count=self.max_failed_login_count))
+            users.append(User(user, max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count))
         return users
 
     def update_user_attribute(self, user_id, **kwargs):
@@ -70,18 +71,18 @@ class UserApiClient(NotifyAdminAPIClient):
         data = dict(**kwargs)
         url = "/user/{}".format(user_id)
         user_data = self.post(url, data=data)
-        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def reset_failed_login_count(self, user_id):
         url = "/user/{}/reset-failed-login-count".format(user_id)
         user_data = self.post(url, data={})
-        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def update_password(self, user_id, password):
         data = {"_password": password}
         url = "/user/{}/update-password".format(user_id)
         user_data = self.post(url, data=data)
-        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def verify_password(self, user_id, password):
         try:
@@ -159,7 +160,7 @@ class UserApiClient(NotifyAdminAPIClient):
 
     def add_user_to_organisation(self, org_id, user_id):
         resp = self.post('/organisations/{}/users/{}'.format(org_id, user_id), data={})
-        return User(resp['data'], max_failed_login_count=self.max_failed_login_count)
+        return User(resp['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
     def set_user_permissions(self, user_id, service_id, permissions):
         # permissions passed in are the combined admin roles, not db permissions
@@ -181,7 +182,7 @@ class UserApiClient(NotifyAdminAPIClient):
         if user.state == 'pending':
             url = "/user/{}/activate".format(user.id)
             user_data = self.post(url, data=None)
-            return User(user_data['data'], max_failed_login_count=self.max_failed_login_count)
+            return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
         else:
             return user
 

@@ -368,6 +368,7 @@ def dao_fetch_todays_stats_for_all_services(include_from_test_key=True, only_act
         Service.research_mode,
         Service.active,
         Service.created_at,
+        Service.organisation_type,
         subquery.c.notification_type,
         subquery.c.status,
         subquery.c.count
@@ -414,6 +415,7 @@ def fetch_stats_by_date_range_for_all_services(start_date, end_date, include_fro
         Service.research_mode,
         Service.active,
         Service.created_at,
+        Service.organisation_type,
         subquery.c.notification_type,
         subquery.c.status,
         subquery.c.count

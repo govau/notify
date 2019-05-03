@@ -14,13 +14,16 @@ from app.dao.users_dao import (
     get_user_code,
     use_user_code,
     increment_failed_login_count,
+    increment_failed_verify_count,
     reset_failed_login_count,
+    reset_failed_verify_count,
     get_user_by_email,
     create_secret_code,
     save_user_attribute,
     update_user_password,
     count_user_verify_codes,
-    get_user_and_accounts
+    get_user_and_accounts,
+    set_verify_codes_to_used
 )
 from app.dao.permissions_dao import permission_dao
 from app.dao.services_dao import dao_fetch_service_by_id
@@ -104,6 +107,7 @@ def activate_user(user_id):
 def user_reset_failed_login_count(user_id):
     user_to_update = get_user_by_id(user_id=user_id)
     reset_failed_login_count(user_to_update)
+    reset_failed_verify_count(user_to_update)
     return jsonify(data=user_to_update.serialize()), 200
 
 
@@ -136,20 +140,20 @@ def verify_user_code(user_id):
     user_to_verify = get_user_by_id(user_id=user_id)
 
     code = get_user_code(user_to_verify, data['code'], data['code_type'])
-    if user_to_verify.failed_login_count >= current_app.config.get('MAX_VERIFY_CODE_COUNT'):
+    if user_to_verify.failed_verify_count >= current_app.config.get('MAX_FAILED_VERIFY_COUNT'):
         raise InvalidRequest("Code not found", status_code=404)
     if not code:
         # only relevant from sms
-        increment_failed_login_count(user_to_verify)
+        increment_failed_verify_count(user_to_verify)
         raise InvalidRequest("Code not found", status_code=404)
     if datetime.utcnow() > code.expiry_datetime or code.code_used:
         # sms and email
-        increment_failed_login_count(user_to_verify)
+        increment_failed_verify_count(user_to_verify)
         raise InvalidRequest("Code has expired", status_code=400)
 
     user_to_verify.current_session_id = str(uuid.uuid4())
     user_to_verify.logged_in_at = datetime.utcnow()
-    user_to_verify.failed_login_count = 0
+    user_to_verify.failed_verify_count = 0
     save_model_user(user_to_verify)
 
     use_user_code(code.id)
@@ -161,18 +165,17 @@ def send_user_2fa_code(user_id, code_type):
     user_to_send_to = get_user_by_id(user_id=user_id)
 
     if count_user_verify_codes(user_to_send_to) >= current_app.config.get('MAX_VERIFY_CODE_COUNT'):
-        # Prevent more than `MAX_VERIFY_CODE_COUNT` active verify codes at a time
-        current_app.logger.warn('Too many verify codes created for user {}'.format(user_to_send_to.id))
+        set_verify_codes_to_used(user_id)
+
+    data = request.get_json()
+    if code_type == SMS_TYPE:
+        validate(data, post_send_user_sms_code_schema)
+        send_user_sms_code(user_to_send_to, data)
+    elif code_type == EMAIL_TYPE:
+        validate(data, post_send_user_email_code_schema)
+        send_user_email_code(user_to_send_to, data)
     else:
-        data = request.get_json()
-        if code_type == SMS_TYPE:
-            validate(data, post_send_user_sms_code_schema)
-            send_user_sms_code(user_to_send_to, data)
-        elif code_type == EMAIL_TYPE:
-            validate(data, post_send_user_email_code_schema)
-            send_user_email_code(user_to_send_to, data)
-        else:
-            abort(404)
+        abort(404)
 
     return '{}', 204
 
