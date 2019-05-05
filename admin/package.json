@@ -29,7 +29,7 @@
     "gulp-concat": "2.6.1",
     "gulp-include": "2.3.1",
     "gulp-load-plugins": "1.5.0",
-    "gulp-sass": "3.1.0",
+    "gulp-sass": "^4.0.2",
     "gulp-uglify": "3.0.0",
     "hogan": "1.0.2",
     "jquery": "^3.4.1",
@@ -48,5 +48,8 @@
     "jshint": "^2.10.2",
     "jshint-stylish": "2.2.1",
     "yargs": "^11.0.0"
+  },
+  "resolutions": {
+    "tar": "^4.4.8"
   }
 }
