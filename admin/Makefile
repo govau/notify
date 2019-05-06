@@ -1,6 +1,6 @@
 PIPENV ?= pipenv
 RUNNER ?= $(PIPENV) run
-NPM    ?= npm
+YARN   ?= yarn
 PORT   ?= 6012
 WORKERS?= 4
 CF     ?= cf
@@ -33,7 +33,7 @@ Pipfile Pipfile.lock:
 	$(PIPENV) install
 
 install-frontend:
-	$(NPM) install
+	$(YARN) install
 
 # this is a hack because CircleCI env variables are awful
 export ADMIN_SENTRY_DSN ?= $(ADMIN_SENTRY_DSN_DEV)
@@ -42,7 +42,7 @@ export ADMIN_SENTRY_ENV ?= $(ADMIN_SENTRY_ENV_DEV)
 build-frontend:
 	ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN} \
 	ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV} \
-	  $(NPM) run build -- --production
+	  $(YARN) run build -- --production
 
 build-frontend-prod: ADMIN_SENTRY_DSN=$(ADMIN_SENTRY_DSN_PROD)
 build-frontend-prod: ADMIN_SENTRY_ENV=$(ADMIN_SENTRY_ENV_PROD)
@@ -59,7 +59,7 @@ test: version-file ## Run linter, python tests, node tests
 	$(RUNNER) flake8 .
 	$(RUNNER) isort --check-only -rc ./app ./tests
 	$(MAKE) tests
-	$(NPM) test
+	$(YARN) test
 
 fmt:
 	$(RUNNER) autopep8 --in-place --recursive .
@@ -73,7 +73,7 @@ check-vulnerabilities:
 run-gulp: ## Continuously build css
 	ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN} \
 	ADMIN_SENTRY_ENV=${ADMIN_SENTRY_ENV} \
-	  $(NPM) run watch
+	  $(YARN) run watch
 
 run: version-file ## Run a development server (reloading)
 	$(RUNNER) flask run -p $(PORT)
