@@ -15,7 +15,7 @@ Languages needed
 
 - Python 3.6+
 - [Node](https://nodejs.org/) 7.0.0 or greater
-- [npm](https://www.npmjs.com/) 5.0.0 or greater
+- [yarn](https://yarnpkg.com/en/) 1.15.0 or greater
 
 ```shell
     brew install node
