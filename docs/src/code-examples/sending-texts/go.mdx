@@ -3,10 +3,14 @@ lang: go
 ---
 
 ```go
-// resp, err := client.SendSMS(templateID, phoneNumber, ...options)
-resp, err := client.SendSMS(templateID, phoneNumber, notify.Personalisation{
-  {"name", userName}
-})
+options := []notify.SendSMSOption{
+  notify.Personalisation{
+    {"name", userName},
+  },
+  notify.SMSSenderID(senderID),
+}
+
+resp, err := client.SendSMS(templateID, phoneNumber, options...)
 ```
 
 <Panel label={<H3>Arguments</H3>}>
@@ -38,8 +42,8 @@ If a template has placeholder fields for personalised information such as name o
 
 ```go inline
 p := notify.Personalisation{
-  {"name", userName}
-  {"age",  userAge}
+  {"name", userName},
+  {"age",  userAge},
 }
 ```
 

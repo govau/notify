@@ -5,7 +5,7 @@ lang: go
 ```go
 // resp, err := client.SendEmail(templateID, emailAddress, ...options)
 resp, err := client.SendEmail(templateID, emailAddress, notify.Personalisation{
-  {"name", userName}
+  {"name", userName},
 })
 ```
 
