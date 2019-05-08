@@ -1,0 +1,95 @@
+---
+lang: go
+---
+
+```go
+options := []notify.SendSMSOption{
+  notify.Personalisation{
+    {"name", userName},
+  },
+  notify.SMSSenderID(senderID),
+}
+
+resp, err := client.SendSMS(templateID, phoneNumber, options...)
+```
+
+<Panel label={<H3>Arguments</H3>}>
+
+#### Ordered arguments
+
+<Parameters>
+  <Parameter required name="templateID" kind="String">
+
+The ID of the template
+
+You can find this by signing into Notify and
+going to the Templates page.
+
+  </Parameter>
+  <Parameter required name="phoneNumber" kind="String">
+
+The phone number of the recipient you want to send to.
+
+  </Parameter>
+</Parameters>
+
+#### Options
+
+<Parameters>
+  <Parameter optional name="Personalisation" kind="[]struct{ Key, Value string }">
+
+If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a struct. For example:
+
+```go inline
+p := notify.Personalisation{
+  {"name", userName},
+  {"age",  userAge},
+}
+```
+
+  </Parameter>
+  <Parameter optional name="Reference" kind="string">
+
+A unique identifier you create. This reference identifies a single unique notification or a batch of notifications.
+
+```go inline
+r := notify.Reference("batch-abc")
+```
+
+  </Parameter>
+
+  <Parameter optional name="SMSSenderID" kind="string">
+
+Specifies the identifier of the SMS sender to set for the notification. The identifiers are found in your service Settings, when you 'Manage' your 'Text message sender'.
+
+If you omit this argument your default SMS sender will be set for the notification.
+
+```go inline nonumbers
+s := notify.SMSSenderID("8e222534-7f05-4972-86e3-17c5d9f894e2")
+```
+
+  </Parameter>
+</Parameters>
+</Panel>
+<Panel label={<H3>Response</H3>}>
+
+If the request to the client is successful, the client returns a `struct`:
+
+```go
+{
+    ID: "bfb50d92-100d-4b8b-b559-14fa3b091cda",
+    Reference: "Sam's reminders",
+    Content: {
+        Body: "Hi Sam, just a reminder to visit the post office today.",
+        FromNumber: "04xxxxxxxx"
+    },
+    URI: "https://rest-api.notify.gov.au/v2/notifications/ceb50d92-100d-4b8b-b559-14fa3b091cd",
+    Template: {
+        ID: "ceb50d92-100d-4b8b-b559-14fa3b091cda",
+        Version: 1,
+        URI: "https://rest-api.notify.gov.au/v2/templates/bfb50d92-100d-4b8b-b559-14fa3b091cda"
+    },
+}
+```
+
+</Panel>
