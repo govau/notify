@@ -20,7 +20,7 @@ const Permalink = ({ id }) =>
       {' '}
       <InitiallyHiddenLink href={`#${id}`}>
         <span role="img" aria-label="permalink">
-          🔗
+          ¶
         </span>
       </InitiallyHiddenLink>
     </Fragment>
