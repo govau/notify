@@ -4,10 +4,10 @@ lang: go
 
 ```go
 options := []notify.SendSMSOption{
-  notify.Personalisation{
-    {"name", userName},
-  },
-  notify.SMSSenderID(senderID),
+	notify.Personalisation{
+		{"name", userName},
+	},
+	notify.SMSSenderID(senderID),
 }
 
 resp, err := client.SendSMS(templateID, phoneNumber, options...)
@@ -42,8 +42,8 @@ If a template has placeholder fields for personalised information such as name o
 
 ```go inline
 p := notify.Personalisation{
-  {"name", userName},
-  {"age",  userAge},
+	{"name", userName},
+	{"age",  userAge},
 }
 ```
 
@@ -73,10 +73,10 @@ s := notify.SMSSenderID("8e222534-7f05-4972-86e3-17c5d9f894e2")
 </Panel>
 <Panel label={<H3>Response</H3>}>
 
-If the request to the client is successful, the client returns a `struct`:
+If the request to the client is successful, the client returns a `SentSMS` struct, for example:
 
 ```go
-{
+resp := SentSMS{
     ID: "bfb50d92-100d-4b8b-b559-14fa3b091cda",
     Reference: "Sam's reminders",
     Content: {
