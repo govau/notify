@@ -3,10 +3,13 @@ lang: go
 ---
 
 ```go
-// resp, err := client.SendEmail(templateID, emailAddress, ...options)
-resp, err := client.SendEmail(templateID, emailAddress, notify.Personalisation{
-  {"name", userName},
-})
+options := []notify.SendEmailOption{
+	notify.Personalisation{
+		{"name", userName},
+	},
+}
+
+resp, err := client.SendEmail(templateID, emailAddress, options...)
 ```
 
 <Panel label={<H3>Arguments</H3>}>
@@ -38,8 +41,8 @@ If a template has placeholder fields for personalised information such as name o
 
 ```go inline
 p := notify.Personalisation{
-  {"name", userName}
-  {"age",  userAge}
+	{"name", userName},
+	{"age",  userAge},
 }
 ```
 
@@ -74,10 +77,10 @@ If you do not have an `EmailReplyToID`, you can leave out this argument.
 </Panel>
 <Panel label={<H3>Response</H3>}>
 
-If the request to the client is successful, the client returns a `struct`:
+If the request to the client is successful, the client returns a `SentEmail` struct, for example:
 
 ```go
-{
+resp := SentEmail{
     ID: "bfb50d92-100d-4b8b-b559-14fa3b091cda",
     Reference: "Sam's reminders",
     Content: {

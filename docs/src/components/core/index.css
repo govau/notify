@@ -16,8 +16,6 @@ body {
   }
 }
 
-code,
-kbd,
-samp {
+pre {
   font-size: 0.8125em;
 }
