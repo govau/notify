@@ -122,9 +122,8 @@ Terms of use
     </p>
     <h3 class="heading-small">Trial mode</h3>
     <p>
-    You can set up a trial account and start using Notify
-    immediately.<br>
-    In trial mode you can:
+      You can set up a trial account and start using Notify immediately.<br />
+      In trial mode you can:
     </p>
     <ul class="list list-bullet">
       <li>
@@ -172,7 +171,7 @@ Terms of use
     </ul>
     <p>
       You don’t need any technical knowledge to use Notify. See our
-      <a href="/features">features </a>page to find out more.
+      <a href="/features">features</a> page to find out more.
     </p>
     <h2 class="heading-medium" id="training">Training</h2>
     <p>
@@ -194,47 +193,9 @@ Terms of use
       All support is subject to DTA resourcing constraints.
     </p>
     <h2 class="heading-medium" id="fees">Fees</h2>
-    <p>To use Notify, there is no:</p>
-    <ul class="list list-bullet">
-      <li>procurement cost</li>
-      <li>monthly charge</li>
-      <li>setup fee to use</li>
-    </ul>
     <p>
-      <strong>Emails</strong> are free to send through Notify via
-      <a href="http://cloud.gov.au/">Cloud.gov.au</a>
-      using their SMTP mail server.
-    </p>
-    <p>
-      <strong>Text messages</strong>—while Notify is in Beta, each service will
-      have a free allowance of 25,000 text messages per financial year. If you
-      exceed this limit, the additional cost will be borne by your organisation.
-    </p>
-    <p><strong>Long text messages</strong></p>
-    <p>
-      Charges vary depending on the length of a text message:
-    </p>
-    {% call mapping_table(
-      caption='Text message pricing',
-      field_headings=['Message length', 'Charge'],
-      field_headings_visible=True,
-      caption_visible=False
-    ) %}
-      {% for message_length, charge in [
-        ('Up to 160 characters', '1 text message'),
-        ('Up to 306 characters', '2 text messages'),
-        ('Up to 459 characters', '3 text messages')
-      ] %}
-        {% call row() %}
-          {{ text_field(message_length) }}
-          {{ text_field(charge) }}
-        {% endcall %}
-      {% endfor %}
-    {% endcall %}
-    <h3 class="heading-small">How to pay</h3>
-    <p>
-      <a href="mailto:notify-support@digital.gov.au">Contact us</a> to find out
-      more.
+      See our
+      <a href="/pricing">pricing</a> page to find out more.
     </p>
     <h2 class="heading-medium" id="security">Security</h2>
     <p>
