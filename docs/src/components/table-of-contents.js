@@ -23,13 +23,17 @@ const Ul = styled.ul`
 
 export const { Provider, Consumer } = createContext([])
 
+export const PageHeadings = ({ children }) => (
+  <Consumer>{headings => children(headings)}</Consumer>
+)
+
 // Consume a provided table of contents. mdx-layout knows how to provide this
 export default ({ title = 'Contents', children }) => (
   <Contents>
     <H2 appearAs={H4}>{title}</H2>
     <Ul>
       {children || (
-        <Consumer>
+        <PageHeadings>
           {headings =>
             headings
               ? headings.map((heading, i) => (
@@ -39,7 +43,7 @@ export default ({ title = 'Contents', children }) => (
                 ))
               : null
           }
-        </Consumer>
+        </PageHeadings>
       )}
     </Ul>
   </Contents>

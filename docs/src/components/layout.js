@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from 'gatsby'
@@ -13,6 +13,7 @@ import { Wrapper } from './theme'
 import { desktop } from './core/media'
 import 'sanitize.css'
 import './core/index.css'
+import { removeLangFromHash } from '../utils/url'
 
 const Root = styled.div`
   display: flex;
@@ -86,6 +87,16 @@ const Layout = ({ sidenav = <Sidenav />, children, location }) => {
 
     return `${edge.page.frontmatter.title} - ${baseTitle}`
   }
+
+  useEffect(() => {
+    const { hash, lang } = removeLangFromHash()
+    // Only trigger scroll for hashes with a lang,
+    // otherwise let browser handle scroll
+    if (lang) {
+      const target = document.querySelector(hash)
+      target && target.scrollIntoView()
+    }
+  }, [])
 
   return (
     <Providers>
