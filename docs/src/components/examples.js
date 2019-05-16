@@ -1,8 +1,9 @@
-import React, { createContext, Fragment } from 'react'
+import React, { createContext } from 'react'
 import { StaticQuery, graphql } from 'gatsby'
 import MDXRenderer from 'gatsby-mdx/mdx-renderer'
 
 import LanguageSelector, { CurrentLanguage } from './language-selector'
+import { PageHeadings } from './table-of-contents'
 
 import * as scope from './examples-components'
 
@@ -15,6 +16,11 @@ const groupBy = identify => (groups, node) => {
 }
 
 const groupByDirectory = groupBy(node => node.parent.relativeDirectory)
+
+const getSectionPath = (headings, title) => {
+  const match = headings.find(heading => heading.title === title)
+  return match && match.url
+}
 
 export const Provider = ({ source = 'data', ...props }) => (
   <StaticQuery
@@ -57,26 +63,37 @@ export const Provider = ({ source = 'data', ...props }) => (
   />
 )
 
-export default ({ reference }) => (
-  <Fragment>
-    <LanguageSelector />
-    <Context.Consumer>
-      {examples => (
-        <CurrentLanguage>
-          {language => {
-            const ex = (examples.get(reference) || []).find(
-              example => example.frontmatter.lang === language
-            )
-
-            if (!ex) {
-              console.warn(`couldnt find example ${reference} for ${language}`)
-              return null
-            }
-
-            return <MDXRenderer scope={scope}>{ex.code.body}</MDXRenderer>
+export default ({ reference, title }) => (
+  <PageHeadings>
+    {headings => (
+      <>
+        <LanguageSelector
+          onChange={language => {
+            const path = getSectionPath(headings, title)
+            path && window.history.pushState(null, null, `${path}-${language}`)
           }}
-        </CurrentLanguage>
-      )}
-    </Context.Consumer>
-  </Fragment>
+        />
+        <Context.Consumer>
+          {examples => (
+            <CurrentLanguage>
+              {language => {
+                const ex = (examples.get(reference) || []).find(
+                  example => example.frontmatter.lang === language
+                )
+
+                if (!ex) {
+                  console.warn(
+                    `couldnt find example ${reference} for ${language}`
+                  )
+                  return null
+                }
+
+                return <MDXRenderer scope={scope}>{ex.code.body}</MDXRenderer>
+              }}
+            </CurrentLanguage>
+          )}
+        </Context.Consumer>
+      </>
+    )}
+  </PageHeadings>
 )

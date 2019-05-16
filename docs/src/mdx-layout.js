@@ -16,11 +16,14 @@ const headingLinks = (pagePath, { items = [] }) =>
       }))
     : []
 
-export default ({ data }) => (
+export default ({ data, location }) => (
   <TOCProvider
     value={headingLinks(data.mdx.fields.pagePath, data.mdx.tableOfContents)}
   >
-    <Layout sidenav={<DynamicSidenav current={data.mdx.fields.pagePath} />}>
+    <Layout
+      location={location}
+      sidenav={<DynamicSidenav current={data.mdx.fields.pagePath} />}
+    >
       <MDXRenderer>{data.mdx.code.body}</MDXRenderer>
     </Layout>
   </TOCProvider>

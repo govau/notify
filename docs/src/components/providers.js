@@ -9,6 +9,7 @@ import SyntaxHighlighter from './syntax-highlighter'
 import { BlockQuote } from './core/blockquote'
 import { Provider as LanguageProvider } from './language-selector'
 import { Provider as ExampleProvider } from './examples'
+import { getLangInHash } from '../utils/url'
 
 const getLanguage = props => {
   const re = /language-(\w+)/g
@@ -23,7 +24,7 @@ const getMetadata = ({ className, ...metadata }) => metadata
 export default ({ children }) => (
   <ThemeProvider>
     <ExampleProvider>
-      <LanguageProvider>
+      <LanguageProvider initial={getLangInHash()}>
         <MDXProvider
           components={{
             wrapper: React.Fragment,
