@@ -73,50 +73,75 @@ const Content = styled.div`
   }
 `
 
-const Layout = ({ sidenav = <Sidenav />, children }) => (
-  <Providers>
-    <StaticQuery
-      query={graphql`
-        query SiteTitleQuery {
-          site {
-            siteMetadata {
-              title
+const Layout = ({ sidenav = <Sidenav />, children, location }) => {
+  const getPageTitle = data => {
+    const baseTitle = data.site.siteMetadata.title
+    if (!location) {
+      return baseTitle
+    }
+
+    const edge = data.mdxPages.edges.find(e =>
+      e.page.fileAbsolutePath.includes(`${location.pathname}.mdx`)
+    )
+
+    return `${edge.page.frontmatter.title} - ${baseTitle}`
+  }
+
+  return (
+    <Providers>
+      <StaticQuery
+        query={graphql`
+          query SiteTitleQuery {
+            site {
+              siteMetadata {
+                title
+              }
+            }
+            mdxPages: allMdx {
+              edges {
+                page: node {
+                  fileAbsolutePath
+                  frontmatter {
+                    title
+                  }
+                }
+              }
             }
           }
-        }
-      `}
-      render={data => (
-        <Root>
-          <SkipNavLink href="#content">Skip to content</SkipNavLink>
-          <SkipNavLink href="#nav">Skip to navigation</SkipNavLink>
-          <Helmet
-            title={data.site.siteMetadata.title}
-            meta={[
-              { content: 'IE=edge', httpEquiv: 'X-UA-Compatible' },
-              {
-                name: 'description',
-                content:
-                  'Notify.gov.au lets you send emails and text messages to your users. Try it now if you work in Australian local, state or federal government.',
-              },
-            ]}
-          >
-            <html lang="en" />
-          </Helmet>
-          <Header siteTitle={data.site.siteMetadata.title} />
-          <Main role="main">
-            <SkipNavContent id="content" />
-            <NavWrapper>
-              <SkipNavContent id="nav" />
-              <StickyNav>{sidenav}</StickyNav>
-            </NavWrapper>
-            <Content>{children}</Content>
-          </Main>
-          <Footer />
-        </Root>
-      )}
-    />
-  </Providers>
-)
+        `}
+        render={data => (
+          <Root>
+            <SkipNavLink href="#content">Skip to content</SkipNavLink>
+            <SkipNavLink href="#nav">Skip to navigation</SkipNavLink>
+            <Helmet
+              title={getPageTitle(data)}
+              meta={[
+                { content: 'IE=edge', httpEquiv: 'X-UA-Compatible' },
+                {
+                  name: 'description',
+                  content:
+                    'Notify.gov.au lets you send emails and text messages to your users. Try it now if you work in Australian local, state or federal government.',
+                },
+              ]}
+            >
+              <html lang="en" />
+            </Helmet>
+            <Header siteTitle={data.site.siteMetadata.title} />
+            <Main role="main">
+              <SkipNavContent id="content" />
+              <NavWrapper>
+                <SkipNavContent id="nav" />
+                <StickyNav>{sidenav}</StickyNav>
+              </NavWrapper>
+              <Content>{children}</Content>
+            </Main>
+            <Footer />
+          </Root>
+        )}
+      />
+    </Providers>
+  )
+}
 
 Layout.propTypes = {
   children: PropTypes.node.isRequired,
