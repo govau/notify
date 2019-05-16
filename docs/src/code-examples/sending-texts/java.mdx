@@ -3,8 +3,13 @@ lang: java
 ---
 
 ```java
-SendSmsResponse response = client.sendSms(templateId, phoneNumber, personalisation, reference);
-SendSmsResponse response = client.sendSms(templateId, phoneNumber, personalisation, reference, smsSenderId);
+SendSmsResponse response = client.sendSms(
+  templateId,
+  phoneNumber,
+  personalisation,
+  reference,
+  smsSenderId
+);
 ```
 
 <Panel label={<H3>Arguments</H3>}>
