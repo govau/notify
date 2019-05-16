@@ -1,18 +1,23 @@
 import { languages } from '../config'
+import { getGlobals } from './globals'
 
 export function getLangInHash() {
-  const winHash = window.location.hash
-  return Object.keys(languages).find(lang => {
-    const re = new RegExp(`-${lang}$`)
-    return re.test(winHash)
+  return getGlobals(({ win }) => {
+    const winHash = win.location.hash
+    return Object.keys(languages).find(lang => {
+      const re = new RegExp(`-${lang}$`)
+      return re.test(winHash)
+    })
   })
 }
 
 export function removeLangFromHash() {
-  const lang = getLangInHash()
-  const re = new RegExp(`-${lang}$`)
-  return {
-    hash: window.location.hash.replace(re, ''),
-    lang,
-  }
+  return getGlobals(({ win }) => {
+    const lang = getLangInHash()
+    const re = new RegExp(`-${lang}$`)
+    return {
+      hash: win.location.hash.replace(re, ''),
+      lang,
+    }
+  })
 }
