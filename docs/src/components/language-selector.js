@@ -1,8 +1,10 @@
 import React, { createContext, Fragment } from 'react'
 import styled, { css } from 'styled-components'
 import Select from 'react-select'
+import PropTypes from 'prop-types'
 
 import { H3 } from './core/heading'
+import { languages } from '../config'
 
 const Nav = styled.nav`
   display: flex;
@@ -35,15 +37,6 @@ const NavLanguageLink = styled(LanguageLink)`
     margin-left: 2px;
   }
 `
-
-const languages = {
-  python: 'Python',
-  java: 'Java',
-  node: 'Node.js',
-  go: 'Go',
-  //ruby: 'Ruby',
-  //dotnet: '.NET',
-}
 
 const createLanguageOption = language => ({
   value: language,
@@ -96,7 +89,10 @@ const Languages = props => (
             <NavLanguageLink
               active={value === current}
               key={label}
-              onClick={e => changeLanguage(value)}
+              onClick={() => {
+                changeLanguage(value)
+                props.onChange(value)
+              }}
             >
               {label}
             </NavLanguageLink>
@@ -106,6 +102,15 @@ const Languages = props => (
     )}
   </Context.Consumer>
 )
+
+Languages.propTypes = {
+  /** Called when a language is selected. Selected language is passed as only parameter. */
+  onChange: PropTypes.func,
+}
+
+Languages.defaultProps = {
+  onChange: () => {},
+}
 
 const Selector = props => (
   <Context.Consumer>
