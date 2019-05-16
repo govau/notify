@@ -40,7 +40,7 @@
         {% if current_user.has_permissions('manage_service') %}
           <a class="user-list-edit-link" href="{{ url_for('.service_edit_sms_sender', service_id=current_service.id, sms_sender_id = item.id) }}">Change</a>
         {% endif %}
-        {% if sms_senders|length  > 1 %}
+        {% if sms_senders|length > 0 %}
           {{ api_key(item.id, thing="ID") }}
         {% endif %}
       </div>
