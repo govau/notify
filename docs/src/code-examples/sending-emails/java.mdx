@@ -3,8 +3,13 @@ lang: java
 ---
 
 ```java
-SendEmailResponse response = client.sendEmail(templateId, emailAddress, personalisation, reference);
-SendEmailResponse response = client.sendEmail(templateId, emailAddress, personalisation, reference, emailReplyToId);
+SendEmailResponse response = client.sendEmail(
+  templateId,
+  emailAddress,
+  personalisation,
+  reference,
+  emailReplyToId
+);
 ```
 
 <Panel label={<H3>Arguments</H3>}>
