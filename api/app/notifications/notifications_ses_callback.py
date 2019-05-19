@@ -37,7 +37,6 @@ from app.notifications.sns_message_verifier import (
     InvalidCertURLException,
     InvalidSignatureVersionException,
     SignatureVerificationFailureException,
-    SNSMessageType,
     SNSMessageVerifier,
 )
 
