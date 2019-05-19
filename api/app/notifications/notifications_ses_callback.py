@@ -32,22 +32,53 @@ from app.errors import (
     register_errors,
     InvalidRequest
 )
+from app.notifications.sns_message_verifier import (
+    InvalidMessageTypeException,
+    InvalidCertURLException,
+    InvalidSignatureVersionException,
+    SignatureVerificationFailureException,
+    SNSMessageType,
+    SNSMessageVerifier,
+)
 
 ses_callback_blueprint = Blueprint('notifications_ses_callback', __name__)
 
 register_errors(ses_callback_blueprint)
 
 
+# 400 counts as a permanent failure so SNS will not retry.
+# 500 counts as a failed delivery attempt so SNS will retry.
+# See https://docs.aws.amazon.com/sns/latest/dg/DeliveryPolicies.html#DeliveryPolicies
 @ses_callback_blueprint.route('/notifications/email/ses', methods=['POST'])
 def sns_callback_handler():
-    req_json = request.get_json(force=True)
+    sns_message_verifier = SNSMessageVerifier()
 
-    if autoconfirm_subscription(req_json):
+    message_type = request.headers.get('x-amz-sns-message-type')
+    try:
+        sns_message_verifier.verify_message_type(message_type)
+    except InvalidMessageTypeException as ex:
+        raise InvalidRequest("SES-SNS callback failed: invalid message type", 400)
+
+    try:
+        message = json.loads(request.data)
+    except json.decoder.JSONDecodeError as ex:
+        raise InvalidRequest("SES-SNS callback failed: invalid JSON given", 400)
+
+    try:
+        sns_message_verifier.verify_message(message=message)
+    except InvalidCertURLException as ex:
+        raise InvalidRequest("SES-SNS callback failed: invalid certificate URL", 400)
+    except InvalidSignatureVersionException as ex:
+        raise InvalidRequest("SES-SNS callback failed: unexpected signature version", 400)
+    except SignatureVerificationFailureException as ex:
+        raise InvalidRequest("SES-SNS callback failed: failed to verify signature", 400)
+
+    if autoconfirm_subscription(message):
         return jsonify(
             result="success", message="SES-SNS auto-confirm callback succeeded"
         ), 200
 
-    ok, retry = process_ses_results(req_json)
+    ok, retry = process_ses_results(message)
 
     if ok:
         return jsonify(
@@ -55,12 +86,8 @@ def sns_callback_handler():
         ), 200
 
     if retry:
-        # 500 counts as a failed delivery attempt so SNS will retry.
-        # See https://docs.aws.amazon.com/sns/latest/dg/DeliveryPolicies.html#DeliveryPolicies
         raise InvalidRequest("SES callback failed, should retry", 500)
 
-    # 400 counts as a permanent failure so SNS will not retry.
-    # See https://docs.aws.amazon.com/sns/latest/dg/DeliveryPolicies.html#DeliveryPolicies
     raise InvalidRequest("SES-SNS callback failed", 400)
 
 
