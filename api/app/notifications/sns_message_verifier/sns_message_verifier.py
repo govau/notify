@@ -78,6 +78,6 @@ class SNSMessageVerifier:
 
     def verify_message_type(self, message_type: str):
         try:
-            sns_message_type: SNSMessageType = SNSMessageType(message_type)
+            SNSMessageType(message_type)
         except ValueError:
             raise InvalidMessageTypeException(f'{message_type} is not a valid message type.')
