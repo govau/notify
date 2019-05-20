@@ -148,6 +148,9 @@ class User(UserMixin):
     def is_locked(self):
         return self.failed_login_count >= self.max_failed_login_count or self.failed_verify_count >= self.max_failed_verify_count
 
+    def belongs_to_service(self, service_id):
+        return str(service_id) in self.services
+
     def serialize(self):
         dct = {
             "id": self.id,
@@ -199,16 +202,16 @@ class InvitedUser(object):
 
     def __eq__(self, other):
         return ((self.id,
-                self.service,
-                self.from_user,
-                self.email_address,
-                self.auth_type,
-                self.status) == (other.id,
-                other.service,
-                other.from_user,
-                other.email_address,
-                other.auth_type,
-                other.status))
+                 self.service,
+                 self.from_user,
+                 self.email_address,
+                 self.auth_type,
+                 self.status) == (other.id,
+                                  other.service,
+                                  other.from_user,
+                                  other.email_address,
+                                  other.auth_type,
+                                  other.status))
 
     def serialize(self, permissions_as_string=False):
         data = {'id': self.id,
@@ -238,14 +241,14 @@ class InvitedOrgUser(object):
 
     def __eq__(self, other):
         return ((self.id,
-                self.organisation,
-                self.invited_by,
-                self.email_address,
-                self.status) == (other.id,
-                other.organisation,
-                other.invited_by,
-                other.email_address,
-                other.status))
+                 self.organisation,
+                 self.invited_by,
+                 self.email_address,
+                 self.status) == (other.id,
+                                  other.organisation,
+                                  other.invited_by,
+                                  other.email_address,
+                                  other.status))
 
     def serialize(self, permissions_as_string=False):
         data = {'id': self.id,

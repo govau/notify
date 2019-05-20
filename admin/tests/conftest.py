@@ -49,6 +49,10 @@ def app_(request):
 @pytest.fixture(scope='function')
 def service_one(api_user_active):
     return service_json(SERVICE_ONE_ID, 'service one', [api_user_active.id])
+    
+@pytest.fixture(scope='function')
+def service_two(api_user_active):
+    return service_json(SERVICE_TWO_ID, 'service two', [api_user_active.id])
 
 
 @pytest.fixture(scope='function')
