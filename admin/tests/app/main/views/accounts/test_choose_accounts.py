@@ -1,6 +1,10 @@
 import pytest
 from flask import url_for
-from tests.conftest import normalize_spaces
+from tests.conftest import (
+    normalize_spaces,
+    service_one,
+    service_two
+)
 
 SAMPLE_DATA = {
     'organisations': [
@@ -122,3 +126,45 @@ def test_choose_account_should_not_show_back_to_service_link_if_no_service_in_se
     page = client_request.get('main.choose_account')
 
     assert len(page.select('.navigation-service a')) == 0
+
+
+@pytest.mark.parametrize('service, expected_status, test_page_title, page_text', (
+    (service_one, 200, True, (
+        'Test Service   Switch service '
+        ''
+        'Dashboard '
+        'Templates '
+        'Team members'
+    )),
+    (service_two, 403, False, (
+        # Page has no ‘back to’ link
+        '403 '
+        'You do not have permission to view this page.'
+    )),
+))
+def test_should_not_show_back_to_service_if_user_doesnt_belong_to_service(
+    client_request,
+    api_user_active,
+    fake_uuid,
+    mock_get_service,
+    service,
+    expected_status,
+    test_page_title,
+    page_text,
+):
+
+    mock_get_service.return_value = service(api_user_active)
+
+    page = client_request.get(
+        'main.view_template',
+        service_id=mock_get_service.return_value['id'],
+        template_id=fake_uuid,
+        _expected_status=expected_status,
+        _test_page_title=test_page_title,
+    )
+
+    assert normalize_spaces(
+        page.select_one('#content').text
+    ).startswith(
+        normalize_spaces(page_text)
+    )
