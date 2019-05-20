@@ -1,5 +1,6 @@
 import re
 import base64
+import enum
 import requests
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -81,3 +82,25 @@ class SNSMessageVerifier:
             SNSMessageType(message_type)
         except ValueError:
             raise InvalidMessageTypeException(f'{message_type} is not a valid message type.')
+
+
+class SNSMessageType(enum.Enum):
+    SubscriptionConfirmation = 'SubscriptionConfirmation'
+    Notification = 'Notification'
+    UnsubscribeConfirmation = 'UnsubscribeConfirmation'
+
+
+class InvalidSignatureVersionException(Exception):
+    pass
+
+
+class InvalidCertURLException(Exception):
+    pass
+
+
+class InvalidMessageTypeException(Exception):
+    pass
+
+
+class SignatureVerificationFailureException(Exception):
+    pass
