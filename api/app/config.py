@@ -306,9 +306,9 @@ class Config(object):
     SENDING_NOTIFICATIONS_TIMEOUT_PERIOD = 259200  # 3 days
 
     SIMULATED_EMAIL_ADDRESSES = (
-        'simulate-delivered@notifications.service.gov.uk',
-        'simulate-delivered-2@notifications.service.gov.uk',
-        'simulate-delivered-3@notifications.service.gov.uk',
+        'simulate-delivered@notify.digital.gov.au',
+        'simulate-delivered-2@notify.digital.gov.au',
+        'simulate-delivered-3@notify.digital.gov.au',
     )
 
     SIMULATED_SMS_NUMBERS = ('+61400900000', '+61400900111', '+61400900222')
