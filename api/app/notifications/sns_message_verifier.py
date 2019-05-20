@@ -7,13 +7,6 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.padding import PKCS1v15
 from cryptography.hazmat.primitives.hashes import SHA1
 from cryptography.exceptions import InvalidSignature
-from .sns_message_type import SNSMessageType
-from .exceptions import (
-    InvalidSignatureVersionException,
-    InvalidCertURLException,
-    InvalidMessageTypeException,
-    SignatureVerificationFailureException,
-)
 
 
 _DEFAULT_CERTIFICATE_URL_REGEX = r'^https://sns\.[-a-z0-9]+\.amazonaws\.com/'
