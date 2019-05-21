@@ -83,3 +83,36 @@
     <span class="textbox-colour-preview" style="background:{{ colour }}"></span>
   </div>
 {% endmacro %}
+
+{% macro textbox_search(
+  field,
+  label=None,
+  search_label='Search'
+) %}
+  <div class="form-group{% if field.errors %} form-group-error{% endif %}">
+    <label class="form-label" for="{{ field.name }}">
+      {% if label %}
+        {{ label }}
+      {% else %}
+        {{ field.label.text }}
+      {% endif %}
+      {% if field.errors %}
+        <span class="error-message" data-module="track-error" data-error-type="{{ field.errors[0] }}" data-error-label="{{ field.name }}">
+          {{ field.errors[0] }}
+        </span>
+      {% endif %}
+    </label>
+    <div class="grid-row">
+      <div class="textbox-search column-three-quarters">
+        {% set field_class = 'form-control ' + (' form-control-error' if field.errors else '') %}
+        {{ field(
+          class=field_class,
+          data_module='',
+          rows='1',
+          **kwargs
+        ) }}
+        <button type="submit" class="button">{{ search_label }}</button>
+      </div>
+    </div>
+  </div>
+{% endmacro %}

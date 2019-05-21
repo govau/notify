@@ -1,5 +1,4 @@
 .textbox-highlight {
-
   $tag-background: rgba($light-blue, 0.6);
 
   &-wrapper {
@@ -42,9 +41,7 @@
     .placeholder {
       color: transparent;
     }
-
   }
-
 }
 
 .textbox-help-link {
@@ -65,8 +62,21 @@
     width: 34px;
     height: 34px;
     margin-left: 5px;
-    border: 2px solid #0B0C0C;
+    border: 2px solid #0b0c0c;
     display: inline-block;
     vertical-align: top;
+  }
+}
+
+.textbox-search {
+  .form-control {
+    margin-bottom: 1rem;
+  }
+  @include media(tablet) {
+    display: flex;
+    .form-control {
+      flex: 1;
+      margin: 0 1rem 0 0;
+    }
   }
 }
