@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 import iso8601
+import enum
+import requests
 
 from flask import (
     Blueprint,
@@ -32,17 +34,39 @@ from app.errors import (
     register_errors,
     InvalidRequest
 )
-from app.notifications.sns_message_verifier import (
-    InvalidMessageTypeException,
-    InvalidCertURLException,
-    InvalidSignatureVersionException,
-    SignatureVerificationFailureException,
-    SNSMessageVerifier,
-)
+import validatesns
 
 ses_callback_blueprint = Blueprint('notifications_ses_callback', __name__)
 
 register_errors(ses_callback_blueprint)
+
+
+class SNSMessageType(enum.Enum):
+    SubscriptionConfirmation = 'SubscriptionConfirmation'
+    Notification = 'Notification'
+    UnsubscribeConfirmation = 'UnsubscribeConfirmation'
+
+
+class InvalidMessageTypeException(Exception):
+    pass
+
+
+def verify_message_type(message_type: str):
+    try:
+        SNSMessageType(message_type)
+    except ValueError:
+        raise InvalidMessageTypeException(f'{message_type} is not a valid message type.')
+
+
+certificate_cache = dict()
+
+
+def get_certificate(url):
+    if url in certificate_cache:
+        return certificate_cache[url]
+    res = requests.get(url).content
+    certificate_cache[url] = res
+    return res
 
 
 # 400 counts as a permanent failure so SNS will not retry.
@@ -50,11 +74,9 @@ register_errors(ses_callback_blueprint)
 # See https://docs.aws.amazon.com/sns/latest/dg/DeliveryPolicies.html#DeliveryPolicies
 @ses_callback_blueprint.route('/notifications/email/ses', methods=['POST'])
 def sns_callback_handler():
-    sns_message_verifier = SNSMessageVerifier()
-
     message_type = request.headers.get('x-amz-sns-message-type')
     try:
-        sns_message_verifier.verify_message_type(message_type)
+        verify_message_type(message_type)
     except InvalidMessageTypeException as ex:
         raise InvalidRequest("SES-SNS callback failed: invalid message type", 400)
 
@@ -64,13 +86,9 @@ def sns_callback_handler():
         raise InvalidRequest("SES-SNS callback failed: invalid JSON given", 400)
 
     try:
-        sns_message_verifier.verify_message(message=message)
-    except InvalidCertURLException as ex:
-        raise InvalidRequest("SES-SNS callback failed: invalid certificate URL", 400)
-    except InvalidSignatureVersionException as ex:
-        raise InvalidRequest("SES-SNS callback failed: unexpected signature version", 400)
-    except SignatureVerificationFailureException as ex:
-        raise InvalidRequest("SES-SNS callback failed: failed to verify signature", 400)
+        validatesns.validate(message, get_certificate=get_certificate)
+    except validatesns.ValidationError as ex:
+        raise InvalidRequest("SES-SNS callback failed: validation failed", 400)
 
     if autoconfirm_subscription(message):
         return jsonify(

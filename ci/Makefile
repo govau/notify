@@ -52,21 +52,22 @@ $(SVC_FETCHED): fetch-service-%:
 create-service-psql:
 	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
 
-setup-ses-callback: export AWS_ACCESS_KEY_ID = $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
-setup-ses-callback: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
-setup-ses-callback: export AWS_REGION = $(SES_CALLBACK_AWS_REGION)
-setup-ses-callback: export TOPIC_ARN = $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
+setup-ses-callback: export AWS_ACCESS_KEY_ID ?= $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
+setup-ses-callback: export AWS_SECRET_ACCESS_KEY ?= $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
+setup-ses-callback: export AWS_REGION ?= $(SES_CALLBACK_AWS_REGION)
+setup-ses-callback: export TOPIC_ARN ?= $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
+setup-ses-callback: export ENDPOINT ?= "https://notify-api-$(STG).apps.y.cld.gov.au/notifications/email/ses"
 setup-ses-callback:
 	@$(AWS) sns subscribe \
 		--region $(AWS_REGION) \
 		--topic-arn "$(TOPIC_ARN)" \
 		--protocol https \
-		--notification-endpoint "https://notify-api-$(STG).apps.y.cld.gov.au/notifications/email/ses" > /dev/null
+		--notification-endpoint $(ENDPOINT) > /dev/null
 
-teardown-ses-callback-%: export AWS_ACCESS_KEY_ID = $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
-teardown-ses-callback-%: export AWS_SECRET_ACCESS_KEY = $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
-teardown-ses-callback-%: export AWS_REGION = $(SES_CALLBACK_AWS_REGION)
-teardown-ses-callback-%: export TOPIC_ARN = $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
+teardown-ses-callback-%: export AWS_ACCESS_KEY_ID ?= $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
+teardown-ses-callback-%: export AWS_SECRET_ACCESS_KEY ?= $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
+teardown-ses-callback-%: export AWS_REGION ?= $(SES_CALLBACK_AWS_REGION)
+teardown-ses-callback-%: export TOPIC_ARN ?= $(SES_CALLBACK_AWS_SNS_TOPIC_ARN)
 teardown-ses-callback-%:
 	$(AWS) sns unsubscribe \
 		--region $(AWS_REGION) \
