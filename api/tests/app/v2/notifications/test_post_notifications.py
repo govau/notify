@@ -329,9 +329,9 @@ def test_post_email_notification_returns_201(client, sample_email_template_with_
 
 
 @pytest.mark.parametrize('recipient, notification_type', [
-    ('simulate-delivered@notify.digital.gov.au', EMAIL_TYPE),
-    ('simulate-delivered-2@notify.digital.gov.au', EMAIL_TYPE),
-    ('simulate-delivered-3@notify.digital.gov.au', EMAIL_TYPE),
+    ('simulate-delivered@notify.gov.au', EMAIL_TYPE),
+    ('simulate-delivered-2@notify.gov.au', EMAIL_TYPE),
+    ('simulate-delivered-3@notify.gov.au', EMAIL_TYPE),
     ('0400 900000', 'sms'),
     ('0400 900111', 'sms'),
     ('0400 900222', 'sms')
