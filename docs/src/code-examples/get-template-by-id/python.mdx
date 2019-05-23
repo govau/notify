@@ -1,0 +1,36 @@
+---
+lang: python
+---
+
+```python
+response = client.get_template(template_id)
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="template_id" kind="String">
+      Sign in to Notify and go to the Templates page to find the template
+      ID.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the client returns a `dict`.
+
+```python
+{
+    "id": 'f33517ff-2a88-4f6e-b855-c550268ce08a', # required string - template ID
+    "name": "STRING", # required string - template name
+    "type": "sms / email / letter" , # required string
+    "created_at": "STRING", # required string - date and time template created
+    "updated_at": "STRING", # required string - date and time template last updated
+    "version": INTEGER,
+    "created_by": "someone@example.com", # required string
+    "body": "STRING", # required string - body of notification
+    "subject": "STRING" # required string for email - subject of email
+}
+```
+
+</Panel>

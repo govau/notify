@@ -90,6 +90,10 @@ export const H4 = styled.h4`
   ${props => (props.appearAs ? props.appearAs.__styles : H4.__styles)};
 `
 
+export const H5 = styled.h5`
+  ${props => (props.appearAs ? props.appearAs.__styles : H5.__styles)};
+`
+
 const AnchoredHeading = Heading => styled(({ children, ...props }) => (
   <Heading {...props}>
     {children}
@@ -138,4 +142,10 @@ H3.__styles = css`
 H4.__styles = css`
   ${common};
   font-size: 1.25em;
+`
+
+H5.__styles = css`
+  ${common};
+  font-weight: normal;
+  font-size: 1em;
 `

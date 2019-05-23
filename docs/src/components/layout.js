@@ -82,7 +82,9 @@ const Layout = ({ sidenav = <Sidenav />, children, location }) => {
     }
 
     const edge = data.mdxPages.edges.find(e =>
-      e.page.fileAbsolutePath.includes(`${location.pathname}.mdx`)
+      e.page.fileAbsolutePath.includes(
+        `${location.pathname.replace(/\//g, '')}.mdx`
+      )
     )
 
     return `${edge.page.frontmatter.title} - ${baseTitle}`

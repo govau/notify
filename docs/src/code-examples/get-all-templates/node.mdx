@@ -1,0 +1,52 @@
+---
+lang: node
+---
+
+```javascript
+client
+  .getAllTemplates(templateType)
+  .then(response => console.log(response))
+  .catch(err => console.error(err))
+```
+
+The method returns a <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">promise</a>.
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter optional name="templateType">
+      If you don’t provide a templateType, the client returns all templates.
+      Otherwise you can filter by passing in:
+      <ul>
+        <li>email</li>
+        <li>sms</li>
+      </ul>
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the promise resolves with an `object`:
+
+```json
+{
+  "templates": [
+    {
+      "id": "template_id",
+      "name": "template name",
+      "type": "sms" | "email" | "letter",
+      "created_at": "created at",
+      "updated_at": "updated at",
+      "version": "version",
+      "created_by": "someone@example.com",
+      "body": "body",
+      "subject": null | "email_subject"
+    },
+    {
+      // … another template
+    }
+  ]
+}
+```
+
+</Panel>

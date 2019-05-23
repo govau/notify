@@ -1,24 +1,48 @@
 ---
-title: 'Listing available templates'
+title: 'List available templates'
 ---
 
 import Examples from 'components/examples'
 import Contents from 'components/table-of-contents'
 
-# Listing available templates
+# List available templates
 
 Notify allows you to inspect which templates are available. This could allow you
 to build your own interfaces or integrate with tools that use Notify.
 
 For example, you could build a service which checks for which templates are
-availble, inspects which variables they require, and then presents an operator
+available, inspects which variables they require, and then presents an operator
 with a form to fill out which could submit and send messages using that
 template.
 
 <Contents />
 
-## Filtering
+## Get a template by ID
+
+This returns the latest version of the template.
+
+<Examples reference="get-template-by-id" title="Get template by ID" />
+
+## Get a template by ID and version
+
+This returns the specified version of a template.
+
+<Examples
+  reference="get-template-by-id-version"
+  title="Get template by ID and version"
+/>
 
 ## Get all templates
 
-<Examples reference="listing-templates" title="Get all templates" />
+This returns the latest version of all templates.
+
+<Examples reference="get-all-templates" title="Get all templates" />
+
+## Generate a template preview
+
+This generates a preview of a template.
+
+<Examples
+  reference="generate-template-preview"
+  title="Generate template preview"
+/>
