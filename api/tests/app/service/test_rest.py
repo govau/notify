@@ -130,6 +130,10 @@ def test_get_service_list_should_return_empty_list_if_no_services(admin_request)
     assert len(json_resp['data']) == 0
 
 
+def test_get_live_services_data():
+    pass
+
+
 def test_get_service_by_id(admin_request, sample_service):
     json_resp = admin_request.get('service.get_service_by_id', service_id=sample_service.id)
     assert json_resp['data']['name'] == sample_service.name
@@ -213,6 +217,14 @@ def test_get_service_by_id_should_404_if_no_service_for_user(notify_api, sample_
             json_resp = json.loads(resp.get_data(as_text=True))
             assert json_resp['result'] == 'error'
             assert json_resp['message'] == 'No result found'
+
+
+def test_get_service_by_id_returns_go_live_user_and_go_live_at(admin_request, sample_user):
+    now = datetime.utcnow()
+    service = create_service(user=sample_user, go_live_user=sample_user, go_live_at=now)
+    json_resp = admin_request.get('service.get_service_by_id', service_id=service.id)
+    assert json_resp['data']['go_live_user'] == str(sample_user.id)
+    assert json_resp['data']['go_live_at'] == str(now)
 
 
 def test_create_service(client, sample_user):

@@ -320,8 +320,8 @@ class Service(db.Model, Versioned):
     restricted = db.Column(db.Boolean, index=False, unique=False, nullable=False)
     research_mode = db.Column(db.Boolean, index=False, unique=False, nullable=False, default=False)
     email_from = db.Column(db.Text, index=False, unique=True, nullable=False)
-    created_by = db.relationship('User')
     created_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), index=True, nullable=False)
+    created_by = db.relationship('User', foreign_keys=[created_by_id])
     prefix_sms = db.Column(db.Boolean, nullable=False, default=True)
     dvla_organisation_id = db.Column(
         db.String,
@@ -344,6 +344,9 @@ class Service(db.Model, Versioned):
     )
     crown = db.Column(db.Boolean, index=False, nullable=False, default=True)
     rate_limit = db.Column(db.Integer, index=False, nullable=False, default=3000)
+    go_live_user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=True)
+    go_live_user = db.relationship('User', foreign_keys=[go_live_user_id])
+    go_live_at = db.Column(db.DateTime, nullable=True)
 
     organisation = db.relationship(
         'Organisation',

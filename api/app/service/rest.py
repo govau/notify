@@ -12,6 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app.dao import notifications_dao
 from app.dao.dao_utils import dao_rollback
+from app.dao.date_util import get_financial_year
 from app.dao.api_key_dao import (
     save_model_api_key,
     get_model_api_keys,
@@ -36,6 +37,7 @@ from app.dao.services_dao import (
     dao_fetch_active_users_for_service,
     dao_fetch_all_services,
     dao_fetch_all_services_by_user,
+    dao_fetch_live_services_data,
     dao_fetch_monthly_historical_stats_for_service,
     dao_fetch_monthly_historical_usage_by_template_for_service,
     dao_fetch_service_by_id,
@@ -163,6 +165,12 @@ def get_services():
     else:
         services = dao_fetch_all_services(only_active)
     data = service_schema.dump(services, many=True).data
+    return jsonify(data=data)
+
+
+@service_blueprint.route('/live-services-data', methods=['GET'])
+def get_live_services_data():
+    data = dao_fetch_live_services_data()
     return jsonify(data=data)
 
 
