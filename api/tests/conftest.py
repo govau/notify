@@ -57,8 +57,6 @@ def create_test_db(database_uri):
         client_encoding='utf8'
     )
     try:
-        # Need to drop db before running tests so rows inserted via migration script exist when running tests
-        postgres_db.execute(sqlalchemy.sql.text('DROP DATABASE IF EXISTS {}'.format(db_uri_parts[-1])))
         result = postgres_db.execute(sqlalchemy.sql.text('CREATE DATABASE {}'.format(db_uri_parts[-1])))
         result.close()
     except sqlalchemy.exc.ProgrammingError:
