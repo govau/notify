@@ -3,7 +3,7 @@ import uuid
 import functools
 
 import pytest
-from sqlalchemy.orm.exc import FlushError, NoResultFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from freezegun import freeze_time
 from app import db
