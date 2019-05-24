@@ -91,7 +91,7 @@ def dao_fetch_live_services_data():
         Service.name.label("service_name"),
         # Service.consent_to_research,
         Service.go_live_user_id,
-        # Service.count_as_live,
+        Service.count_as_live,
         User.name.label('user_name'),
         User.email_address,
         User.mobile_number,
@@ -115,7 +115,7 @@ def dao_fetch_live_services_data():
     ).outerjoin(
         User, Service.go_live_user_id == User.id
     ).filter(
-        # Service.count_as_live.is_(True),
+        Service.count_as_live.is_(True),
         Service.active.is_(True),
         Service.restricted.is_(False),
     ).group_by(
@@ -124,7 +124,7 @@ def dao_fetch_live_services_data():
         # Organisation.organisation_type,
         Service.name,
         # Service.consent_to_research,
-        # Service.count_as_live,
+        Service.count_as_live,
         Service.go_live_user_id,
         User.name,
         User.email_address,
@@ -156,15 +156,15 @@ def dao_fetch_live_services_data():
                 "service_id": row.id,
                 "service_name": row.service_name,
                 "organisation_name": row.organisation_name,
-                # "organisation_type": row.organisation_type,
-                # "consent_to_research": row.consent_to_research,
+                "organisation_type": None,  # TODO real value when col exists in DB
+                "consent_to_research": None,  # TODO real value when col exists in DB
                 "contact_name": row.user_name,
                 "contact_email": row.email_address,
                 "contact_mobile": row.mobile_number,
                 "live_date": row.live_date,
-                # "sms_volume_intent": row.volume_sms,
-                # "email_volume_intent": row.volume_email,
-                # "letter_volume_intent": row.volume_letter,
+                "sms_volume_intent": None,  # TODO real value when col exists in DB
+                "email_volume_intent": None,  # TODO real value when col exists in DB
+                "letter_volume_intent": None,  # TODO real value when col exists in DB
                 "sms_totals": row.sms_totals,
                 "email_totals": row.email_totals,
                 "letter_totals": row.letter_totals,
@@ -280,6 +280,7 @@ def dao_create_service(service, user, service_id=None, service_permissions=None)
     service.active = True
     service.research_mode = False
     service.crown = service.organisation_type == 'central'
+    service.count_as_live = not user.platform_admin
 
     for permission in service_permissions:
         service_permission = ServicePermission(service_id=service.id, permission=permission)

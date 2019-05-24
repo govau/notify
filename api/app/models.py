@@ -346,6 +346,7 @@ class Service(db.Model, Versioned):
     )
     crown = db.Column(db.Boolean, index=False, nullable=False, default=True)
     rate_limit = db.Column(db.Integer, index=False, nullable=False, default=3000)
+    count_as_live = db.Column(db.Boolean, nullable=False, default=True)
     go_live_user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=True)
     go_live_user = db.relationship('User', foreign_keys=[go_live_user_id])
     go_live_at = db.Column(db.DateTime, nullable=True)

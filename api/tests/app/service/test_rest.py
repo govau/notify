@@ -227,7 +227,17 @@ def test_get_service_by_id_returns_go_live_user_and_go_live_at(admin_request, sa
     assert json_resp['data']['go_live_at'] == str(now)
 
 
-def test_create_service(client, sample_user):
+@pytest.mark.parametrize('platform_admin, expected_count_as_live', (
+    (True, False),
+    (False, True),
+))
+def test_create_service(
+    admin_request,
+    sample_user,
+    platform_admin,
+    expected_count_as_live,
+):
+    sample_user.platform_admin = platform_admin
     data = {
         'name': 'created service',
         'user_id': str(sample_user.id),
@@ -237,32 +247,26 @@ def test_create_service(client, sample_user):
         'email_from': 'created.service',
         'created_by': str(sample_user.id)
     }
-    auth_header = create_authorization_header()
-    headers = [('Content-Type', 'application/json'), auth_header]
-    resp = client.post(
-        '/service',
-        data=json.dumps(data),
-        headers=headers)
-    json_resp = json.loads(resp.get_data(as_text=True))
-    assert resp.status_code == 201
+
+    json_resp = admin_request.post('service.create_service', _data=data, _expected_status=201)
+
     assert json_resp['data']['id']
     assert json_resp['data']['name'] == 'created service'
     assert json_resp['data']['email_from'] == 'created.service'
     assert not json_resp['data']['research_mode']
-    assert json_resp['data']['dvla_organisation'] == '001'
     assert json_resp['data']['rate_limit'] == 3000
+    assert json_resp['data']['letter_branding'] is None
+    assert json_resp['data']['count_as_live'] is expected_count_as_live
 
     service_db = Service.query.get(json_resp['data']['id'])
     assert service_db.name == 'created service'
 
-    auth_header_fetch = create_authorization_header()
-
-    resp = client.get(
-        '/service/{}?user_id={}'.format(json_resp['data']['id'], sample_user.id),
-        headers=[auth_header_fetch]
+    json_resp = admin_request.get(
+        'service.get_service_by_id',
+        service_id=json_resp['data']['id'],
+        user_id=sample_user.id
     )
-    assert resp.status_code == 200
-    json_resp = json.loads(resp.get_data(as_text=True))
+
     assert json_resp['data']['name'] == 'created service'
     assert not json_resp['data']['research_mode']
 

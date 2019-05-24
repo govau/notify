@@ -1,0 +1,12 @@
+{% macro page_header(
+    h1,
+    back_link=None
+  ) %}
+  
+    {% if back_link %}
+        <a  href="{{ back_link }}">Back</a>
+    {% endif %}
+  
+    <h1 class="heading-large">{{ h1 }}</h1>
+  
+  {% endmacro %}
