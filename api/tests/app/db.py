@@ -42,7 +42,7 @@ from app.dao.notifications_dao import (
     dao_created_scheduled_notification
 )
 from app.dao.templates_dao import dao_create_template
-from app.dao.services_dao import dao_create_service
+from app.dao.services_dao import dao_create_service, dao_add_user_to_service
 from app.dao.service_permissions_dao import dao_add_service_permission
 from app.dao.inbound_sms_dao import dao_create_inbound_sms
 from app.dao.email_branding_dao import dao_create_email_branding
