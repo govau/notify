@@ -278,6 +278,7 @@ class Organisation(db.Model):
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=True, onupdate=datetime.datetime.utcnow)
+    organisation_type = "TODO"
 
     services = db.relationship(
         'Service',
@@ -338,6 +339,7 @@ class Service(db.Model, Versioned):
         nullable=False,
         default=BRANDING_GOVAU
     )
+    letter_branding = "TODO"
     organisation_type = db.Column(
         db.String(255),
         nullable=True,
@@ -1785,6 +1787,7 @@ class FactBilling(db.Model):
     rate_multiplier = db.Column(db.Numeric(), nullable=True, primary_key=True)
     international = db.Column(db.Boolean, nullable=False, primary_key=False)
     rate = db.Column(db.Numeric(), nullable=True)
+    postage = "TODO"
     billable_units = db.Column(db.Numeric(), nullable=True)
     notifications_sent = db.Column(db.Integer(), nullable=True)
 

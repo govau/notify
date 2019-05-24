@@ -90,29 +90,28 @@ def test_should_have_decorated_services_dao_functions():
     assert dao_fetch_stats_for_service.__wrapped__.__name__ == 'dao_fetch_stats_for_service'  # noqa
 
 
-def test_create_service(sample_user):
+def test_create_service(notify_db_session):
+    user = create_user()
     assert Service.query.count() == 0
     service = Service(name="service_name",
                       email_from="email_from",
                       message_limit=1000,
                       restricted=False,
                       organisation_type='central',
-                      created_by=sample_user)
-    dao_create_service(service, sample_user)
+                      created_by=user)
+    dao_create_service(service, user)
     assert Service.query.count() == 1
-
     service_db = Service.query.one()
     assert service_db.name == "service_name"
     assert service_db.id == service.id
-    assert service_db.branding == BRANDING_GOVAU
-    assert service_db.dvla_organisation_id == DVLA_ORG_HM_GOVERNMENT
     assert service_db.email_from == 'email_from'
     assert service_db.research_mode is False
     assert service_db.prefix_sms is True
     assert service.active is True
-    assert sample_user in service_db.users
+    assert user in service_db.users
     assert service_db.organisation_type == 'central'
     assert service_db.crown is True
+    assert service.letter_branding == 'TODO'
 
 
 def test_cannot_create_two_services_with_same_name(sample_user):

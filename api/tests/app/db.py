@@ -66,36 +66,44 @@ def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-offi
 
 
 def create_service(
-    user=None,
-    service_name="Sample service",
-    service_id=None,
-    restricted=False,
-    service_permissions=[EMAIL_TYPE, SMS_TYPE],
-    research_mode=False,
-    active=True,
-    email_from=None,
-    prefix_sms=True,
-    message_limit=1000,
-    organisation_type='central',
-    go_live_user=None,
-    go_live_at=None
+        user=None,
+        service_name="Sample service",
+        service_id=None,
+        restricted=False,
+        count_as_live=True,
+        service_permissions=[EMAIL_TYPE, SMS_TYPE],
+        research_mode=False,
+        active=True,
+        email_from=None,
+        prefix_sms=True,
+        message_limit=1000,
+        organisation_type='central',
+        check_if_service_exists=False,
+        go_live_user=None,
+        go_live_at=None
 ):
-    service = Service(
-        name=service_name,
-        message_limit=message_limit,
-        restricted=restricted,
-        email_from=email_from if email_from else service_name.lower().replace(' ', '.'),
-        created_by=user or create_user(email='{}@digital.cabinet-office.gov.uk'.format(uuid.uuid4())),
-        prefix_sms=prefix_sms,
-        organisation_type=organisation_type,
-        go_live_user=go_live_user,
-        go_live_at=go_live_at
-    )
+    if check_if_service_exists:
+        service = Service.query.filter_by(name=service_name).first()
+    if (not check_if_service_exists) or (check_if_service_exists and not service):
+        service = Service(
+            name=service_name,
+            message_limit=message_limit,
+            restricted=restricted,
+            email_from=email_from if email_from else service_name.lower().replace(' ', '.'),
+            created_by=user if user else create_user(email='{}@digital.cabinet-office.gov.uk'.format(uuid.uuid4())),
+            prefix_sms=prefix_sms,
+            organisation_type=organisation_type,
+            go_live_user=go_live_user,
+            go_live_at=go_live_at
+        )
+        dao_create_service(service, service.created_by, service_id, service_permissions=service_permissions)
 
-    dao_create_service(service, service.created_by, service_id, service_permissions=service_permissions)
-
-    service.active = active
-    service.research_mode = research_mode
+        service.active = active
+        service.research_mode = research_mode
+        service.count_as_live = count_as_live
+    else:
+        if user and user not in service.users:
+            dao_add_user_to_service(service, user)
 
     return service
 
@@ -493,10 +501,11 @@ def create_letter_rate(
     return rate
 
 
-def create_organisation(name='test_org_1', active=True):
+def create_organisation(name='test_org_1', active=True, organisation_type=None):
     data = {
         'name': name,
-        'active': active
+        'active': active,
+        'organisation_type': organisation_type
     }
     organisation = Organisation(**data)
     dao_create_organisation(organisation)

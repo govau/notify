@@ -70,12 +70,10 @@ def create_test_db(database_uri):
 
 @pytest.fixture(scope='session')
 def notify_db(notify_api, worker_id):
-    assert 'test_notification_api' in db.engine.url.database, \
-        'dont run tests against main db: {}'.format(db.engine.url.database)
+    assert 'test_notification_api' in db.engine.url.database, 'dont run tests against main db'
 
     # create a database for this worker thread -
     from flask import current_app
-
     current_app.config['SQLALCHEMY_DATABASE_URI'] += '_{}'.format(worker_id)
     create_test_db(current_app.config['SQLALCHEMY_DATABASE_URI'])
 
