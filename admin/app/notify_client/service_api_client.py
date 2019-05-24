@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from datetime import datetime
 
 from app.notify_client import NotifyAdminAPIClient, _attach_current_user
 
@@ -119,6 +120,14 @@ class ServiceAPIClient(NotifyAdminAPIClient):
 
     def request_to_go_live(self, service_id, data):
         return self.put('/service/{}/go-live'.format(service_id), data)
+
+    def update_status(self, service_id, live):
+        return self.update_service(
+            service_id,
+            message_limit=25000 if live else 50,
+            restricted=(not live),
+            go_live_at=str(datetime.utcnow()) if live else None
+        )
 
     def update_service_with_properties(self, service_id, properties):
         return self.update_service(service_id, **properties)

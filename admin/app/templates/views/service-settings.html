@@ -218,6 +218,17 @@
         caption_visible=False
       ) %}
         {% call row() %}
+          {{ text_field('Live')}}
+          {% if current_service.restricted and not current_service.organisation %}
+            {{ text_field('No (organisation must be set first)') }}
+            {{ text_field('') }}
+          {% else %}
+            {{ boolean_field(not current_service.restricted) }}
+            {{ edit_field('Change', url_for('.service_switch_live', service_id=current_service.id)) }}
+          {% endif %}
+        {% endcall %}
+
+        {% call row() %}
           {{ text_field('Count in list of live services')}}
           {{ text_field('Yes' if current_service.count_as_live else 'No') }}
           {{ edit_field('Change', url_for('.service_switch_count_as_live', service_id=current_service.id)) }}
@@ -255,13 +266,8 @@
           {{ edit_field('Change', url_for('.service_set_email_branding', service_id=current_service.id)) }}
         {% endcall %}
       {% endcall %}
-
+      <br />
       <ul>
-        <li class="bottom-gutter">
-          <a href="{{ url_for('.service_switch_live', service_id=current_service.id) }}" class="button">
-            {{ 'Make service live' if current_service.restricted else 'Revert service to trial mode' }}
-          </a>
-        </li>
         <li class="bottom-gutter">
           <a href="{{ url_for('.service_switch_research_mode', service_id=current_service.id) }}" class="button">
             {{ 'Take service out of research mode' if current_service.research_mode else 'Put into research mode' }}
