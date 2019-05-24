@@ -151,16 +151,17 @@ def test_cannot_create_two_services_with_same_email_from(sample_user):
     assert 'duplicate key value violates unique constraint "services_email_from_key"' in str(excinfo.value)
 
 
-def test_cannot_create_service_with_no_user(notify_db_session, sample_user):
+def test_cannot_create_service_with_no_user(notify_db_session):
+    user = create_user()
     assert Service.query.count() == 0
     service = Service(name="service_name",
                       email_from="email_from",
                       message_limit=1000,
                       restricted=False,
-                      created_by=sample_user)
-    with pytest.raises(FlushError) as excinfo:
+                      created_by=user)
+    with pytest.raises(ValueError) as excinfo:
         dao_create_service(service, None)
-    assert "Can't flush None value found in collection Service.users" in str(excinfo.value)
+    assert "Can't create a service without a user" in str(excinfo.value)
 
 
 def test_should_add_user_to_service(sample_user):
