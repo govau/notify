@@ -12,7 +12,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app.dao import notifications_dao
 from app.dao.dao_utils import dao_rollback
-from app.dao.date_util import get_financial_year
 from app.dao.api_key_dao import (
     save_model_api_key,
     get_model_api_keys,
