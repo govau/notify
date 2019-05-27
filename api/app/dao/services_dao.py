@@ -78,6 +78,75 @@ def dao_count_live_services():
     ).count()
 
 
+def dao_fetch_trial_services_data():
+    year_start_date, year_end_date = get_current_financial_year()
+    this_year_ft_billing = FactBilling.query.filter(
+        FactBilling.aet_date >= year_start_date,
+        FactBilling.aet_date <= year_end_date,
+    ).subquery()
+    data = db.session.query(
+        Service.id,
+        Organisation.name.label("organisation_name"),
+        # Organisation.organisation_type,
+        Service.name.label("service_name"),
+        # Service.volume_sms,
+        # Service.volume_email,
+        # Service.volume_letter,
+        case([
+            (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("email_totals"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'sms', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("sms_totals"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'letter', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("letter_totals"),
+    ).outerjoin(
+        Service.organisation
+    ).outerjoin(
+        this_year_ft_billing, Service.id == this_year_ft_billing.c.service_id
+    ).filter(
+        Service.active.is_(True),
+        Service.restricted.is_(True),
+    ).group_by(
+        Service.id,
+        Organisation.name,
+        # Organisation.organisation_type,
+        Service.name,
+        # Service.volume_sms,
+        # Service.volume_email,
+        # Service.volume_letter,
+        this_year_ft_billing.c.notification_type
+    ).order_by(
+        asc(Service.name)
+    ).all()
+    results = []
+    for row in data:
+        is_service_in_list = None
+        i = 0
+        while i < len(results):
+            if results[i]["service_id"] == row.id:
+                is_service_in_list = i
+                break
+            else:
+                i += 1
+        if is_service_in_list is not None:
+            results[is_service_in_list]["email_totals"] += row.email_totals
+            results[is_service_in_list]["sms_totals"] += row.sms_totals
+            results[is_service_in_list]["letter_totals"] += row.letter_totals
+        else:
+            results.append({
+                "service_id": row.id,
+                "service_name": row.service_name,
+                "organisation_name": row.organisation_name,
+                "organisation_type": None,  # TODO real value when col exists in DB
+                "sms_totals": row.sms_totals,
+                "email_totals": row.email_totals,
+                "letter_totals": row.letter_totals,
+            })
+    return results
+
+
 def dao_fetch_live_services_data():
     year_start_date, year_end_date = get_current_financial_year()
     this_year_ft_billing = FactBilling.query.filter(

@@ -36,6 +36,7 @@ from app.dao.services_dao import (
     dao_fetch_active_users_for_service,
     dao_fetch_all_services,
     dao_fetch_all_services_by_user,
+    dao_fetch_trial_services_data,
     dao_fetch_live_services_data,
     dao_fetch_monthly_historical_stats_for_service,
     dao_fetch_monthly_historical_usage_by_template_for_service,
@@ -164,6 +165,12 @@ def get_services():
     else:
         services = dao_fetch_all_services(only_active)
     data = service_schema.dump(services, many=True).data
+    return jsonify(data=data)
+
+
+@service_blueprint.route('/trial-services-data', methods=['GET'])
+def get_trial_services_data():
+    data = dao_fetch_trial_services_data()
     return jsonify(data=data)
 
 

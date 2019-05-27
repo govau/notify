@@ -130,6 +130,10 @@ def test_get_service_list_should_return_empty_list_if_no_services(admin_request)
     assert len(json_resp['data']) == 0
 
 
+def test_get_trial_services_data():
+    pass
+
+
 def test_get_live_services_data():
     pass
 

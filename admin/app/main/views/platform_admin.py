@@ -85,6 +85,36 @@ def platform_admin_reports():
     )
 
 
+@main.route("/platform-admin/reports/trial-services.csv")
+@login_required
+@user_is_platform_admin
+def trial_services_csv():
+    results = service_api_client.get_trial_services_data()["data"]
+    trial_services_columns = [
+        "Service ID", "Organisation", "Organisation type", "Service name",
+        "SMS sent this year", "Emails sent this year", "Letters sent this year"
+    ]
+    trial_services_data = []
+    trial_services_data.append(trial_services_columns)
+    for row in results:
+        trial_services_data.append([
+            row["service_id"],
+            row["organisation_name"],
+            row.get("organisation_type", "TODO"),
+            row["service_name"],
+            row["sms_totals"],
+            row["email_totals"],
+            row["letter_totals"],
+        ])
+
+    return Spreadsheet.from_rows(trial_services_data).as_csv_data, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'inline; filename="{} trial services report.csv"'.format(
+            format_date_numeric(datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")),
+        )
+    }
+
+
 @main.route("/platform-admin/reports/live-services.csv")
 @login_required
 @user_is_platform_admin

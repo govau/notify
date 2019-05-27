@@ -66,6 +66,12 @@ class ServiceAPIClient(NotifyAdminAPIClient):
         """
         return self.get('/service', params=params_dict)
 
+    def get_trial_services_data(self, params_dict=None):
+        """
+        Retrieve a list of trial services data with contact names and notification counts.
+        """
+        return self.get('/service/trial-services-data', params=params_dict)
+
     def get_live_services_data(self, params_dict=None):
         """
         Retrieve a list of live services data with contact names and notification counts.
