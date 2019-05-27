@@ -271,45 +271,21 @@ def test_dao_fetch_trial_services_data(sample_user, mock):
     template = create_template(service=service)
     service_2 = create_service(service_name='second', go_live_user=sample_user, go_live_at='2017-04-20T10:00:00')
     create_service(service_name='third', go_live_at='2016-04-20T10:00:00')
-    # below services should be filtered out:
-    create_service(service_name='restricted', restricted=True)
-    create_service(service_name='not_active', active=False)
-    create_service(service_name='not_live', count_as_live=False)
-    template2 = create_template(service=service, template_type='email')
-    template_letter_1 = create_template(service=service, template_type='letter')
-    template_letter_2 = create_template(service=service_2, template_type='letter')
+    # This service should be included.
+    restricted_service = create_service(service_name='restricted', restricted=True)
+    dao_add_service_to_organisation(service=restricted_service, organisation_id=org.id)
+    create_service(service_name='not_active', active=False, restricted=True)
     dao_add_service_to_organisation(service=service, organisation_id=org.id)
-    # two sms billing records for 1st service within current financial year:
-    create_ft_billing(aet_date='2019-07-20', notification_type='sms', template=template, service=service)
-    create_ft_billing(aet_date='2019-07-21', notification_type='sms', template=template, service=service)
-    # one sms billing record for 1st service from previous financial year, should not appear in the result:
-    create_ft_billing(aet_date='2018-07-20', notification_type='sms', template=template, service=service)
-    # one email billing record for 1st service within current financial year:
-    create_ft_billing(aet_date='2019-07-20', notification_type='email', template=template2, service=service)
-    # one letter billing record for 1st service within current financial year:
-    create_ft_billing(aet_date='2019-07-15', notification_type='letter', template=template_letter_1, service=service)
-    # one letter billing record for 2nd service within current financial year:
-    create_ft_billing(aet_date='2019-07-16', notification_type='letter', template=template_letter_2, service=service_2)
+    # two sms billing records for restricted service within current financial year:
+    create_ft_billing(aet_date='2019-07-20', notification_type='sms', template=template, service=restricted_service)
+    create_ft_billing(aet_date='2019-07-21', notification_type='sms', template=template, service=restricted_service)
 
     results = dao_fetch_trial_services_data()
-    assert len(results) == 3
-    # checks the results and that they are ordered by date:
+
+    assert len(results) == 1
     assert results == [
-        {'service_id': mock.ANY, 'service_name': 'Sample service', 'organisation_name': 'test_org_1',
-            'organisation_type': None, 'consent_to_research': None, 'contact_name': 'Test User',
-            'contact_email': 'notify@digital.cabinet-office.gov.uk', 'contact_mobile': '+61412345678',
-            'live_date': datetime(2014, 4, 20, 10, 0), 'sms_volume_intent': None, 'email_volume_intent': None,
-            'letter_volume_intent': None, 'sms_totals': 2, 'email_totals': 1, 'letter_totals': 1},
-        {'service_id': mock.ANY, 'service_name': 'third', 'organisation_name': None, 'consent_to_research': None,
-            'organisation_type': None, 'contact_name': None, 'contact_email': None,
-            'contact_mobile': None, 'live_date': datetime(2016, 4, 20, 10, 0), 'sms_volume_intent': None,
-            'email_volume_intent': None, 'letter_volume_intent': None,
-            'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0},
-        {'service_id': mock.ANY, 'service_name': 'second', 'organisation_name': None, 'consent_to_research': None,
-            'contact_name': 'Test User', 'contact_email': 'notify@digital.cabinet-office.gov.uk',
-            'contact_mobile': '+61412345678', 'live_date': datetime(2017, 4, 20, 10, 0), 'sms_volume_intent': None,
-            'organisation_type': None, 'email_volume_intent': None, 'letter_volume_intent': None,
-            'sms_totals': 0, 'email_totals': 0, 'letter_totals': 1}
+        {'service_id': mock.ANY, 'service_name': 'restricted', 'organisation_name': 'test_org_1',
+            'organisation_type': None, 'sms_totals': 2, 'email_totals': 0, 'letter_totals': 0},
     ]
 
 
