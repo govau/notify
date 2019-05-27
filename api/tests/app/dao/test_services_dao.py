@@ -269,7 +269,7 @@ def test_dao_fetch_trial_services_data(sample_user, mock):
     org = create_organisation(organisation_type='crown')
     service = create_service(go_live_user=sample_user, go_live_at='2014-04-20T10:00:00')
     template = create_template(service=service)
-    service_2 = create_service(service_name='second', go_live_user=sample_user, go_live_at='2017-04-20T10:00:00')
+    create_service(service_name='second', go_live_user=sample_user, go_live_at='2017-04-20T10:00:00')
     create_service(service_name='third', go_live_at='2016-04-20T10:00:00')
     # This service should be included.
     restricted_service = create_service(service_name='restricted', restricted=True)
