@@ -89,9 +89,6 @@ def dao_fetch_trial_services_data():
         Organisation.name.label("organisation_name"),
         Service.organisation_type,
         Service.name.label("service_name"),
-        # Service.volume_sms,
-        # Service.volume_email,
-        # Service.volume_letter,
         case([
             (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
         ], else_=0).label("email_totals"),
@@ -113,9 +110,6 @@ def dao_fetch_trial_services_data():
         Organisation.name,
         Service.organisation_type,
         Service.name,
-        # Service.volume_sms,
-        # Service.volume_email,
-        # Service.volume_letter,
         this_year_ft_billing.c.notification_type
     ).order_by(
         asc(Service.name)
@@ -158,16 +152,12 @@ def dao_fetch_live_services_data():
         Organisation.name.label("organisation_name"),
         Service.organisation_type,
         Service.name.label("service_name"),
-        # Service.consent_to_research,
         Service.go_live_user_id,
         Service.count_as_live,
         User.name.label('user_name'),
         User.email_address,
         User.mobile_number,
         Service.go_live_at.label("live_date"),
-        # Service.volume_sms,
-        # Service.volume_email,
-        # Service.volume_letter,
         case([
             (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
         ], else_=0).label("email_totals"),
@@ -192,16 +182,12 @@ def dao_fetch_live_services_data():
         Organisation.name,
         Service.organisation_type,
         Service.name,
-        # Service.consent_to_research,
         Service.count_as_live,
         Service.go_live_user_id,
         User.name,
         User.email_address,
         User.mobile_number,
         Service.go_live_at,
-        # Service.volume_sms,
-        # Service.volume_email,
-        # Service.volume_letter,
         this_year_ft_billing.c.notification_type
     ).order_by(
         asc(Service.go_live_at)
