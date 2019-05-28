@@ -2,11 +2,12 @@ import uuid
 from datetime import date, datetime, timedelta, time
 
 from notifications_utils.statsd_decorators import statsd
-from sqlalchemy import asc, func, extract
+from sqlalchemy import asc, func, extract, case
 from sqlalchemy.orm import joinedload
 from flask import current_app
 
 from app import db
+from app.dao.date_util import get_current_financial_year
 from app.dao.dao_utils import (
     transactional,
     version_class
@@ -17,11 +18,13 @@ from app.dao.stats_template_usage_by_month_dao import dao_get_template_usage_sta
 from app.models import (
     AnnualBilling,
     ApiKey,
+    FactBilling,
     InboundNumber,
     InvitedUser,
     Job,
     Notification,
     NotificationHistory,
+    Organisation,
     Permission,
     ProviderStatistics,
     Service,
@@ -65,6 +68,163 @@ def dao_fetch_all_services(only_active=False):
         query = query.filter(Service.active)
 
     return query.all()
+
+
+def dao_count_live_services():
+    return Service.query.filter_by(
+        active=True,
+        restricted=False,
+        count_as_live=True,
+    ).count()
+
+
+def dao_fetch_trial_services_data():
+    year_start_date, year_end_date = get_current_financial_year()
+    this_year_ft_billing = FactBilling.query.filter(
+        FactBilling.aet_date >= year_start_date,
+        FactBilling.aet_date <= year_end_date,
+    ).subquery()
+    data = db.session.query(
+        Service.id,
+        Organisation.name.label("organisation_name"),
+        Service.organisation_type,
+        Service.name.label("service_name"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("email_totals"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'sms', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("sms_totals"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'letter', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("letter_totals"),
+    ).outerjoin(
+        Service.organisation
+    ).outerjoin(
+        this_year_ft_billing, Service.id == this_year_ft_billing.c.service_id
+    ).filter(
+        Service.active.is_(True),
+        Service.restricted.is_(True),
+    ).group_by(
+        Service.id,
+        Organisation.name,
+        Service.organisation_type,
+        Service.name,
+        this_year_ft_billing.c.notification_type
+    ).order_by(
+        asc(Service.name)
+    ).all()
+    results = []
+    for row in data:
+        is_service_in_list = None
+        i = 0
+        while i < len(results):
+            if results[i]["service_id"] == row.id:
+                is_service_in_list = i
+                break
+            else:
+                i += 1
+        if is_service_in_list is not None:
+            results[is_service_in_list]["email_totals"] += row.email_totals
+            results[is_service_in_list]["sms_totals"] += row.sms_totals
+            results[is_service_in_list]["letter_totals"] += row.letter_totals
+        else:
+            results.append({
+                "service_id": row.id,
+                "service_name": row.service_name,
+                "organisation_name": row.organisation_name,
+                "organisation_type": row.organisation_type,
+                "sms_totals": row.sms_totals,
+                "email_totals": row.email_totals,
+                "letter_totals": row.letter_totals,
+            })
+    return results
+
+
+def dao_fetch_live_services_data():
+    year_start_date, year_end_date = get_current_financial_year()
+    this_year_ft_billing = FactBilling.query.filter(
+        FactBilling.aet_date >= year_start_date,
+        FactBilling.aet_date <= year_end_date,
+    ).subquery()
+    data = db.session.query(
+        Service.id,
+        Organisation.name.label("organisation_name"),
+        Service.organisation_type,
+        Service.name.label("service_name"),
+        Service.go_live_user_id,
+        Service.count_as_live,
+        User.name.label('user_name'),
+        User.email_address,
+        User.mobile_number,
+        Service.go_live_at.label("live_date"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("email_totals"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'sms', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("sms_totals"),
+        case([
+            (this_year_ft_billing.c.notification_type == 'letter', func.sum(this_year_ft_billing.c.notifications_sent))
+        ], else_=0).label("letter_totals"),
+    ).outerjoin(
+        Service.organisation
+    ).outerjoin(
+        this_year_ft_billing, Service.id == this_year_ft_billing.c.service_id
+    ).outerjoin(
+        User, Service.go_live_user_id == User.id
+    ).filter(
+        Service.count_as_live.is_(True),
+        Service.active.is_(True),
+        Service.restricted.is_(False),
+    ).group_by(
+        Service.id,
+        Organisation.name,
+        Service.organisation_type,
+        Service.name,
+        Service.count_as_live,
+        Service.go_live_user_id,
+        User.name,
+        User.email_address,
+        User.mobile_number,
+        Service.go_live_at,
+        this_year_ft_billing.c.notification_type
+    ).order_by(
+        asc(Service.go_live_at)
+    ).all()
+    results = []
+    for row in data:
+        is_service_in_list = None
+        i = 0
+        while i < len(results):
+            if results[i]["service_id"] == row.id:
+                is_service_in_list = i
+                break
+            else:
+                i += 1
+        if is_service_in_list is not None:
+            results[is_service_in_list]["email_totals"] += row.email_totals
+            results[is_service_in_list]["sms_totals"] += row.sms_totals
+            results[is_service_in_list]["letter_totals"] += row.letter_totals
+        else:
+            results.append({
+                "service_id": row.id,
+                "service_name": row.service_name,
+                "organisation_name": row.organisation_name,
+                "organisation_type": row.organisation_type,
+                "consent_to_research": None,  # TODO real value when col exists in DB
+                "contact_name": row.user_name,
+                "contact_email": row.email_address,
+                "contact_mobile": row.mobile_number,
+                "live_date": row.live_date,
+                "sms_volume_intent": None,  # TODO real value when col exists in DB
+                "email_volume_intent": None,  # TODO real value when col exists in DB
+                "letter_volume_intent": None,  # TODO real value when col exists in DB
+                "sms_totals": row.sms_totals,
+                "email_totals": row.email_totals,
+                "letter_totals": row.letter_totals,
+            })
+    return results
 
 
 def dao_fetch_service_by_id(service_id, only_active=False):
@@ -159,11 +319,18 @@ def dao_fetch_service_by_id_and_user(service_id, user_id):
 
 @transactional
 @version_class(Service)
-def dao_create_service(service, user, service_id=None, service_permissions=None):
+def dao_create_service(
+    service,
+    user,
+    service_id=None,
+    service_permissions=None,
+):
     # the default property does not appear to work when there is a difference between the sqlalchemy schema and the
     # db schema (ie: during a migration), so we have to set sms_sender manually here. After the GOVAU sms_sender
     # migration is completed, this code should be able to be removed.
-    # TODO
+
+    if not user:
+        raise ValueError("Can't create a service without a user")
 
     if service_permissions is None:
         service_permissions = DEFAULT_SERVICE_PERMISSIONS
@@ -175,6 +342,7 @@ def dao_create_service(service, user, service_id=None, service_permissions=None)
     service.active = True
     service.research_mode = False
     service.crown = service.organisation_type == 'central'
+    service.count_as_live = not user.platform_admin
 
     for permission in service_permissions:
         service_permission = ServicePermission(service_id=service.id, permission=permission)
@@ -262,7 +430,7 @@ def dao_fetch_stats_for_service(service_id):
 @statsd(namespace="dao")
 def dao_fetch_todays_stats_for_service(service_id):
     return _stats_for_service_query(service_id).filter(
-        func.date(Notification.created_at) == date.today()
+        func.date(Notification.created_at) == datetime.utcnow().date()
     ).all()
 
 
@@ -272,7 +440,7 @@ def fetch_todays_total_message_count(service_id):
     ).filter(
         Notification.service_id == service_id,
         Notification.key_type != KEY_TYPE_TEST,
-        func.date(Notification.created_at) == date.today()
+        func.date(Notification.created_at) == datetime.utcnow().date()
     ).group_by(
         Notification.notification_type,
         Notification.status,

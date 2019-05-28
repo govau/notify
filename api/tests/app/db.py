@@ -34,6 +34,7 @@ from app.models import (
     AnnualBilling,
     LetterRate,
     InvitedOrganisationUser,
+    FactBilling,
 )
 from app.dao.users_dao import save_model_user
 from app.dao.notifications_dao import (
@@ -41,7 +42,7 @@ from app.dao.notifications_dao import (
     dao_created_scheduled_notification
 )
 from app.dao.templates_dao import dao_create_template
-from app.dao.services_dao import dao_create_service
+from app.dao.services_dao import dao_create_service, dao_add_user_to_service
 from app.dao.service_permissions_dao import dao_add_service_permission
 from app.dao.inbound_sms_dao import dao_create_inbound_sms
 from app.dao.email_branding_dao import dao_create_email_branding
@@ -65,32 +66,44 @@ def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-offi
 
 
 def create_service(
-    user=None,
-    service_name="Sample service",
-    service_id=None,
-    restricted=False,
-    service_permissions=[EMAIL_TYPE, SMS_TYPE],
-    research_mode=False,
-    active=True,
-    email_from=None,
-    prefix_sms=True,
-    message_limit=1000,
-    organisation_type='central'
+        user=None,
+        service_name="Sample service",
+        service_id=None,
+        restricted=False,
+        count_as_live=True,
+        service_permissions=[EMAIL_TYPE, SMS_TYPE],
+        research_mode=False,
+        active=True,
+        email_from=None,
+        prefix_sms=True,
+        message_limit=1000,
+        organisation_type='central',
+        check_if_service_exists=False,
+        go_live_user=None,
+        go_live_at=None
 ):
-    service = Service(
-        name=service_name,
-        message_limit=message_limit,
-        restricted=restricted,
-        email_from=email_from if email_from else service_name.lower().replace(' ', '.'),
-        created_by=user or create_user(email='{}@digital.cabinet-office.gov.uk'.format(uuid.uuid4())),
-        prefix_sms=prefix_sms,
-        organisation_type=organisation_type
-    )
+    if check_if_service_exists:
+        service = Service.query.filter_by(name=service_name).first()
+    if (not check_if_service_exists) or (check_if_service_exists and not service):
+        service = Service(
+            name=service_name,
+            message_limit=message_limit,
+            restricted=restricted,
+            email_from=email_from if email_from else service_name.lower().replace(' ', '.'),
+            created_by=user if user else create_user(email='{}@digital.cabinet-office.gov.uk'.format(uuid.uuid4())),
+            prefix_sms=prefix_sms,
+            organisation_type=organisation_type,
+            go_live_user=go_live_user,
+            go_live_at=go_live_at
+        )
+        dao_create_service(service, service.created_by, service_id, service_permissions=service_permissions)
 
-    dao_create_service(service, service.created_by, service_id, service_permissions=service_permissions)
-
-    service.active = active
-    service.research_mode = research_mode
+        service.active = active
+        service.research_mode = research_mode
+        service.count_as_live = count_as_live
+    else:
+        if user and user not in service.users:
+            dao_add_user_to_service(service, user)
 
     return service
 
@@ -488,10 +501,11 @@ def create_letter_rate(
     return rate
 
 
-def create_organisation(name='test_org_1', active=True):
+def create_organisation(name='test_org_1', active=True, organisation_type=None):
     data = {
         'name': name,
-        'active': active
+        'active': active,
+        'organisation_type': organisation_type
     }
     organisation = Organisation(**data)
     dao_create_organisation(organisation)
@@ -524,3 +538,36 @@ def create_daily_sorted_letter(billing_day=date(2018, 1, 18),
     db.session.commit()
 
     return daily_sorted_letter
+
+
+def create_ft_billing(aet_date,
+                      notification_type,
+                      template=None,
+                      service=None,
+                      provider='test',
+                      rate_multiplier=1,
+                      international=False,
+                      rate=0,
+                      billable_unit=1,
+                      notifications_sent=1,
+                      postage='none',
+                      ):
+    if not service:
+        service = create_service()
+    if not template:
+        template = create_template(service=service, template_type=notification_type)
+
+    data = FactBilling(aet_date=aet_date,
+                       service_id=service.id,
+                       template_id=template.id,
+                       notification_type=notification_type,
+                       provider=provider,
+                       rate_multiplier=rate_multiplier,
+                       international=international,
+                       rate=rate,
+                       billable_units=billable_unit,
+                       notifications_sent=notifications_sent,
+                       postage=postage)
+    db.session.add(data)
+    db.session.commit()
+    return data

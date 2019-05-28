@@ -728,8 +728,6 @@ def test_get_jobs_can_filter_on_statuses(
 
     assert response.status_code == 200
     resp_json = json.loads(response.get_data(as_text=True))
-    from pprint import pprint
-    pprint(resp_json)
     assert {x['job_status'] for x in resp_json['data']} == set(expected_statuses)
 
 

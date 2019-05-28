@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from datetime import datetime
 
 from app.notify_client import NotifyAdminAPIClient, _attach_current_user
 
@@ -65,6 +66,18 @@ class ServiceAPIClient(NotifyAdminAPIClient):
         """
         return self.get('/service', params=params_dict)
 
+    def get_trial_services_data(self, params_dict=None):
+        """
+        Retrieve a list of trial services data with contact names and notification counts.
+        """
+        return self.get('/service/trial-services-data', params=params_dict)
+
+    def get_live_services_data(self, params_dict=None):
+        """
+        Retrieve a list of live services data with contact names and notification counts.
+        """
+        return self.get('/service/live-services-data', params=params_dict)
+
     def get_active_services(self, params_dict=None):
         """
         Retrieve a list of active services.
@@ -99,6 +112,9 @@ class ServiceAPIClient(NotifyAdminAPIClient):
             'organisation_type',
             'free_sms_fragment_limit',
             'prefix_sms',
+            'count_as_live',
+            'go_live_user',
+            'go_live_at'
         }
         if disallowed_attributes:
             raise TypeError('Not allowed to update service attributes: {}'.format(
@@ -110,6 +126,14 @@ class ServiceAPIClient(NotifyAdminAPIClient):
 
     def request_to_go_live(self, service_id, data):
         return self.put('/service/{}/go-live'.format(service_id), data)
+
+    def update_status(self, service_id, live):
+        return self.update_service(
+            service_id,
+            message_limit=25000 if live else 50,
+            restricted=(not live),
+            go_live_at=str(datetime.utcnow()) if live else None
+        )
 
     def update_service_with_properties(self, service_id, properties):
         return self.update_service(service_id, **properties)

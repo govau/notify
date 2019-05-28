@@ -171,6 +171,7 @@ def service_json(
         'inbound_api': inbound_api,
         'service_callback_api': service_callback_api,
         'prefix_sms': prefix_sms,
+        'count_as_live': True,
     }
 
 

@@ -21,7 +21,7 @@ def upgrade():
     try:
         os.environ['CREATE_ADMIN_USER']
     except:
-        print('CREATE_ADMIN_USER environment variable not found')
+        print('CREATE_ADMIN_USER environment variable not found, skipping')
         return
 
     if os.environ['CREATE_ADMIN_USER'].lower() == 'true':

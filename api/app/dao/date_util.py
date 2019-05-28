@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from app.utils import convert_aet_to_utc, aet_tz
+from app.utils import convert_aet_to_utc, convert_utc_to_aet, aet_tz
 
 
 def get_months_for_financial_year(year):
@@ -21,6 +21,14 @@ def get_months_for_year(start, end, year):
 
 def get_financial_year(year):
     return get_financial_year_start(year), get_financial_year_start(year + 1) - timedelta(microseconds=1)
+
+
+def get_current_financial_year():
+    now = convert_utc_to_aet(datetime.utcnow())
+    current_month = int(now.strftime('%-m'))
+    current_year = int(now.strftime('%Y'))
+    year = current_year if current_month > 6 else current_year - 1
+    return get_financial_year(year)
 
 
 def get_financial_year_start(year):

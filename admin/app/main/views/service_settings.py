@@ -35,6 +35,7 @@ from app.main.forms import (
     ServiceEditInboundNumberForm,
     ServiceInboundNumberForm,
     ServiceLetterContactBlockForm,
+    ServiceOnOffSettingForm,
     ServiceReplyToEmailForm,
     ServiceSetBranding,
     ServiceSmsSenderForm,
@@ -220,18 +221,49 @@ def submit_request_to_go_live(service_id):
     return render_template('views/service-settings/submit-request-to-go-live.html', form=form)
 
 
-@main.route("/services/<service_id>/service-settings/switch-live")
+@main.route("/services/<service_id>/service-settings/switch-live", methods=["GET", "POST"])
 @login_required
 @user_is_platform_admin
 def service_switch_live(service_id):
-    service_api_client.update_service(
-        current_service['id'],
-        # TODO This limit should be set depending on the agreement signed by
-        # with Notify.
-        message_limit=25000 if current_service['restricted'] else 50,
-        restricted=(not current_service['restricted'])
+    form = ServiceOnOffSettingForm(
+        name="Make service live",
+        enabled=not current_service['restricted']
     )
-    return redirect(url_for('.service_settings', service_id=service_id))
+
+    if form.validate_on_submit():
+        service_api_client.update_status(service_id, live=form.enabled.data)
+        return redirect(url_for('.service_settings', service_id=service_id))
+
+    return render_template(
+        'views/service-settings/set-service-setting.html',
+        title="Make service live",
+        form=form,
+    )
+
+
+@main.route("/services/<service_id>/service-settings/switch-count-as-live", methods=["GET", "POST"])
+@login_required
+@user_is_platform_admin
+def service_switch_count_as_live(service_id):
+    form = ServiceOnOffSettingForm(
+        name="Count in list of live services",
+        enabled=current_service['count_as_live'],
+        truthy='Yes',
+        falsey='No',
+    )
+
+    if form.validate_on_submit():
+        service_api_client.update_service_with_properties(
+            service_id,
+            {"count_as_live": form.enabled.data}
+        )
+        return redirect(url_for('.service_settings', service_id=service_id))
+
+    return render_template(
+        'views/service-settings/set-service-setting.html',
+        title="Count in list of live services",
+        form=form,
+    )
 
 
 @main.route("/services/<service_id>/service-settings/research-mode")

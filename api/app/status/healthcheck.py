@@ -5,10 +5,13 @@ from flask import (
 )
 
 from app import db, version
+from app.dao.services_dao import dao_count_live_services
+from app.dao.organisation_dao import dao_count_organsations_with_live_services
 
 status = Blueprint('status', __name__)
 
 
+@status.route('/', methods=['GET'])
 @status.route('/_status', methods=['GET', 'POST'])
 def show_status():
     if request.args.get('elb', None):
@@ -20,6 +23,14 @@ def show_status():
             build_number=version.__build_job_number__,
             build_time=version.__time__,
             db_version=get_db_version()), 200
+
+
+@status.route('/_status/live-service-and-organisation-counts')
+def live_service_and_organisation_counts():
+    return jsonify(
+        organisations=dao_count_organsations_with_live_services(),
+        services=dao_count_live_services(),
+    ), 200
 
 
 def get_db_version():

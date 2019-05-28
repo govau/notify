@@ -3,7 +3,7 @@ import uuid
 import functools
 
 import pytest
-from sqlalchemy.orm.exc import FlushError, NoResultFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from freezegun import freeze_time
 from app import db
@@ -13,11 +13,14 @@ from app.dao.inbound_numbers_dao import (
     dao_get_available_inbound_numbers,
     dao_set_inbound_number_active_flag
 )
+from app.dao.organisation_dao import dao_add_service_to_organisation
 from app.dao.services_dao import (
     dao_create_service,
     dao_add_user_to_service,
     dao_remove_user_from_service,
     dao_fetch_all_services,
+    dao_fetch_trial_services_data,
+    dao_fetch_live_services_data,
     dao_fetch_service_by_id,
     dao_fetch_all_services_by_user,
     dao_update_service,
@@ -64,7 +67,9 @@ from app.models import (
 )
 
 from tests.app.db import (
+    create_ft_billing,
     create_inbound_number,
+    create_organisation,
     create_user,
     create_service,
     create_service_with_inbound_number,
@@ -86,29 +91,28 @@ def test_should_have_decorated_services_dao_functions():
     assert dao_fetch_stats_for_service.__wrapped__.__name__ == 'dao_fetch_stats_for_service'  # noqa
 
 
-def test_create_service(sample_user):
+def test_create_service(notify_db_session):
+    user = create_user()
     assert Service.query.count() == 0
     service = Service(name="service_name",
                       email_from="email_from",
                       message_limit=1000,
                       restricted=False,
                       organisation_type='central',
-                      created_by=sample_user)
-    dao_create_service(service, sample_user)
+                      created_by=user)
+    dao_create_service(service, user)
     assert Service.query.count() == 1
-
     service_db = Service.query.one()
     assert service_db.name == "service_name"
     assert service_db.id == service.id
-    assert service_db.branding == BRANDING_GOVAU
-    assert service_db.dvla_organisation_id == DVLA_ORG_HM_GOVERNMENT
     assert service_db.email_from == 'email_from'
     assert service_db.research_mode is False
     assert service_db.prefix_sms is True
     assert service.active is True
-    assert sample_user in service_db.users
+    assert user in service_db.users
     assert service_db.organisation_type == 'central'
     assert service_db.crown is True
+    assert service.letter_branding == 'TODO'
 
 
 def test_cannot_create_two_services_with_same_name(sample_user):
@@ -148,16 +152,17 @@ def test_cannot_create_two_services_with_same_email_from(sample_user):
     assert 'duplicate key value violates unique constraint "services_email_from_key"' in str(excinfo.value)
 
 
-def test_cannot_create_service_with_no_user(notify_db_session, sample_user):
+def test_cannot_create_service_with_no_user(notify_db_session):
+    user = create_user()
     assert Service.query.count() == 0
     service = Service(name="service_name",
                       email_from="email_from",
                       message_limit=1000,
                       restricted=False,
-                      created_by=sample_user)
-    with pytest.raises(FlushError) as excinfo:
+                      created_by=user)
+    with pytest.raises(ValueError) as excinfo:
         dao_create_service(service, None)
-    assert "Can't flush None value found in collection Service.users" in str(excinfo.value)
+    assert "Can't create a service without a user" in str(excinfo.value)
 
 
 def test_should_add_user_to_service(sample_user):
@@ -257,6 +262,80 @@ def test_get_all_only_services_user_has_access_to(service_factory, sample_user):
 
 def test_get_all_user_services_should_return_empty_list_if_no_services_for_user(sample_user):
     assert len(dao_fetch_all_services_by_user(sample_user.id)) == 0
+
+
+@freeze_time('2019-07-23T10:00:00')
+def test_dao_fetch_trial_services_data(sample_user, mock):
+    org = create_organisation(organisation_type='crown')
+    service = create_service(go_live_user=sample_user, go_live_at='2014-04-20T10:00:00')
+    template = create_template(service=service)
+    create_service(service_name='second', go_live_user=sample_user, go_live_at='2017-04-20T10:00:00')
+    create_service(service_name='third', go_live_at='2016-04-20T10:00:00')
+    # This service should be included.
+    restricted_service = create_service(service_name='restricted', restricted=True)
+    dao_add_service_to_organisation(service=restricted_service, organisation_id=org.id)
+    create_service(service_name='not_active', active=False, restricted=True)
+    dao_add_service_to_organisation(service=service, organisation_id=org.id)
+    # two sms billing records for restricted service within current financial year:
+    create_ft_billing(aet_date='2019-07-20', notification_type='sms', template=template, service=restricted_service)
+    create_ft_billing(aet_date='2019-07-21', notification_type='sms', template=template, service=restricted_service)
+
+    results = dao_fetch_trial_services_data()
+
+    assert len(results) == 1
+    assert results == [
+        {'service_id': mock.ANY, 'service_name': 'restricted', 'organisation_name': 'test_org_1',
+            'organisation_type': 'central', 'sms_totals': 2, 'email_totals': 0, 'letter_totals': 0},
+    ]
+
+
+@freeze_time('2019-07-23T10:00:00')
+def test_dao_fetch_live_services_data(sample_user, mock):
+    org = create_organisation(organisation_type='crown')
+    service = create_service(go_live_user=sample_user, go_live_at='2014-04-20T10:00:00')
+    template = create_template(service=service)
+    service_2 = create_service(service_name='second', go_live_user=sample_user, go_live_at='2017-04-20T10:00:00')
+    create_service(service_name='third', go_live_at='2016-04-20T10:00:00')
+    # below services should be filtered out:
+    create_service(service_name='restricted', restricted=True)
+    create_service(service_name='not_active', active=False)
+    create_service(service_name='not_live', count_as_live=False)
+    template2 = create_template(service=service, template_type='email')
+    template_letter_1 = create_template(service=service, template_type='letter')
+    template_letter_2 = create_template(service=service_2, template_type='letter')
+    dao_add_service_to_organisation(service=service, organisation_id=org.id)
+    # two sms billing records for 1st service within current financial year:
+    create_ft_billing(aet_date='2019-07-20', notification_type='sms', template=template, service=service)
+    create_ft_billing(aet_date='2019-07-21', notification_type='sms', template=template, service=service)
+    # one sms billing record for 1st service from previous financial year, should not appear in the result:
+    create_ft_billing(aet_date='2018-07-20', notification_type='sms', template=template, service=service)
+    # one email billing record for 1st service within current financial year:
+    create_ft_billing(aet_date='2019-07-20', notification_type='email', template=template2, service=service)
+    # one letter billing record for 1st service within current financial year:
+    create_ft_billing(aet_date='2019-07-15', notification_type='letter', template=template_letter_1, service=service)
+    # one letter billing record for 2nd service within current financial year:
+    create_ft_billing(aet_date='2019-07-16', notification_type='letter', template=template_letter_2, service=service_2)
+
+    results = dao_fetch_live_services_data()
+    assert len(results) == 3
+    # checks the results and that they are ordered by date:
+    assert results == [
+        {'service_id': mock.ANY, 'service_name': 'Sample service', 'organisation_name': 'test_org_1',
+            'organisation_type': 'central', 'consent_to_research': None, 'contact_name': 'Test User',
+            'contact_email': 'notify@digital.cabinet-office.gov.uk', 'contact_mobile': '+61412345678',
+            'live_date': datetime(2014, 4, 20, 10, 0), 'sms_volume_intent': None, 'email_volume_intent': None,
+            'letter_volume_intent': None, 'sms_totals': 2, 'email_totals': 1, 'letter_totals': 1},
+        {'service_id': mock.ANY, 'service_name': 'third', 'organisation_name': None, 'consent_to_research': None,
+            'organisation_type': 'central', 'contact_name': None, 'contact_email': None,
+            'contact_mobile': None, 'live_date': datetime(2016, 4, 20, 10, 0), 'sms_volume_intent': None,
+            'email_volume_intent': None, 'letter_volume_intent': None,
+            'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0},
+        {'service_id': mock.ANY, 'service_name': 'second', 'organisation_name': None, 'consent_to_research': None,
+            'contact_name': 'Test User', 'contact_email': 'notify@digital.cabinet-office.gov.uk',
+            'contact_mobile': '+61412345678', 'live_date': datetime(2017, 4, 20, 10, 0), 'sms_volume_intent': None,
+            'organisation_type': 'central', 'email_volume_intent': None, 'letter_volume_intent': None,
+            'sms_totals': 0, 'email_totals': 0, 'letter_totals': 1}
+    ]
 
 
 def test_get_service_by_id_returns_none_if_no_service(notify_db):

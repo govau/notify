@@ -4,11 +4,17 @@ from datetime import datetime
 from flask import render_template, request
 from flask_login import login_required
 
-from app import service_api_client
+from app import (
+    format_date_numeric,
+    service_api_client,
+)
 from app.main import main
 from app.main.forms import DateFilterForm
 from app.statistics_utils import get_formatted_percentage
-from app.utils import user_is_platform_admin
+from app.utils import (
+    Spreadsheet,
+    user_is_platform_admin,
+)
 
 
 @main.route("/platform-admin")
@@ -68,6 +74,86 @@ def platform_admin_services():
         ),
         global_stats=create_global_stats(services),
     )
+
+
+@main.route("/platform-admin/reports")
+@login_required
+@user_is_platform_admin
+def platform_admin_reports():
+    return render_template(
+        'views/platform-admin/reports.html'
+    )
+
+
+@main.route("/platform-admin/reports/trial-services.csv")
+@login_required
+@user_is_platform_admin
+def trial_services_csv():
+    results = service_api_client.get_trial_services_data()["data"]
+    trial_services_columns = [
+        "Service ID", "Organisation", "Organisation type", "Service name",
+        "SMS sent this year", "Emails sent this year", "Letters sent this year"
+    ]
+    trial_services_data = []
+    trial_services_data.append(trial_services_columns)
+    for row in results:
+        trial_services_data.append([
+            row["service_id"],
+            row["organisation_name"],
+            row.get("organisation_type", "TODO"),
+            row["service_name"],
+            row["sms_totals"],
+            row["email_totals"],
+            row["letter_totals"],
+        ])
+
+    return Spreadsheet.from_rows(trial_services_data).as_csv_data, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'inline; filename="{} trial services report.csv"'.format(
+            format_date_numeric(datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")),
+        )
+    }
+
+
+@main.route("/platform-admin/reports/live-services.csv")
+@login_required
+@user_is_platform_admin
+def live_services_csv():
+    results = service_api_client.get_live_services_data()["data"]
+    live_services_columns = [
+        "Service ID", "Organisation", "Organisation type", "Service name", "Consent to research", "Main contact",
+        "Contact email", "Contact mobile", "Live date", "SMS volume intent", "Email volume intent",
+        "Letter volume intent", "SMS sent this year", "Emails sent this year", "Letters sent this year"
+    ]
+    live_services_data = []
+    live_services_data.append(live_services_columns)
+    for row in results:
+        live_services_data.append([
+            row["service_id"],
+            row["organisation_name"],
+            row.get("organisation_type", "TODO"),
+            row["service_name"],
+            row.get("consent_to_research", "TODO"),
+            row["contact_name"],
+            row["contact_email"],
+            row["contact_mobile"],
+            datetime.strptime(
+                row["live_date"], '%a, %d %b %Y %X %Z'
+            ).strftime("%d-%m-%Y") if row["live_date"] else None,
+            row.get("sms_volume_intent", "TODO"),
+            row.get("email_volume_intent", "TODO"),
+            row.get("letter_volume_intent", "TODO"),
+            row["sms_totals"],
+            row["email_totals"],
+            row["letter_totals"],
+        ])
+
+    return Spreadsheet.from_rows(live_services_data).as_csv_data, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'inline; filename="{} live services report.csv"'.format(
+            format_date_numeric(datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")),
+        )
+    }
 
 
 def sum_service_usage(service):

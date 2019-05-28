@@ -211,6 +211,7 @@ class ServiceSchema(BaseSchema):
     organisation = field_for(models.Service, 'organisation')
     override_flag = False
     letter_contact_block = fields.Method(method_name="get_letter_contact")
+    go_live_at = field_for(models.Service, 'go_live_at', format='%Y-%m-%d %H:%M:%S.%f')
 
     def service_permissions(self, service):
         return [p.permission for p in service.permissions]

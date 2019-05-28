@@ -278,6 +278,7 @@ class Organisation(db.Model):
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=True, onupdate=datetime.datetime.utcnow)
+    organisation_type = "TODO"
 
     services = db.relationship(
         'Service',
@@ -320,8 +321,8 @@ class Service(db.Model, Versioned):
     restricted = db.Column(db.Boolean, index=False, unique=False, nullable=False)
     research_mode = db.Column(db.Boolean, index=False, unique=False, nullable=False, default=False)
     email_from = db.Column(db.Text, index=False, unique=True, nullable=False)
-    created_by = db.relationship('User')
     created_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), index=True, nullable=False)
+    created_by = db.relationship('User', foreign_keys=[created_by_id])
     prefix_sms = db.Column(db.Boolean, nullable=False, default=True)
     dvla_organisation_id = db.Column(
         db.String,
@@ -338,12 +339,17 @@ class Service(db.Model, Versioned):
         nullable=False,
         default=BRANDING_GOVAU
     )
+    letter_branding = "TODO"
     organisation_type = db.Column(
         db.String(255),
         nullable=True,
     )
     crown = db.Column(db.Boolean, index=False, nullable=False, default=True)
     rate_limit = db.Column(db.Integer, index=False, nullable=False, default=3000)
+    count_as_live = db.Column(db.Boolean, nullable=False, default=True)
+    go_live_user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=True)
+    go_live_user = db.relationship('User', foreign_keys=[go_live_user_id])
+    go_live_at = db.Column(db.DateTime, nullable=True)
 
     organisation = db.relationship(
         'Organisation',
@@ -1782,6 +1788,7 @@ class FactBilling(db.Model):
     rate_multiplier = db.Column(db.Numeric(), nullable=True, primary_key=True)
     international = db.Column(db.Boolean, nullable=False, primary_key=False)
     rate = db.Column(db.Numeric(), nullable=True)
+    postage = "TODO"
     billable_units = db.Column(db.Numeric(), nullable=True)
     notifications_sent = db.Column(db.Integer(), nullable=True)
 
