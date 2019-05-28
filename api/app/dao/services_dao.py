@@ -87,7 +87,7 @@ def dao_fetch_trial_services_data():
     data = db.session.query(
         Service.id,
         Organisation.name.label("organisation_name"),
-        # Organisation.organisation_type,
+        Service.organisation_type,
         Service.name.label("service_name"),
         # Service.volume_sms,
         # Service.volume_email,
@@ -111,7 +111,7 @@ def dao_fetch_trial_services_data():
     ).group_by(
         Service.id,
         Organisation.name,
-        # Organisation.organisation_type,
+        Service.organisation_type,
         Service.name,
         # Service.volume_sms,
         # Service.volume_email,
@@ -139,7 +139,7 @@ def dao_fetch_trial_services_data():
                 "service_id": row.id,
                 "service_name": row.service_name,
                 "organisation_name": row.organisation_name,
-                "organisation_type": None,  # TODO real value when col exists in DB
+                "organisation_type": row.organisation_type,
                 "sms_totals": row.sms_totals,
                 "email_totals": row.email_totals,
                 "letter_totals": row.letter_totals,
@@ -156,7 +156,7 @@ def dao_fetch_live_services_data():
     data = db.session.query(
         Service.id,
         Organisation.name.label("organisation_name"),
-        # Organisation.organisation_type,
+        Service.organisation_type,
         Service.name.label("service_name"),
         # Service.consent_to_research,
         Service.go_live_user_id,
@@ -190,7 +190,7 @@ def dao_fetch_live_services_data():
     ).group_by(
         Service.id,
         Organisation.name,
-        # Organisation.organisation_type,
+        Service.organisation_type,
         Service.name,
         # Service.consent_to_research,
         Service.count_as_live,
@@ -225,7 +225,7 @@ def dao_fetch_live_services_data():
                 "service_id": row.id,
                 "service_name": row.service_name,
                 "organisation_name": row.organisation_name,
-                "organisation_type": None,  # TODO real value when col exists in DB
+                "organisation_type": row.organisation_type,
                 "consent_to_research": None,  # TODO real value when col exists in DB
                 "contact_name": row.user_name,
                 "contact_email": row.email_address,
