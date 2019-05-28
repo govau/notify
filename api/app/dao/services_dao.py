@@ -430,7 +430,7 @@ def dao_fetch_stats_for_service(service_id):
 @statsd(namespace="dao")
 def dao_fetch_todays_stats_for_service(service_id):
     return _stats_for_service_query(service_id).filter(
-        func.date(Notification.created_at) == date.today()
+        func.date(Notification.created_at) == datetime.utcnow().date()
     ).all()
 
 
@@ -440,7 +440,7 @@ def fetch_todays_total_message_count(service_id):
     ).filter(
         Notification.service_id == service_id,
         Notification.key_type != KEY_TYPE_TEST,
-        func.date(Notification.created_at) == date.today()
+        func.date(Notification.created_at) == datetime.utcnow().date()
     ).group_by(
         Notification.notification_type,
         Notification.status,
