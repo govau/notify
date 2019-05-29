@@ -9,7 +9,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 from notifications_utils.field import Field
 from notifications_utils.formatters import formatted_list
 

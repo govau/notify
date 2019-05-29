@@ -5,7 +5,7 @@ from dateutil.parser import parse
 from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from markupsafe import Markup
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 from notifications_utils.formatters import nl2br
 from notifications_utils.recipients import first_column_headings
 

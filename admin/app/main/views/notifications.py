@@ -14,7 +14,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
-from notifications_python_client.errors import APIError
+from notify.errors import APIError
 from notifications_utils.pdf import pdf_page_count
 
 from app import (

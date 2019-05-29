@@ -23,7 +23,7 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import CSRFError
 from functools import partial
 
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 from notifications_utils import logging, request_helper, formatters
 from notifications_utils.clients import DeskproClient
 from notifications_utils.clients.statsd.statsd_client import StatsdClient

@@ -1,5 +1,5 @@
 from flask import current_app, jsonify, request
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 
 from app import status_api_client, version
 from app.status import status

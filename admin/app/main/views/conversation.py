@@ -1,6 +1,6 @@
 from flask import jsonify, redirect, render_template, session, url_for
 from flask_login import login_required
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 from notifications_utils.recipients import format_phone_number_human_readable
 from notifications_utils.template import SMSPreviewTemplate
 

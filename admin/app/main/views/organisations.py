@@ -1,6 +1,6 @@
 from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 from werkzeug.exceptions import abort
 
 from app import (
