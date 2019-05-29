@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7f8e87d77dfcc79e98bf22ee78b202ad89add87d6e922248bf6b4c6298d9ae80"
+            "sha256": "29896ccc04bddc6b7e5386a4a50ace2546de87f7a41c4ae508dad2c827584e20"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -276,7 +276,7 @@
         },
         "notify-client-python": {
             "git": "https://github.com/govau/notify-client-python",
-            "ref": "1c1bf8e62f1f3ea3a585954fdfe225cc641bf61a"
+            "ref": "628e9aee8de29967df82ede18ff924e8b3214b76"
         },
         "openpyxl": {
             "hashes": [
