@@ -1,6 +1,6 @@
 # Notify admin
 
-Notify.gov.au admin application.
+Notify admin application.
 
 ## Features of this application
 
