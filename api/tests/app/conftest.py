@@ -915,7 +915,7 @@ def email_2fa_code_template(notify_db, notify_db_session):
             'To sign in to GOV.​AU Notify please open this link:'
             '((url))'
         ),
-        subject='Sign in to GOV.AU Notify',
+        subject='Sign in to Notify.gov.au',
         template_type='email'
     )
 
@@ -999,7 +999,7 @@ def change_email_confirmation_template(notify_db,
     content = """Hi ((name)),
               Click this link to confirm your new email address:
               ((url))
-              If you didn’t try to change the email address for your GOV.AU Notify account, let us know here:
+              If you didn’t try to change the email address for your Notify.gov.au account, let us know here:
               ((feedback_url))"""
     template = create_custom_template(
         service=service,

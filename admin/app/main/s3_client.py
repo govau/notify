@@ -113,7 +113,7 @@ def get_mou(organisation_is_crown):
 
     bucket = client.bucket_name
     filename = 'crown.pdf' if organisation_is_crown else 'non-crown.pdf'
-    attachment_filename = 'GOV.AU Notify data sharing and financial agreement{}.pdf'.format(
+    attachment_filename = 'Notify.gov.au data sharing and financial agreement{}.pdf'.format(
         '' if organisation_is_crown else ' (non-crown)'
     )
     try:

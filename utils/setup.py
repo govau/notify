@@ -1,5 +1,5 @@
 """
-Python API client for GOV.AU Notify
+Python API client for Notify.gov.au
 """
 import re
 import ast
@@ -17,7 +17,7 @@ setup(
     url='https://github.com/alphagov/notifications-utils',
     license='MIT',
     author='Government Digital Service',
-    description='Shared python code for GOV.AU Notify.',
+    description='Shared python code for Notify.gov.au.',
     long_description=__doc__,
     packages=find_packages(),
     include_package_data=True,

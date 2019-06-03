@@ -113,7 +113,7 @@ def test_terms_is_generic_if_user_is_not_logged_in(
         'test@cabinet-office.gov.uk',
         (
             'Your organisation (Cabinet Office) has already accepted '
-            'the GOV.AU Notify data sharing and financial agreement.'
+            'the Notify.gov.au data sharing and financial agreement.'
         ),
         None,
         (

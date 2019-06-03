@@ -578,7 +578,7 @@ class RequestToGoLiveForm(StripWhitespaceForm):
     )
     method_one_off = BooleanField('One at a time')
     method_upload = BooleanField('Upload a spreadsheet of recipients')
-    method_api = BooleanField('Integrate with the GOV.AU Notify API')
+    method_api = BooleanField('Integrate with the Notify.gov.au API')
 
 
 class ProviderForm(StripWhitespaceForm):

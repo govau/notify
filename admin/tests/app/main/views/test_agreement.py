@@ -39,12 +39,12 @@ def test_show_agreement_page(
     pytest.mark.xfail((
         'test@cabinet-office.gov.uk',
         'crown.pdf',
-        'GOV.AU Notify data sharing and financial agreement.pdf',
+        'Notify.gov.au data sharing and financial agreement.pdf',
     ), raises=AssertionError),
     (
         'test@aylesburytowncouncil.gov.uk',
         'non-crown.pdf',
-        'GOV.AU Notify data sharing and financial agreement (non-crown).pdf',
+        'Notify.gov.au data sharing and financial agreement (non-crown).pdf',
     ),
 ])
 def test_downloading_agreement(

@@ -603,7 +603,7 @@ def test_should_show_request_to_go_live(
     for feature, label in (
         ('one_off', 'One at a time'),
         ('upload', 'Upload a spreadsheet of recipients'),
-        ('api', 'Integrate with the GOV.AU Notify API'),
+        ('api', 'Integrate with the Notify.gov.au API'),
     ):
         assert normalize_spaces(
             page.select_one('label[for=method_{}]'.format(feature)).text
