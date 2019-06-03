@@ -1,4 +1,4 @@
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 
 from app.notify_client import NotifyAdminAPIClient
 from app.notify_client.models import (

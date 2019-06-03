@@ -2,7 +2,7 @@ import pytest
 from bs4 import BeautifulSoup
 from flask import Response, url_for
 from flask_wtf.csrf import CSRFError
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 
 
 def test_bad_url_returns_page_not_found(client):

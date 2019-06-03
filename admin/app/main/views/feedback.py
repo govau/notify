@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 from flask import abort, redirect, render_template, request, session, url_for
 from flask_login import current_user
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 
 from app import (
     convert_to_boolean,

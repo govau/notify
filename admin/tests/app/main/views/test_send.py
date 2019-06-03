@@ -10,7 +10,7 @@ from zipfile import BadZipFile
 import pytest
 from bs4 import BeautifulSoup
 from flask import url_for
-from notifications_python_client.errors import HTTPError
+from notify.errors import HTTPError
 from notifications_utils.recipients import RecipientCSV
 from notifications_utils.template import (
     LetterImageTemplate,
