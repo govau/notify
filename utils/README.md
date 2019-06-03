@@ -1,6 +1,6 @@
 # Notify - notifications-utils [BETA]
 
-Shared python code for Notify.
+Shared python code for Notify
 
 Provides logging utils etc.
 
