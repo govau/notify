@@ -3,4 +3,5 @@ export const languages = {
   java: 'Java',
   node: 'Node.js',
   go: 'Go',
+  dotnet: 'C#',
 }

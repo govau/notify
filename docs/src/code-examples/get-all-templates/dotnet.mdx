@@ -1,0 +1,32 @@
+---
+lang: dotnet
+---
+
+```C#
+TemplateList response = client.GetAllTemplates(templateType);
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter optional name="templateType" kind="string">
+      If you don’t provide a templateType, the client returns all templates.
+      Otherwise you can filter by passing in:
+      <ul>
+        <li>email</li>
+        <li>sms</li>
+      </ul>
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the client returns a `TemplateList`:
+
+```C#
+List<TemplateResponse> templates;
+```
+
+If no templates exist for a template type or there no templates for a service, the templates list is empty.
+
+</Panel>

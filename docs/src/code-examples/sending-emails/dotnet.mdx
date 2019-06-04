@@ -1,0 +1,91 @@
+---
+lang: dotnet
+---
+
+```C#
+EmailNotificationResponse response = client.SendEmail(
+  emailAddress,
+  templateId,
+  personalisation,
+  reference,
+  emailReplyToId
+);
+```
+
+<Panel label={<H3>Arguments</H3>}>
+<Parameters>
+  <Parameter required name="templateId" kind="string">
+
+The ID of the template
+
+You can find this by signing into Notify and
+going to the Templates page.
+
+  </Parameter>
+  <Parameter required name="emailAddress" kind="string">
+
+The email address of the recipient you want to send to.
+
+  </Parameter>
+
+  <Parameter optional name="personalisation" kind="Dictionary<string, dynamic>">
+
+If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a dictionary. For example:
+
+```C# inline
+Dictionary<string, dynamic> personalisation = new Dictionary<string, dynamic>
+{
+    {"first_name", "Amala"},
+    {"application_date", "2018-01-01"}
+};
+```
+
+  </Parameter>
+  <Parameter optional name="reference" kind="string">
+
+A unique identifier you create. This reference identifies a single unique notification or a batch of notifications.
+
+  </Parameter>
+
+  <Parameter optional name="emailReplyToId" kind="string">
+
+This is an email reply-to address specified by you to receive replies from your users. Your service cannot go live until you set up at least one of these email addresses. To set up:
+
+1. Sign into your Notify account.
+1. Go to Settings.
+1. Go to the Email section and select Manage on the Email reply-to addresses row.
+1. Select Change to specify the email address to receive replies, and select Save.
+
+```java inline nonumbers
+string emailReplyToId='8e222534-7f05-4972-86e3-17c5d9f894e2'
+```
+
+If you do not have an `emailReplyToId`, you can leave out this argument.
+
+  </Parameter>
+</Parameters>
+</Panel>
+<Panel label={<H3>Response</H3>}>
+
+If the request to the client is successful, the client returns an `EmailNotificationResponse`:
+
+```C#
+public string id;
+public string reference;
+public string uri;
+public Template template;
+public EmailResponseContent content;
+
+public class Template{
+    public string id;
+    public string uri;
+    public Int32 version;
+}
+public class EmailResponseContent{
+  public string fromEmail;
+  public string body;
+  public string subject;
+}
+```
+
+</Panel>
