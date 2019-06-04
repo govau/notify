@@ -1,7 +1,7 @@
 {
   "name": "notifications-admin",
   "version": "0.0.1",
-  "description": "Admin front end for GOV.AU Notify",
+  "description": "Admin front end for Notify",
   "scripts": {
     "test": "gulp lint",
     "build": "gulp",

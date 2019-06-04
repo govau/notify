@@ -1,6 +1,6 @@
-# GOV.AU Notify - notifications-utils [BETA]
+# Notify - notifications-utils [BETA]
 
-Shared python code for GOV.AU Notify
+Shared python code for Notify
 
 Provides logging utils etc.
 
