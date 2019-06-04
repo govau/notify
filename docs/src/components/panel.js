@@ -5,7 +5,7 @@ import P from './core/paragraph'
 
 const Header = styled.div`
   background-color: #f3f5f5;
-  padding: 0 2rem;
+  padding: 1rem 2rem;
 
   display: flex;
   justify-content: space-between;

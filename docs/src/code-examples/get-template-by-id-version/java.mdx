@@ -1,0 +1,38 @@
+---
+lang: java
+---
+
+```java
+Template template = client.getTemplateVersion(templateId, version);
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="templateId" kind="String">
+      Sign in to Notify and go to the Templates page to find the template
+      ID.
+    </Parameter>
+    <Parameter required name="version" kind="int">
+      The version number of the template.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the client returns a `Template`:
+
+```java
+UUID id;
+String name;
+String templateType;
+DateTime createdAt;
+Optional<DateTime> updatedAt;
+String createdBy;
+int version;
+String body;
+Optional<String> subject;
+Optional<Map<String, Object>> personalisation;
+```
+
+</Panel>

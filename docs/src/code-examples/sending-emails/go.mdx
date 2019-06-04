@@ -12,7 +12,7 @@ options := []notify.SendEmailOption{
 resp, err := client.SendEmail(templateID, emailAddress, options...)
 ```
 
-<Panel label={<H3>Arguments</H3>}>
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
 
 #### Ordered arguments
 
@@ -75,7 +75,7 @@ If you do not have an `EmailReplyToID`, you can leave out this argument.
   </Parameter>
 </Parameters>
 </Panel>
-<Panel label={<H3>Response</H3>}>
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
 
 If the request to the client is successful, the client returns a `SentEmail` struct, for example:
 

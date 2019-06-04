@@ -1,0 +1,46 @@
+---
+lang: node
+---
+
+```javascript
+const personalisation = { foo: 'bar' }
+
+client
+  .previewTemplateById(templateId, personalisation)
+  .then(response => console.log(response))
+  .catch(err => console.error(err))
+```
+
+The method returns a <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">promise</a>.
+
+The parameters in the personalisation argument must match the placeholder fields in the actual template.
+The API notification client ignores any extra fields in the method.
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="templateId">
+      Sign in to Notify and go to the Templates page to find the template
+      ID.
+    </Parameter>
+    <Parameter optional name="personalisation">
+      If a template has placeholder fields for personalised information such as
+      name or application date, you must provide their values in a map.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the promise resolves with an `object`:
+
+```json
+{
+  "id": "notify_id",
+  "type": "sms" | "email" | "letter",
+  "version": "version",
+  "body": "Hello bar", // with personalisation values
+  "subject": null | "email_subject"
+}
+```
+
+</Panel>

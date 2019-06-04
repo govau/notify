@@ -1,0 +1,48 @@
+---
+lang: node
+---
+
+```javascript
+client
+  .getTemplateByIdAndVersion(templateId, version)
+  .then(response => console.log(response))
+  .catch(err => console.error(err))
+```
+
+The method returns a <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">promise</a>.
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+<Parameters>
+  <Parameter required name="templateId">
+
+The ID of the template
+
+You can find this by signing into Notify and
+going to the Templates page.
+
+  </Parameter>
+  <Parameter required name="version">
+    The version number of the template.
+  </Parameter>
+</Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the promise resolves with an `object`:
+
+```json
+{
+  "id": "template_id",
+  "name": "template name",
+  "type": "sms" | "email" | "letter",
+  "created_at": "created at",
+  "updated_at": "updated at",
+  "version": "version",
+  "created_by": "someone@example.com",
+  "body": "body",
+  "subject": null | "email_subject"
+}
+```
+
+</Panel>

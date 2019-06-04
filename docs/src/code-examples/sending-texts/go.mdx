@@ -13,7 +13,7 @@ options := []notify.SendSMSOption{
 resp, err := client.SendSMS(templateID, phoneNumber, options...)
 ```
 
-<Panel label={<H3>Arguments</H3>}>
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
 
 #### Ordered arguments
 
@@ -71,7 +71,7 @@ s := notify.SMSSenderID("8e222534-7f05-4972-86e3-17c5d9f894e2")
   </Parameter>
 </Parameters>
 </Panel>
-<Panel label={<H3>Response</H3>}>
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
 
 If the request to the client is successful, the client returns a `SentSMS` struct, for example:
 

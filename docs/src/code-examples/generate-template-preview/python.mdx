@@ -1,0 +1,37 @@
+---
+lang: python
+---
+
+```python
+response = client.post_template_preview(template_id, personalisation)
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="template_id" kind="String">
+      Sign in to Notify and go to the Templates page to find the template
+      ID.
+    </Parameter>
+    <Parameter optional name="personalisation" kind="dict">
+      If a template has placeholder fields for personalised information such as
+      name or reference number, you need to provide their values in a dictionary
+      with key value pairs.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the client returns a `dict`.
+
+```python
+{
+    "id": "740e5834-3a29-46b4-9a6f-16142fde533a", # required string - notification ID
+    "type": "sms / email / letter" , # required string
+    "version": INTEGER,
+    "body": "STRING", # required string - body of notification
+    "subject": "STRING" # required string for email - subject of email
+}
+```
+
+</Panel>
