@@ -271,6 +271,9 @@ def test_dao_fetch_trial_services_data(sample_user, mock):
     template = create_template(service=service)
     create_service(service_name='second', go_live_user=sample_user, go_live_at='2017-04-20T10:00:00')
     create_service(service_name='third', go_live_at='2016-04-20T10:00:00')
+    # This service represents one created by platform admin (hence why
+    # count_as_live is false).
+    create_service(service_name='not_live', count_as_live=False)
     # This service should be included.
     restricted_service = create_service(service_name='restricted', restricted=True)
     dao_add_service_to_organisation(service=restricted_service, organisation_id=org.id)
