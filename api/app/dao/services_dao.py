@@ -89,6 +89,7 @@ def dao_fetch_trial_services_data():
         Organisation.name.label("organisation_name"),
         Service.organisation_type,
         Service.name.label("service_name"),
+        Service.count_as_live,
         case([
             (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
         ], else_=0).label("email_totals"),
@@ -103,6 +104,7 @@ def dao_fetch_trial_services_data():
     ).outerjoin(
         this_year_ft_billing, Service.id == this_year_ft_billing.c.service_id
     ).filter(
+        Service.count_as_live.is_(True),
         Service.active.is_(True),
         Service.restricted.is_(True),
     ).group_by(
@@ -110,6 +112,7 @@ def dao_fetch_trial_services_data():
         Organisation.name,
         Service.organisation_type,
         Service.name,
+        Service.count_as_live,
         this_year_ft_billing.c.notification_type
     ).order_by(
         asc(Service.name)
