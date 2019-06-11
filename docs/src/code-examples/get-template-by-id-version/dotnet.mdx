@@ -1,0 +1,37 @@
+---
+lang: dotnet
+---
+
+```C#
+TemplateResponse response = client.GetTemplateByIdAndVersion(templateId, version);
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="templateId" kind="string">
+      Sign in to Notify and go to the Templates page to find the template
+      ID.
+    </Parameter>
+    <Parameter required name="version" kind="int">
+      The version number of the template.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the client returns a `TemplateResponse`:
+
+```C#
+public string id;
+public string name;
+public string type;
+public DateTime created_at;
+public DateTime? updated_at;
+public string created_by;
+public int version;
+public string body;
+public string subject; // null if an sms message
+```
+
+</Panel>
