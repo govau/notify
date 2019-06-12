@@ -18,7 +18,7 @@ The parameters in the personalisation argument must match the placeholder fields
       Sign in to Notify and go to the Templates page to find the template
       ID.
     </Parameter>
-    <Parameter optional name="personalisation" kind="Map<String, String>">
+    <Parameter optional name="personalisation" kind="[]struct{ Key, Value string }">
       If a template has placeholder fields for personalised information such as
       name or application date, you must provide their values in a map.
     </Parameter>
