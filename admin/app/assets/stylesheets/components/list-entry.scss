@@ -64,10 +64,6 @@
   @include button($grey-3);
 }
 
-.form-control {
-  padding: 8px 10px;
-}
-
 .form-label {
   @include core-strong;
 }

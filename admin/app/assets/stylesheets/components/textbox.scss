@@ -1,3 +1,8 @@
+@mixin input-spacing {
+  @include core-font;
+  padding: 8px 10px;
+}
+
 .textbox-highlight {
   $tag-background: rgba($light-blue, 0.6);
 
@@ -37,6 +42,7 @@
     border: 2px solid transparent;
     padding-bottom: $gutter-half;
     z-index: 10;
+    @include input-spacing;
 
     .placeholder {
       color: transparent;
@@ -79,4 +85,8 @@
       margin: 0 1rem 0 0;
     }
   }
+}
+
+.form-control {
+  @include input-spacing;
 }
