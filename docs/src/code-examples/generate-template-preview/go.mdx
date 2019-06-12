@@ -5,9 +5,9 @@ lang: go
 ```go
 resp, err := client.TemplatePreview(id, 
     notify.Personalisation{
-		{"name", "John"},
-		{"day", "Monday"},
-	},
+        {"name", "John"},
+        {"day", "Monday"},
+    },
 )
 ```
 The parameters in the personalisation argument must match the placeholder fields in the actual template.
