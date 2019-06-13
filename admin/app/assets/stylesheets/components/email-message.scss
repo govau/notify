@@ -60,6 +60,7 @@ $email-message-gutter: $gutter * 2;
         border: 0;
         padding: 0;
         font-family: inherit !important;
+        word-break: break-word;
       }
 
       li:first-child {
