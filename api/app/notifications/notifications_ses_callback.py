@@ -27,6 +27,7 @@ from app.errors import (
     register_errors,
     InvalidRequest
 )
+from werkzeug.contrib.cache import SimpleCache
 import validatesns
 
 ses_callback_blueprint = Blueprint('notifications_ses_callback', __name__)
@@ -51,14 +52,15 @@ def verify_message_type(message_type: str):
         raise InvalidMessageTypeException(f'{message_type} is not a valid message type.')
 
 
-certificate_cache = dict()
+certificate_cache = SimpleCache()
 
 
 def get_certificate(url):
-    if url in certificate_cache:
-        return certificate_cache[url]
+    res = certificate_cache.get(url)
+    if res is not None:
+        return res
     res = requests.get(url).content
-    certificate_cache[url] = res
+    certificate_cache.set(url, res, timeout=60 * 60)  # 60 minutes
     return res
 
 
