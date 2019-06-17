@@ -9,9 +9,10 @@ itsdangerous = "==1.1.0"
 
 [dev-packages]
 bandit = "==1.5.1"
-pytest = "*"
+pytest = "==3.6.4"
 pytest-mock = "*"
 pytest-cov = "*"
+pytest-xdist = "==1.22.2"
 requests-mock = "*"
 freezegun = "*"
 "flake8" = "*"

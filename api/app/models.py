@@ -57,6 +57,10 @@ SMS_AUTH_TYPE = 'sms_auth'
 EMAIL_AUTH_TYPE = 'email_auth'
 USER_AUTH_TYPE = [SMS_AUTH_TYPE, EMAIL_AUTH_TYPE]
 
+DELIVERY_STATUS_CALLBACK_TYPE = 'delivery_status'
+COMPLAINT_CALLBACK_TYPE = 'complaint'
+SERVICE_CALLBACK_TYPES = [DELIVERY_STATUS_CALLBACK_TYPE, COMPLAINT_CALLBACK_TYPE]
+
 
 def filter_null_value_fields(obj):
     return dict(
@@ -596,14 +600,19 @@ class ServiceInboundApi(db.Model, Versioned):
 class ServiceCallbackApi(db.Model, Versioned):
     __tablename__ = 'service_callback_api'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=False, unique=True)
+    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=False)
     service = db.relationship('Service', backref='service_callback_api')
     url = db.Column(db.String(), nullable=False)
+    callback_type = db.Column(db.String(), db.ForeignKey('service_callback_type.name'), nullable=True)
     _bearer_token = db.Column("bearer_token", db.String(), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=True)
     updated_by = db.relationship('User')
     updated_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), index=True, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('service_id', 'callback_type', name='uix_service_callback_type'),
+    )
 
     @property
     def bearer_token(self):
@@ -625,6 +634,12 @@ class ServiceCallbackApi(db.Model, Versioned):
             "created_at": self.created_at.strftime(DATETIME_FORMAT),
             "updated_at": self.updated_at.strftime(DATETIME_FORMAT) if self.updated_at else None
         }
+
+
+class ServiceCallbackType(db.Model):
+    __tablename__ = 'service_callback_type'
+
+    name = db.Column(db.String, primary_key=True)
 
 
 class ApiKey(db.Model, Versioned):
@@ -859,10 +874,11 @@ class TemplateHistory(TemplateBase):
 
 
 TELSTRA_PROVIDER = "telstra"
+SES_PROVIDER = 'ses'
 SMTP_PROVIDER = 'smtp'
 
 SMS_PROVIDERS = [TELSTRA_PROVIDER]
-EMAIL_PROVIDERS = [SMTP_PROVIDER]
+EMAIL_PROVIDERS = [SES_PROVIDER, SMTP_PROVIDER]
 PROVIDERS = SMS_PROVIDERS + EMAIL_PROVIDERS
 
 NOTIFICATION_TYPE = [EMAIL_TYPE, SMS_TYPE, LETTER_TYPE]
@@ -1035,6 +1051,7 @@ class VerifyCode(db.Model):
         return check_hash(cde, self._code)
 
 
+NOTIFICATION_CANCELLED = 'cancelled'
 NOTIFICATION_CREATED = 'created'
 NOTIFICATION_SENDING = 'sending'
 NOTIFICATION_SENT = 'sent'
@@ -1045,13 +1062,17 @@ NOTIFICATION_TECHNICAL_FAILURE = 'technical-failure'
 NOTIFICATION_TEMPORARY_FAILURE = 'temporary-failure'
 NOTIFICATION_PERMANENT_FAILURE = 'permanent-failure'
 NOTIFICATION_PENDING_VIRUS_CHECK = 'pending-virus-check'
+NOTIFICATION_VALIDATION_FAILED = 'validation-failed'
 NOTIFICATION_VIRUS_SCAN_FAILED = 'virus-scan-failed'
+NOTIFICATION_RETURNED_LETTER = 'returned-letter'
 
 NOTIFICATION_STATUS_TYPES_FAILED = [
     NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
+    NOTIFICATION_VALIDATION_FAILED,
     NOTIFICATION_VIRUS_SCAN_FAILED,
+    NOTIFICATION_RETURNED_LETTER,
 ]
 
 NOTIFICATION_STATUS_TYPES_COMPLETED = [
@@ -1061,6 +1082,8 @@ NOTIFICATION_STATUS_TYPES_COMPLETED = [
     NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
+    NOTIFICATION_RETURNED_LETTER,
+    NOTIFICATION_CANCELLED,
 ]
 
 NOTIFICATION_STATUS_SUCCESS = [
@@ -1068,17 +1091,24 @@ NOTIFICATION_STATUS_SUCCESS = [
     NOTIFICATION_DELIVERED
 ]
 
+NOTIFICATION_STATUS_TYPES_BILLABLE_FOR_LETTERS = [
+    NOTIFICATION_SENDING,
+    NOTIFICATION_DELIVERED,
+    NOTIFICATION_RETURNED_LETTER,
+]
+
 NOTIFICATION_STATUS_TYPES_BILLABLE = [
     NOTIFICATION_SENDING,
     NOTIFICATION_SENT,
     NOTIFICATION_DELIVERED,
     NOTIFICATION_FAILED,
-    NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
+    NOTIFICATION_RETURNED_LETTER,
 ]
 
 NOTIFICATION_STATUS_TYPES = [
+    NOTIFICATION_CANCELLED,
     NOTIFICATION_CREATED,
     NOTIFICATION_SENDING,
     NOTIFICATION_SENT,
@@ -1089,7 +1119,9 @@ NOTIFICATION_STATUS_TYPES = [
     NOTIFICATION_TEMPORARY_FAILURE,
     NOTIFICATION_PERMANENT_FAILURE,
     NOTIFICATION_PENDING_VIRUS_CHECK,
+    NOTIFICATION_VALIDATION_FAILED,
     NOTIFICATION_VIRUS_SCAN_FAILED,
+    NOTIFICATION_RETURNED_LETTER,
 ]
 
 NOTIFICATION_STATUS_TYPES_NON_BILLABLE = list(set(NOTIFICATION_STATUS_TYPES) - set(NOTIFICATION_STATUS_TYPES_BILLABLE))
@@ -1100,6 +1132,14 @@ NOTIFICATION_STATUS_LETTER_ACCEPTED = 'accepted'
 NOTIFICATION_STATUS_LETTER_RECEIVED = 'received'
 
 DVLA_RESPONSE_STATUS_SENT = 'Sent'
+
+FIRST_CLASS = 'first'
+SECOND_CLASS = 'second'
+POSTAGE_TYPES = [FIRST_CLASS, SECOND_CLASS]
+RESOLVE_POSTAGE_FOR_FILE_NAME = {
+    FIRST_CLASS: 1,
+    SECOND_CLASS: 2
+}
 
 
 class NotificationStatusTypes(db.Model):
@@ -1814,3 +1854,29 @@ class DateTimeDimension(db.Model):
 
 
 Index('ix_dm_datetime_yearmonth', DateTimeDimension.year, DateTimeDimension.month)
+
+
+class Complaint(db.Model):
+    __tablename__ = 'complaints'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    notification_id = db.Column(UUID(as_uuid=True), db.ForeignKey('notification_history.id'),
+                                index=True, nullable=False)
+    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), unique=False, index=True, nullable=False)
+    service = db.relationship(Service, backref=db.backref('complaints'))
+    ses_feedback_id = db.Column(db.Text, nullable=True)
+    complaint_type = db.Column(db.Text, nullable=True)
+    complaint_date = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+    def serialize(self):
+        return {
+            'id': str(self.id),
+            'notification_id': str(self.notification_id),
+            'service_id': str(self.service_id),
+            'service_name': self.service.name,
+            'ses_feedback_id': str(self.ses_feedback_id),
+            'complaint_type': self.complaint_type,
+            'complaint_date': self.complaint_date.strftime(DATETIME_FORMAT) if self.complaint_date else None,
+            'created_at': self.created_at.strftime(DATETIME_FORMAT),
+        }

@@ -5,7 +5,7 @@ from flask import Flask
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-# notify_celery is referenced from manifest_delivery_base.yml, and cannot be removed
+# notify_celery is referenced from manifest.yml, and cannot be removed
 from app import notify_celery, create_app, version  # noqa
 
 sentry_extras = dict(release=version.__commit_sha__)

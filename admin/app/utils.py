@@ -320,7 +320,7 @@ def get_template(
         return EmailPreviewTemplate(
             template,
             from_name=service['name'],
-            from_address='{}@digital.gov.au'.format(service['email_from']),
+            from_address='{}@notify.gov.au'.format(service['email_from']),
             expanded=expand_emails,
             show_recipient=show_recipient,
             redact_missing_personalisation=redact_missing_personalisation,
@@ -352,15 +352,19 @@ def get_template(
                 redact_missing_personalisation=redact_missing_personalisation,
             )
 
+
 # AET is Australian Eastern Time (https://www.timeanddate.com/time/zones/aet).
 aet_tz_str = "Australia/Sydney"
 aet_tz = pytz.timezone(aet_tz_str)
 
+
 def convert_utc_to_local(utc_dt, local_tz):
     return pytz.utc.localize(utc_dt).astimezone(local_tz).replace(tzinfo=None)
 
+
 def convert_utc_to_aet(utc_dt):
     return convert_utc_to_local(utc_dt, aet_tz)
+
 
 def get_current_financial_year():
     now = convert_utc_to_aet(datetime.utcnow())
@@ -426,6 +430,7 @@ def gmt_timezones(date):
 def get_cdn_domain():
     parsed_uri = urlparse(current_app.config['CDN_BASE_URL'])
     return parsed_uri.netloc
+
 
 def parse_filter_args(filter_dict):
     if not isinstance(filter_dict, MultiDict):

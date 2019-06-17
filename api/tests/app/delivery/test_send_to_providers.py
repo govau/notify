@@ -110,14 +110,14 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
         personalisation={'name': 'Jo'}
     )
 
-    mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
+    mocker.patch('app.aws_ses_client.send_email', return_value=['reference', 'sending'])
 
     send_to_providers.send_email_to_provider(
         db_notification
     )
 
-    app.smtp_client.send_email.assert_called_once_with(
-        '"Sample service" <sample.service@notifytest.gov.au>',
+    app.aws_ses_client.send_email.assert_called_once_with(
+        '"Sample service" <sample.service@test-notify.digital.gov.au>',
         'jo.smith@example.com',
         'Jo <em>some HTML</em>',
         body='Hello Jo\nThis is an email from GOV.\u200bAU with <em>some HTML</em>\n',
@@ -125,13 +125,13 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
         reply_to_address=None
     )
 
-    assert '<!DOCTYPE html' in app.smtp_client.send_email.call_args[1]['html_body']
-    assert '&lt;em&gt;some HTML&lt;/em&gt;' in app.smtp_client.send_email.call_args[1]['html_body']
+    assert '<!DOCTYPE html' in app.aws_ses_client.send_email.call_args[1]['html_body']
+    assert '&lt;em&gt;some HTML&lt;/em&gt;' in app.aws_ses_client.send_email.call_args[1]['html_body']
 
     notification = Notification.query.filter_by(id=db_notification.id).one()
-    assert notification.status == 'sent'
+    assert notification.status == 'sending'
     assert notification.sent_at <= datetime.utcnow()
-    assert notification.sent_by == 'smtp'
+    assert notification.sent_by == 'ses'
     assert notification.personalisation == {"name": "Jo"}
 
 
@@ -366,7 +366,7 @@ def test_send_email_to_provider_should_call_research_mode_task_response_task_if_
     assert persisted_notification.status == 'sending'
     assert persisted_notification.sent_at <= datetime.utcnow()
     assert persisted_notification.created_at <= datetime.utcnow()
-    assert persisted_notification.sent_by == 'smtp'
+    assert persisted_notification.sent_by == 'ses'
     assert persisted_notification.reference == str(reference)
     assert persisted_notification.billable_units == 0
 
@@ -390,7 +390,7 @@ def test_send_email_should_use_service_reply_to_email(
         sample_service,
         sample_email_template,
         mocker):
-    mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
+    mocker.patch('app.aws_ses_client.send_email', return_value=['reference', 'sending'])
 
     db_notification = create_notification(template=sample_email_template, reply_to_text='foo@bar.com')
     create_reply_to_email(service=sample_service, email_address='foo@bar.com')
@@ -399,7 +399,7 @@ def test_send_email_should_use_service_reply_to_email(
         db_notification,
     )
 
-    app.smtp_client.send_email.assert_called_once_with(
+    app.aws_ses_client.send_email.assert_called_once_with(
         ANY,
         ANY,
         ANY,
@@ -680,11 +680,9 @@ def test_should_handle_sms_sender_and_prefix_message(
 
 
 def test_send_email_to_provider_uses_reply_to_from_notification(
-    notify_db,
-    sample_email_template,
-    mocker,
-):
-    mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
+        sample_email_template,
+        mocker):
+    mocker.patch('app.aws_ses_client.send_email', return_value=['reference', 'sending'])
 
     db_notification = create_notification(template=sample_email_template, reply_to_text="test@test.com")
 
@@ -692,7 +690,7 @@ def test_send_email_to_provider_uses_reply_to_from_notification(
         db_notification,
     )
 
-    app.smtp_client.send_email.assert_called_once_with(
+    app.aws_ses_client.send_email.assert_called_once_with(
         ANY,
         ANY,
         ANY,
@@ -703,11 +701,9 @@ def test_send_email_to_provider_uses_reply_to_from_notification(
 
 
 def test_send_email_to_provider_should_format_reply_to_email_address(
-    notify_db,
-    sample_email_template,
-    mocker,
-):
-    mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
+        sample_email_template,
+        mocker):
+    mocker.patch('app.aws_ses_client.send_email', return_value=['reference', 'sending'])
 
     db_notification = create_notification(template=sample_email_template, reply_to_text="test@test.com\t")
 
@@ -715,7 +711,7 @@ def test_send_email_to_provider_should_format_reply_to_email_address(
         db_notification,
     )
 
-    app.smtp_client.send_email.assert_called_once_with(
+    app.aws_ses_client.send_email.assert_called_once_with(
         ANY,
         ANY,
         ANY,
@@ -738,13 +734,9 @@ def test_send_sms_to_provider_should_format_phone_number(
     assert send_mock.call_args[1]['to'] == '61412345678'
 
 
-def test_send_email_to_provider_should_format_email_address(
-    notify_db,
-    sample_email_notification,
-    mocker,
-):
+def test_send_email_to_provider_should_format_email_address(sample_email_notification, mocker):
     sample_email_notification.to = 'test@example.com\t'
-    send_mock = mocker.patch('app.smtp_client.send_email', return_value=['reference', 'sent'])
+    send_mock = mocker.patch('app.aws_ses_client.send_email', return_value=['reference', 'sending'])
 
     send_to_providers.send_email_to_provider(sample_email_notification)
 

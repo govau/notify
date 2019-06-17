@@ -25,9 +25,9 @@
         caption_visible=False
       ) %}
         {% for key, description, format in [
-          ('id', 'Notify’s id for the status receipts', 'UUID'),
+          ('id', 'Notify’s ID for the status receipts', 'UUID'),
           ('reference', 'The reference sent by the service', '12345678'),
-          ('to', 'The email address of the recipient', 'hello@digital.gov.au'),
+          ('to', 'The email address of the recipient', 'person@example.com'),
           ('status', 'The status of the notification', 'delivered | permanent-failure | temporary-failure | technical-failure'),
           ('created_at', 'The time the service sent the request', '2017-05-14T12:15:30.000000Z'),
           ('completed_at', 'The last time the status was updated', '2017-05-14T12:15:30.000000Z'),
@@ -53,9 +53,9 @@
         caption_visible=False
       ) %}
         {% for key, description, format in [
-          ('id', 'Notify’s id for the received message', 'UUID'),
-          ('source_number', 'The phone number the message was sent from', '447700912345'),
-          ('destination_number', 'The number the message was sent to (your number)', '07700987654'),
+          ('id', 'Notify’s ID for the received message', 'UUID'),
+          ('source_number', 'The phone number the message was sent from', '61412987654'),
+          ('destination_number', 'The number the message was sent to (your number)', '0412345678'),
           ('message', 'The received message', 'Hello Notify!'),
           ('date_received', 'The UTC datetime that the message was received by Notify', '2017-05-14T12:15:30.000000Z')
         ] %}

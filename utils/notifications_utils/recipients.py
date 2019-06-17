@@ -1,3 +1,4 @@
+import string
 import re
 import sys
 import csv
@@ -10,7 +11,8 @@ from orderedset import OrderedSet
 
 from flask import current_app
 
-from notifications_utils.formatters import formatted_list
+from . import EMAIL_REGEX_PATTERN, hostname_part, tld_part
+from notifications_utils.formatters import strip_and_remove_obscure_whitespace, strip_whitespace, OBSCURE_WHITESPACE
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns, Row, Cell
 from notifications_utils.international_billing_rates import (
@@ -43,14 +45,6 @@ optional_address_columns = {
     'address line 6',
 }
 
-# regexes for use in validate_email_address.
-# invalid local chars - whitespace, quotes and apostrophes, semicolons and colons, GBP sign
-# Note: Normal apostrophe eg `Firstname-o'surname@domain.com` is allowed.
-INVALID_LOCAL_CHARS = r"\s\",;:@£“”‘’"
-email_regex = re.compile(r'^[^{}]+@([^.@][^@]+)$'.format(INVALID_LOCAL_CHARS))
-hostname_part = re.compile(r'^(xn-|[a-z0-9]+)(-[a-z0-9]+)*$', re.IGNORECASE)
-tld_part = re.compile(r'^([a-z]{2,63}|xn--([a-z0-9]+-)*[a-z0-9]+)$', re.IGNORECASE)
-
 
 class RecipientCSV():
 
@@ -68,7 +62,7 @@ class RecipientCSV():
         remaining_messages=sys.maxsize,
         international_sms=False,
     ):
-        self.file_data = file_data.strip(', \n\r\t')
+        self.file_data = strip_whitespace(file_data, extra_characters=',')
         self.template_type = template_type
         self.placeholders = placeholders
         self.max_errors_shown = max_errors_shown
@@ -330,7 +324,7 @@ class InvalidAddressError(InvalidEmailError):
 
 def normalise_phone_number(number):
 
-    for character in ['(', ')', ' ', '-', '+']:
+    for character in string.whitespace + OBSCURE_WHITESPACE + '()-+':
         number = number.replace(character, '')
 
     try:
@@ -452,17 +446,18 @@ def validate_email_address(email_address, column=None):  # noqa (C901 too comple
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
     # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
-    email_address = email_address.strip()
-    match = re.match(email_regex, email_address)
+    email_address = strip_and_remove_obscure_whitespace(email_address)
+    match = re.match(EMAIL_REGEX_PATTERN, email_address)
 
     # not an email
     if not match:
         raise InvalidEmailError
 
-    hostname = match.group(1)
-    # don't allow consecutive periods in domain names
-    if '..' in hostname:
+    # don't allow consecutive periods in either part
+    if '..' in email_address:
         raise InvalidEmailError
+
+    hostname = match.group(1)
 
     # idna = "Internationalized domain name" - this encode/decode cycle converts unicode into its accurate ascii
     # representation as the web uses. '例え.テスト'.encode('idna') == b'xn--r8jz45g.xn--zckzah'
@@ -488,7 +483,7 @@ def validate_email_address(email_address, column=None):  # noqa (C901 too comple
 
 
 def format_email_address(email_address):
-    return email_address.lower()
+    return strip_and_remove_obscure_whitespace(email_address.lower())
 
 
 def validate_and_format_email_address(email_address):
@@ -496,18 +491,11 @@ def validate_and_format_email_address(email_address):
 
 
 def validate_address(address_line, column):
-    if address_line:
-        invalid_chars = sorted(set(c for c in address_line if ord(c) > 255))
-        if invalid_chars:
-            raise InvalidAddressError(
-                "Can’t include {}".format(
-                    formatted_list(items=invalid_chars, before_each='', after_each='', conjunction='or')))
-
     if Columns.make_key(column) in Columns.from_keys(optional_address_columns).keys():
         return address_line
     if Columns.make_key(column) not in Columns.from_keys(first_column_headings['letter']).keys():
         raise TypeError
-    if not address_line or not address_line.strip():
+    if not address_line or not strip_whitespace(address_line):
         raise InvalidAddressError('Missing')
     return address_line
 
