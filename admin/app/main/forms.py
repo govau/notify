@@ -801,23 +801,16 @@ class DateFilterForm(StripWhitespaceForm):
 
 
 class ChooseTemplateType(StripWhitespaceForm):
-
     template_type = RadioField(
         'What kind of template do you want to add?',
+        choices=[
+            ('email', 'Email'),
+            ('sms', 'Text message'),
+        ],
         validators=[
             DataRequired()
         ]
     )
-
-    def __init__(self, include_letters=False, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-
-        self.template_type.choices = filter(None, [
-            ('email', 'Email'),
-            ('sms', 'Text message'),
-        ])
-
 
 class SearchTemplatesForm(StripWhitespaceForm):
 
