@@ -3,6 +3,40 @@ lang: go
 ---
 
 ```go
-// Not yet available
+resp, err := client.GetAllTemplates(type)
 ```
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="type" kind="string">
+      If you provide an empty string the client returns all templates. Otherwise you can filter by passing in:
+      <ul>
+        <li><pre>email</pre></li>
+        <li><pre>sms</pre></li>
+      </ul>
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request is successful an Array of `Template` structs is returned, for example:
+
+```go
+resp := []Template{
+    Template{
+        ID:        "bfb50d92-100d-4b8b-b559-14fa3b091cda",
+        Name:      "Welcome email",
+        Type:      "email",
+        CreatedAt: "2019-06-06T23:01:01.406542Z",
+        UpdatedAt: "2019-06-06T23:01:01.406542Z",
+        CreatedBy: "creator@example.com",
+        Version:   1,
+        Subject:   "Welcome to Notify",
+        Body:      "Hi ((name)),\r\n\r\nWelcome to Notify. Today is ((day)).",
+    },
+}
+```
+
+</Panel>
+
 

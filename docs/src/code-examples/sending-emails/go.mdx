@@ -37,7 +37,7 @@ The email address of the recipient you want to send to.
 <Parameters>
   <Parameter optional name="Personalisation" kind="[]struct{ Key, Value string }">
 
-If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a struct. For example:
+If a template has placeholder fields for personalised information such as name or application date you must provide their values in a struct. For example:
 
 ```go inline
 p := notify.Personalisation{
@@ -77,7 +77,7 @@ If you do not have an `EmailReplyToID`, you can leave out this argument.
 </Panel>
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
-If the request to the client is successful, the client returns a `SentEmail` struct, for example:
+If the request is successful a `SentEmail` struct is returned, for example::
 
 ```go
 resp := SentEmail{
