@@ -140,6 +140,78 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
             assert '##' not in email
 
 
+def test_preheader_is_at_start_of_html_emails():
+    assert (
+        '<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#414141;">\n'
+        '\n'
+        '<span style="display: none;font-size: 1px;color: #fff; max-height: 0;">content…</span>'
+    ) in str(
+        HTMLEmailTemplate({'content': 'content', 'subject': 'subject'})
+    )
+
+
+@pytest.mark.parametrize('content, values, expected_preheader', [
+    (
+        (
+            'Hello (( name ))\n'
+            '\n'
+            '# This - is a "heading"\n'
+            '\n'
+            'My favourite websites\' URLs are:\n'
+            '- notify.gov.au\n'
+            '- https://www.example.com\n'
+        ),
+        {'name': 'Jo'},
+        'Hello Jo This – is a “heading” My favourite websites’ URLs are: • notify.gov.au • https://www.example.com',
+    ),
+    (
+        """
+            Lorem Ipsum is simply dummy text of the printing and
+            typesetting industry.
+
+            Lorem Ipsum has been the industry’s standard dummy text
+            ever since the 1500s, when an unknown printer took a galley
+            of type and scrambled it to make a type specimen book.
+
+            Lorem Ipsum is simply dummy text of the printing and
+            typesetting industry.
+
+            Lorem Ipsum has been the industry’s standard dummy text
+            ever since the 1500s, when an unknown printer took a galley
+            of type and scrambled it to make a type specimen book.
+        """,
+        {},
+        (
+            'Lorem Ipsum is simply dummy text of the printing and '
+            'typesetting industry. Lorem Ipsum has been the industry’s '
+            'standard dummy text ever since the 1500s, when an unknown '
+            'printer took a galley of type and scrambled it to make a '
+            'type specimen book. Lorem Ipsu'
+        ),
+    ),
+    (
+        'short email',
+        {},
+        'short email',
+    ),
+])
+@mock.patch(
+    'notifications_utils.template.HTMLEmailTemplate.jinja_template.render',
+    return_value='mocked'
+)
+def test_content_of_preheader_in_html_emails(
+    mock_jinja_template,
+    content,
+    values,
+    expected_preheader,
+):
+    assert str(HTMLEmailTemplate(
+        {'content': content, 'subject': 'subject'},
+        values
+    )) == 'mocked'
+    assert mock_jinja_template.call_args[0][0]['preheader'] == expected_preheader
+
+
 @pytest.mark.parametrize('template_class, extra_args, result, markdown_renderer', [
     [
         HTMLEmailTemplate,
