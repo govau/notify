@@ -50,7 +50,7 @@ def test_make_twilio_callback(notify_api, rmock, phone_number):
 
 
 def test_make_ses_callback(notify_api, mocker):
-    mock_task = mocker.patch('app.celery.research_mode_tasks.process_ses_results')
+    mock_task = mocker.patch('app.celery.research_mode_tasks.process_ses_results_task')
     some_ref = str(uuid.uuid4())
 
     send_email_response(reference=some_ref, to="test@test.com")
