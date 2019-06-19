@@ -9,7 +9,7 @@ from notifications_utils.s3 import s3upload
 from app import notify_celery
 from app.models import SMS_TYPE
 from app.config import QueueNames
-from app.celery.process_ses_receipts_tasks import process_ses_results
+from app.celery.process_ses_receipts_tasks import process_ses_results_task
 
 temp_fail = "409000003"
 perm_fail = "409000002"
@@ -41,7 +41,7 @@ def send_email_response(reference, to):
     else:
         body = ses_notification_callback(reference)
 
-    process_ses_results.apply_async([body], queue=QueueNames.RESEARCH_MODE)
+    process_ses_results_task.apply_async([body], queue=QueueNames.RESEARCH_MODE)
 
 
 def make_request(notification_type, provider, notification_id, data, headers):
