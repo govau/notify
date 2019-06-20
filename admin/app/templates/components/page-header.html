@@ -4,9 +4,16 @@
 ) %}
 
   {% if back_link %}
-    <a  href="{{ back_link }}">Back</a>
+    {{ govau_back_link(back_link) }}
   {% endif %}
 
   <h1 class="heading-large">{{ h1 }}</h1>
+
+{% endmacro %}
+
+
+{% macro govau_back_link(back_link) %}
+
+  <a href="{{ back_link }}">Back</a>
 
 {% endmacro %}

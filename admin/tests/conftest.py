@@ -49,7 +49,7 @@ def app_(request):
 @pytest.fixture(scope='function')
 def service_one(api_user_active):
     return service_json(SERVICE_ONE_ID, 'service one', [api_user_active.id])
-    
+
 @pytest.fixture(scope='function')
 def service_two(api_user_active):
     return service_json(SERVICE_TWO_ID, 'service two', [api_user_active.id])
@@ -1723,6 +1723,16 @@ def mock_get_job_in_progress(mocker, api_user_active):
         )}
 
     return mocker.patch('app.job_api_client.get_job', side_effect=_get_job)
+
+
+@pytest.fixture(scope='function')
+def mock_has_jobs(mocker):
+    mocker.patch('app.job_api_client.has_jobs', return_value=True)
+
+
+@pytest.fixture(scope='function')
+def mock_has_no_jobs(mocker):
+    mocker.patch('app.job_api_client.has_jobs', return_value=False)
 
 
 @pytest.fixture(scope='function')
