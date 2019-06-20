@@ -34,6 +34,7 @@ from notifications_utils.formatters import (
     strip_leading_whitespace,
     add_trailing_newline,
     normalise_newlines,
+    remove_smart_quotes_from_email_addresses,
     strip_unsupported_characters,
 )
 from notifications_utils.take import Take
@@ -605,6 +606,8 @@ def do_nice_typography(value):
         remove_whitespace_before_punctuation
     ).then(
         make_quotes_smart
+    ).then(
+        remove_smart_quotes_from_email_addresses
     ).then(
         replace_hyphens_with_en_dashes
     )
