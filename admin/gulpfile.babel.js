@@ -168,8 +168,12 @@ gulp.task("lint:sass", () =>
       paths.src + "stylesheets/components/*.scss",
       paths.src + "stylesheets/views/*.scss"
     ])
-    .pipe(plugins.sassLint())
-    .pipe(plugins.sassLint.format(stylish))
+    .pipe(
+      plugins.sassLint({
+        options: { formatter: "stylish" }
+      })
+    )
+    .pipe(plugins.sassLint.format())
     .pipe(plugins.sassLint.failOnError())
 );
 
