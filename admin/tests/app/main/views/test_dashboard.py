@@ -63,7 +63,7 @@ def test_redirect_from_old_dashboard(
 
     expected_location = 'http://localhost/services/{}'.format(SERVICE_ONE_ID)
 
-    response = logged_in_client.get('/services/{}'.format(SERVICE_ONE_ID))
+    response = logged_in_client.get('/services/{}/dashboard'.format(SERVICE_ONE_ID))
 
     assert response.status_code == 302
     assert response.location == expected_location
