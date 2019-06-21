@@ -63,7 +63,7 @@ def test_redirect_from_old_dashboard(
 
     expected_location = 'http://localhost/services/{}'.format(SERVICE_ONE_ID)
 
-    response = logged_in_client.get('/services/{}/dashboard'.format(SERVICE_ONE_ID))
+    response = logged_in_client.get('/services/{}'.format(SERVICE_ONE_ID))
 
     assert response.status_code == 302
     assert response.location == expected_location
@@ -75,8 +75,8 @@ def test_should_redirect_to_login_when_unauthenticated_and_valid_service_id(
     mocker,
     service_one
 ):
-    expected_location = 'http://localhost/sign-in?next=%2Fservices%2F{}%2Fdashboard'.format(SERVICE_ONE_ID)
-    response = client.get('/services/{}/dashboard'.format(SERVICE_ONE_ID))
+    expected_location = 'http://localhost/sign-in?next=%2Fservices%2F{}'.format(SERVICE_ONE_ID)
+    response = client.get('/services/{}'.format(SERVICE_ONE_ID))
 
     assert response.status_code == 302
     assert response.location == expected_location
@@ -87,8 +87,8 @@ def test_should_redirect_to_login_when_unauthenticated_and_invalid_service_id(
     mocker,
     service_one
 ):
-    expected_location = 'http://localhost/sign-in?next=%2Fservices%2F{}%2Fdashboard'.format('INVALID')
-    response = client.get('/services/{}/dashboard'.format('INVALID'))
+    expected_location = 'http://localhost/sign-in?next=%2Fservices%2F{}'.format('INVALID')
+    response = client.get('/services/{}'.format('INVALID'))
 
     assert response.status_code == 302
     assert response.location == expected_location    
