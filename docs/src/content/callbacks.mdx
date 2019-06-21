@@ -1,0 +1,52 @@
+---
+title: 'Callbacks'
+---
+
+import Examples from 'components/examples'
+import Contents from 'components/table-of-contents'
+
+# Accepting callbacks
+
+A callback lets you receive messages from Notify to a URL you choose.
+
+You should make sure that the callbacks to your URL are coming from Notify by 
+providing a "bearer token" when you set up the callback URL.
+You should keep this bearer token secure and rotate it if you have any reason
+to think that it might no longer be trusted.
+
+When you accept a callback from Notify, you should check that the bearer token
+we send is the same as what you've set up. This could be a hashed value so
+that Notify doesn't hold the true token.
+
+The callback message will be delivered in JSON.
+
+<Contents />
+
+## Message delivery receipts
+
+When you send an email or text message through Notify, we can send a receipt to your callback URL to tell you if we were able to deliver it or not.
+
+
+| Key               | Description                           | Format                                                                |
+|-------------------|---------------------------------------|-----------------------------------------------------------------------|
+| id                | Notify’s ID for the status receipts   | UUID                                                                  |
+| reference         | The reference sent by the service     | 12345678                                                              |
+| to                | The email address of the recipient    | person@example.com                                                    |
+| status            | The status of the notification        | delivered | permanent-failure | temporary-failure | technical-failure |
+| created_at        | The time the service sent the request | 2017-05-14T12:15:30.000000Z                                           |
+| completed_at      | The last time the status was updated  | 2017-05-14T12:15:30.000000Z                                           |
+| sent_at           | The time the notification was sent    | 2017-05-14T12:15:30.000000Z or nil                                    |
+| notification_type | The notification type                 | email | sms                                                           |
+
+## Inbound SMS messages
+
+If your service receives text messages in Notify, we can forward them to your callback URL as soon as they arrive.
+
+| Key                | Description                                              | Format                      |
+|--------------------|----------------------------------------------------------|-----------------------------|
+| id                 | Notify’s ID for the received message                     | UUID                        |
+| source_number      | The phone number the message was sent from               | 61412987654                 |
+| destination_number | The number the message was sent to (your number)         | 0412345678                  |
+| message            | The received message                                     | Hello Notify!               |
+| date_received      | The UTC datetime that the message was received by Notify | 2017-05-14T12:15:30.000000Z |
+

@@ -27,6 +27,15 @@ const Optional = styled(Requirement)`
   color: #074371;
 `
 
+const NoRequirement = styled(Requirement)`
+  background-color: #d8d8d8;
+  color: #5d5d5d;
+
+  ${RequirementKind} {
+    background: none;
+  }
+`
+
 const Description = styled.dd`
   margin: 0;
 
@@ -116,6 +125,10 @@ const Parameter = ({
             Optional
             <Kind>{kind}</Kind>
           </Optional>
+        ) : kind ? (
+          <NoRequirement>
+            <Kind>{kind}</Kind>
+          </NoRequirement>
         ) : null}
       </Requirements>
     </Term>
