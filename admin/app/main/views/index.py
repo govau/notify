@@ -111,7 +111,7 @@ def email_template():
 
 @main.route('/callbacks')
 def callbacks():
-    return render_template('views/callbacks.html')
+    return redirect(f"{current_app.config['DOCS_BASE_URL']}/callbacks", code=301)
 
 
 @main.route('/documentation')

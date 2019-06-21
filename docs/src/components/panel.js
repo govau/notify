@@ -3,10 +3,16 @@ import styled from 'styled-components'
 import Collapsible from './collapsible'
 import P from './core/paragraph'
 
-const Header = styled.div`
+const BaseHeader = styled.div`
   background-color: #f3f5f5;
   padding: 1rem 2rem;
 
+  * + & {
+    margin-top: 2em;
+  }
+`
+
+const Header = styled(BaseHeader)`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -21,14 +27,7 @@ const Header = styled.div`
       : '&:after { content: "↓ show" }'}
 `
 
-const Content = styled.div`
-  > * {
-    padding: 0 2rem;
-  }
-  ${P} {
-    margin-top: 1em;
-  }
-`
+const Content = styled.div``
 
 export const Panel = ({ label, children, defaultOpen }) => (
   <Collapsible
@@ -37,4 +36,11 @@ export const Panel = ({ label, children, defaultOpen }) => (
   >
     <Content>{children}</Content>
   </Collapsible>
+)
+
+export const SimplePanel = ({ label, children }) => (
+  <>
+    <BaseHeader>{label}</BaseHeader>
+    <Content>{children}</Content>
+  </>
 )

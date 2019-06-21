@@ -27,11 +27,26 @@ const Optional = styled(Requirement)`
   color: #074371;
 `
 
+const NoRequirement = styled(Requirement)`
+  background-color: #d8d8d8;
+  color: #5d5d5d;
+
+  ${RequirementKind} {
+    background: none;
+  }
+`
+
 const Description = styled.dd`
   margin: 0;
 
   @media ${desktop} {
+    dd ~ & {
+      border-top: 1px solid #eee;
+    }
+
     grid-column-start: 2;
+    padding-top: 1em;
+    padding-left: 2em;
 
     /*
     * prevents this cell from overflowing the css grid because code examples
@@ -42,22 +57,23 @@ const Description = styled.dd`
     overflow: hidden;
     min-width: 0;
   }
+
 `
 
 const Term = styled.dt`
+  padding-top: 1em;
+
+  dt ~ & {
+    border-top: 1px solid #eee;
+  }
+
   @media ${desktop} {
     grid-column-start: 1;
   }
 
   @media ${nondesktop} {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-
     ${Description} + & {
       margin-top: 2em;
-      padding-top: 1em;
-      border-top: 1px solid #eee;
     }
 
     & + ${Description} {
@@ -71,7 +87,6 @@ const Parameters = styled.dl`
     display: grid;
     grid-template-columns: max-content auto;
     grid-row-gap: 1em;
-    grid-column-gap: 2em;
 
     /* prevent cell from overflowing. see 'Description' */
     min-height: 0;
@@ -79,13 +94,7 @@ const Parameters = styled.dl`
   }
 `
 
-const Code = styled.code`
-  @media ${nondesktop} {
-    background-color: #f1f1f1;
-    border-radius: 3px;
-    padding: 2px 4px;
-  }
-`
+const Code = styled.code``
 
 const Kind = ({ children }) =>
   children ? (
@@ -116,6 +125,10 @@ const Parameter = ({
             Optional
             <Kind>{kind}</Kind>
           </Optional>
+        ) : kind ? (
+          <NoRequirement>
+            <Kind>{kind}</Kind>
+          </NoRequirement>
         ) : null}
       </Requirements>
     </Term>
