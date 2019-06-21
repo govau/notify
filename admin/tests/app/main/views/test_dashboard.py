@@ -70,6 +70,29 @@ def test_redirect_from_old_dashboard(
     assert expected_location == url_for('main.service_dashboard', service_id=SERVICE_ONE_ID, _external=True)
 
 
+def test_should_redirect_to_login_when_unauthenticated_and_valid_service_id(
+    client,
+    mocker,
+    service_one
+):
+    expected_location = 'http://localhost/sign-in?next=%2Fservices%2F{}%2Fdashboard'.format(SERVICE_ONE_ID)
+    response = client.get('/services/{}/dashboard'.format(SERVICE_ONE_ID))
+
+    assert response.status_code == 302
+    assert response.location == expected_location
+
+
+def test_should_redirect_to_login_when_unauthenticated_and_invalid_service_id(
+    client,
+    mocker,
+    service_one
+):
+    expected_location = 'http://localhost/sign-in?next=%2Fservices%2F{}%2Fdashboard'.format('INVALID')
+    response = client.get('/services/{}/dashboard'.format('INVALID'))
+
+    assert response.status_code == 302
+    assert response.location == expected_location    
+
 def test_get_started(
     logged_in_client,
     mocker,
