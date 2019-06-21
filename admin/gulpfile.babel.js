@@ -161,22 +161,6 @@ gulp.task("watchForChanges", function() {
   gulp.watch("gulpfile.babel.js", gulp.series("default"));
 });
 
-gulp.task("lint:sass", () =>
-  gulp
-    .src([
-      paths.src + "stylesheets/*.scss",
-      paths.src + "stylesheets/components/*.scss",
-      paths.src + "stylesheets/views/*.scss"
-    ])
-    .pipe(
-      plugins.sassLint({
-        options: { formatter: "stylish" }
-      })
-    )
-    .pipe(plugins.sassLint.format())
-    .pipe(plugins.sassLint.failOnError())
-);
-
 gulp.task("lint:js", () =>
   gulp
     .src(paths.src + "javascripts/**/*.js")
