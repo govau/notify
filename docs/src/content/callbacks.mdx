@@ -1,0 +1,106 @@
+---
+title: 'Callbacks'
+---
+
+import Examples from 'components/examples'
+import Contents from 'components/table-of-contents'
+import { SimplePanel } from 'components/panel'
+import { Parameters, Parameter } from 'components/parameters'
+import { H1, H2, H3, H4, H5 } from 'components/core/heading'
+
+# Accepting callbacks
+
+A callback lets you receive message delivery updates and/or inbound SMS from Notify to a URL you choose.
+
+<span />
+
+On a server you control, you should set up an endpoint that can accept POST
+requests. Notify will POST messages in a JSON format to the endpoint you specify.
+
+To ensure that callbacks are coming from Notify and not some other malicious
+source, you will need to create a "bearer token" when setting up the callback
+URL. A bearer token should be a long randomised piece of text that an attacker
+wouldn't be able to impersonate.
+
+**When creating a bearer token, you should:**
+
+- keep your bearer token secure
+- change it if you have any reason to think it might no longer be trusted
+- make sure that callbacks you recieve from Notify contain your bearer token as an authorisation header
+- use a hashed value so that Notify doesn't hold the true token
+
+<Contents />
+
+## Message delivery updates
+
+When you send an email or text message through Notify, we can send a receipt to your callback URL to tell you if we were able to deliver it or not.
+
+The JSON message that Notify sends has this format:
+
+```json inline nonumbers
+{
+	"id": "UUID",
+	"reference": "12345678",
+	"to": "person@example.com",
+	"status": "delivered",
+	"notification_type": "email",
+	"created_at": "2017-05-14T12:15:30.000000Z",
+	"completed_at": "2017-05-14T12:15:30.000000Z",
+	"sent_at": "2017-05-14T12:15:30.000000Z"
+}
+```
+
+<SimplePanel label={<H3>Fields</H3>}>
+<Parameters>
+  <Parameter name="id" kind="UUID">Notify's ID for this notification. You can use this to correlate with the ID that is returned when you send a message.</Parameter>
+  <Parameter name="reference" optional kind="string">The reference potentially sent with your API request</Parameter>
+  <Parameter name="to" kind="string">The email address or phone number of the recipient</Parameter>
+  <Parameter name="status" kind="string">
+
+The status of the notification
+
+Possible values:
+
+- `delivered`
+- `permanent-failure`
+- `temporary-failure`
+- `technical-failure`
+
+</Parameter>
+<Parameter name="notification_type" kind="string">
+
+The notification type, `email` or `sms`
+
+</Parameter>
+  <Parameter name="created_at" kind="ISO-8601 string">The time in UTC that the service sent the request</Parameter>
+  <Parameter name="completed_at" kind="ISO-8601 string">The last time in UTC that the status was updated</Parameter>
+  <Parameter name="sent_at" optional kind="ISO-8601 string">The time in UTC that the notification was sent</Parameter>
+</Parameters>
+</SimplePanel>
+
+
+## Inbound SMS messages
+
+If your service receives text messages in Notify, we can forward them to your callback URL as soon as they arrive.
+
+The JSON message that Notify sends has this format:
+
+```json inline nonumbers
+{
+	"id": "UUID",
+	"source_number": "61412987654",
+	"destination_number": "0412345678",
+	"message": "Hello Notify!",
+	"date_received": "2017-05-14T12:15:30.000000Z"
+}
+```
+
+<SimplePanel label={<H3>Fields</H3>}>
+<Parameters>
+  <Parameter name="id" kind="UUID">Notify’s ID for the status receipts</Parameter>
+  <Parameter name="source_number" kind="string">The phone number the message was sent from</Parameter>
+  <Parameter name="destination_number" kind="string">The number the message was sent to (your number)</Parameter>
+  <Parameter name="message" kind="string">The received message</Parameter>
+  <Parameter name="date_received" kind="ISO-8601 string">The UTC datetime that the message was received by Notify</Parameter>
+</Parameters>
+</SimplePanel>
