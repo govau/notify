@@ -4,7 +4,7 @@ lang: node
 
 ```javascript
 client
-  .getTemplateById(templateId)
+  .getNotificationById(id)
   .then(response => console.log(response))
   .catch(err => console.error(err))
 ```
@@ -13,13 +13,8 @@ The method returns a <a target="_blank" href="https://developer.mozilla.org/en-U
 
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
 <Parameters>
-  <Parameter required name="templateId">
-
-The ID of the template
-
-You can find this by signing into Notify and
-going to the Templates page.
-
+  <Parameter required name="id">
+    The ID of the notification. This can be found in response after sending an email or sms.
   </Parameter>
 </Parameters>
 </Panel>
@@ -30,15 +25,22 @@ If the request is successful the promise resolves with an `object`, for example:
 
 ```json
 {
-  "id": "template_id",
-  "name": "template name",
-  "type": "sms" | "email" | "letter",
-  "created_at": "created at",
-  "updated_at": "updated at",
-  "version": "version",
-  "created_by": "someone@example.com",
-  "body": "body",
-  "subject": null | "email_subject"
+    "id": "notify_id",
+    "body": "Hello Foo",
+    "subject": "null|email_subject",
+    "reference": "client reference",
+    "email_address": "email address sent to",
+    "phone_number": "phone number sent to",
+    "type": "sms|email",
+    "status": "current status",
+    "template": {
+        "version": 1,
+        "id": 1,
+        "uri": "/template/{id}/{version}"
+     },
+    "created_by_name": "name of the person who sent the notification if sent manually",
+    "created_at": "created at",
+    "sent_at": "sent to provider at",
 }
 ```
 

@@ -3,12 +3,12 @@ lang: java
 ---
 
 ```java
-Notification notification = client.getNotificationById(notificationId);
+Notification notification = client.getNotificationById(id);
 ```
 
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
-    <Parameter required name="notificationId" kind="String">
+    <Parameter required name="id" kind="String">
       The ID of the notification. This can be found in response after sending an email or sms.
     </Parameter>
   </Parameters>

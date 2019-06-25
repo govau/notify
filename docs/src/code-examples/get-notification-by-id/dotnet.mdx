@@ -3,32 +3,44 @@ lang: dotnet
 ---
 
 ```C#
-TemplateResponse response = client.GetTemplateById(templateId);
+Notification notification = client.GetNotificationById(id);
 ```
 
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
-    <Parameter required name="templateId" kind="string">
-      Sign in to Notify and go to the Templates page to find the template
-      ID.
+    <Parameter required name="id" kind="String">
+      The ID of the notification. This can be found in response after sending an email or sms.
     </Parameter>
   </Parameters>
 </Panel>
 
+
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
-If the request to the client is successful, the client returns a `TemplateResponse`:
+If the request to the client is successful, the client returns a `Notification`:
 
 ```C#
-public string id;
-public string name;
-public string type;
-public DateTime created_at;
-public DateTime? updated_at;
-public string created_by;
-public int version;
-public string body;
-public string subject; // null if an sms message
+string id;
+string completedAt;
+string createdAt;
+string emailAddress;
+string body;
+string subject;
+string line1;
+string line2;
+string line3;
+string line4;
+string line5;
+string line6;
+string phoneNumber;
+string postcode;
+string postage;
+string reference;
+string sentAt;
+string status;
+Template template;
+string type;
+string createdByName;
 ```
 
 </Panel>

@@ -3,14 +3,13 @@ lang: python
 ---
 
 ```python
-response = client.get_template(template_id)
+response = python_client.get_notification_by_id(id)
 ```
 
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
-    <Parameter required name="template_id" kind="String">
-      Sign in to Notify and go to the Templates page to find the template
-      ID.
+    <Parameter required name="id" kind="String">
+      The ID of the notification. This can be found in response after sending an email or sms.
     </Parameter>
   </Parameters>
 </Panel>
@@ -21,15 +20,23 @@ If the request is successful a `dict` is returned, for example:
 
 ```python
 {
-    "id": 'f33517ff-2a88-4f6e-b855-c550268ce08a', # required string - template ID
-    "name": "STRING", # required string - template name
-    "type": "sms / email / letter" , # required string
-    "created_at": "STRING", # required string - date and time template created
-    "updated_at": "STRING", # required string - date and time template last updated
-    "version": INTEGER,
-    "created_by": "someone@example.com", # required string
-    "body": "STRING", # required string - body of notification
-    "subject": "STRING" # required string for email - subject of email
+  "id": "740e5834-3a29-46b4-9a6f-16142fde533a", # required string - notification ID
+  "reference": "STRING", # optional string
+  "email_address": "sender@something.com",  # required string for emails
+  "phone_number": "+447900900123",  # required string for text messages
+  "type": "sms / email", # required string
+  "status": "sending / delivered / permanent-failure / temporary-failure / technical-failure", # required string
+  "template": {
+    "Version": INTEGER
+    "id": 'f33517ff-2a88-4f6e-b855-c550268ce08a' # required string - template ID
+    "uri": "/v2/template/{id}/{version}", # required
+  },
+  "body": "STRING", # required string - body of notification
+  "subject": "STRING" # required string for email - subject of email
+  "created_at": "STRING", # required string - date and time notification created
+  "created_by_name": "STRING", # optional string - name of the person who sent the notification if sent manually
+  "sent_at": "STRING", # optional string - date and time notification sent to provider
+  "completed_at:" "STRING" # optional string - date and time notification delivered or failed
 }
 ```
 

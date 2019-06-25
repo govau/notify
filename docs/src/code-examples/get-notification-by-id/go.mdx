@@ -2,32 +2,5 @@
 lang: go
 ---
 ```go
-resp, err := client.GetTemplateByID(id)
+// Not yet implemented
 ```
-<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
-  <Parameters>
-    <Parameter required name="id" kind="string">
-      Sign in to Notify and go to the Templates page to find the template ID.
-    </Parameter>
-  </Parameters>
-</Panel>
-
-<Panel label={<H3 appearAs={H5}>Response</H3>}>
-
-If the request is successful a `Template` struct is returned, for example:
-
-```go
-resp := Template{
-    ID:        "bfb50d92-100d-4b8b-b559-14fa3b091cda",
-    Name:      "Welcome email",
-    Type:      "email",
-    CreatedAt: "2019-06-06T23:01:01.406542Z",
-    UpdatedAt: "2019-06-06T23:01:01.406542Z",
-    CreatedBy: "creator@example.com",
-    Version:   1,
-    Subject:   "Welcome to Notify",
-    Body:      "Hi ((name)),\r\n\r\nWelcome to Notify. Today is ((day)).",
-}
-```
-
-</Panel>
