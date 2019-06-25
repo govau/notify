@@ -58,12 +58,13 @@ Notify allows you to convert this field into a list in the generated message.
 To do this, your code should pass in a list of things as the value of the
 personalisation field, instead of a string.
 
-For example, in Go you would pass a slice of strings:
+For example, in JSON you could pass an array of strings where each string is one
+of the required documents:
 
-```go
-p := notify.Personalisation{
-	{"name", "Kim"},
-	{"documents", []string{"Driver licence", "Medicare card"}},
+```json
+{
+  "name": "Kim",
+  "documents": ["Driver licence", "Medicare card"]
 }
 ```
 
