@@ -1,0 +1,47 @@
+---
+lang: java
+---
+
+```java
+Notification notification = client.getNotificationById(notificationId);
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="notificationId" kind="String">
+      The ID of the notification. This can be found in response after sending an email or sms.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request is successful a `Notification` returned:
+
+```java
+UUID id;
+String reference;
+String emailAddress;
+String phoneNumber;
+String line1;
+String line2;
+String line3;
+String line4;
+String line5;
+String line6;
+String postcode;
+String notificationType;
+String status;
+UUID templateId;
+int templateVersion;
+String templateUri;
+String body;
+String subject;
+DateTime createdAt;
+DateTime sentAt;
+DateTime completedAt;
+DateTime estimatedDelivery;
+String createdByName;
+```
+
+</Panel>
