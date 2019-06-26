@@ -1,0 +1,40 @@
+---
+lang: go
+---
+```go
+resp, err := client.GetNotificationById(id)
+```
+
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="id" kind="String">
+      The ID of the notification. This can be found in the response after sending an email or SMS.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request is successful a `Notification` is returned, for example for an SMS notification:
+:
+
+```go
+resp := Notification {
+	ID: "bfb50d92-100d-4b8b-b559-14fa3b091cda",
+	Body: "Hello, this is a text reminder",
+	Reference: "REF1234",
+	PhoneNumber: "0412345678",
+	Type: "sms",
+	Status: "delivered",
+	CreatedAt: "2019-06-25T23:44:48.502581Z",
+	SentAt: "2019-06-25T23:44:50.611542Z",
+	Template: {
+		ID: "b19c2493-efc6-40e3-bbcb-8b2bc30dc2e1",
+		URI: "https://rest-api.notify.gov.au/v2/template/b19c2493-efc6-40e3-bbcb-8b2bc30dc2e1/version/4",
+		Version: 4
+	}
+}
+```
+</Panel>
+

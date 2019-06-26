@@ -1,0 +1,39 @@
+---
+lang: dotnet
+---
+
+```C#
+Notification notification = client.GetNotificationById(id);
+```
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter required name="id" kind="String">
+      The ID of the notification. This can be found in the response after sending an email or SMS.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request to the client is successful, the client returns a `Notification`:
+
+```C#
+string id;
+string completedAt;
+string createdAt;
+string emailAddress;
+string body;
+string subject;
+string phoneNumber;
+string postage;
+string reference;
+string sentAt;
+string status;
+Template template;
+string type;
+string createdByName;
+```
+
+</Panel>
