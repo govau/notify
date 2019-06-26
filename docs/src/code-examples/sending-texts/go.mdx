@@ -5,7 +5,7 @@ lang: go
 ```go
 options := []notify.SendSMSOption{
 	notify.Personalisation{
-		{"name", userName},
+		{"name", "Kim"},
 	},
 	notify.SMSSenderID(senderID),
 }
@@ -36,14 +36,15 @@ The phone number of the recipient you want to send to.
 #### Options
 
 <Parameters>
-  <Parameter optional name="Personalisation" kind="[]struct{ Key, Value string }">
+  <Parameter optional name="Personalisation" kind="[]struct{ Key string, Value interface{} }">
 
 If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a struct. For example:
 
 ```go inline
 p := notify.Personalisation{
-	{"name", userName},
-	{"age",  userAge},
+	{"name", "Kim"},
+	{"age", 31},
+	{"colours", []string{"red", "blue"}},
 }
 ```
 

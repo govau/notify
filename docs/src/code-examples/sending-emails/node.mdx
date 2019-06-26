@@ -4,9 +4,9 @@ lang: node
 
 ```javascript
 client.sendEmail(templateId, emailAddress, {
-  personalisation: personalisation,
-  reference: reference,
-  emailReplyToId: emailReplyToId,
+  personalisation,
+  reference,
+  emailReplyToId,
 })
 ```
 
@@ -59,10 +59,11 @@ substituted in the message.
 
 For example:
 
-```json inline
-{
-  "first_name": "Lisa",
-  "amount_owing": "$15.50"
+```javascript
+const personalisation = {
+  name: 'Kim',
+  age: 31,
+  colours: ['red', 'blue'],
 }
 ```
 

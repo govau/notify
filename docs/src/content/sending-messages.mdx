@@ -19,11 +19,11 @@ is due.
 
 ## Getting ready
 
-To send an email message in Notify, you'll need to set up a template in the user
+To send a message in Notify, you’ll need to set up a template in the user
 interface. Go to **Services › Templates › Add a template** to get started.
 
-Once you've got a template ready, find the template ID associated with
-it. You'll need that ID to specify which template you want to use when you call
+Once you’ve got a template ready, find the template ID associated with
+it. You’ll need that ID to specify which template you want to use when you call
 our API.
 
 ## Personalisation
@@ -34,8 +34,57 @@ gets sent out. You might use personalisation to:
 - Address a user by their name
 - Provide users with a specific link to click
 - Send a unique transaction number as a follow up
+- Give users a dynamically generated list of actions they need to take
 
 Your API call must include any fields that have been set up as personalisations.
+
+### List fields
+
+A list field allows you to include a nicely formatted list of things in your
+message. A list field looks just like an ordinary field in your template.
+
+For example, your Notify template might look like this:
+
+```text
+Dear ((name)), please bring these documents to your appointment:
+
+((documents))
+```
+
+In this example, `((documents))` looks just like `((name))` but its intent is to
+become a nicely formatted list of documents.
+
+Notify allows you to convert this field into a list in the generated message.
+To do this, your code should pass in a list of things as the value of the
+personalisation field, instead of a string.
+
+For example, in JSON you could pass an array of strings where each string is one
+of the required documents:
+
+```json
+{
+  "name": "Kim",
+  "documents": ["Driver licence", "Medicare card", "Passport"]
+}
+```
+
+Generated emails will display the list as bullet points:
+
+```text
+Dear Kim, please bring these documents to your appointment:
+
+• Driver licence
+• Medicare card
+• Passport
+```
+
+Generated text messages will display the list inline:
+
+```text
+Dear Kim, please bring these documents to your appointment:
+
+Driver licence, Medicare card and Passport
+```
 
 ## Sending an email
 
@@ -47,7 +96,7 @@ messages in user interface for each service.
 ## Sending an SMS
 
 Sending an SMS is similar to sending an email. Send them one-by-one to a
-recipient. If you set up a reply number in the Notify interface, you'll be able
+recipient. If you set up a reply number in the Notify interface, you’ll be able
 to capture replies from your users.
 
 <Examples reference="sending-texts" title="Sending an SMS" />
