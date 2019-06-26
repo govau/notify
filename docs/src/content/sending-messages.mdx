@@ -45,7 +45,7 @@ message. A list field looks just like an ordinary field in your template.
 
 For example, your Notify template might look like this:
 
-```text
+```text inline nonumbers
 Dear ((name)), please bring these documents to your appointment:
 
 ((documents))
@@ -61,7 +61,7 @@ personalisation field, instead of a string.
 For example, in JSON you could pass an array of strings where each string is one
 of the required documents:
 
-```json
+```json inline nonumbers
 {
   "name": "Kim",
   "documents": ["Driver licence", "Medicare card", "Passport"]
@@ -70,7 +70,7 @@ of the required documents:
 
 Generated emails will display the list as bullet points:
 
-```text
+```text inline nonumbers
 Dear Kim, please bring these documents to your appointment:
 
 • Driver licence
@@ -80,7 +80,7 @@ Dear Kim, please bring these documents to your appointment:
 
 Generated text messages will display the list inline:
 
-```text
+```text inline nonumbers
 Dear Kim, please bring these documents to your appointment:
 
 Driver licence, Medicare card and Passport
