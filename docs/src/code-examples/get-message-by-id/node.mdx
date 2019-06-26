@@ -14,7 +14,7 @@ The method returns a <a target="_blank" href="https://developer.mozilla.org/en-U
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
 <Parameters>
   <Parameter required name="id">
-    The ID of the notification. This can be found in response after sending an email or sms.
+    The ID of the notification. This can be found in the response after sending an email or SMS.
   </Parameter>
 </Parameters>
 </Panel>
@@ -27,11 +27,11 @@ If the request is successful the promise resolves with an `object`, for example:
 {
     "id": "notify_id",
     "body": "Hello Foo",
-    "subject": "null|email_subject",
+    "subject": null | "email_subject",
     "reference": "client reference",
     "email_address": "email address sent to",
     "phone_number": "phone number sent to",
-    "type": "sms|email",
+    "type": "sms" | "email",
     "status": "current status",
     "template": {
         "version": 1,

@@ -9,7 +9,7 @@ response = python_client.get_notification_by_id(id)
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
     <Parameter required name="id" kind="String">
-      The ID of the notification. This can be found in response after sending an email or sms.
+      The ID of the notification. This can be found in the response after sending an email or SMS.
     </Parameter>
   </Parameters>
 </Panel>
@@ -18,7 +18,7 @@ response = python_client.get_notification_by_id(id)
 
 If the request is successful a `dict` is returned, for example:
 
-```python
+```json
 {
   "id": "740e5834-3a29-46b4-9a6f-16142fde533a", # required string - notification ID
   "reference": "STRING", # optional string

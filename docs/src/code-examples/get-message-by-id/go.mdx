@@ -9,14 +9,14 @@ resp, err := client.GetNotificationById(id)
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
     <Parameter required name="id" kind="String">
-      The ID of the notification. This can be found in response after sending an email or sms.
+      The ID of the notification. This can be found in the response after sending an email or SMS.
     </Parameter>
   </Parameters>
 </Panel>
 
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
-If the request is successful a `Notification` returned, for example for an SMS notification:
+If the request is successful a `Notification` is returned, for example for an SMS notification:
 :
 
 ```go
@@ -33,7 +33,7 @@ resp := Notification {
 		ID: "b19c2493-efc6-40e3-bbcb-8b2bc30dc2e1",
 		URI: "https://rest-api.notify.gov.au/v2/template/b19c2493-efc6-40e3-bbcb-8b2bc30dc2e1/version/4",
 		Version: 4
-	} `json:"template"`
+	}
 }
 ```
 </Panel>

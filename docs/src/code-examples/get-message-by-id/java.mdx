@@ -9,14 +9,14 @@ Notification notification = client.getNotificationById(id);
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
     <Parameter required name="id" kind="String">
-      The ID of the notification. This can be found in response after sending an email or sms.
+      The ID of the notification. This can be found in the response after sending an email or SMS.
     </Parameter>
   </Parameters>
 </Panel>
 
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
-If the request is successful a `Notification` returned:
+If the request is successful a `Notification` is returned:
 
 ```java
 UUID id;
