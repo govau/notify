@@ -1,10 +1,10 @@
-# Notify
+# CANotify
 
-Notify is a service developed by the [DTA](https://www.dta.gov.au) that helps
+CANotify is a service developed by the [CDS](https://digital.canada.ca) that helps
 government agencies communicate with their users.
 
 This is the open source repository that encompasses all projects that make up
-Notify.
+CANotify.
 
 ## Running the things
 
@@ -77,7 +77,7 @@ we don't usually run it locally.
 
 ## Credits
 
-Notify is based on [GOV.UK Notify](https://www.notifications.service.gov.uk).
+Notify is based on [GOV.UK Notify](https://www.notifications.service.gov.uk) with work incorperated from [DTA](https://www.dta.gov.au/)
 
 Thanks GDS team for providing Notify as an open source project that made it
 possible for us to build on a stable and reliable foundation.
