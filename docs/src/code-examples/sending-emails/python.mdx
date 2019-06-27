@@ -3,12 +3,13 @@ lang: python
 ---
 
 ```python
-notify_client.send_email_notification(
-    email_address='lisa@example.com',
+client.send_email_notification(
+    email_address='kim@example.com',
     template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',
     personalisation={
-        'user_name': 'Lisa',
-        'amount_owing': '$15.50'
+        'name': 'Kim',
+        'age': 31,
+        'colours': ['red', 'blue'],
     }
 )
 ```
@@ -40,24 +41,30 @@ substituted in the message.
 
 For example:
 
-```json inline
-{
-  "first_name": "Lisa",
-  "amount_owing": "$15.50"
+```python inline
+personalisation = {
+    'name': 'Kim',
+    'age': 31,
+    'colours': ['red', 'blue'],
 }
 ```
 
   </Parameter>
   <Parameter optional name="reference">
 
-A unique identifier you create. This reference identifies a single unique notification or a batch of notifications. If you do not have a reference, you must pass in an empty string or null.
+A unique identifier you create. This reference identifies a single unique
+notification or a batch of notifications. If you do not have a reference, you
+must pass in an empty string or null.
 
   </Parameter>
   <Parameter optional name="email_reply_to_id">
 
-An optional identifier that you can get from the service email_reply_to ids found in the service settings / manage email reply to addresses page.
+An optional identifier that you can get from the service `email_reply_to` ids
+found in the service settings / manage email reply to addresses page.
 
-You can omit this argument if you want to use the default service email reply to otherwise add the id from the list of email_reply_to ids associated with the service.
+You can omit this argument if you want to use the default service email reply
+to otherwise add the id from the list of `email_reply_to` ids associated with the
+service.
 
   </Parameter>
 

@@ -3,12 +3,13 @@ lang: python
 ---
 
 ```python
-notify_client.send_sms_notification(
-    phone_number='+61423 555 555',
+client.send_sms_notification(
+    phone_number='+61 423 555 555',
     template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',
     personalisation={
-        'user_name': 'Lisa',
-        'amount_owing': '$15.50'
+        'name': 'Kim',
+        'age': 31,
+        'colours': ['red', 'blue'],
     }
 )
 ```
@@ -40,10 +41,11 @@ substituted in the message.
 
 For example:
 
-```json inline
-{
-  "first_name": "Lisa",
-  "amount_owing": "$15.50"
+```python inline
+personalisation = {
+    'name': 'Kim',
+    'age': 31,
+    'colours': ['red', 'blue'],
 }
 ```
 

@@ -1,3 +1,3 @@
 from notifications_python_client.notifications import NotificationsAPIClient
 
-notify_client = NotificationsAPIClient(api_key)
+client = NotificationsAPIClient(api_key)
