@@ -41,6 +41,7 @@ twilio_sms_client = TwilioSMSClient(
 )
 smtp_client = SMTPClient(
     addr=os.getenv('SMTP_ADDR'),
+    port=os.getenv('SMTP_PORT'),
     user=os.getenv('SMTP_USER'),
     password=os.getenv('SMTP_PASSWORD'),
 )
