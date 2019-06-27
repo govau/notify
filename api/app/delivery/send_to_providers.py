@@ -25,7 +25,7 @@ from app.models import (
     KEY_TYPE_TEST,
     BRANDING_ORG,
     BRANDING_ORG_BANNER,
-    BRANDING_GOVAU,
+    BRANDING_NOTIFY,
     EMAIL_TYPE,
     NOTIFICATION_CREATED,
     NOTIFICATION_TECHNICAL_FAILURE,
@@ -194,7 +194,7 @@ def get_logo_url(base_url, logo_file):
 def get_html_email_options(service):
     govau_banner = service.branding not in (BRANDING_ORG, BRANDING_ORG_BANNER)
     brand_banner = service.branding == BRANDING_ORG_BANNER
-    if service.branding != BRANDING_GOVAU and service.email_branding:
+    if service.branding != BRANDING_NOTIFY and service.email_branding:
 
         logo_url = get_logo_url(
             current_app.config['CDN_BASE_URL'],

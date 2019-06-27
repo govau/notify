@@ -144,7 +144,7 @@ def test_get_service_by_id(admin_request, sample_service):
     assert json_resp['data']['id'] == str(sample_service.id)
     assert not json_resp['data']['research_mode']
     assert json_resp['data']['email_branding'] is None
-    assert json_resp['data']['branding'] == 'govau'
+    assert json_resp['data']['branding'] == 'notify'
     assert json_resp['data']['dvla_organisation'] == '001'
     assert json_resp['data']['prefix_sms'] is True
 

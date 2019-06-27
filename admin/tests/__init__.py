@@ -135,7 +135,7 @@ def service_json(
     sms_sender='GOVAU',
     research_mode=False,
     email_branding=None,
-    branding='govau',
+    branding='notify',
     created_at=None,
     letter_contact_block=None,
     inbound_api=None,

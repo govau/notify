@@ -253,10 +253,10 @@
         {% call row() %}
           {{ text_field('Email branding' )}}
           {% call field() %}
-            {% if current_service.branding == 'govau' %}
-              GOV.AU
+            {% if current_service.branding == 'notify' %}
+              Notify
             {% elif current_service.branding == 'both' %}
-              GOV.AU and {{ email_branding.name if email_branding else None }}
+              Notify and {{ email_branding.name if email_branding else None }}
             {% elif current_service.branding == 'org' %}
               Only {{ email_branding.name if email_branding else None }}
             {% elif current_service.branding == 'org_banner' %}

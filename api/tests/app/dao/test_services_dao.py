@@ -54,7 +54,7 @@ from app.models import (
     Service,
     ServicePermission,
     ServicePermissionTypes,
-    BRANDING_GOVAU,
+    BRANDING_NOTIFY,
     DVLA_ORG_HM_GOVERNMENT,
     KEY_TYPE_NORMAL,
     KEY_TYPE_TEAM,
@@ -434,9 +434,9 @@ def test_create_service_creates_a_history_record_with_current_data(sample_user):
     assert service_from_db.version == service_history.version
     assert sample_user.id == service_history.created_by_id
     assert service_from_db.created_by.id == service_history.created_by_id
-    assert service_from_db.branding == BRANDING_GOVAU
+    assert service_from_db.branding == BRANDING_NOTIFY
     assert service_from_db.dvla_organisation_id == DVLA_ORG_HM_GOVERNMENT
-    assert service_history.branding == BRANDING_GOVAU
+    assert service_history.branding == BRANDING_NOTIFY
     assert service_history.dvla_organisation_id == DVLA_ORG_HM_GOVERNMENT
 
 
