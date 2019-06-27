@@ -57,7 +57,7 @@ const mockGraphQLResponse = {
       {
         node: {
           content:
-            "notify_client.send_email_notification(\n    email_address='lisa@example.com',\n    template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',\n    personalisation={\n        'user_name': 'Lisa',\n        'amount_owing': '$15.50'\n    }\n)\n",
+            "client.send_email_notification(\n    email_address='lisa@example.com',\n    template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',\n    personalisation={\n        'user_name': 'Lisa',\n        'amount_owing': '$15.50'\n    }\n)\n",
           extension: 'py',
           relativePath: 'sending-emails/Python.py',
           name: 'Python',
@@ -75,7 +75,7 @@ const mockGraphQLResponse = {
       {
         node: {
           content:
-            "notify_client.send_sms_notification(\n    phone_number='+61423 555 555',\n    template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',\n    personalisation={\n        'user_name': 'Lisa',\n        'amount_owing': '$15.50'\n    }\n)\n",
+            "client.send_sms_notification(\n    phone_number='+61423 555 555',\n    template_id='f33517ff-2a88-4f6e-b855-xxxxxxxxxxxx',\n    personalisation={\n        'user_name': 'Lisa',\n        'amount_owing': '$15.50'\n    }\n)\n",
           extension: 'py',
           relativePath: 'sending-texts/Python.py',
           name: 'Python',
