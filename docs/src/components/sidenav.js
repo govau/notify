@@ -133,6 +133,7 @@ export const DynamicSidenav = ({ current, ...props }) => (
               <Option>/getting-messages</Option>
               <Option>/check-available-templates</Option>
               <Option>/integration-testing</Option>
+              <Option>/callbacks</Option>
             </NavList>
           </NavWrapper>
         </Fragment>
