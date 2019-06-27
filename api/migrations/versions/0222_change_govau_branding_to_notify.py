@@ -17,8 +17,10 @@ def upgrade():
     op.execute("INSERT INTO branding_type (name) VALUES ('notify')")
     op.execute("UPDATE services SET branding = 'notify' WHERE branding = 'govau'")
     op.execute("DELETE FROM branding_type WHERE name = 'govau'")
+    op.execute("UPDATE service_sms_senders SET sms_sender = 'Notify' where sms_sender = 'GOVAU'")
 
 def downgrade():
     op.execute("INSERT INTO branding_type (name) VALUES ('govau')")
     op.execute("UPDATE services SET branding = 'govau' WHERE branding = 'notify'")
     op.execute("DELETE FROM branding_type WHERE name = 'notify'")
+    op.execute("UPDATE service_sms_senders SET sms_sender = 'GOVAU' where sms_sender = 'Notify'")

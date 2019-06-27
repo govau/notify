@@ -2797,7 +2797,7 @@ def test_sms_sender_is_previewed(
     sms_sender_on_page = page.select_one('.sms-message-sender')
 
     if sms_sender:
-        assert sms_sender_on_page.text.strip() == 'From: GOVAU'
+        assert sms_sender_on_page.text.strip() == 'From: Notify'
     else:
         assert not sms_sender_on_page
 

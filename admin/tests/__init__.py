@@ -132,7 +132,7 @@ def service_json(
     restricted=True,
     email_from=None,
     reply_to_email_address=None,
-    sms_sender='GOVAU',
+    sms_sender='Notify',
     research_mode=False,
     email_branding=None,
     branding='notify',
