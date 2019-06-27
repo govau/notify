@@ -1,10 +1,10 @@
-# CANotify
+# CANotifier
 
-CANotify is a service developed by the [CDS](https://digital.canada.ca) that helps
+CANotifier is a service developed by the [CDS](https://digital.canada.ca) that helps
 government agencies communicate with their users.
 
 This is the open source repository that encompasses all projects that make up
-CANotify.
+CANotifier.
 
 ## Running the things
 
@@ -77,7 +77,7 @@ we don't usually run it locally.
 
 ## Credits
 
-Notify is based on [GOV.UK Notify](https://www.notifications.service.gov.uk) with work incorperated from [DTA](https://www.dta.gov.au/)
+CANofitier is based on [GOV.UK Notify](https://www.notifications.service.gov.uk) with work incorperated from [DTA](https://www.dta.gov.au/)
 
 Thanks GDS team for providing Notify as an open source project that made it
 possible for us to build on a stable and reliable foundation.
