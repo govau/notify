@@ -133,7 +133,7 @@ const Layout = ({ sidenav = <Sidenav />, children, location }) => {
                 {
                   name: 'description',
                   content:
-                    'Notify.gov.au lets you send emails and text messages to your users. Try it now if you work in Australian local, state or federal government.',
+                    'Notify.gov.au lets you send emails and text messages to your users. Try it now if you work in Canadian local, state or federal government.',
                 },
               ]}
             >

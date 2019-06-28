@@ -352,7 +352,7 @@ button:focus {
 #global-header {
   background-color: #313131;
   width: 100%;
-  border-bottom: 6px solid #45c2f0;
+  border-bottom: 6px solid $cdn-light-blue;
 
   @media (min-width: 641px) {
     padding: 0;
