@@ -370,7 +370,7 @@ def test_sms_message_adds_prefix_only_if_asked_to(
 
 
 @pytest.mark.parametrize('content_to_look_for', [
-    'GOVAU', 'sms-message-sender'
+    'Notify', 'sms-message-sender'
 ])
 @pytest.mark.parametrize("show_sender", [
     True,
@@ -382,7 +382,7 @@ def test_sms_message_preview_shows_sender(
 ):
     assert content_to_look_for in str(SMSPreviewTemplate(
         {'content': 'foo'},
-        sender='GOVAU',
+        sender='Notify',
         show_sender=show_sender,
     ))
 

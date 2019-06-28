@@ -671,8 +671,8 @@ class ServiceSetBranding(StripWhitespaceForm):
     branding_type = RadioField(
         'Branding type',
         choices=[
-            ('govau', 'GOV.AU only'),
-            ('both', 'GOV.AU and branding'),
+            ('notify', 'Notify only'),
+            ('both', 'Notify and branding'),
             ('org', 'Branding only'),
             ('org_banner', 'Branding banner')
         ],

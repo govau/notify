@@ -21,7 +21,7 @@ from app.models import (
     KEY_TYPE_TEST,
     KEY_TYPE_TEAM,
     BRANDING_ORG,
-    BRANDING_GOVAU,
+    BRANDING_NOTIFY,
     BRANDING_BOTH,
     BRANDING_ORG_BANNER
 )
@@ -442,7 +442,7 @@ def test_get_html_email_renderer_with_branding_details(branding_type, govau_bann
 
 
 def test_get_html_email_renderer_with_branding_details_and_render_govau_banner_only(notify_db, sample_service):
-    sample_service.branding = BRANDING_GOVAU
+    sample_service.branding = BRANDING_NOTIFY
     email_branding = EmailBranding(colour='#000000', logo='justice-league.png', name='Justice League')
     sample_service.email_branding = email_branding
     notify_db.session.add_all([sample_service, email_branding])

@@ -144,7 +144,7 @@ def test_get_service_by_id(admin_request, sample_service):
     assert json_resp['data']['id'] == str(sample_service.id)
     assert not json_resp['data']['research_mode']
     assert json_resp['data']['email_branding'] is None
-    assert json_resp['data']['branding'] == 'govau'
+    assert json_resp['data']['branding'] == 'notify'
     assert json_resp['data']['dvla_organisation'] == '001'
     assert json_resp['data']['prefix_sms'] is True
 
@@ -2736,7 +2736,7 @@ def test_add_service_sms_sender_can_add_multiple_senders(client, notify_db_sessi
 
 def test_add_service_sms_sender_when_it_is_an_inbound_number_updates_the_only_existing_sms_sender(
         client, notify_db_session):
-    service = create_service_with_defined_sms_sender(sms_sender_value='GOVAU')
+    service = create_service_with_defined_sms_sender(sms_sender_value='Notify')
     inbound_number = create_inbound_number(number='12345')
     data = {
         "sms_sender": str(inbound_number.id),
@@ -2761,7 +2761,7 @@ def test_add_service_sms_sender_when_it_is_an_inbound_number_updates_the_only_ex
 
 def test_add_service_sms_sender_when_it_is_an_inbound_number_inserts_new_sms_sender_when_more_than_one(
         client, notify_db_session):
-    service = create_service_with_defined_sms_sender(sms_sender_value='GOVAU')
+    service = create_service_with_defined_sms_sender(sms_sender_value='Notify')
     create_service_sms_sender(service=service, sms_sender="second", is_default=False)
     inbound_number = create_inbound_number(number='12345')
     data = {

@@ -190,7 +190,7 @@ user_to_organisation = db.Table(
 )
 
 
-BRANDING_GOVAU = 'govau'
+BRANDING_NOTIFY = 'notify'
 BRANDING_ORG = 'org'
 BRANDING_BOTH = 'both'
 BRANDING_ORG_BANNER = 'org_banner'
@@ -341,7 +341,7 @@ class Service(db.Model, Versioned):
         db.ForeignKey('branding_type.name'),
         index=True,
         nullable=False,
-        default=BRANDING_GOVAU
+        default=BRANDING_NOTIFY
     )
     letter_branding = "TODO"
     organisation_type = db.Column(

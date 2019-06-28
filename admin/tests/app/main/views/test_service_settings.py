@@ -1562,7 +1562,7 @@ def test_should_show_branding(
     assert response.status_code == 200
     page = BeautifulSoup(response.data.decode('utf-8'), 'html.parser')
 
-    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'govau'
+    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'notify'
     assert page.find('input', attrs={"id": "branding_type-1"})['value'] == 'both'
     assert page.find('input', attrs={"id": "branding_type-2"})['value'] == 'org'
     assert page.find('input', attrs={"id": "branding_type-3"})['value'] == 'org_banner'
@@ -1587,7 +1587,7 @@ def test_should_show_organisations(
     assert response.status_code == 200
     page = BeautifulSoup(response.data.decode('utf-8'), 'html.parser')
 
-    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'govau'
+    assert page.find('input', attrs={"id": "branding_type-0"})['value'] == 'notify'
     assert page.find('input', attrs={"id": "branding_type-1"})['value'] == 'both'
     assert page.find('input', attrs={"id": "branding_type-2"})['value'] == 'org'
     assert page.find('input', attrs={"id": "branding_type-3"})['value'] == 'org_banner'
