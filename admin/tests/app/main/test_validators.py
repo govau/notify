@@ -73,7 +73,7 @@ def _gen_mock_field(x):
 
 @pytest.mark.parametrize("email", [
     'test@gov.au',
-    'test@digital.gov.au',
+    'test@dta.gov.au',
     'test@humanservices.gov.au',
 ])
 def test_valid_list_of_white_list_email_domains(

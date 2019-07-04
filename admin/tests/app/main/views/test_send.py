@@ -2723,11 +2723,11 @@ def test_reply_to_is_previewed_if_chosen(
 ):
     mocker.patch('app.main.views.send.s3download', return_value="""
         email_address,date,thing
-        notify@digital.gov.au,foo,bar
+        notify@dta.gov.au,foo,bar
     """)
 
     with client_request.session_transaction() as session:
-        session['recipient'] = 'notify@digital.gov.au'
+        session['recipient'] = 'notify@dta.gov.au'
         session['placeholders'] = {}
         session['file_uploads'] = {
             fake_uuid: {'template_id': fake_uuid}
