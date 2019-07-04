@@ -23,7 +23,8 @@ from app.dao.users_dao import (
     update_user_password,
     count_user_verify_codes,
     get_user_and_accounts,
-    set_verify_codes_to_used
+    set_verify_codes_to_used,
+    dao_archive_user
 )
 from app.dao.permissions_dao import permission_dao
 from app.dao.services_dao import dao_fetch_service_by_id
@@ -90,6 +91,14 @@ def update_user_attribute(user_id):
         raise InvalidRequest(errors, status_code=400)
     save_user_attribute(user_to_update, update_dict=update_dct)
     return jsonify(data=user_to_update.serialize()), 200
+
+
+@user_blueprint.route('/<uuid:user_id>/archive', methods=['POST'])
+def archive_user(user_id):
+    user = get_user_by_id(user_id)
+    dao_archive_user(user)
+
+    return '', 204
 
 
 @user_blueprint.route('/<uuid:user_id>/activate', methods=['POST'])
