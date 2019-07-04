@@ -38,9 +38,8 @@ from app.dao.services_dao import (
     dao_fetch_monthly_historical_stats_by_template,
     dao_fetch_monthly_historical_usage_by_template_for_service)
 from app.dao.service_permissions_dao import dao_add_service_permission, dao_remove_service_permission
-from app.dao.users_dao import save_model_user
+from app.dao.users_dao import save_model_user, create_user_code
 from app.models import (
-    ProviderStatistics,
     VerifyCode,
     ApiKey,
     Template,
@@ -75,7 +74,9 @@ from tests.app.db import (
     create_service_with_inbound_number,
     create_service_with_defined_sms_sender,
     create_template,
-    create_notification as create_notification_db
+    create_notification as create_notification_db,
+    create_api_key,
+    create_invited_user
 )
 from tests.app.conftest import (
     sample_notification as create_notification,
@@ -530,26 +531,21 @@ def test_create_service_and_history_is_transactional(sample_user):
     assert Service.get_history_model().query.count() == 0
 
 
-def test_delete_service_and_associated_objects(notify_db,
-                                               notify_db_session,
-                                               sample_user,
-                                               sample_service,
-                                               sample_email_code,
-                                               sample_sms_code,
-                                               sample_template,
-                                               sample_email_template,
-                                               sample_api_key,
-                                               sample_job,
-                                               sample_notification,
-                                               sample_invited_user,
-                                               sample_permission,
-                                               sample_provider_statistics):
+def test_delete_service_and_associated_objects(notify_db_session):
+    user = create_user()
+    service = create_service(user=user, service_permissions=None)
+    create_user_code(user=user, code='somecode', code_type='email')
+    create_user_code(user=user, code='somecode', code_type='sms')
+    template = create_template(service=service)
+    api_key = create_api_key(service=service)
+    create_notification_db(template=template, api_key=api_key)
+    create_invited_user(service=service)
+
     assert ServicePermission.query.count() == len((
-        SMS_TYPE, EMAIL_TYPE, LETTER_TYPE, INTERNATIONAL_SMS_TYPE
+        SMS_TYPE, EMAIL_TYPE, LETTER_TYPE, INTERNATIONAL_SMS_TYPE,
     ))
 
-    delete_service_and_all_associated_db_objects(sample_service)
-    assert ProviderStatistics.query.count() == 0
+    delete_service_and_all_associated_db_objects(service)
     assert VerifyCode.query.count() == 0
     assert ApiKey.query.count() == 0
     assert ApiKey.get_history_model().query.count() == 0

@@ -17,6 +17,7 @@ from app.models import (
     Notification,
     EmailBranding,
     Organisation,
+    Permission,
     Rate,
     Service,
     ServiceEmailReplyTo,
@@ -36,6 +37,7 @@ from app.models import (
     InvitedOrganisationUser,
     FactBilling,
     Complaint,
+    InvitedUser,
 )
 from app.dao.users_dao import save_model_user
 from app.dao.notifications_dao import (
@@ -46,8 +48,10 @@ from app.dao.templates_dao import dao_create_template
 from app.dao.services_dao import dao_create_service, dao_add_user_to_service
 from app.dao.service_permissions_dao import dao_add_service_permission
 from app.dao.inbound_sms_dao import dao_create_inbound_sms
+from app.dao.invited_user_dao import save_invited_user
 from app.dao.email_branding_dao import dao_create_email_branding
 from app.dao.organisation_dao import dao_create_organisation
+from app.dao.permissions_dao import permission_dao
 
 
 def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-office.gov.uk", state='active', id_=None):
@@ -64,6 +68,15 @@ def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-offi
         user = User(**data)
     save_model_user(user)
     return user
+
+
+def create_permissions(user, service, *permissions):
+    permissions = [
+        Permission(service_id=service.id, user_id=user.id, permission=p)
+        for p in permissions
+    ]
+
+    permission_dao.set_user_service_permission(user, service, permissions)
 
 
 def create_service(
@@ -663,3 +676,24 @@ def ses_notification_callback():
            'dd426d95ee9390147a5624348ee.pem",' \
            '\n  "UnsubscribeURL" : "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&S' \
            'subscriptionArn=arn:aws:sns:eu-west-1:302763885840:preview-emails:d6aad3ef-83d6-4cf3-a470-54e2e75916da"\n}'
+
+
+def create_invited_user(service=None,
+                        to_email_address=None):
+
+    if service is None:
+        service = create_service()
+    if to_email_address is None:
+        to_email_address = 'invited_user@digital.gov.uk'
+
+    from_user = service.users[0]
+
+    data = {
+        'service': service,
+        'email_address': to_email_address,
+        'from_user': from_user,
+        'permissions': 'send_messages,manage_service,manage_api_keys'
+    }
+    invited_user = InvitedUser(**data)
+    save_invited_user(invited_user)
+    return invited_user
