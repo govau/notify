@@ -111,7 +111,7 @@ class Config(object):
     PERFORMANCE_PLATFORM_URL = 'https://www.performance.service.gov.uk/data/govuk-notify/'
 
     # Notify support email
-    NOTIFY_SUPPORT_EMAIL = os.environ.get('NOTIFY_SUPPORT_EMAIL', 'notify-support-dev@digital.gov.au')
+    NOTIFY_SUPPORT_EMAIL = os.environ.get('NOTIFY_SUPPORT_EMAIL', 'notify-support-dev@dta.gov.au')
 
     # Deskpro
     DESKPRO_API_HOST = os.environ.get('DESKPRO_API_HOST')
@@ -458,7 +458,7 @@ class Live(Config):
     FUNCTIONAL_TEST_PROVIDER_SMS_TEMPLATE_ID = 'ba9e1789-a804-40b8-871f-cc60d4c1286f'
     API_RATE_LIMIT_ENABLED = True
     CHECK_PROXY_HEADER = True
-    NOTIFY_SUPPORT_EMAIL = 'notify-support@digital.gov.au'
+    NOTIFY_SUPPORT_EMAIL = 'notify-support@dta.gov.au'
 
 
 class CloudFoundryConfig(Config):
