@@ -37,30 +37,30 @@ from werkzeug.exceptions import abort
 from werkzeug.local import LocalProxy
 
 from app import proxy_fix
+from app.asset_fingerprinter import asset_fingerprinter
 from app.config import configs
-from app.asset_fingerprinter import AssetFingerprinter
-from app.notify_client.service_api_client import ServiceAPIClient
-from app.notify_client.api_key_api_client import ApiKeyApiClient
-from app.notify_client.invite_api_client import InviteApiClient
-from app.notify_client.job_api_client import JobApiClient
-from app.notify_client.notification_api_client import NotificationApiClient
-from app.notify_client.support_api_client import SupportApiClient
-from app.notify_client.status_api_client import StatusApiClient
-from app.notify_client.template_statistics_api_client import TemplateStatisticsApiClient
-from app.notify_client.user_api_client import UserApiClient
-from app.notify_client.events_api_client import EventsApiClient
-from app.notify_client.provider_client import ProviderClient
-from app.notify_client.email_branding_client import EmailBrandingClient
 from app.notify_client.models import AnonymousUser
-from app.notify_client.organisations_api_client import OrganisationsClient
-from app.notify_client.org_invite_api_client import OrgInviteApiClient
-from app.notify_client.letter_jobs_client import LetterJobsClient
-from app.notify_client.inbound_number_client import InboundNumberClient
-from app.notify_client.billing_api_client import BillingAPIClient
+from app.notify_client.api_key_api_client import api_key_api_client
+from app.notify_client.billing_api_client import billing_api_client
 from app.notify_client.complaint_api_client import complaint_api_client
+from app.notify_client.email_branding_client import email_branding_client
+from app.notify_client.events_api_client import events_api_client
+from app.notify_client.inbound_number_client import inbound_number_client
+from app.notify_client.invite_api_client import invite_api_client
+from app.notify_client.job_api_client import job_api_client
+from app.notify_client.letter_jobs_client import letter_jobs_client
+from app.notify_client.notification_api_client import notification_api_client
+from app.notify_client.org_invite_api_client import org_invite_api_client
+from app.notify_client.organisations_api_client import organisations_client
 from app.notify_client.platform_stats_api_client import (
     platform_stats_api_client,
 )
+from app.notify_client.provider_client import provider_client
+from app.notify_client.service_api_client import service_api_client
+from app.notify_client.status_api_client import status_api_client
+from app.notify_client.support_api_client import support_api_client
+from app.notify_client.template_statistics_api_client import template_statistics_client
+from app.notify_client.user_api_client import user_api_client
 from app.commands import setup_commands
 from app.utils import requires_auth
 from app.utils import get_cdn_domain
@@ -69,26 +69,8 @@ from app.utils import gmt_timezones
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-service_api_client = ServiceAPIClient()
-user_api_client = UserApiClient()
-api_key_api_client = ApiKeyApiClient()
-job_api_client = JobApiClient()
-notification_api_client = NotificationApiClient()
-support_api_client = SupportApiClient()
-status_api_client = StatusApiClient()
-invite_api_client = InviteApiClient()
-template_statistics_client = TemplateStatisticsApiClient()
-events_api_client = EventsApiClient()
-provider_client = ProviderClient()
-email_branding_client = EmailBrandingClient()
-organisations_client = OrganisationsClient()
-org_invite_api_client = OrgInviteApiClient()
-asset_fingerprinter = AssetFingerprinter()
 statsd_client = StatsdClient()
 deskpro_client = DeskproClient()
-letter_jobs_client = LetterJobsClient()
-inbound_number_client = InboundNumberClient()
-billing_api_client = BillingAPIClient()
 
 # The current service attached to the request stack.
 current_service = LocalProxy(partial(_lookup_req_object, 'service'))
@@ -105,33 +87,45 @@ def create_app(application):
     application.config.from_object(configs[notify_environment])
 
     init_app(application)
-    statsd_client.init_app(application)
-    deskpro_client.init_app(application)
+
+    for client in (
+
+        # Gubbins
+        csrf,
+        login_manager,
+        proxy_fix,
+        request_helper,
+
+        # API clients
+        api_key_api_client,
+        billing_api_client,
+        complaint_api_client,
+        email_branding_client,
+        events_api_client,
+        inbound_number_client,
+        invite_api_client,
+        job_api_client,
+        letter_jobs_client,
+        notification_api_client,
+        org_invite_api_client,
+        organisations_client,
+        platform_stats_api_client,
+        provider_client,
+        service_api_client,
+        status_api_client,
+        support_api_client,
+        template_statistics_client,
+        user_api_client,
+
+        # External API clients
+        statsd_client,
+        deskpro_client
+
+    ):
+        client.init_app(application)
+
     logging.init_app(application, statsd_client)
-    csrf.init_app(application)
-    request_helper.init_app(application)
 
-    service_api_client.init_app(application)
-    user_api_client.init_app(application)
-    api_key_api_client.init_app(application)
-    job_api_client.init_app(application)
-    notification_api_client.init_app(application)
-    support_api_client.init_app(application)
-    status_api_client.init_app(application)
-    invite_api_client.init_app(application)
-    org_invite_api_client.init_app(application)
-    template_statistics_client.init_app(application)
-    events_api_client.init_app(application)
-    provider_client.init_app(application)
-    email_branding_client.init_app(application)
-    organisations_client.init_app(application)
-    letter_jobs_client.init_app(application)
-    inbound_number_client.init_app(application)
-    billing_api_client.init_app(application)
-    complaint_api_client.init_app(application)
-    platform_stats_api_client.init_app(application)
-
-    login_manager.init_app(application)
     login_manager.login_view = 'main.sign_in'
     login_manager.login_message_category = 'default'
     login_manager.session_protection = None
@@ -142,8 +136,6 @@ def create_app(application):
 
     from .status import status as status_blueprint
     application.register_blueprint(status_blueprint)
-
-    proxy_fix.init_app(application)
 
     add_template_filters(application)
 

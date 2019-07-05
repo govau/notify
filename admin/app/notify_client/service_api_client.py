@@ -460,3 +460,6 @@ class ServiceAPIClient(NotifyAdminAPIClient):
             "updated_by_id": user_id
         }
         return self.post("/service/{}/delivery-receipt-api".format(service_id), data)
+
+
+service_api_client = ServiceAPIClient()
