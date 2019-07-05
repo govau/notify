@@ -30,3 +30,6 @@ class EmailBrandingClient(NotifyAdminAPIClient):
             "colour": colour
         }
         return self.post(url="/email-branding/{}".format(branding_id), data=data)
+
+
+email_branding_client = EmailBrandingClient()

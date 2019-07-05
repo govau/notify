@@ -84,3 +84,6 @@ class NotificationApiClient(NotifyAdminAPIClient):
         )
 
         return self.get(url=get_url)
+
+
+notification_api_client = NotificationApiClient()

@@ -96,3 +96,6 @@ class JobApiClient(NotifyAdminAPIClient):
         job['data']['notifications_requested'] = stats['requested']
 
         return job
+
+
+job_api_client = JobApiClient()

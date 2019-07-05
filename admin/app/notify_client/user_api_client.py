@@ -194,3 +194,6 @@ class UserApiClient(NotifyAdminAPIClient):
     def get_organisations_and_services_for_user(self, user):
         endpoint = '/user/{}/organisations-and-services'.format(user.id)
         return self.get(endpoint)
+
+
+user_api_client = UserApiClient()

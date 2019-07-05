@@ -14,3 +14,6 @@ class LetterJobsClient(NotifyAdminAPIClient):
             url='/send-letter-jobs',
             data={"job_ids": job_ids}
         )['data']
+
+
+letter_jobs_client = LetterJobsClient()
