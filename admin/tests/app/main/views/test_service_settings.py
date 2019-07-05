@@ -340,7 +340,7 @@ def test_switch_service_to_live(
         service_id=service_one['id'], _external=True)
     mock_update_service.assert_called_with(
         service_one['id'],
-        message_limit=25000,
+        message_limit=250000,
         restricted=False
     )
 
