@@ -130,7 +130,7 @@ class ServiceAPIClient(NotifyAdminAPIClient):
     def update_status(self, service_id, live):
         return self.update_service(
             service_id,
-            message_limit=25000 if live else 50,
+            message_limit=250000 if live else 50,
             restricted=(not live),
             go_live_at=str(datetime.utcnow()) if live else None
         )
