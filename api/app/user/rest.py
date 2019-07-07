@@ -478,27 +478,39 @@ def get_orgs_and_services(user):
                 'services': [
                     {
                         'id': service.id,
-                        'name': service.name
+                        'name': service.name,
+                        'restricted': service.restricted,
                     }
                     for service in org.services
                     if service.active and service in user.services
-                ]
+                ],
+                'count_of_live_services': len(org.live_services),
             }
             for org in user.organisations if org.active
         ],
         'services_without_organisations': [
             {
                 'id': service.id,
-                'name': service.name
+                'name': service.name,
+                'restricted': service.restricted,
             } for service in user.services
             if (
                 service.active and
                 # include services that either aren't in an organisation, or are in an organisation,
                 # but not one that the user can see.
                 (
-                    not service.organisation
-                    or service.organisation not in user.organisations
+                    not service.organisation or
+                    service.organisation not in user.organisations
                 )
             )
+        ],
+        'services': [
+            {
+                'id': service.id,
+                'name': service.name,
+                'restricted': service.restricted,
+                'organisation': service.organisation.id if service.organisation else None,
+            }
+            for service in user.services if service.active
         ]
     }

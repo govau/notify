@@ -298,6 +298,13 @@ class Organisation(db.Model):
         secondary='organisation_to_service',
         uselist=True)
 
+    @property
+    def live_services(self):
+        return [
+            service for service in self.services
+            if service.active and not service.restricted
+        ]
+
     def serialize(self):
         serialized = {
             "id": str(self.id),
