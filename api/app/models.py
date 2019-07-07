@@ -203,6 +203,7 @@ BRANDING_NOTIFY = 'notify'
 BRANDING_ORG = 'org'
 BRANDING_BOTH = 'both'
 BRANDING_ORG_BANNER = 'org_banner'
+BRANDING_TYPES = [BRANDING_ORG, BRANDING_BOTH, BRANDING_ORG_BANNER]
 
 
 class BrandingTypes(db.Model):
@@ -215,7 +216,15 @@ class EmailBranding(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     colour = db.Column(db.String(7), nullable=True)
     logo = db.Column(db.String(255), nullable=True)
-    name = db.Column(db.String(255), nullable=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+    text = db.Column(db.String(255), nullable=True)
+    brand_type = db.Column(
+        db.String(255),
+        db.ForeignKey('branding_type.name'),
+        index=True,
+        nullable=False,
+        default=BRANDING_ORG
+    )
 
     def serialize(self):
         serialized = {
@@ -223,6 +232,8 @@ class EmailBranding(db.Model):
             "colour": self.colour,
             "logo": self.logo,
             "name": self.name,
+            "text": self.text,
+            "brand_type": self.brand_type
         }
 
         return serialized
