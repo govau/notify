@@ -24,11 +24,13 @@
         .on('scroll', this.maintainHeight);
 
       if (
-        window.GOVUK.stopScrollingAtFooter &&
-        window.GOVUK.stopScrollingAtFooter.updateFooterTop
+        window.GOVUK.stickAtBottomWhenScrolling &&
+        window.GOVUK.stickAtBottomWhenScrolling.recalculate
       ) {
-        window.GOVUK.stopScrollingAtFooter.updateFooterTop();
+        window.GOVUK.stickAtBottomWhenScrolling.recalculate();
       }
+
+      this.maintainWidth();
 
     };
 

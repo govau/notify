@@ -1,13 +1,15 @@
 {% extends "withnav_template.html" %}
 {% from "components/banner.html" import banner_wrapper %}
 {% from "components/message-count-label.html" import message_count_label %}
+{% from "components/page-header.html" import govau_back_link, page_header %}
 
 {% block service_page_title %}
-  {{ "Error" if error else "Preview of {}".format(template.name) }}
+  {{ "Error" if error else "Preview of ‘{}’".format(template.name) }}
 {% endblock %}
 
 {% block maincolumn_content %}
   {% if error == 'not-allowed-to-send-to' %}
+    {{ govau_back_link(back_link) }}
     <div class="bottom-gutter">
       {% call banner_wrapper(type='dangerous') %}
         {% with
@@ -21,6 +23,7 @@
       {% endcall %}
     </div>
   {% elif error == 'too-many-messages' %}
+    {{ govau_back_link(back_link) }}
     <div class="bottom-gutter">
       {% call banner_wrapper(type='dangerous') %}
         {% include "partials/check/too-many-messages.html" %}
@@ -28,20 +31,22 @@
     </div>
   {% elif error == 'message-too-long' %}
     {# the only row_errors we can get when sending one off messages is that the message is too long #}
+    {{ govau_back_link(back_link) }}
     <div class="bottom-gutter">
       {% call banner_wrapper(type='dangerous') %}
         {% include "partials/check/message-too-long.html" %}
       {% endcall %}
     </div>
   {% else %}
-    <h1 class="heading-large">
-      Preview of {{ template.name }}
-    </h1>
+    {{ page_header(
+      'Preview of ‘{}’'.format(template.name),
+      back_link=back_link
+    ) }}
   {% endif %}
 
   {{ template|string }}
 
-  <div class="bottom-gutter-3-2">
+  <div class="js-stick-at-bottom-when-scrolling">
     <form method="post" enctype="multipart/form-data" action="{{url_for(
         'main.send_notification',
         service_id=current_service.id,
@@ -50,13 +55,8 @@
       )}}" class='page-footer'>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       {% if not error %}
-        {% if template.template_type != 'letter' or not request.args.from_test %}
         <button type="submit" class="button">Send 1 {{ message_count_label(1, template.template_type, suffix='') }}</button>
-        {% else %}
-          <a href="{{ url_for('main.check_messages_preview', service_id=current_service.id, template_id=template.id, upload_id=upload_id, filetype='pdf') }}" download class="button">Download as a printable PDF</a>
-        {% endif %}
       {% endif %}
-      <a href="{{ back_link }}" class="page-footer-secondary-link">Back</a>
     </form>
   </div>
 

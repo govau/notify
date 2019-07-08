@@ -606,10 +606,10 @@ def test_upload_valid_csv_shows_preview_and_table(
 
     for row_index, row in enumerate([
         (
-            '<td class="table-field-center-aligned "> <div class=""> 0470900001 </div> </td>',
-            '<td class="table-field-center-aligned "> <div class=""> A </div> </td>',
+            '<td class="table-field-left-aligned "> <div class=""> 0470900001 </div> </td>',
+            '<td class="table-field-left-aligned "> <div class=""> A </div> </td>',
             (
-                '<td class="table-field-center-aligned "> '
+                '<td class="table-field-left-aligned "> '
                 '<div class="table-field-status-default"> '
                 '<ul class="list list-bullet"> '
                 '<li>foo</li> <li>foo</li> <li>foo</li> '
@@ -619,10 +619,10 @@ def test_upload_valid_csv_shows_preview_and_table(
             )
         ),
         (
-            '<td class="table-field-center-aligned "> <div class=""> 0470900002 </div> </td>',
-            '<td class="table-field-center-aligned "> <div class=""> B </div> </td>',
+            '<td class="table-field-left-aligned "> <div class=""> 0470900002 </div> </td>',
+            '<td class="table-field-left-aligned "> <div class=""> B </div> </td>',
             (
-                '<td class="table-field-center-aligned "> '
+                '<td class="table-field-left-aligned "> '
                 '<div class="table-field-status-default"> '
                 '<ul class="list list-bullet"> '
                 '<li>foo</li> <li>foo</li> <li>foo</li> '
@@ -632,10 +632,10 @@ def test_upload_valid_csv_shows_preview_and_table(
             )
         ),
         (
-            '<td class="table-field-center-aligned "> <div class=""> 0470900003 </div> </td>',
-            '<td class="table-field-center-aligned "> <div class=""> C </div> </td>',
+            '<td class="table-field-left-aligned "> <div class=""> 0470900003 </div> </td>',
+            '<td class="table-field-left-aligned "> <div class=""> C </div> </td>',
             (
-                '<td class="table-field-center-aligned "> '
+                '<td class="table-field-left-aligned "> '
                 '<div class="table-field-status-default"> '
                 '<ul class="list list-bullet"> '
                 '<li>foo</li> <li>foo</li> '
@@ -929,6 +929,33 @@ def test_send_one_off_has_skip_link(
         )
     else:
         assert not skip_links
+
+
+@pytest.mark.parametrize('template_mock, expected_sticky', [
+    (mock_get_service_template, False),
+    (mock_get_service_email_template, True),
+    (mock_get_service_letter_template, True),
+])
+def test_send_one_off_has_sticky_header_for_email_and_letter(
+    mocker,
+    client_request,
+    fake_uuid,
+    mock_has_no_jobs,
+    template_mock,
+    expected_sticky,
+):
+    template_mock(mocker)
+    mocker.patch('app.main.views.send.get_page_count_for_letter', return_value=9)
+
+    page = client_request.get(
+        'main.send_one_off_step',
+        service_id=SERVICE_ONE_ID,
+        template_id=fake_uuid,
+        step_index=0,
+        _follow_redirects=True,
+    )
+
+    assert bool(page.select('.js-stick-at-top-when-scrolling')) == expected_sticky
 
 
 def test_skip_link_will_not_show_on_sms_one_off_if_service_has_no_mobile_number(

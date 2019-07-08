@@ -60,6 +60,9 @@ class JobApiClient(NotifyAdminAPIClient):
 
         return jobs
 
+    def has_jobs(self, service_id):
+        return bool(self.get_jobs(service_id)['data'])
+
     def create_job(self, job_id, service_id, template_id, original_file_name, notification_count, scheduled_for=None):
         data = {
             "id": job_id,

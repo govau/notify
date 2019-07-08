@@ -68,8 +68,7 @@ gulp.task("javascripts", () =>
     .src([
       paths.src + "javascripts/sentry.js",
       paths.toolkit + "javascripts/govuk/modules.js",
-      paths.toolkit + "javascripts/govuk/stop-scrolling-at-footer.js",
-      paths.toolkit + "javascripts/govuk/stick-at-top-when-scrolling.js",
+      paths.src + "javascripts/stick-to-window-when-scrolling.js",
       paths.src + "javascripts/detailsPolyfill.js",
       paths.src + "javascripts/apiKey.js",
       paths.src + "javascripts/autofocus.js",

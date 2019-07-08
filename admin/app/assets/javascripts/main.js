@@ -1,6 +1,7 @@
 $(() => $("time.timeago").timeago());
 
 $(() => GOVUK.stickAtTopWhenScrolling.init());
+$(() => GOVUK.stickAtBottomWhenScrolling.init());
 
 $(() => GOVUK.modules.start());
 

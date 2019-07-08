@@ -1,6 +1,8 @@
 {% extends "withnav_template.html" %}
 {% from "components/radios.html" import radios, branding_radios %}
-{% from "components/page-footer.html" import page_footer %}
+{% from "components/page-header.html" import page_header %}
+{% from "components/page-footer.html" import page_footer, sticky_page_footer %}
+{% from "components/form.html" import form_wrapper %}
 
 {% block service_page_title %}
   Set email branding
@@ -8,19 +10,22 @@
 
 {% block maincolumn_content %}
 
-  <h1 class="heading-large">Set email branding</h1>
-  <div class="grid-row">
-    <div class="column-three-quarters">
-      <form method="post">
+  {{ page_header(
+    'Set email branding',
+    back_link=url_for('.service_settings', service_id=current_service.id)
+  ) }}
+  {% call form_wrapper() %}
+    <div class="grid-row">
+      <div class="column-full preview-pane">
+      </div>
+    </div>
+    <div class="grid-row">
+      <div class="column-full">
         {{ radios(form.branding_type) }}
         {{ branding_radios(form.branding_style, branding_dict=branding_dict) }}
-        {{ page_footer(
-          'Save',
-          back_link=url_for('.service_settings', service_id=current_service.id),
-          back_link_text='Back to settings'
-        ) }}
-      </form>
+      </div>
     </div>
-  </div>
+    {{ sticky_page_footer('Save') }}
+  {% endcall %}
 
 {% endblock %}
