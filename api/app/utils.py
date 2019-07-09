@@ -102,3 +102,12 @@ def get_public_notify_type_text(notify_type, plural=False):
         notify_type_text = 'text message'
 
     return '{}{}'.format(notify_type_text, 's' if plural else '')
+
+
+def escape_special_characters(string):
+    for special_character in ('\\', '_', '%', '/'):
+        string = string.replace(
+            special_character,
+            r'\{}'.format(special_character)
+        )
+    return string
