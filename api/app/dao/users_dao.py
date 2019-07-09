@@ -11,6 +11,7 @@ from app.dao.service_user_dao import dao_get_service_users_by_user_id
 from app.dao.dao_utils import transactional
 from app.errors import InvalidRequest
 from app.models import (EMAIL_AUTH_TYPE, User, VerifyCode)
+from app.utils import escape_special_characters
 
 
 def _remove_values_for_keys_if_present(dict, keys):
@@ -105,6 +106,11 @@ def get_user_by_id(user_id=None):
 
 def get_user_by_email(email):
     return User.query.filter(func.lower(User.email_address) == func.lower(email)).one()
+
+
+def get_users_by_partial_email(email):
+    email = escape_special_characters(email)
+    return User.query.filter(User.email_address.ilike("%{}%".format(email))).all()
 
 
 def increment_failed_login_count(user):
