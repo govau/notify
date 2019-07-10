@@ -859,11 +859,8 @@ def link_service_to_organisation(service_id):
 @main.route("/services/<service_id>/data-retention", methods=['GET'])
 @user_is_platform_admin
 def data_retention(service_id):
-    data_retention = service_api_client.get_service_data_retention(service_id)
-
     return render_template(
         'views/service-settings/data-retention.html',
-        data_retention=data_retention
     )
 
 
