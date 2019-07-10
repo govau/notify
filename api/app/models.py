@@ -1903,3 +1903,30 @@ class Complaint(db.Model):
             'complaint_date': self.complaint_date.strftime(DATETIME_FORMAT) if self.complaint_date else None,
             'created_at': self.created_at.strftime(DATETIME_FORMAT),
         }
+
+
+class ServiceDataRetention(db.Model):
+    __tablename__ = 'service_data_retention'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), unique=False, index=True, nullable=False)
+    service = db.relationship(Service, backref=db.backref('service_data_retention'))
+    notification_type = db.Column(notification_types, nullable=False)
+    days_of_retention = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=True, onupdate=datetime.datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint('service_id', 'notification_type', name='uix_service_data_retention'),
+    )
+
+    def serialize(self):
+        return {
+            "id": str(self.id),
+            "service_id": str(self.service_id),
+            "service_name": self.service.name,
+            "notification_type": self.notification_type,
+            "days_of_retention": self.days_of_retention,
+            "created_at": self.created_at.strftime(DATETIME_FORMAT),
+            "updated_at": self.updated_at.strftime(DATETIME_FORMAT) if self.updated_at else None,
+        }
