@@ -1,0 +1,25 @@
+{% extends "withnav_template.html" %}
+{% from "components/textbox.html" import textbox %}
+{% from "components/page-header.html" import page_header %}
+{% from "components/page-footer.html" import page_footer %}
+{% from "components/form.html" import form_wrapper %}
+{% from "components/radios.html" import radios %}
+
+{% block service_page_title %}
+  Data retention
+{% endblock %}
+
+{% block maincolumn_content %}
+
+    {{ page_header(
+      'Set data retention',
+      back_link=url_for('.add_data_retention', service_id=current_service.id)
+    ) }}
+
+    {% call form_wrapper() %}
+      {{ radios(form.notification_type) }}
+      {{ textbox(form.days_of_retention) }}
+      {{ page_footer('Add') }}
+    {% endcall %}
+
+{% endblock %}

@@ -265,6 +265,13 @@
           {% endcall %}
           {{ edit_field('Change', url_for('.service_set_email_branding', service_id=current_service.id)) }}
         {% endcall %}
+        {% call row() %}
+          {{ text_field('Data retention')}}
+          {% call field() %}
+              {{ data_retention | join(', ', attribute='notification_type') }}
+          {% endcall %}
+          {{ edit_field('Change', url_for('.data_retention', service_id=current_service.id)) }}
+        {% endcall %}
       {% endcall %}
       <br />
       <ul>
