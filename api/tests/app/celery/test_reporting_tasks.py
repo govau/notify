@@ -1,19 +1,27 @@
 from datetime import datetime, timedelta, date
-from tests.app.conftest import sample_notification
-from app.celery.reporting_tasks import create_nightly_billing, get_rate
-from app.models import (FactBilling,
-                        Notification,
-                        LETTER_TYPE,
-                        EMAIL_TYPE,
-                        SMS_TYPE)
 from decimal import Decimal
+
 import pytest
+from freezegun import freeze_time
+
+from tests.app.conftest import sample_notification
+from app.celery.reporting_tasks import create_nightly_billing, get_rate, create_nightly_notification_status
+from app.models import (
+    FactBilling,
+    Notification,
+    LETTER_TYPE,
+    EMAIL_TYPE,
+    SMS_TYPE, FactNotificationStatus
+)
+
 from app.dao.letter_rate_dao import dao_create_letter_rate
 from app.models import LetterRate, Rate
 from app import db
-from freezegun import freeze_time
+
 from sqlalchemy import desc
 from app.utils import convert_utc_to_aet
+
+from tests.app.db import create_service, create_template, create_notification
 
 
 def test_reporting_should_have_decorated_tasks_functions():
@@ -448,3 +456,75 @@ def test_create_nightly_billing_update_when_record_exists(
     # run again, make sure create_nightly_billing updates with no error
     create_nightly_billing()
     assert len(records) == 1
+
+
+def test_create_nightly_notification_status(notify_db_session):
+    first_service = create_service(service_name='First Service')
+    first_template = create_template(service=first_service)
+    second_service = create_service(service_name='second Service')
+    second_template = create_template(service=second_service, template_type='email')
+    third_service = create_service(service_name='third Service')
+    third_template = create_template(service=third_service, template_type='letter')
+
+    create_notification(template=first_template, status='delivered')
+    create_notification(template=first_template, status='delivered', created_at=datetime.utcnow() - timedelta(days=1))
+    create_notification(template=first_template, status='delivered', created_at=datetime.utcnow() - timedelta(days=2))
+    create_notification(template=first_template, status='delivered', created_at=datetime.utcnow() - timedelta(days=4))
+    create_notification(template=first_template, status='delivered', created_at=datetime.utcnow() - timedelta(days=5))
+
+    create_notification(template=second_template, status='temporary-failure')
+    create_notification(template=second_template, status='temporary-failure',
+                        created_at=datetime.utcnow() - timedelta(days=1))
+    create_notification(template=second_template, status='temporary-failure',
+                        created_at=datetime.utcnow() - timedelta(days=2))
+    create_notification(template=second_template, status='temporary-failure',
+                        created_at=datetime.utcnow() - timedelta(days=4))
+    create_notification(template=second_template, status='temporary-failure',
+                        created_at=datetime.utcnow() - timedelta(days=5))
+
+    create_notification(template=third_template, status='created')
+    create_notification(template=third_template, status='created', created_at=datetime.utcnow() - timedelta(days=1))
+    create_notification(template=third_template, status='created', created_at=datetime.utcnow() - timedelta(days=2))
+    create_notification(template=third_template, status='created', created_at=datetime.utcnow() - timedelta(days=4))
+    create_notification(template=third_template, status='created', created_at=datetime.utcnow() - timedelta(days=5))
+
+    assert len(FactNotificationStatus.query.all()) == 0
+
+    create_nightly_notification_status()
+    new_data = FactNotificationStatus.query.order_by(
+        FactNotificationStatus.aet_date,
+        FactNotificationStatus.notification_type
+    ).all()
+    assert len(new_data) == 9
+    assert str(new_data[0].aet_date) == datetime.strftime(datetime.utcnow() - timedelta(days=4), "%Y-%m-%d")
+    assert str(new_data[3].aet_date) == datetime.strftime(datetime.utcnow() - timedelta(days=2), "%Y-%m-%d")
+    assert str(new_data[6].aet_date) == datetime.strftime(datetime.utcnow() - timedelta(days=1), "%Y-%m-%d")
+
+
+@freeze_time('2019-10-20 13:30')  # 21 October 2019 12:30am AEDT
+def test_create_nightly_notification_status_respects_aet(sample_template):
+    create_notification(sample_template, status='delivered', created_at=datetime(2019, 10, 20, 13, 0))  # too new
+
+    create_notification(sample_template, status='created', created_at=datetime(2019, 10, 20, 12, 59))
+    create_notification(sample_template, status='created', created_at=datetime(2019, 10, 19, 23, 0))
+
+    create_notification(sample_template, status='temporary-failure', created_at=datetime(2019, 10, 19, 22, 59))
+
+    # we create records for last four days
+    create_notification(sample_template, status='sending', created_at=datetime(2019, 10, 17, 0, 0))
+
+    create_notification(sample_template, status='delivered', created_at=datetime(2019, 3, 16, 23, 59))  # too old
+
+    create_nightly_notification_status()
+
+    noti_status = FactNotificationStatus.query.order_by(FactNotificationStatus.aet_date).all()
+    assert len(noti_status) == 3
+
+    assert noti_status[0].aet_date == date(2019, 10, 17)
+    assert noti_status[0].notification_status == 'sending'
+
+    assert noti_status[1].aet_date == date(2019, 10, 20)
+    assert noti_status[1].notification_status == 'created'
+
+    assert noti_status[2].aet_date == date(2019, 10, 20)
+    assert noti_status[2].notification_status == 'temporary-failure'
