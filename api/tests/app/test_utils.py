@@ -1,10 +1,12 @@
 from datetime import datetime
 import pytz
 import pytest
+from freezegun import freeze_time
 
 from app.utils import (
     get_sydney_midnight_in_utc,
     get_midnight_for_day_before,
+    midnight_n_days_ago,
     convert_utc_to_local,
     convert_utc_to_aet,
     convert_local_to_utc,
@@ -33,6 +35,28 @@ def test_get_sydney_midnight_in_utc_returns_expected_date(date, expected_date):
 ])
 def test_get_midnight_for_day_before_returns_expected_date(date, expected_date):
     assert get_midnight_for_day_before(date) == expected_date
+
+
+@pytest.mark.parametrize('current_time, arg, expected_datetime', [
+    # summer
+    ('2018-01-10 23:59', 1, datetime(2018, 1, 8, 13, 0)),
+    ('2018-01-11 00:00', 1, datetime(2018, 1, 9, 13, 0)),
+
+    # AET switchover 6 October 2019 at 2am
+    ('2019-10-05 10:00', 1, datetime(2019, 10, 3, 14, 0)),
+    ('2019-10-06 10:00', 1, datetime(2019, 10, 4, 14, 0)),
+    ('2019-10-07 10:00', 1, datetime(2019, 10, 5, 14, 0)),
+
+    # winter
+    ('2018-06-05 10:00', 1, datetime(2018, 6, 3, 14, 0)),
+
+    # zero days ago
+    ('2018-01-11 00:00', 0, datetime(2018, 1, 10, 13, 0)),
+    ('2018-06-05 10:00', 0, datetime(2018, 6, 4, 14, 0)),
+])
+def test_midnight_n_days_ago(current_time, arg, expected_datetime):
+    with freeze_time(current_time):
+        assert midnight_n_days_ago(arg) == expected_datetime
 
 
 @pytest.mark.parametrize('date, local_tz, expected_date', [
