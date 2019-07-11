@@ -37,6 +37,7 @@ from app.models import (
     LetterRate,
     InvitedOrganisationUser,
     FactBilling,
+    FactNotificationStatus,
     Complaint,
     InvitedUser,
 )
@@ -585,6 +586,41 @@ def create_ft_billing(aet_date,
                        billable_units=billable_unit,
                        notifications_sent=notifications_sent,
                        postage=postage)
+    db.session.add(data)
+    db.session.commit()
+    return data
+
+
+def create_ft_notification_status(
+    aet_date,
+    notification_type='sms',
+    service=None,
+    template=None,
+    job=None,
+    key_type='normal',
+    notification_status='delivered',
+    count=1
+):
+    if job:
+        template = job.template
+    if template:
+        service = template.service
+        notification_type = template.template_type
+    else:
+        if not service:
+            service = create_service()
+        template = create_template(service=service, template_type=notification_type)
+
+    data = FactNotificationStatus(
+        aet_date=aet_date,
+        template_id=template.id,
+        service_id=service.id,
+        job_id=job.id if job else uuid.UUID(int=0),
+        notification_type=notification_type,
+        key_type=key_type,
+        notification_status=notification_status,
+        notification_count=count
+    )
     db.session.add(data)
     db.session.commit()
     return data

@@ -1,5 +1,4 @@
 from datetime import date, datetime
-
 import pytest
 from freezegun import freeze_time
 
@@ -7,14 +6,9 @@ from app.models import SMS_TYPE, EMAIL_TYPE
 from tests.app.db import (
     create_service,
     create_template,
-    # create_ft_notification_status, # TODO: wait for FactNotificationStatus to exist
+    create_ft_notification_status,
     create_notification
 )
-
-
-# TODO: wait for FactNotificationStatus to exist
-def create_ft_notification_status():
-    pass
 
 
 @freeze_time('2018-06-01')
@@ -49,8 +43,8 @@ def test_get_platform_stats_validates_the_date(admin_request):
         start_date)
 
 
-@freeze_time('2018-10-31 14:00')
-@pytest.mark.skip(reason="TODO: wait for create_ft_notification_status to exist")
+@freeze_time('2018-10-31 14:00')  # 1 November 2018 1am AEDT
+@pytest.mark.skip(reason="TODO: wait for FactNotificationStatus to be populated")
 def test_get_platform_stats_with_real_query(admin_request, notify_db_session):
     service_1 = create_service(service_name='service_1')
     sms_template = create_template(service=service_1, template_type=SMS_TYPE)
@@ -58,9 +52,9 @@ def test_get_platform_stats_with_real_query(admin_request, notify_db_session):
     create_ft_notification_status(date(2018, 10, 29), 'sms', service_1, count=10)
     create_ft_notification_status(date(2018, 10, 29), 'email', service_1, count=3)
 
-    create_notification(sms_template, created_at=datetime(2018, 10, 31, 11, 0, 0), key_type='test')
-    create_notification(sms_template, created_at=datetime(2018, 10, 31, 12, 0, 0), status='delivered')
-    create_notification(email_template, created_at=datetime(2018, 10, 31, 13, 0, 0), status='delivered')
+    create_notification(sms_template, created_at=datetime(2018, 10, 31, 0, 0, 0), key_type='test')
+    create_notification(sms_template, created_at=datetime(2018, 10, 31, 1, 0, 0), status='delivered')
+    create_notification(email_template, created_at=datetime(2018, 10, 31, 2, 0, 0), status='delivered')
 
     response = admin_request.get(
         'platform_stats.get_platform_stats', start_date=date(2018, 10, 29),

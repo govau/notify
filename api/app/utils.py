@@ -104,6 +104,13 @@ def get_public_notify_type_text(notify_type, plural=False):
     return '{}{}'.format(notify_type_text, 's' if plural else '')
 
 
+def midnight_n_days_ago(number_of_days):
+    """
+    Returns midnight a number of days ago (in UTC). Takes care of daylight savings etc.
+    """
+    return get_sydney_midnight_in_utc(datetime.utcnow() - timedelta(days=number_of_days))
+
+
 def escape_special_characters(string):
     for special_character in ('\\', '_', '%', '/'):
         string = string.replace(
