@@ -246,7 +246,7 @@ class Config(object):
         },
         'create-nightly-notification-status': {
             'task': 'create-nightly-notification-status',
-            'schedule': crontab(hour=3, minute=3),  # after 'timeout-sending-notifications'
+            'schedule': crontab(hour=3, minute=30),  # after 'timeout-sending-notifications'
             'options': {'queue': QueueNames.PERIODIC}
         },
         'remove_sms_email_jobs': {
