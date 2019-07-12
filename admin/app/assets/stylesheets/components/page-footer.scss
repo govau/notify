@@ -3,8 +3,7 @@
   margin-bottom: 30px;
 
   &-back-link {
-
-    @include button($grey-1);
+    @include au-button-secondary;
     display: inline-block;
 
     @include media('mobile') {
@@ -55,8 +54,7 @@
   }
 
   .button-destructive {
-    @include button($error-colour);
-    padding: 0.52632em 0.78947em 0.26316em 0.78947em;
+    @include au-button-error;
   }
 
 }

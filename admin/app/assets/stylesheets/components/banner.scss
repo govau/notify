@@ -59,7 +59,7 @@
   }
 
   .button {
-    @include button($error-colour);
+    @include au-button-error;
     margin-top: 10px;
   }
 

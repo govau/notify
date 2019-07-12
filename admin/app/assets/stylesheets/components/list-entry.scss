@@ -60,10 +60,6 @@
   }
 }
 
-.button-secondary {
-  @include button($grey-3);
-}
-
 .form-label {
   @include core-strong;
 }

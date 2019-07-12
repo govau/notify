@@ -1,27 +1,31 @@
-@mixin au-button() {
+@mixin au-button($colour: $button-colour) {
+  // overriding a bunch of stuff from govuk elements on .button:
+  // https://github.com/alphagov/govuk_elements/blob/84f485f688e7f796a4c44dd73b17177e8e39538c/assets/sass/elements/_buttons.scss#L4
+
   @include core-medium;
 
+  color: white;
   padding: 0.5rem 1.5rem;
   line-height: 1.5;
   display: inline-block;
   border-radius: 4px;
   box-shadow: none;
-  background-color: #00698f;
-  border: 3px solid #00698f;
+  background-color: $colour;
+  border: 3px solid $colour;
   cursor: pointer;
   vertical-align: middle;
   transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 
   &:visited {
-    background-color: #00698f;
+    background-color: $colour;
   }
 
   &:focus,
   &:active,
   &:hover:not(:disabled) {
     outline: none;
-    background-color: #313131;
-    border-color: #313131;
+    background-color: darken($colour, 15%);
+    border-color: darken($colour, 15%);
     text-decoration: underline;
   }
 
@@ -31,17 +35,25 @@
   }
 }
 
-%secondary {
-  background-color: transparent;
-  color: #00698f;
+@mixin au-button-secondary($colour: transparent, $content: $button-colour) {
+  @include au-button($colour);
+  color: $content;
+  border-color: $content;
 
   &:focus,
   &:active,
   &:hover:not(:disabled) {
-    background-color: transparent;
-    border-color: #313131;
-    color: #313131;
+    border-color: darken($content, 15%);
+    color: darken($content, 15%);
   }
+}
+
+@mixin au-button-error($colour: $error-colour) {
+  @include au-button($colour);
+}
+
+%secondary {
+  @include au-button-secondary;
 }
 
 %button,
@@ -56,6 +68,10 @@
     @extend %secondary;
     border: none;
   }
+}
+
+.button-secondary {
+  @include au-button-secondary;
 }
 
 %button-submit {
