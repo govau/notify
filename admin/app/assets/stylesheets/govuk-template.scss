@@ -912,6 +912,10 @@ button:focus {
 #content div main.column-three-quarters div.grid-row .column-one-third {
   padding: 0;
 
+  @media (max-width:640px) {
+    margin-top: 0.6em;
+  }
+
   @media (min-width: 641px) {
     padding: 0 1.5rem;
   }

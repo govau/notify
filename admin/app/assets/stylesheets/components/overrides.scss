@@ -26,6 +26,11 @@ $button-colour: #00698f;
   font-weight: $text-normal;
 }
 
+*,:after,:before {
+  background-repeat: no-repeat;
+  box-sizing: border-box
+}
+
 body,
 main {
   @include core-typography;

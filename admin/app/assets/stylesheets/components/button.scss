@@ -33,6 +33,11 @@
     outline: 3px solid #9263de;
     outline-offset: 2px;
   }
+
+  @include media (mobile) {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 @mixin au-button-secondary($colour: transparent, $content: $button-colour) {
