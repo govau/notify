@@ -13,7 +13,6 @@
 
   &-button-show,
   &-button-copy {
-    @include button($grey-3);
+    @include au-button-secondary;
   }
-
 }

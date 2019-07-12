@@ -23,19 +23,18 @@
   }
 }
 
+// Looks like a button but include is not enough.
+// Needs to forcefully override a bunch of stuff from base uk stylesheet
 .pill-separate-item {
+  @include au-button(#00698f);
   color: $white;
-  padding: 0.5rem 1.5rem;
   display: block;
-  border-radius: 4px;
-  box-shadow: none;
   background-color: #00698f;
   border: 3px solid #00698f;
-  cursor: pointer;
   vertical-align: middle;
-  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 
   &:link,
+  &:link:focus,
   &:visited {
     color: $white;
   }
