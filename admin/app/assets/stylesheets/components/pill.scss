@@ -34,6 +34,7 @@
   vertical-align: middle;
 
   &:link,
+  &:link:focus,
   &:visited {
     color: $white;
   }
