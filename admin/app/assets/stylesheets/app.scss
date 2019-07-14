@@ -106,6 +106,10 @@ td {
   }
 }
 
+.list {
+  list-style-position: inside;
+}
+
 details summary {
   text-decoration: underline;
   margin-bottom: $gutter-half;
