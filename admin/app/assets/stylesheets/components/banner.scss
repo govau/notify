@@ -82,10 +82,12 @@
 
 }
 
+$govau-blue: #0d414d;
+
 .banner-tour {
 
   @extend %banner;
-  background: $govuk-blue;
+  background: $govau-blue;
   color: $white;
   margin-top: 10px;
   margin-bottom: 0;
