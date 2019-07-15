@@ -496,9 +496,9 @@ def test_create_nightly_notification_status(notify_db_session):
         FactNotificationStatus.notification_type
     ).all()
     assert len(new_data) == 9
-    assert str(new_data[0].aet_date) == datetime.strftime(datetime.utcnow() - timedelta(days=4), "%Y-%m-%d")
-    assert str(new_data[3].aet_date) == datetime.strftime(datetime.utcnow() - timedelta(days=2), "%Y-%m-%d")
-    assert str(new_data[6].aet_date) == datetime.strftime(datetime.utcnow() - timedelta(days=1), "%Y-%m-%d")
+    assert str(new_data[0].aet_date) == datetime.strftime(convert_utc_to_aet(datetime.utcnow() - timedelta(days=4)), "%Y-%m-%d")
+    assert str(new_data[3].aet_date) == datetime.strftime(convert_utc_to_aet(datetime.utcnow() - timedelta(days=2)), "%Y-%m-%d")
+    assert str(new_data[6].aet_date) == datetime.strftime(convert_utc_to_aet(datetime.utcnow() - timedelta(days=1)), "%Y-%m-%d")
 
 
 @freeze_time('2019-10-20 13:30')  # 21 October 2019 12:30am AEDT
