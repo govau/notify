@@ -322,6 +322,20 @@ button:focus {
   outline-offset: 0;
 }
 
+.multiple-choice [type="radio"]:focus + label::before {
+  box-shadow: 0 0 0 3px #61daff;
+}
+
+.multiple-choice [type="checkbox"]+label::after {
+  width: 18px;
+  height: 11px;
+}
+
+.multiple-choice [type="radio"]+label::after {
+  top: 7px;
+  left: 7px;
+}
+
 .banner-dangerous:focus {
   outline: none;
 }
