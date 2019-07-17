@@ -13,6 +13,7 @@ from app.dao.inbound_numbers_dao import (
     dao_get_available_inbound_numbers,
     dao_set_inbound_number_active_flag
 )
+from app.dao.notifications_dao import update_notification_status_by_id
 from app.dao.organisation_dao import dao_add_service_to_organisation
 from app.dao.services_dao import (
     dao_create_service,
@@ -768,6 +769,44 @@ def test_dao_fetch_todays_total_message_count_returns_count_for_today(notify_db,
 def test_dao_fetch_todays_total_message_count_returns_0_when_no_messages_for_today(notify_db,
                                                                                    notify_db_session):
     assert fetch_todays_total_message_count(uuid.uuid4()) == 0
+
+
+def test_dao_fetch_todays_total_message_count_aggregates_templates(
+        notify_db, notify_db_session, sample_service):
+
+    sms_template = create_sample_template(
+        notify_db,
+        notify_db_session,
+        service=sample_service)
+
+    email_template = create_email_template(
+        notify_db,
+        notify_db_session,
+        service=sample_service)
+
+    email_template2 = create_email_template(
+        notify_db,
+        notify_db_session,
+        service=sample_service)
+
+    for template in [sms_template, email_template, email_template2]:
+        create_notification(
+            notify_db, notify_db_session,
+            service=sample_service, template=template)
+
+    assert fetch_todays_total_message_count(sample_service.id) == 3
+
+
+def test_dao_fetch_todays_total_message_count_aggregates_statuses(
+        notify_db, notify_db_session, sample_template):
+
+    create_notification(notify_db, notify_db_session, template=sample_template)
+    create_notification(notify_db, notify_db_session, template=sample_template)
+
+    notification = create_notification(notify_db, notify_db_session, template=sample_template)
+    update_notification_status_by_id(notification.id, 'delivered')
+
+    assert fetch_todays_total_message_count(sample_template.service_id) == 3
 
 
 def test_dao_fetch_todays_stats_for_all_services_includes_all_services(notify_db, notify_db_session, service_factory):
