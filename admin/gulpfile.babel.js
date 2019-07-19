@@ -59,7 +59,11 @@ gulp.task("copy:govuk_template:js", () =>
 
 gulp.task("copy:govuk_template:images", () =>
   gulp
-    .src(paths.template + "assets/stylesheets/images/**/*")
+    .src([
+      `${paths.template}assets/stylesheets/images/**/*`,
+      `!${paths.template}assets/stylesheets/images/govuk*`,
+      `!${paths.template}assets/stylesheets/images/gov.uk*`
+    ])
     .pipe(gulp.dest(paths.dist + "images/"))
 );
 
@@ -139,9 +143,12 @@ gulp.task("sass", () =>
 gulp.task("images", () =>
   gulp
     .src([
-      paths.src + "images/**/*",
-      paths.toolkit + "images/**/*",
-      paths.template + "assets/images/**/*"
+      `${paths.src}images/**/*`,
+      `${paths.toolkit}images/**/*`,
+      `${paths.template}assets/images/**/*`,
+      `!${paths.template}assets/images/gov.uk*`,
+      `!${paths.template}assets/images/favicon*`,
+      `!${paths.template}assets/images/apple-touch-icon*.png`
     ])
     .pipe(gulp.dest(paths.dist + "images/"))
 );
@@ -150,6 +157,12 @@ gulp.task("copy:govuk_template:error_page", () =>
   gulp
     .src(paths.src + "error_pages/**/*")
     .pipe(gulp.dest(paths.dist + "error_pages/"))
+);
+
+gulp.task("copy:misc", () =>
+  gulp
+    .src([paths.src + "manifest.json", paths.src + "browserconfig.xml"])
+    .pipe(gulp.dest(paths.dist))
 );
 
 // Watch for changes and re-run tasks
@@ -178,6 +191,7 @@ gulp.task(
     //'copy:govuk_template:css',
     "copy:govuk_template:js",
     "copy:govuk_template:error_page",
+    "copy:misc",
     "javascripts",
     "sass",
     "images"
