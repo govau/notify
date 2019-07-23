@@ -13,7 +13,7 @@ module.exports = {
         background_color: '#0b0c0c',
         theme_color: '#0b0c0c',
         display: 'minimal-ui',
-        icon: 'src/images/dta-icon.png', // This path is relative to the root of the site.
+        icon: 'src/images/favicon.ico', // This path is relative to the root of the site.
       },
     },
     {
