@@ -8,7 +8,7 @@ from flask import (
     session,
     url_for,
 )
-from flask_login import current_user, logout_user
+from flask_login import current_user
 
 from app import invite_api_client, login_manager, user_api_client
 from app.main import main
@@ -80,9 +80,6 @@ def sign_in_sms(user_id, to):
 
 @login_manager.unauthorized_handler
 def sign_in_again():
-    session.clear()
-    logout_user()
-
     return redirect(
         url_for('main.sign_in', next=request.path)
     )
