@@ -432,9 +432,6 @@ def load_service_before_request():
 
         if service_id:
             try:
-                if not current_user.is_authenticated:
-                    return current_app.login_manager.unauthorized()
-
                 _request_ctx_stack.top.service = service_api_client.get_service(service_id)['data']
             except HTTPError as exc:
                 # if service id isn't real, then 404 rather than 500ing later because we expect service to be set
