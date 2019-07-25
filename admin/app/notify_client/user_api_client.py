@@ -37,6 +37,13 @@ class UserApiClient(NotifyAdminAPIClient):
         user_data = self.post("/user", data)
         return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
 
+    # TODO_get_user is the new one, will eventually replace the old one.
+    def TODO_get_user(self, user_id):
+        return self._get_user(user_id)['data']
+
+    def _get_user(self, user_id):
+        return self.get("/user/{}".format(user_id))
+
     def get_user(self, id):
         url = "/user/{}".format(id)
         user_data = self.get(url)
@@ -72,6 +79,9 @@ class UserApiClient(NotifyAdminAPIClient):
         url = "/user/{}".format(user_id)
         user_data = self.post(url, data=data)
         return User(user_data['data'], max_failed_login_count=self.max_failed_login_count, max_failed_verify_count=self.max_failed_verify_count)
+
+    def archive_user(self, user_id):
+        return self.post('/user/{}/archive'.format(user_id), data=None)
 
     def reset_failed_login_count(self, user_id):
         url = "/user/{}/reset-failed-login-count".format(user_id)
@@ -172,6 +182,12 @@ class UserApiClient(NotifyAdminAPIClient):
         endpoint = '/user/reset-password'
         data = {'email': email_address}
         self.post(endpoint, data=data)
+
+    def find_users_by_full_or_partial_email(self, email_address):
+        endpoint = '/user/find-users-by-email'
+        data = {'email': email_address}
+        users = self.post(endpoint, data=data)
+        return users
 
     def is_email_already_in_use(self, email_address):
         if self.get_user_by_email_or_none(email_address):

@@ -25,6 +25,7 @@ from app.main.views import (  # noqa
     manage_users,
     invites,
     feedback,
+    find_users,
     providers,
     platform_admin,
     letter_jobs,
