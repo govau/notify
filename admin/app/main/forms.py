@@ -800,6 +800,16 @@ class DateFilterForm(StripWhitespaceForm):
     include_from_test_key = BooleanField("Include test keys", default="checked", false_values={"N"})
 
 
+class SearchUsersByEmailForm(StripWhitespaceForm):
+
+    search = SearchField(
+        'Search by name or email address',
+        validators=[
+            DataRequired("You need to enter full or partial email address to search by.")
+        ],
+    )
+
+
 class ChooseTemplateType(StripWhitespaceForm):
     template_type = RadioField(
         'What kind of template do you want to add?',
@@ -811,6 +821,7 @@ class ChooseTemplateType(StripWhitespaceForm):
             DataRequired()
         ]
     )
+
 
 class SearchTemplatesForm(StripWhitespaceForm):
 
