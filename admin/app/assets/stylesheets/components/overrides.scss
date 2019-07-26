@@ -79,3 +79,11 @@ table td,
 @mixin core-strong() {
   font-weight: $text-bold;
 }
+
+@mixin core-responsive-huge() {
+  @include core-xxlarge;
+
+  @media (min-width: 641px) {
+    @include core-huge;
+  }
+}

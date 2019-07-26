@@ -106,7 +106,7 @@
 
   &-big-number {
     @include core-strong;
-    @include core-huge;
+    @include core-responsive-huge;
     // @include bold-48($tabular-numbers: true);
     margin: 0 0 0 0;
   }
