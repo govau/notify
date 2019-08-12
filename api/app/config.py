@@ -458,7 +458,7 @@ class Live(Config):
     LETTERS_PDF_BUCKET_NAME = 'production-letters-pdf'
     LETTERS_SCAN_BUCKET_NAME = 'production-letters-scan'
     STATSD_ENABLED = False
-    FROM_NUMBER = 'Notify'
+    FROM_NUMBER = 'NotifyGovAu'
     FUNCTIONAL_TEST_PROVIDER_SERVICE_ID = '6c1d81bb-dae2-4ee9-80b0-89a4aae9f649'
     FUNCTIONAL_TEST_PROVIDER_SMS_TEMPLATE_ID = 'ba9e1789-a804-40b8-871f-cc60d4c1286f'
     API_RATE_LIMIT_ENABLED = True
