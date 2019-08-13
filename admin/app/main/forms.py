@@ -146,7 +146,7 @@ def international_phone_number(label='Mobile number'):
 def password(label='Password'):
     return PasswordField(label,
                          validators=[DataRequired(message='Can’t be empty'),
-                                     Length(8, 255, message='Must be at least 8 characters'),
+                                     Length(13, 255, message='Must be at least 13 characters'),
                                      Blacklist(message='Choose a password that’s harder to guess')])
 
 
