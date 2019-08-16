@@ -583,6 +583,7 @@ class RequestToGoLiveForm(StripWhitespaceForm):
 
 class ProviderForm(StripWhitespaceForm):
     priority = IntegerField('Priority', [validators.NumberRange(min=1, max=100, message="Must be between 1 and 100")])
+    active = BooleanField('Active')
 
 
 class ServiceReplyToEmailForm(StripWhitespaceForm):

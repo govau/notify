@@ -38,7 +38,11 @@ def edit_provider(provider_id):
     form = ProviderForm(active=provider['active'], priority=provider['priority'])
 
     if form.validate_on_submit():
-        provider_client.update_provider(provider_id, form.priority.data)
+        provider_client.update_provider(
+                provider_id,
+                form.priority.data,
+                active=form.active.data
+                )
         return redirect(url_for('.view_providers'))
 
     return render_template('views/providers/edit-provider.html', form=form, provider=provider)
