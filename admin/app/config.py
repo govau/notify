@@ -58,7 +58,7 @@ class Config(object):
     MAX_FAILED_VERIFY_COUNT = 5
     NOTIFY_APP_NAME = 'admin'
     NOTIFY_LOG_LEVEL = 'DEBUG'
-    PERMANENT_SESSION_LIFETIME = 20 * 60 * 60  # 20 hours
+    PERMANENT_SESSION_LIFETIME = 8 * 60 * 60  # 8 hours
     SEND_FILE_MAX_AGE_DEFAULT = 365 * 24 * 60 * 60  # 1 year
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_NAME = 'notify_admin_session'
