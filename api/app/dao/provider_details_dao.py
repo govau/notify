@@ -70,14 +70,14 @@ def dao_switch_sms_provider_to_provider_with_identifier(identifier):
     providers_to_update = []
 
     if conflicting_provider:
-        switch_providers(conflicting_provider, new_provider)
+        providers_to_update = switch_providers(conflicting_provider, new_provider)
     else:
         current_provider = get_current_provider('sms')
         if not provider_is_primary(current_provider, new_provider, identifier):
             providers_to_update = switch_providers(current_provider, new_provider)
 
-        for provider in providers_to_update:
-            dao_update_provider_details(provider)
+    for provider in providers_to_update:
+        dao_update_provider_details(provider)
 
 
 def get_provider_details_by_notification_type(notification_type, supports_international=False):
