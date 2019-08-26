@@ -1,6 +1,7 @@
+import functools
 from monotonic import monotonic
 from app.clients.sms import SmsClient
-import Telstra_Messaging
+import Telstra_Messaging as telstra
 
 telstra_response_map = {
     'PEND': 'pending',
@@ -12,6 +13,20 @@ telstra_response_map = {
     'REJECTED': 'temporary-failure',  # TODO: assuming this is temporary
     'READ': 'delivered'  # TODO: can we add a new status 'read'?
 }
+
+
+def timed(description):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def inner(self, *args, **kwargs):
+            start_time = monotonic()
+            result = fn(self, *args, **kwargs)
+            elapsed_time = monotonic() - start_time
+            self.logger.info(f"{description} finished in {elapsed_time}")
+            return result
+
+        return inner
+    return decorator
 
 
 def get_telstra_responses(status):
@@ -32,49 +47,52 @@ class TelstraSMSClient(SmsClient):
     def name(self):
         return 'telstra'
 
+    @property
+    def _client(self):
+        return telstra.ApiClient(self.auth)
+
     def get_name(self):
         return self.name
 
+    # https://dev.telstra.com/content/messaging-api#operation/Send%20SMS
+    @timed("Telstra send SMS request")
     def send_sms(self, to, content, reference, sender=None):
-        conf = self.auth()
+        telstra_api = telstra.MessagingApi(self._client)
+        notify_host = self._callback_notify_url_host
+        notify_url = f"{notify_host}/notifications/sms/telstra/{reference}" if notify_host else None
 
-        api_instance = Telstra_Messaging.MessagingApi(Telstra_Messaging.ApiClient(conf))
-        payload = Telstra_Messaging.SendSMSRequest(
+        payload = telstra.SendSMSRequest(
             to=to,
             body=content,
-            notify_url="{}/notifications/sms/telstra/{}".format(self._callback_notify_url_host, reference)
+            _from=sender if sender else None,
+            notify_url=notify_url
         )
 
-        start_time = monotonic()
         try:
-            resp = api_instance.send_sms(payload)
+            resp = telstra_api.send_sms(payload)
             message = resp.messages[0]
-            self.logger.info("Telstra send SMS request for {} succeeded: {}".format(reference, message.message_id))
-        except Exception as e:
-            self.logger.error("Telstra send SMS request for {} failed".format(reference))
-            raise e
-        finally:
-            elapsed_time = monotonic() - start_time
-            self.logger.info("Telstra send SMS request for {} finished in {}".format(reference, elapsed_time))
+            self.logger.info(f"Telstra send SMS request for {reference} succeeded: {message.message_id}")
 
+        except Exception as e:
+            self.logger.error(f"Telstra send SMS request for {reference} failed")
+            raise e
+
+    @timed("Telstra provision request")
+    def provision_subscription(self):
+        # maximum subscription is 5 years, 1825 days
+        telstra_api = telstra.ProvisioningApi(self._client)
+        req = telstra.ProvisionNumberRequest(active_days=1825)
+        telstra_api.create_subscription(req)
+
+    # TODO: cache this call. token is valid for 1 hr.
+    # https://dev.telstra.com/content/messaging-api#tag/Authentication
+    @property
+    @timed("Telstra auth request")
     def auth(self):
         grant_type = 'client_credentials'
+        api_instance = telstra.AuthenticationApi()
 
-        api_instance = Telstra_Messaging.AuthenticationApi()
-
-        start_time = monotonic()
-        try:
-            resp = api_instance.auth_token(self._client_id, self._client_secret, grant_type)
-
-            self.logger.info("Telstra auth request succeeded")
-
-            conf = Telstra_Messaging.Configuration()
-            conf.access_token = resp.access_token
-
-            return conf
-        except Exception as e:
-            self.logger.error("Telstra auth request failed")
-            raise e
-        finally:
-            elapsed_time = monotonic() - start_time
-            self.logger.info("Telstra auth request finished in {}".format(elapsed_time))
+        resp = api_instance.auth_token(self._client_id, self._client_secret, grant_type)
+        conf = telstra.Configuration()
+        conf.access_token = resp.access_token
+        return conf

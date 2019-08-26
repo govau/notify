@@ -36,6 +36,7 @@ from app.utils import (
     get_sydney_midnight_in_utc,
     get_midnight_for_day_before,
 )
+from app import telstra_sms_client
 
 
 @click.group(name='command', help='Additional commands')
@@ -306,6 +307,11 @@ def list_routes():
     """List URLs of all application routes."""
     for rule in sorted(current_app.url_map.iter_rules(), key=lambda r: r.rule):
         print("{:10} {}".format(", ".join(rule.methods - set(['OPTIONS', 'HEAD'])), rule.rule))
+
+
+@notify_command(name='provision-telstra')
+def provision_telstra_subscription():
+    telstra_sms_client.provision_subscription()
 
 
 @notify_command(name='insert-inbound-numbers')
