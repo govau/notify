@@ -1,4 +1,5 @@
 import sys
+import csv
 import functools
 import uuid
 from datetime import datetime, timedelta
@@ -26,7 +27,8 @@ from app.dao.provider_rates_dao import create_provider_rates as dao_create_provi
 from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
 from app.dao.services_dao import (
     delete_service_and_all_associated_db_objects,
-    dao_fetch_all_services_by_user
+    dao_fetch_all_services_by_user,
+    dao_fetch_all_services
 )
 from app.dao.users_dao import (delete_model_user, delete_user_verify_codes)
 from app.models import PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
@@ -312,6 +314,18 @@ def list_routes():
 @notify_command(name='provision-telstra')
 def provision_telstra_subscription():
     telstra_sms_client.provision_subscription()
+
+
+@notify_command(name='contact-users')
+def list_user_contacts():
+    writer = csv.writer(sys.stdout)
+    writer.writerow(['service_id', 'service_name', 'count_as_live', 'user_email_address'])
+
+    for service in dao_fetch_all_services(only_active=True):
+        for user in service.users:
+            permissions = user.get_permissions(service_id=service.id)
+            if 'manage_users' in permissions or 'manage_settings' in permissions:
+                writer.writerow([service.id, service.name, service.count_as_live, user.email_address])
 
 
 @notify_command(name='insert-inbound-numbers')
