@@ -122,8 +122,8 @@ def test_post_sms_notification_uses_inbound_number_reply_to_as_sender(client, no
     assert len(notifications) == 1
     notification_id = notifications[0].id
     assert resp_json['id'] == str(notification_id)
-    assert resp_json['content']['from_number'] == '61412345678'
-    assert notifications[0].reply_to_text == '61412345678'
+    assert resp_json['content']['from_number'] == '+61412345678'
+    assert notifications[0].reply_to_text == '+61412345678'
     mocked.assert_called_once_with([str(notification_id)], queue='send-sms-tasks')
 
 
@@ -174,10 +174,10 @@ def test_post_sms_notification_uses_sms_sender_id_reply_to(
     assert response.status_code == 201
     resp_json = json.loads(response.get_data(as_text=True))
     assert validate(resp_json, post_sms_response) == resp_json
-    assert resp_json['content']['from_number'] == '61412345679'
+    assert resp_json['content']['from_number'] == '+61412345679'
     notifications = Notification.query.all()
     assert len(notifications) == 1
-    assert notifications[0].reply_to_text == '61412345679'
+    assert notifications[0].reply_to_text == '+61412345679'
     mocked.assert_called_once_with([resp_json['id']], queue='send-sms-tasks')
 
 
@@ -463,7 +463,7 @@ def test_post_sms_notification_returns_400_if_not_allowed_to_send_int_sms(
     template = create_sample_template(notify_db, notify_db_session, service=service)
 
     data = {
-        'phone_number': '20-12-1234-1234',
+            'phone_number': '+20-12-1234-1234',
         'template_id': template.id
     }
     auth_header = create_authorization_header(service_id=service.id)
@@ -485,7 +485,7 @@ def test_post_sms_notification_returns_400_if_not_allowed_to_send_int_sms(
 
 
 @pytest.mark.parametrize('recipient,label,template_factory,expected_error', [
-    ('07700 900000', 'phone_number', sample_template_without_sms_permission, 'Cannot send text messages'),
+    ('0412345678', 'phone_number', sample_template_without_sms_permission, 'Cannot send text messages'),
     ('someone@test.com', 'email_address', sample_template_without_email_permission, 'Cannot send emails')])
 def test_post_sms_notification_returns_400_if_not_allowed_to_send_notification(
         client, template_factory, recipient, label, expected_error, notify_db, notify_db_session):
@@ -520,7 +520,7 @@ def test_post_sms_notification_returns_201_if_allowed_to_send_int_sms(
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     data = {
-        'phone_number': '20-12-1234-1234',
+        'phone_number': '+20-12-1234-1234',
         'template_id': sample_template.id
     }
     auth_header = create_authorization_header(service_id=sample_service.id)
