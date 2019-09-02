@@ -30,6 +30,7 @@ from app.dao.services_dao import (
     dao_fetch_all_services_by_user,
     dao_fetch_all_services
 )
+import app.dao.service_sms_sender_dao as sms_sender_dao
 from app.dao.users_dao import (delete_model_user, delete_user_verify_codes)
 from app.models import PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
 from app.performance_platform.processing_time import (send_processing_time_for_start_and_end)
@@ -314,6 +315,14 @@ def list_routes():
 @notify_command(name='provision-telstra')
 def provision_telstra_subscription():
     telstra_sms_client.provision_subscription()
+
+
+@notify_command(name='remove-sms-sender')
+@click.option('-s', '--sms_sender_id',
+              type=click.UUID, required=True,
+              help="SMS sender ID of the non-default sender ID to be removed")
+def remove_sms_sender(sms_sender_id):
+    sms_sender_dao.dao_remove_sms_sender(sms_sender_id)
 
 
 @notify_command(name='contact-users')

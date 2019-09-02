@@ -46,6 +46,14 @@ def dao_add_sms_sender_for_service(service_id, sms_sender, is_default, inbound_n
     return new_sms_sender
 
 
+def dao_remove_sms_sender(sms_sender_id):
+    query = ServiceSmsSender.query.filter_by(id=sms_sender_id, is_default=False)
+    for sms_sender in query.all():
+        db.session.delete(sms_sender)
+
+    db.session.commit()
+
+
 @transactional
 def dao_update_service_sms_sender(service_id, service_sms_sender_id, is_default, sms_sender=None):
     old_default = _get_existing_default(service_id)
