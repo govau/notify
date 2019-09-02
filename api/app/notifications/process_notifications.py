@@ -103,6 +103,11 @@ def persist_notification(
         notification.international = recipient_info.international
         notification.phone_prefix = recipient_info.country_prefix
         notification.rate_multiplier = recipient_info.billable_units
+
+        if notification.international:
+            notification.reply_to_text = None
+
+
     elif notification_type == EMAIL_TYPE:
         notification.normalised_to = format_email_address(notification.to)
 
