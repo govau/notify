@@ -84,6 +84,12 @@ class TelstraSMSClient(SmsClient):
         req = telstra.ProvisionNumberRequest(active_days=1825)
         telstra_api.create_subscription(req)
 
+    # https://dev.telstra.com/content/messaging-api#operation/Get%20SMS%20Status
+    @timed("Telstra get message status request")
+    def get_message_status(self, message_id):
+        telstra_api = telstra.MessagingApi(self._client)
+        return telstra_api.get_sms_status(message_id=message_id)
+
     # TODO: cache this call. token is valid for 1 hr.
     # https://dev.telstra.com/content/messaging-api#tag/Authentication
     @property
