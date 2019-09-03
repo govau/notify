@@ -17,6 +17,7 @@ from app import db, DATETIME_FORMAT, encryption, redis_store
 from app.celery.scheduled_tasks import send_total_sent_notifications_to_performance_platform
 from app.celery.service_callback_tasks import send_delivery_status_to_service
 from app.celery.letters_pdf_tasks import create_letters_pdf
+from app.clients.sms.telstra import get_telstra_responses
 from app.config import QueueNames
 from app.dao.monthly_billing_dao import (
     create_or_update_monthly_billing,
@@ -315,6 +316,24 @@ def list_routes():
 @notify_command(name='provision-telstra')
 def provision_telstra_subscription():
     telstra_sms_client.provision_subscription()
+
+
+@notify_command(name='get-telstra-message-status')
+@click.option('-m', '--message_id',
+              required=True,
+              help="ID of the Telstra message to check")
+def get_telstra_message_status(message_id):
+    resp = telstra_sms_client.get_message_status(message_id=message_id)
+    if len(resp) == 0:
+        current_app.logger.error('Could not find the message with ID {}'.format(message_id))
+        sys.exit(1)
+    msg = resp[0]
+    print('Sent to: {}'.format(msg.to))
+    print('Sent at: {}'.format(msg.sent_timestamp))
+    print('Received at: {}'.format(msg.received_timestamp))
+    print('Telstra status: {}'.format(msg.delivery_status))
+    if msg.delivery_status:
+        print('Notify status: {}'.format(get_telstra_responses(msg.delivery_status)))
 
 
 @notify_command(name='remove-sms-sender')
