@@ -228,7 +228,7 @@ def test_cannot_create_user_with_empty_strings(admin_request, notify_db_session)
     )
     assert resp['message'] == {
         'email_address': ['Not a valid email address'],
-        'mobile_number': ['Invalid phone number: Not enough digits'],
+        'mobile_number': ['Invalid phone number: Badly formed phone number'],
         'name': ['Invalid name']
     }
 
@@ -236,7 +236,7 @@ def test_cannot_create_user_with_empty_strings(admin_request, notify_db_session)
 @pytest.mark.parametrize('user_attribute, user_value', [
     ('name', 'New User'),
     ('email_address', 'newuser@mail.com'),
-    ('mobile_number', '+4407700900460')
+    ('mobile_number', '+61412345679'),
 ])
 def test_post_user_attribute(client, sample_user, user_attribute, user_value):
     assert getattr(sample_user, user_attribute) != user_value
@@ -633,7 +633,7 @@ def test_cannot_update_user_with_mobile_number_as_empty_string(admin_request, sa
         _data={'mobile_number': ''},
         _expected_status=400
     )
-    assert resp['message']['mobile_number'] == ['Invalid phone number: Not enough digits']
+    assert resp['message']['mobile_number'] == ['Invalid phone number: Badly formed phone number']
 
 
 def test_cannot_update_user_password_using_attributes_method(admin_request, sample_user):

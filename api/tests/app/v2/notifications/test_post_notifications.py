@@ -463,7 +463,7 @@ def test_post_sms_notification_returns_400_if_not_allowed_to_send_int_sms(
     template = create_sample_template(notify_db, notify_db_session, service=service)
 
     data = {
-            'phone_number': '+20-12-1234-1234',
+        'phone_number': '+20-12-1234-1234',
         'template_id': template.id
     }
     auth_header = create_authorization_header(service_id=service.id)

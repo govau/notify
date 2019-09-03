@@ -3,7 +3,6 @@ from datetime import datetime
 
 from flask import current_app
 from notifications_utils.recipients import (
-    validate_and_format_phone_number,
     validate_and_format_email_address
 )
 from notifications_utils.template import HTMLEmailTemplate, PlainTextEmailTemplate, SMSMessageTemplate
@@ -71,7 +70,7 @@ def send_sms_to_provider(notification):
         else:
             try:
                 provider.send_sms(
-                    to=validate_and_format_phone_number(notification.to, international=notification.international),
+                    to=notification.normalised_to,
                     content=str(template),
                     reference=str(notification.id),
                     sender=notification.reply_to_text

@@ -285,7 +285,7 @@ def test_send_one_off_sms_notification_should_use_sms_sender_reply_to_text(sampl
         queue=None
     )
 
-    assert notification.reply_to_text == "61412345678"
+    assert notification.reply_to_text == "+61412345678"
 
 
 def test_send_one_off_sms_notification_should_use_default_service_reply_to_text(sample_service, celery_mock):
@@ -311,7 +311,7 @@ def test_send_one_off_sms_notification_should_use_default_service_reply_to_text(
         queue=None
     )
 
-    assert notification.reply_to_text == "61412345678"
+    assert notification.reply_to_text == "+61412345678"
 
 
 def test_send_one_off_notification_should_throw_exception_if_reply_to_id_doesnot_exist(
