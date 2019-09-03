@@ -367,9 +367,20 @@ def get_billable_units_for_prefix(prefix):
 def validate_phone_number(number, column=None, international=False):
     number = parse_phone_number(number)
 
+    if not phonenumbers.is_possible_number(number):
+        reason = phonenumbers.is_possible_number_with_reason(number)
+        if reason == phonenumbers.ValidationResult.TOO_SHORT:
+            raise InvalidPhoneError('Not enough digits')
+
+        if reason == phonenumbers.ValidationResult.TOO_LONG:
+            raise InvalidPhoneError('Too many digits')
+
+        if reason == phonenumbers.ValidationResult.INVALID_LENGTH:
+            raise InvalidPhoneError('Wrong amount of digits')
+
     if not international:
         if not is_au_phone_number(number):
-            raise InvalidPhoneError('No international support')
+            raise InvalidPhoneError('Not an AU mobile number')
 
     if not phonenumbers.is_valid_number(number):
         raise InvalidPhoneError('Phone number is invalid')
