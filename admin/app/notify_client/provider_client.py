@@ -21,13 +21,15 @@ class ProviderClient(NotifyAdminAPIClient):
             url='/provider-details/{}/versions'.format(provider_id)
         )
 
-    def update_provider(self, provider_id, priority, active=None):
+    def update_provider(self, provider_id, priority, active=None, supports_international=None):
         data = {
             "priority": priority,
         }
 
         if active is not None:
             data['active'] = active
+        if supports_international is not None:
+            data['supports_international'] = supports_international
 
         data = _attach_current_user(data)
         return self.post(url='/provider-details/{}'.format(provider_id), data=data)

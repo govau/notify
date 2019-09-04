@@ -28,6 +28,10 @@ Provider - {{provider.display_name}}
                 {{ checkbox(form.active) }}
             </div>
 
+            <div class="form-group">
+                {{ checkbox(form.supports_international) }}
+            </div>
+
             {{ page_footer('Save', back_link=url_for('.view_providers'), back_link_text="Back to providers") }}
         </form>
 
