@@ -35,14 +35,19 @@ def view_providers():
 @user_is_platform_admin
 def edit_provider(provider_id):
     provider = provider_client.get_provider_by_id(provider_id)['provider_details']
-    form = ProviderForm(active=provider['active'], priority=provider['priority'])
+    form = ProviderForm(
+        priority=provider['priority'],
+        active=provider['active'],
+        supports_international=provider['supports_international'],
+    )
 
     if form.validate_on_submit():
         provider_client.update_provider(
-                provider_id,
-                form.priority.data,
-                active=form.active.data
-                )
+            provider_id,
+            form.priority.data,
+            active=form.active.data,
+            supports_international=form.supports_international.data
+        )
         return redirect(url_for('.view_providers'))
 
     return render_template('views/providers/edit-provider.html', form=form, provider=provider)

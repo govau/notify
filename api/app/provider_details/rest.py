@@ -41,7 +41,7 @@ def get_provider_versions(provider_details_id):
 
 @provider_details.route('/<uuid:provider_details_id>', methods=['POST'])
 def update_provider_details(provider_details_id):
-    valid_keys = {'priority', 'created_by', 'active'}
+    valid_keys = {'priority', 'created_by', 'active', 'supports_international'}
     req_json = request.get_json()
 
     invalid_keys = req_json.keys() - valid_keys
