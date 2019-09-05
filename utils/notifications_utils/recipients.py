@@ -335,7 +335,7 @@ def parse_phone_number(number):
     try:
         return phonenumbers.parse(number, "AU")
     except Exception as e:
-        raise InvalidPhoneError('Badly formed phone number')
+        raise InvalidPhoneError('Must not contain letters or symbols')
 
 
 def format_phone_number(number):
@@ -378,12 +378,12 @@ def validate_phone_number(number, column=None, international=False):
         if reason == phonenumbers.ValidationResult.INVALID_LENGTH:
             raise InvalidPhoneError('Wrong amount of digits')
 
+    if not phonenumbers.is_valid_number(number):
+        raise InvalidPhoneError('Must not contain letters or symbols2')
+
     if not international:
         if not is_au_phone_number(number):
             raise InvalidPhoneError('Not an AU mobile number')
-
-    if not phonenumbers.is_valid_number(number):
-        raise InvalidPhoneError('Phone number is invalid')
 
     return number
 

@@ -83,7 +83,7 @@ def test_should_reject_bad_phone_numbers(notify_api, sample_template, mocker):
 
 
 @pytest.mark.parametrize('template_type, to',
-                         [(SMS_TYPE, '+447700900855'),
+                         [(SMS_TYPE, '+61420900855'),
                           (EMAIL_TYPE, 'ok@ok.com')])
 def test_send_notification_invalid_template_id(notify_api, sample_template, mocker, fake_uuid, template_type, to):
     with notify_api.test_request_context():
@@ -206,7 +206,7 @@ def test_should_not_send_notification_for_archived_template(notify_api, sample_t
             sample_template.archived = True
             dao_update_template(sample_template)
             json_data = json.dumps({
-                'to': '+447700900855',
+                'to': '+61420900855',
                 'template': sample_template.id
             })
             auth_header = create_authorization_header(service_id=sample_template.service_id)
@@ -221,7 +221,7 @@ def test_should_not_send_notification_for_archived_template(notify_api, sample_t
 
 
 @pytest.mark.parametrize('template_type, to',
-                         [(SMS_TYPE, '+447700900855'),
+                         [(SMS_TYPE, '61427090855'),
                           (EMAIL_TYPE, 'not-someone-we-trust@email-address.com')])
 def test_should_not_send_notification_if_restricted_and_not_a_service_user(notify_api,
                                                                            sample_template,
@@ -562,7 +562,7 @@ def test_should_not_send_sms_if_team_api_key_and_not_a_service_user(notify_api, 
         mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
         data = {
-            'to': '07123123123',
+            'to': '0423123123',
             'template': str(sample_template.id),
         }
 
@@ -851,7 +851,7 @@ def test_should_not_persist_notification_or_send_sms_if_simulated_number(
     KEY_TYPE_NORMAL, KEY_TYPE_TEAM
 ])
 @pytest.mark.parametrize('notification_type, to, _create_sample_template', [
-    (SMS_TYPE, '07827992635', create_sample_template),
+    (SMS_TYPE, '0422799263', create_sample_template),
     (EMAIL_TYPE, 'non_whitelist_recipient@mail.com', create_sample_email_template)]
 )
 def test_should_not_send_notification_to_non_whitelist_recipient_in_trial_mode(
@@ -1072,7 +1072,7 @@ def test_send_notification_uses_priority_queue_when_template_is_marked_as_priori
 
 @pytest.mark.parametrize(
     "notification_type, send_to",
-    [("sms", "07700 900 855"), ("email", "sample@email.com")]
+    [("sms", "0420 900 855"), ("email", "sample@email.com")]
 )
 def test_returns_a_429_limit_exceeded_if_rate_limit_exceeded(
     client,
@@ -1146,7 +1146,7 @@ def test_should_not_allow_international_number_on_sms_notification(client, sampl
     mocked = mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     data = {
-        'to': '20-12-1234-1234',
+        'to': '+20-12-1234-1234',
         'template': str(sample_template.id)
     }
 
@@ -1171,7 +1171,7 @@ def test_should_allow_international_number_on_sms_notification(client, notify_db
     template = create_sample_template(notify_db, notify_db_session, service=service)
 
     data = {
-        'to': '20-12-1234-1234',
+        'to': '+20-12-1234-1234',
         'template': str(template.id)
     }
 

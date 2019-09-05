@@ -336,8 +336,8 @@ def test_simulated_recipient(notify_api, to_address, notification_type, expected
     ('+61490090012', False, '61', 1),  # AU
     ('0400900222', False, '61', 1),  # AU
     ('+447900900123', True, '44', 2),  # UK
-    ('73122345678', True, '7', 1),  # Russia
-    ('360623400400', True, '36', 3)]  # Hungary
+    ('+7495 123 4567', True, '7', 1),  # Russia
+    ('+360623400400', True, '36', 3)]  # Hungary
 )
 def test_persist_notification_with_international_info_stores_correct_info(
     sample_job,
@@ -402,14 +402,14 @@ def test_persist_scheduled_notification(sample_notification):
 
 
 @pytest.mark.parametrize('recipient, expected_recipient_normalised', [
-    ('0400900123', '61400900123'),
-    ('+61412   345 678', '61412345678'),
-    ('  0412345678', '61412345678'),
-    ('0412900222', '61412900222'),
-    (' 0412345678', '61412345678'),
-    ('61498765432', '61498765432'),
-    ('-0412-111-222-', '61412111222'),
-    ('(0412(999)(888)', '61412999888')
+    ('0400900123', '+61400900123'),
+    ('+61412   345 678', '+61412345678'),
+    ('  0412345678', '+61412345678'),
+    ('0412900222', '+61412900222'),
+    (' 0412345678', '+61412345678'),
+    ('+61498765432', '+61498765432'),
+    ('-0412-111-222-', '+61412111222'),
+    ('(0412(999)(888)', '+61412999888')
 
 ])
 def test_persist_sms_notification_stores_normalised_number(
