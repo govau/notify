@@ -4,8 +4,12 @@ from uuid import UUID
 
 from iso8601 import iso8601, ParseError
 from jsonschema import (Draft7Validator, ValidationError, FormatChecker)
-from notifications_utils.recipients import (validate_phone_number, validate_email_address, InvalidPhoneError,
-                                            InvalidEmailError)
+from notifications_utils.recipients import (
+    validate_phone_number_and_allow_international,
+    validate_email_address,
+    InvalidPhoneError,
+    InvalidEmailError,
+)
 
 
 format_checker = FormatChecker()
@@ -21,7 +25,7 @@ def validate_uuid(instance):
 @format_checker.checks('phone_number', raises=InvalidPhoneError)
 def validate_schema_phone_number(instance):
     if isinstance(instance, str):
-        validate_phone_number(instance, international=True)
+        validate_phone_number_and_allow_international(instance)
     return True
 
 

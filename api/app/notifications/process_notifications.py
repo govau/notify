@@ -6,7 +6,8 @@ from flask import current_app
 from notifications_utils.clients import redis
 from notifications_utils.recipients import (
     get_international_phone_info,
-    validate_and_format_phone_number,
+    validate_and_format_phone_number_and_require_local,
+    validate_and_format_phone_number_and_allow_international,
     format_email_address
 )
 
@@ -97,13 +98,19 @@ def persist_notification(
     )
 
     if notification_type == SMS_TYPE:
-        formatted_recipient = validate_and_format_phone_number(recipient, international=True)
+        formatted_recipient = validate_and_format_phone_number_and_allow_international(recipient)
         recipient_info = get_international_phone_info(formatted_recipient)
         notification.normalised_to = formatted_recipient
         notification.international = recipient_info.international
         notification.phone_prefix = recipient_info.country_prefix
         notification.rate_multiplier = recipient_info.billable_units
 
+        # We can't use a sender name/ID if the text is sending to an
+        # international number. At the time of writing, this is because Telstra
+        # won't send to an international number unless sending from the number
+        # associated with the subscription. Additionally, Twilio can send from a
+        # sender name/ID, however, it requires configuration and it depends on
+        # the countries in play.
         if notification.international:
             notification.reply_to_text = None
 
@@ -164,7 +171,7 @@ def send_notification_to_queue(notification, research_mode, queue=None):
 def simulated_recipient(to_address, notification_type):
     if notification_type == SMS_TYPE:
         formatted_simulated_numbers = [
-            validate_and_format_phone_number(number) for number in current_app.config['SIMULATED_SMS_NUMBERS']
+            validate_and_format_phone_number_and_require_local(number) for number in current_app.config['SIMULATED_SMS_NUMBERS']
         ]
         return to_address in formatted_simulated_numbers
     else:

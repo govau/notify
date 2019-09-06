@@ -9,7 +9,8 @@ from flask_wtf.file import FileField as FileField_wtf
 from notifications_utils.columns import Columns
 from notifications_utils.recipients import (
     InvalidPhoneError,
-    validate_phone_number,
+    validate_phone_number_and_require_local,
+    validate_phone_number_and_allow_international,
 )
 from wtforms import (
     BooleanField,
@@ -114,10 +115,10 @@ def strip_whitespace(value):
     return value
 
 
-class UKMobileNumber(TelField):
+class LocalMobileNumber(TelField):
     def pre_validate(self, form):
         try:
-            validate_phone_number(self.data)
+            validate_phone_number_and_require_local(self.data)
         except InvalidPhoneError as e:
             raise ValidationError(str(e))
 
@@ -126,13 +127,13 @@ class InternationalPhoneNumber(TelField):
     def pre_validate(self, form):
         try:
             if self.data:
-                validate_phone_number(self.data, international=True)
+                validate_phone_number_and_allow_international(self.data)
         except InvalidPhoneError as e:
             raise ValidationError(str(e))
 
 
-def uk_mobile_number(label='Mobile number'):
-    return UKMobileNumber(label,
+def local_mobile_number(label='Mobile number'):
+    return LocalMobileNumber(label,
                           validators=[DataRequired(message='Can’t be empty')])
 
 
@@ -928,7 +929,7 @@ def get_placeholder_form_instance(
         if allow_international_phone_numbers:
             field = international_phone_number(label=placeholder_name)
         else:
-            field = uk_mobile_number(label=placeholder_name)
+            field = local_mobile_number(label=placeholder_name)
     elif optional_placeholder:
         field = StringField(placeholder_name)
     else:

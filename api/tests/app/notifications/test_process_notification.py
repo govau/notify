@@ -22,7 +22,10 @@ from app.notifications.process_notifications import (
     send_notification_to_queue,
     simulated_recipient
 )
-from notifications_utils.recipients import validate_and_format_phone_number, validate_and_format_email_address
+from notifications_utils.recipients import (
+    validate_and_format_phone_number_and_allow_international,
+    validate_and_format_email_address,
+)
 from app.utils import cache_key_for_service_template_counter
 from app.v2.errors import BadRequestError
 from tests.app.conftest import sample_api_key as create_api_key
@@ -324,7 +327,7 @@ def test_simulated_recipient(notify_api, to_address, notification_type, expected
     if notification_type == 'email':
         formatted_address = validate_and_format_email_address(to_address)
     else:
-        formatted_address = validate_and_format_phone_number(to_address)
+        formatted_address = validate_and_format_phone_number_and_allow_international(to_address)
 
     is_simulated_address = simulated_recipient(formatted_address, notification_type)
 
@@ -407,6 +410,7 @@ def test_persist_scheduled_notification(sample_notification):
     ('  0412345678', '+61412345678'),
     ('0412900222', '+61412900222'),
     (' 0412345678', '+61412345678'),
+    ('61498765432', '+61498765432'),
     ('+61498765432', '+61498765432'),
     ('-0412-111-222-', '+61412111222'),
     ('(0412(999)(888)', '+61412999888')

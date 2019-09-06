@@ -1,7 +1,11 @@
 from flask import jsonify, redirect, render_template, session, url_for
 from flask_login import login_required
+import phonenumbers
 from notify.errors import HTTPError
-from notifications_utils.recipients import format_phone_number_human_readable
+from notifications_utils.recipients import (
+    format_phone_number_human_readable,
+    validate_and_format_phone_number_and_allow_international,
+)
 from notifications_utils.template import SMSPreviewTemplate
 
 from app import notification_api_client, service_api_client
@@ -93,10 +97,23 @@ def get_conversation_partials(service_id, user_number):
 
 def get_user_number(service_id, notification_id):
     try:
-        user_number = service_api_client.get_inbound_sms_by_id(service_id, notification_id)['user_number']
+        number_e164 = service_api_client.get_inbound_sms_by_id(service_id, notification_id)['user_number']
     except HTTPError:
-        user_number = notification_api_client.get_notification(service_id, notification_id)['to']
-    return format_phone_number_human_readable(user_number)
+        notification = notification_api_client.get_notification(service_id, notification_id)
+
+        number_e164 = notification['normalised_to']
+
+        # For old records normalised_to is not right, or not set, so try and
+        # create it on the fly.
+        if not number_e164:
+            try:
+                number_e164 = validate_and_format_phone_number_and_allow_international(notification['to'])
+            except Exception:
+                return notification['to']
+
+    number = phonenumbers.parse(number_e164)
+
+    return format_phone_number_human_readable(number)
 
 
 def get_sms_thread(service_id, user_number):

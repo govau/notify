@@ -15,7 +15,7 @@ from sqlalchemy import UniqueConstraint, CheckConstraint, Index
 from notifications_utils.columns import Columns
 from notifications_utils.recipients import (
     validate_email_address,
-    validate_phone_number,
+    validate_phone_number_and_allow_international,
     try_validate_and_format_phone_number,
     InvalidPhoneError,
     InvalidEmailError
@@ -568,7 +568,7 @@ class ServiceWhitelist(db.Model):
 
         try:
             if recipient_type == MOBILE_TYPE:
-                validate_phone_number(recipient, international=True)
+                validate_phone_number_and_allow_international(recipient)
                 instance.recipient = recipient
             elif recipient_type == EMAIL_TYPE:
                 validate_email_address(recipient)
