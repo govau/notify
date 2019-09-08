@@ -249,12 +249,12 @@ def test_valid_local_phone_number_can_be_formatted_consistently(phone_number):
 
 
 @pytest.mark.parametrize("phone_number, expected_formatted", [
-    ('71234567890', '71234567890'),
-    ('1-202-555-0104', '12025550104'),
-    ('+12025550104', '12025550104'),
-    ('0012025550104', '12025550104'),
-    ('+0012025550104', '12025550104'),
-    ('23051234567', '23051234567'),
+    ('71234567890', '+71234567890'),
+    ('1-202-555-0104', '+12025550104'),
+    ('+12025550104', '+12025550104'),
+    ('0012025550104', '+12025550104'),
+    ('+0012025550104', '+12025550104'),
+    ('230 5 421 4567', '+23054214567'),
 ])
 def test_valid_international_phone_number_can_be_formatted_consistently(phone_number, expected_formatted):
     assert validate_and_format_phone_number_and_allow_international(phone_number) == expected_formatted
