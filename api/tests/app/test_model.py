@@ -35,8 +35,9 @@ from tests.app.db import (
 
 
 @pytest.mark.parametrize('mobile_number', [
-    '07700 900678',
-    '+44 7700 900678'
+    '0412 345678',
+    '+61 412 345 678',
+    '+44 7800 900678'
 ])
 def test_should_build_service_whitelist_from_mobile_number(mobile_number):
     service_whitelist = ServiceWhitelist.from_string('service_id', MOBILE_TYPE, mobile_number)
