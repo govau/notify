@@ -70,8 +70,8 @@ def test_post_to_get_inbound_sms_should_error_with_invalid_limit(admin_request, 
                          '61412345678'])
 def test_post_to_get_inbound_sms_filters_user_number(admin_request, sample_service, user_number):
     # user_number in the db is international and normalised
-    one = create_inbound_sms(sample_service, user_number='61412345678')
-    create_inbound_sms(sample_service, user_number='61412345679')
+    one = create_inbound_sms(sample_service, user_number='+61412345678')
+    create_inbound_sms(sample_service, user_number='+61412345679')
 
     data = {
         'limit': 1,
@@ -91,7 +91,7 @@ def test_post_to_get_inbound_sms_filters_user_number(admin_request, sample_servi
 
 def test_post_to_get_inbound_sms_filters_international_user_number(admin_request, sample_service):
     # user_number in the db is international and normalised
-    one = create_inbound_sms(sample_service, user_number='12025550104')
+    one = create_inbound_sms(sample_service, user_number='+12025550104')
     create_inbound_sms(sample_service)
 
     data = {
@@ -159,8 +159,8 @@ def test_old_get_inbound_sms(admin_request, sample_service):
                          '61412345678'])
 def test_old_get_inbound_sms_filters_user_number(admin_request, sample_service, user_number):
     # user_number in the db is international and normalised
-    one = create_inbound_sms(sample_service, user_number='61412345678')
-    create_inbound_sms(sample_service, user_number='61412345679')
+    one = create_inbound_sms(sample_service, user_number='+61412345678')
+    create_inbound_sms(sample_service, user_number='+61412345679')
 
     sms = admin_request.get(
         'inbound_sms.get_inbound_sms_for_service',
