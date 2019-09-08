@@ -563,7 +563,7 @@ def test_save_sms_should_save_default_smm_sender_notification_reply_to_text_on(n
     service = create_service_with_defined_sms_sender(sms_sender_value='12345')
     template = create_template(service=service)
 
-    notification = _notification_json(template, to="07700 900205")
+    notification = _notification_json(template, to="0412 345 678")
     mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     notification_id = uuid.uuid4()
