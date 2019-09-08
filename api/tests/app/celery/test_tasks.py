@@ -490,11 +490,11 @@ def test_should_save_sms_if_restricted_service_and_valid_number(notify_db, notif
 def test_should_save_sms_if_restricted_service_and_non_team_number_with_test_key(notify_db,
                                                                                  notify_db_session,
                                                                                  mocker):
-    user = create_user(mobile_number="07700 900205")
+    user = create_user(mobile_number="0412 345678")
     service = create_sample_service(notify_db, notify_db_session, user=user, restricted=True)
     template = create_sample_template(notify_db, notify_db_session, service=service)
 
-    notification = _notification_json(template, "07700 900849")
+    notification = _notification_json(template, "0412 999999")
     mocked_deliver_sms = mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
 
     notification_id = uuid.uuid4()
@@ -1088,7 +1088,7 @@ def test_save_sms_uses_sms_sender_reply_to_text(mocker, notify_db_session):
     )
 
     persisted_notification = Notification.query.one()
-    assert persisted_notification.reply_to_text == '61412345678'
+    assert persisted_notification.reply_to_text == '+61412345678'
 
 
 @pytest.mark.parametrize('env', ['staging', 'live'])
