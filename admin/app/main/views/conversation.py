@@ -1,8 +1,8 @@
 from flask import jsonify, redirect, render_template, session, url_for
 from flask_login import login_required
-import phonenumbers
 from notify.errors import HTTPError
 from notifications_utils.recipients import (
+    e164_to_phone_number,
     format_phone_number_human_readable,
     validate_and_format_phone_number_and_allow_international,
 )
@@ -111,7 +111,7 @@ def get_user_number(service_id, notification_id):
             except Exception:
                 return notification['to']
 
-    number = phonenumbers.parse(number_e164)
+    number = e164_to_phone_number(number_e164)
 
     return format_phone_number_human_readable(number)
 
