@@ -351,11 +351,11 @@ def test_validate_address_allows_any_non_empty_value(column):
     'address_line_6',
     'postcode',
 ])
-def test_non_ascii_address_line_raises_invalid_address_error(column):
-    invalid_address = u'\u041F\u0435\u0442\u044F'
-    with pytest.raises(InvalidAddressError) as e:
-        validate_recipient(invalid_address, 'letter', column=column)
-    assert str(e.value) == u'Can’t include \u041F, \u0435, \u0442 or \u044F'
+def test_non_ascii_address_line_is_fine(column):
+    valid_address = u'\u041F\u0435\u0442\u044F'
+    assert validate_recipient(
+        valid_address, 'letter', column=column
+    ) == valid_address
 
 
 def test_valid_address_line_does_not_raise_error():

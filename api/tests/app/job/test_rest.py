@@ -377,7 +377,7 @@ def test_get_all_notifications_for_job_in_order_of_job_number(notify_api,
             notify_db,
             notify_db_session,
             job=main_job,
-            to_field="1",
+            to_field="0412345678",
             created_at=datetime.utcnow(),
             job_row_number=1
         )
@@ -385,7 +385,7 @@ def test_get_all_notifications_for_job_in_order_of_job_number(notify_api,
             notify_db,
             notify_db_session,
             job=main_job,
-            to_field="2",
+            to_field="0412345677",
             created_at=datetime.utcnow(),
             job_row_number=2
         )
@@ -393,7 +393,7 @@ def test_get_all_notifications_for_job_in_order_of_job_number(notify_api,
             notify_db,
             notify_db_session,
             job=main_job,
-            to_field="3",
+            to_field="0412345676",
             created_at=datetime.utcnow(),
             job_row_number=3
         )
@@ -440,7 +440,7 @@ def test_get_all_notifications_for_job_filtered_by_status(
             notify_db,
             notify_db_session,
             job=job,
-            to_field="1",
+            to_field="0412345678",
             created_at=datetime.utcnow(),
             status=NOTIFICATION_STATUS_TYPES[0],
             job_row_number=1
