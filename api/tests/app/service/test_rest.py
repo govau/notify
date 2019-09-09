@@ -1952,11 +1952,11 @@ def test_search_for_notification_by_to_field(client, sample_template, sample_ema
 
 
 def test_search_for_notification_by_to_field_return_empty_list_if_there_is_no_match(
-    client, notify_db, notify_db_session
+    client, notify_db, notify_db_session, sample_email_template
 ):
     create_notification = partial(create_sample_notification, notify_db, notify_db_session)
     notification1 = create_notification(to_field='+447800900855')
-    create_notification(to_field='jack@gmail.com')
+    create_notification(template=sample_email_template, to_field='jack@gmail.com')
 
     response = client.get(
         '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447800900800', 'sms'),
@@ -1968,12 +1968,12 @@ def test_search_for_notification_by_to_field_return_empty_list_if_there_is_no_ma
     assert len(notifications) == 0
 
 
-def test_search_for_notification_by_to_field_return_multiple_matches(client, notify_db, notify_db_session):
+def test_search_for_notification_by_to_field_return_multiple_matches(client, notify_db, notify_db_session, sample_email_template):
     create_notification = partial(create_sample_notification, notify_db, notify_db_session)
     notification1 = create_notification(to_field='+447800900855')
     notification2 = create_notification(to_field=' +44 78009 00855 ')
-    notification3 = create_notification(to_field='+44770 0900 855')
-    notification4 = create_notification(to_field='jack@gmail.com', normalised_to='jack@gmail.com')
+    notification3 = create_notification(to_field='+44780 0900 855')
+    notification4 = create_notification(template=sample_email_template, to_field='jack@gmail.com', normalised_to='jack@gmail.com')
 
     response = client.get(
         '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447800900855', 'sms'),
@@ -2290,7 +2290,7 @@ def test_search_for_notification_by_to_field_returns_notifications_by_type(
 
     response = client.get(
         '/service/{}/notifications?to={}&template_type={}'.format(
-            sms_notification.service_id, '0770', 'sms'
+            sms_notification.service_id, '0780', 'sms'
 
         ),
         headers=[create_authorization_header()]
