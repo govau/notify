@@ -1851,7 +1851,7 @@ def test_dao_get_notifications_by_to_field_search_ignores_spaces(sample_template
         template=sample_template, to_field='+447800900855',
     )
     notification2 = create_notification(
-        template=sample_template, to_field='+44 77 00900 855',
+        template=sample_template, to_field='+44 78 00900 855',
     )
     notification3 = create_notification(
         template=sample_template, to_field=' +4478009 00 855 ',
