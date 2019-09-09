@@ -330,18 +330,25 @@ def is_local_number(number):
     return number.country_code == LOCAL_CALLING_CODE
 
 
-# format_phone_number formats number using E.164 phone number formatting.
-# At the time of writing, E.164 is recommended by Twilio and Telstra:
-#
-# "Twilio strongly encourages using E.164 phone number formatting for all phone
-# numbers both in the ‘To’ and ‘From’ fields. This is an
-# internationally-recognized standard phone number format that will help to
-# ensure deliverability of calls and SMS messages across the globe."
-#
-# See https://support.twilio.com/hc/en-us/articles/223183008-Formatting-International-Phone-Numbers
-# See https://www.twilio.com/docs/glossary/what-e164
-# See https://dev.telstra.com/content/messaging-api#operation/Send%20SMS
 def format_phone_number(number):
+    """Formats number using E.164 phone number formatting.
+
+    At the time of writing, E.164 is recommended by Twilio and Telstra:
+
+    "Twilio strongly encourages using E.164 phone number formatting for all
+    phone numbers both in the ‘To’ and ‘From’ fields. This is an
+    internationally-recognized standard phone number format that will help to
+    ensure deliverability of calls and SMS messages across the globe."
+
+    See https://support.twilio.com/hc/en-us/articles/223183008-Formatting-International-Phone-Numbers
+    See https://www.twilio.com/docs/glossary/what-e164
+    See https://dev.telstra.com/content/messaging-api#operation/Send%20SMS
+
+    Args:
+        number: A phonenumbers.PhoneNumber object.
+    Returns:
+        An E.164 formatted string corresponding to the given phone number.
+    """
     return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
 
 
@@ -437,9 +444,10 @@ def prevalidate_phone_number(number_str, expecting_international_number):
 
 
 def postvalidate_phone_number(number):
+    from pprint import pprint
+
     if not phonenumbers.is_possible_number(number):
         reason = phonenumbers.is_possible_number_with_reason(number)
-        from pprint import pprint
         pprint(reason)
         if f'{number.country_code}' not in COUNTRY_PREFIXES:
             raise InvalidPhoneError('Not a valid country prefix')
@@ -591,8 +599,18 @@ def e164_to_phone_number(number_str):
     return phonenumbers.parse(number_str)
 
 
-# number should be a phonenumbers.PhoneNumber object.
 def format_phone_number_human_readable(number):
+    """Formats number as a human readable phone number.
+
+    If the given number is a local number, the human readable format is the
+    national format. Otherwise, the human readable format is the international
+    format.
+
+    Args:
+        number: A phonenumbers.PhoneNumber object.
+    Returns:
+        A nationally formatted number or an internationally formatted number.
+    """
     format = phonenumbers.PhoneNumberFormat.NATIONAL if is_local_number(number) else phonenumbers.PhoneNumberFormat.INTERNATIONAL
 
     return phonenumbers.format_number(number, format)
