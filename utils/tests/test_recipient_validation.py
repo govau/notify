@@ -365,8 +365,8 @@ def test_valid_address_line_does_not_raise_error():
 
 @pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
 def test_validates_against_whitelist_of_phone_numbers(phone_number):
-    assert allowed_to_send_to(phone_number, ['0412345678', '07700900460', 'test@example.com'])
-    assert not allowed_to_send_to(phone_number, ['0412000000', '07700900461', 'test@example.com'])
+    assert allowed_to_send_to(phone_number, ['0412345678', '07800900460', 'test@example.com'])
+    assert not allowed_to_send_to(phone_number, ['0412000000', '07800900461', 'test@example.com'])
 
 
 @pytest.mark.parametrize("email_address", valid_email_addresses)

@@ -167,7 +167,7 @@ def test_get_rows(file_contents, template_type, expected):
         (
             """
                 phone number,name
-                07700900460, test1
+                07800900460, test1
                 +447800 900 460,test2
                 ,
             """,
@@ -274,7 +274,7 @@ def test_big_list():
 
 def test_overly_big_list():
     big_csv = RecipientCSV(
-        "phonenumber,name\n" + ("07700900123,example\n" * (RecipientCSV.max_rows + 1)),
+        "phonenumber,name\n" + ("07800900123,example\n" * (RecipientCSV.max_rows + 1)),
         template_type='sms',
         placeholders=['name'],
     )
@@ -389,9 +389,9 @@ def test_get_recipient_respects_order(file_contents,
         (
             """
                 phone number,name
-                07700900460,test1
-                07700900460,test1
-                07700900460,test1
+                07800900460,test1
+                07800900460,test1
+                07800900460,test1
             """,
             'sms',
             ['phone number', 'name'],
@@ -490,11 +490,11 @@ def test_recipient_column(placeholders, file_contents, template_type):
         (
             """
                 phone number,name,date
-                07700900460,test1,test1
-                07700900460,test1
+                07800900460,test1,test1
+                07800900460,test1
                 +44 123,test1,test1
-                07700900460,test1,test1
-                07700900460,test1
+                07800900460,test1,test1
+                07800900460,test1
                 +1644000000,test1,test1
                 ,test1,test1
             """,
@@ -504,7 +504,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
         (
             """
                 phone number,name
-                07700900460,test1,test2
+                07800900460,test1,test2
             """,
             'sms',
             set(), set()
@@ -603,10 +603,10 @@ def test_errors_when_too_many_rows():
         (
             """
                 phone number
-                07700900460
-                07700900461
-                07700900462
-                07700900463
+                07800900460
+                07800900461
+                07800900462
+                07800900463
             """,
             'sms',
             ['+447800900460'],  # Same as first phone number but in different format
@@ -615,12 +615,12 @@ def test_errors_when_too_many_rows():
         (
             """
                 phone number
-                7700900460
+                7800900460
                 447800900461
-                07700900462
+                07800900462
             """,
             'sms',
-            ['07700900460', '07700900461', '07700900462', '07700900463', 'test@example.com'],
+            ['07800900460', '07800900461', '07800900462', '07800900463', 'test@example.com'],
             0
         ),
         (
@@ -630,7 +630,7 @@ def test_errors_when_too_many_rows():
                 not_in_whitelist@example.com
             """,
             'email',
-            ['in_whitelist@example.com', '07700900460'],  # Email case differs to the one in the CSV
+            ['in_whitelist@example.com', '07800900460'],  # Email case differs to the one in the CSV
             1
         )
     ]
@@ -650,7 +650,7 @@ def test_recipient_whitelist(file_contents, template_type, whitelist, count_of_r
 
     # Make sure the whitelist isn’t emptied by reading it. If it’s an iterator then
     # there’s a risk that it gets emptied after being read once
-    recipients.whitelist = (str(fake_number) for fake_number in range(7700900888, 7700900898))
+    recipients.whitelist = (str(fake_number) for fake_number in range(7800900888, 7800900898))
     list(recipients.whitelist)
     assert not recipients.allowed_to_send_to
     assert recipients.has_errors
@@ -671,10 +671,10 @@ def test_detects_rows_which_result_in_overly_long_messages():
     recipients = RecipientCSV(
         """
             phone number,placeholder
-            07700900460,1
-            07700900461,{one_under}
-            07700900462,{exactly}
-            07700900463,{one_over}
+            07800900460,1
+            07800900461,{one_under}
+            07800900462,{exactly}
+            07800900463,{one_over}
         """.format(
             one_under='a' * (SMS_CHAR_COUNT_LIMIT - 1),
             exactly='a' * SMS_CHAR_COUNT_LIMIT,
@@ -692,7 +692,7 @@ def test_detects_rows_which_result_in_overly_long_messages():
     "key, expected",
     sum([
         [(key, expected) for key in group] for expected, group in [
-            ('07700900460', (
+            ('07800900460', (
                 'phone number',
                 '   PHONENUMBER',
                 'phone_number',
@@ -720,7 +720,7 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     recipients = RecipientCSV(
         """
             phone number,FIRSTNAME, Last Name
-            07700900460, Jo, Bloggs
+            07800900460, Jo, Bloggs
         """,
         placeholders=['phone_number', 'First Name', 'lastname'],
         template_type='sms'
@@ -728,7 +728,7 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     first_row = recipients[0]
     assert first_row.get(key).data == expected
     assert first_row[key].data == expected
-    assert first_row.recipient == '07700900460'
+    assert first_row.recipient == '07800900460'
     assert len(first_row.items()) == 3
     assert not recipients.has_errors
 
@@ -740,7 +740,7 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
 
 def test_error_if_too_many_recipients():
     recipients = RecipientCSV(
-        'phone number,\n07700900460,\n07700900460,\n07700900460,',
+        'phone number,\n07800900460,\n07800900460,\n07800900460,',
         placeholders=['phone_number'],
         template_type='sms',
         remaining_messages=2
@@ -751,7 +751,7 @@ def test_error_if_too_many_recipients():
 
 def test_dont_error_if_too_many_recipients_not_specified():
     recipients = RecipientCSV(
-        'phone number,\n07700900460,\n07700900460,\n07700900460,',
+        'phone number,\n07800900460,\n07800900460,\n07800900460,',
         placeholders=['phone_number'],
         template_type='sms'
     )

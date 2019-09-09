@@ -1803,13 +1803,13 @@ def test_dao_get_notifications_by_to_field_escapes(
     '001',
     '100',
     '09001',
-    '077009001',
+    '078009001',
     '07700 9001',
     '(0)7700 9001',
     '4478009001',
     '+4478009001',
-    pytest.mark.skip('+44077009001', reason='No easy way to normalise this'),
-    pytest.mark.skip('+44(0)77009001', reason='No easy way to normalise this'),
+    pytest.mark.skip('+44078009001', reason='No easy way to normalise this'),
+    pytest.mark.skip('+44(0)78009001', reason='No easy way to normalise this'),
 ])
 def test_dao_get_notifications_by_to_field_matches_partial_phone_numbers(
     sample_template,

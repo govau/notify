@@ -119,7 +119,7 @@ def test_should_show_mobile_number_page(
 
 
 @pytest.mark.parametrize('phone_number_to_register_with', [
-    '+4407700900460',
+    '+4407800900460',
     '+1800-555-555',
 ])
 def test_should_redirect_after_mobile_number_change(
@@ -181,7 +181,7 @@ def test_should_show_confirm_after_mobile_number_change(
 
 
 @pytest.mark.parametrize('phone_number_to_register_with', [
-    '+4407700900460',
+    '+4407800900460',
     '+1800-555-555',
 ])
 def test_should_redirect_after_mobile_number_confirm(

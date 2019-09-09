@@ -67,7 +67,7 @@ def test_user_update_schema_accepts_valid_attribute_pairs(user_attribute, user_v
     ('name', None),
     ('name', ''),
     ('email_address', 'bademail@...com'),
-    ('mobile_number', '+44077009')
+    ('mobile_number', '+44078009')
 ])
 def test_user_update_schema_rejects_invalid_attribute_pairs(user_attribute, user_value):
     from app.schemas import user_update_schema_load_json
