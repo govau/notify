@@ -67,6 +67,9 @@ from tests.app.db import (
     create_letter_contact,
     create_invited_org_user,
 )
+from notifications_utils.recipients import (
+    validate_and_format_phone_number_and_allow_international,
+)
 
 
 @pytest.yield_fixture
@@ -563,6 +566,9 @@ def sample_notification(
         to = to_field
     else:
         to = '+61412345678'
+
+    if normalised_to is None and template.template_type == SMS_TYPE:
+        normalised_to = validate_and_format_phone_number_and_allow_international(to)
 
     data = {
         'id': notification_id,
