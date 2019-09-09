@@ -1225,7 +1225,7 @@ def test_get_template_class(template_type, expected_class):
 def test_send_inbound_sms_to_service_post_https_request_to_service(notify_api, sample_service):
     inbound_api = create_service_inbound_api(service=sample_service, url="https://some.service.gov.uk/",
                                              bearer_token="something_unique")
-    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="447700900111",
+    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="+447700900111",
                                      provider_date=datetime(2017, 6, 20), content="Here is some content")
     data = {
         "id": str(inbound_sms.id),
@@ -1262,7 +1262,7 @@ def test_send_inbound_sms_to_service_does_not_send_request_when_inbound_sms_does
 
 def test_send_inbound_sms_to_service_does_not_sent_request_when_inbound_api_does_not_exist(
         notify_api, sample_service, mocker):
-    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="447700900111",
+    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="+447700900111",
                                      provider_date=datetime(2017, 6, 20), content="Here is some content")
     mocked = mocker.patch("requests.request")
     send_inbound_sms_to_service(inbound_sms.id, inbound_sms.service_id)
@@ -1273,7 +1273,7 @@ def test_send_inbound_sms_to_service_does_not_sent_request_when_inbound_api_does
 def test_send_inbound_sms_to_service_retries_if_request_returns_500(notify_api, sample_service, mocker):
     inbound_api = create_service_inbound_api(service=sample_service, url="https://some.service.gov.uk/",
                                              bearer_token="something_unique")
-    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="447700900111",
+    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="+447700900111",
                                      provider_date=datetime(2017, 6, 20), content="Here is some content")
 
     mocked = mocker.patch('app.celery.tasks.send_inbound_sms_to_service.retry')
@@ -1292,7 +1292,7 @@ def test_send_inbound_sms_to_service_retries_if_request_throws_unknown(notify_ap
         service=sample_service,
         url="https://some.service.gov.uk/",
         bearer_token="something_unique")
-    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="447700900111",
+    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="+447700900111",
                                      provider_date=datetime(2017, 6, 20), content="Here is some content")
 
     mocked = mocker.patch('app.celery.tasks.send_inbound_sms_to_service.retry')
@@ -1307,7 +1307,7 @@ def test_send_inbound_sms_to_service_retries_if_request_throws_unknown(notify_ap
 def test_send_inbound_sms_to_service_does_not_retries_if_request_returns_404(notify_api, sample_service, mocker):
     inbound_api = create_service_inbound_api(service=sample_service, url="https://some.service.gov.uk/",
                                              bearer_token="something_unique")
-    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="447700900111",
+    inbound_sms = create_inbound_sms(service=sample_service, notify_number="0751421", user_number="+447700900111",
                                      provider_date=datetime(2017, 6, 20), content="Here is some content")
 
     mocked = mocker.patch('app.celery.tasks.send_inbound_sms_to_service.retry')

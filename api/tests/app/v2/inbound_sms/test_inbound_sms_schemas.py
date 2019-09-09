@@ -44,9 +44,9 @@ invalid_inbound_sms_list = {
 
 def test_get_inbound_sms_contract(client, sample_service):
     all_inbound_sms = [
-        create_inbound_sms(service=sample_service, user_number='447700900113'),
-        create_inbound_sms(service=sample_service, user_number='447700900112'),
-        create_inbound_sms(service=sample_service, user_number='447700900111'),
+        create_inbound_sms(service=sample_service, user_number='+447700900113'),
+        create_inbound_sms(service=sample_service, user_number='+447700900112'),
+        create_inbound_sms(service=sample_service, user_number='+447700900111'),
     ]
     reversed_inbound_sms = sorted(all_inbound_sms, key=lambda sms: sms.created_at, reverse=True)
 

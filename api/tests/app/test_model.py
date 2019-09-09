@@ -97,7 +97,7 @@ def test_status_conversion(initial_statuses, expected_statuses):
 
 @freeze_time("2016-01-01 11:09:00.000000")
 @pytest.mark.parametrize('template_type, recipient', [
-    ('sms', '+447700900855'),
+    ('sms', '+447800900855'),
     ('email', 'foo@bar.com'),
 ])
 def test_notification_for_csv_returns_correct_type(notify_db, notify_db_session, template_type, recipient):

@@ -579,7 +579,7 @@ def test_should_send_sms_to_international_providers(
     )
 
     twilio_sms_client.send_sms.assert_called_with(
-        to="61412888999",
+        to="+61412888999",
         content=ANY,
         reference=str(db_notification_au.id),
         sender=current_app.config['FROM_NUMBER']
@@ -590,7 +590,7 @@ def test_should_send_sms_to_international_providers(
     )
 
     twilio_sms_client.send_sms.assert_called_with(
-        to="61412111222",
+        to="+61412111222",
         content=ANY,
         reference=str(db_notification_international.id),
         sender=current_app.config['FROM_NUMBER']

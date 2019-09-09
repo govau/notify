@@ -178,13 +178,13 @@ def test_dao_get_paginated_inbound_sms_for_service_for_public_api_older_than_end
 
 
 def test_most_recent_inbound_sms_only_returns_most_recent_for_each_number(notify_api, sample_service):
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 1', created_at=datetime(2017, 1, 1))
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 2', created_at=datetime(2017, 1, 2))
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 3', created_at=datetime(2017, 1, 3))
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 4', created_at=datetime(2017, 1, 4))
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 5', created_at=datetime(2017, 1, 5))
-    create_inbound_sms(sample_service, user_number='447700900222', content='222 1', created_at=datetime(2017, 1, 1))
-    create_inbound_sms(sample_service, user_number='447700900222', content='222 2', created_at=datetime(2017, 1, 2))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 1', created_at=datetime(2017, 1, 1))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 2', created_at=datetime(2017, 1, 2))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 3', created_at=datetime(2017, 1, 3))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 4', created_at=datetime(2017, 1, 4))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 5', created_at=datetime(2017, 1, 5))
+    create_inbound_sms(sample_service, user_number='+447700900222', content='222 1', created_at=datetime(2017, 1, 1))
+    create_inbound_sms(sample_service, user_number='+447700900222', content='222 2', created_at=datetime(2017, 1, 2))
 
     with set_config(notify_api, 'PAGE_SIZE', 3):
         res = dao_get_paginated_most_recent_inbound_sms_by_user_number_for_service(sample_service.id, page=1)
@@ -197,14 +197,14 @@ def test_most_recent_inbound_sms_only_returns_most_recent_for_each_number(notify
 
 
 def test_most_recent_inbound_sms_paginates_properly(notify_api, sample_service):
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 1', created_at=datetime(2017, 1, 1))
-    create_inbound_sms(sample_service, user_number='447700900111', content='111 2', created_at=datetime(2017, 1, 2))
-    create_inbound_sms(sample_service, user_number='447700900222', content='222 1', created_at=datetime(2017, 1, 3))
-    create_inbound_sms(sample_service, user_number='447700900222', content='222 2', created_at=datetime(2017, 1, 4))
-    create_inbound_sms(sample_service, user_number='447700900333', content='333 1', created_at=datetime(2017, 1, 5))
-    create_inbound_sms(sample_service, user_number='447700900333', content='333 2', created_at=datetime(2017, 1, 6))
-    create_inbound_sms(sample_service, user_number='447700900444', content='444 1', created_at=datetime(2017, 1, 7))
-    create_inbound_sms(sample_service, user_number='447700900444', content='444 2', created_at=datetime(2017, 1, 8))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 1', created_at=datetime(2017, 1, 1))
+    create_inbound_sms(sample_service, user_number='+447700900111', content='111 2', created_at=datetime(2017, 1, 2))
+    create_inbound_sms(sample_service, user_number='+447700900222', content='222 1', created_at=datetime(2017, 1, 3))
+    create_inbound_sms(sample_service, user_number='+447700900222', content='222 2', created_at=datetime(2017, 1, 4))
+    create_inbound_sms(sample_service, user_number='+447700900333', content='333 1', created_at=datetime(2017, 1, 5))
+    create_inbound_sms(sample_service, user_number='+447700900333', content='333 2', created_at=datetime(2017, 1, 6))
+    create_inbound_sms(sample_service, user_number='+447700900444', content='444 1', created_at=datetime(2017, 1, 7))
+    create_inbound_sms(sample_service, user_number='+447700900444', content='444 2', created_at=datetime(2017, 1, 8))
 
     with set_config(notify_api, 'PAGE_SIZE', 2):
         # first page has most recent 444 and 333
