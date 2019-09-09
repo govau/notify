@@ -1800,16 +1800,16 @@ def test_dao_get_notifications_by_to_field_escapes(
 
 
 @pytest.mark.parametrize('search_term', [
-    '001',
-    '100',
-    '09001',
-    '078009001',
-    '07700 9001',
-    '(0)7700 9001',
-    '4478009001',
-    '+4478009001',
-    pytest.mark.skip('+44078009001', reason='No easy way to normalise this'),
-    pytest.mark.skip('+44(0)78009001', reason='No easy way to normalise this'),
+    '008',
+    '800',
+    '09008',
+    '04129008',
+    '0412 9008',
+    '(0)412 9008',
+    '614129008',
+    '+614129008',
+    pytest.mark.skip('+6104129008', reason='No easy way to normalise this'),
+    pytest.mark.skip('+61(0)4129008', reason='No easy way to normalise this'),
 ])
 def test_dao_get_notifications_by_to_field_matches_partial_phone_numbers(
     sample_template,
@@ -1818,11 +1818,11 @@ def test_dao_get_notifications_by_to_field_matches_partial_phone_numbers(
 
     notification_1 = create_notification(
         template=sample_template,
-        to_field='+447800900100',
+        to_field='+61412900800',
     )
     notification_2 = create_notification(
         template=sample_template,
-        to_field='+447800900200',
+        to_field='+61412900200',
     )
     results = dao_get_notifications_by_to_field(notification_1.service_id, search_term, notification_type='sms')
     notification_ids = [notification.id for notification in results]
