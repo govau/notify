@@ -13,7 +13,7 @@ from tests import create_authorization_header
 from tests.app.db import create_inbound_sms
 
 valid_inbound_sms = {
-    "user_number": "447700900111",
+    "user_number": "447800900111",
     "created_at": "2017-11-02T15:07:57.197546Z",
     "service_id": "a5149c32-f03b-4711-af49-ad6993797d45",
     "id": "342786aa-23ce-4695-9aad-7f79e68ee29a",
@@ -30,7 +30,7 @@ valid_inbound_sms_list = {
 }
 
 invalid_inbound_sms = {
-    "user_number": "447700900111",
+    "user_number": "447800900111",
     "created_at": "2017-11-02T15:07:57.197546",
     "service_id": "a5149c32-f03b-4711-af49-ad6993797d45",
     "id": "342786aa-23ce-4695-9aad-7f79e68ee29a",
@@ -44,9 +44,9 @@ invalid_inbound_sms_list = {
 
 def test_get_inbound_sms_contract(client, sample_service):
     all_inbound_sms = [
-        create_inbound_sms(service=sample_service, user_number='+447700900113'),
-        create_inbound_sms(service=sample_service, user_number='+447700900112'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111'),
+        create_inbound_sms(service=sample_service, user_number='+447800900113'),
+        create_inbound_sms(service=sample_service, user_number='+447800900112'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111'),
     ]
     reversed_inbound_sms = sorted(all_inbound_sms, key=lambda sms: sms.created_at, reverse=True)
 
@@ -71,7 +71,7 @@ def test_valid_inbound_sms_request_json(client, request_args):
 
 def test_invalid_inbound_sms_request_json(client):
     with pytest.raises(expected_exception=ValidationError):
-        validate({'user_number': '447700900111'}, get_inbound_sms_request)
+        validate({'user_number': '447800900111'}, get_inbound_sms_request)
 
 
 def test_valid_inbound_sms_response_json():

@@ -8,10 +8,10 @@ def test_get_inbound_sms_returns_200(
         client, sample_service
 ):
     all_inbound_sms = [
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='Hi'),
-        create_inbound_sms(service=sample_service, user_number='+447700900112'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='Bye'),
-        create_inbound_sms(service=sample_service, user_number='+447700900113')
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='Hi'),
+        create_inbound_sms(service=sample_service, user_number='+447800900112'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='Bye'),
+        create_inbound_sms(service=sample_service, user_number='+447800900113')
     ]
 
     auth_header = create_authorization_header(service_id=sample_service.id)
@@ -37,9 +37,9 @@ def test_get_inbound_sms_generate_page_links(client, sample_service, mocker):
         {"API_PAGE_SIZE": 2}
     )
     all_inbound_sms = [
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='Hi'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='End'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='Hi'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='End'),
     ]
 
     reversed_inbound_sms = sorted(all_inbound_sms, key=lambda sms: sms.created_at, reverse=True)
@@ -70,10 +70,10 @@ def test_get_next_inbound_sms_will_get_correct_inbound_sms_list(client, sample_s
         {"API_PAGE_SIZE": 2}
     )
     all_inbound_sms = [
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='1'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='2'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='3'),
-        create_inbound_sms(service=sample_service, user_number='+447700900111', content='4'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='1'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='2'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='3'),
+        create_inbound_sms(service=sample_service, user_number='+447800900111', content='4'),
     ]
     reversed_inbound_sms = sorted(all_inbound_sms, key=lambda sms: sms.created_at, reverse=True)
 
@@ -141,7 +141,7 @@ def test_get_inbound_sms_for_no_inbound_sms_returns_empty_list(
 def test_get_inbound_sms_with_invalid_query_string_returns_400(client, sample_service):
     auth_header = create_authorization_header(service_id=sample_service.id)
     response = client.get(
-        path='/v2/received-text-messages?user_number=447700900000',
+        path='/v2/received-text-messages?user_number=447800900000',
         headers=[('Content-Type', 'application/json'), auth_header])
 
     assert response.status_code == 400

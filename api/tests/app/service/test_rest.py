@@ -1936,7 +1936,7 @@ def test_get_template_usage_by_month_returns_two_templates(
 
 def test_search_for_notification_by_to_field(client, sample_template, sample_email_template):
 
-    notification1 = create_notification(template=sample_template, to_field='+447700900855')
+    notification1 = create_notification(template=sample_template, to_field='+447800900855')
     notification2 = create_notification(template=sample_email_template, to_field='jack@gmail.com',
                                         normalised_to='jack@gmail.com')
 
@@ -1955,11 +1955,11 @@ def test_search_for_notification_by_to_field_return_empty_list_if_there_is_no_ma
     client, notify_db, notify_db_session
 ):
     create_notification = partial(create_sample_notification, notify_db, notify_db_session)
-    notification1 = create_notification(to_field='+447700900855')
+    notification1 = create_notification(to_field='+447800900855')
     create_notification(to_field='jack@gmail.com')
 
     response = client.get(
-        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447700900800', 'sms'),
+        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447800900800', 'sms'),
         headers=[create_authorization_header()]
     )
     notifications = json.loads(response.get_data(as_text=True))['notifications']
@@ -1970,13 +1970,13 @@ def test_search_for_notification_by_to_field_return_empty_list_if_there_is_no_ma
 
 def test_search_for_notification_by_to_field_return_multiple_matches(client, notify_db, notify_db_session):
     create_notification = partial(create_sample_notification, notify_db, notify_db_session)
-    notification1 = create_notification(to_field='+447700900855')
-    notification2 = create_notification(to_field=' +44 77009 00855 ')
+    notification1 = create_notification(to_field='+447800900855')
+    notification2 = create_notification(to_field=' +44 78009 00855 ')
     notification3 = create_notification(to_field='+44770 0900 855')
     notification4 = create_notification(to_field='jack@gmail.com', normalised_to='jack@gmail.com')
 
     response = client.get(
-        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447700900855', 'sms'),
+        '/service/{}/notifications?to={}&template_type={}'.format(notification1.service_id, '+447800900855', 'sms'),
         headers=[create_authorization_header()]
     )
     notifications = json.loads(response.get_data(as_text=True))['notifications']
@@ -2075,14 +2075,14 @@ def test_search_for_notification_by_to_field_filters_by_status(client, notify_db
         create_sample_notification,
         notify_db,
         notify_db_session,
-        to_field='+447700900855',
+        to_field='+447800900855',
     )
     notification1 = create_notification(status='delivered')
     create_notification(status='sending')
 
     response = client.get(
         '/service/{}/notifications?to={}&status={}&template_type={}'.format(
-            notification1.service_id, '+447700900855', 'delivered', 'sms'
+            notification1.service_id, '+447800900855', 'delivered', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2099,14 +2099,14 @@ def test_search_for_notification_by_to_field_filters_by_statuses(client, notify_
         create_sample_notification,
         notify_db,
         notify_db_session,
-        to_field='+447700900855',
+        to_field='+447800900855',
     )
     notification1 = create_notification(status='delivered')
     notification2 = create_notification(status='sending')
 
     response = client.get(
         '/service/{}/notifications?to={}&status={}&status={}&template_type={}'.format(
-            notification1.service_id, '+447700900855', 'delivered', 'sending', 'sms'
+            notification1.service_id, '+447800900855', 'delivered', 'sending', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2128,14 +2128,14 @@ def test_search_for_notification_by_to_field_returns_content(
     notification = create_sample_notification(
         notify_db,
         notify_db_session,
-        to_field='+447700900855',
+        to_field='+447800900855',
         template=sample_template_with_placeholders,
         personalisation={"name": "Foo"}
     )
 
     response = client.get(
         '/service/{}/notifications?to={}&template_type={}'.format(
-            sample_template_with_placeholders.service_id, '+447700900855', 'sms'
+            sample_template_with_placeholders.service_id, '+447800900855', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2144,7 +2144,7 @@ def test_search_for_notification_by_to_field_returns_content(
     assert len(notifications) == 1
 
     assert notifications[0]['id'] == str(notification.id)
-    assert notifications[0]['to'] == '+447700900855'
+    assert notifications[0]['to'] == '+447800900855'
     assert notifications[0]['template']['content'] == 'Hello (( Name))\nYour thing is due soon'
 
 
@@ -2248,14 +2248,14 @@ def test_search_for_notification_by_to_field_returns_personlisation(
     create_sample_notification(
         notify_db,
         notify_db_session,
-        to_field='+447700900855',
+        to_field='+447800900855',
         template=sample_template_with_placeholders,
         personalisation={"name": "Foo"}
     )
 
     response = client.get(
         '/service/{}/notifications?to={}&template_type={}'.format(
-            sample_template_with_placeholders.service_id, '+447700900855', 'sms'
+            sample_template_with_placeholders.service_id, '+447800900855', 'sms'
         ),
         headers=[create_authorization_header()]
     )
@@ -2277,7 +2277,7 @@ def test_search_for_notification_by_to_field_returns_notifications_by_type(
     sms_notification = create_sample_notification(
         notify_db,
         notify_db_session,
-        to_field='+447700900855',
+        to_field='+447800900855',
         template=sample_template
     )
     create_sample_notification(

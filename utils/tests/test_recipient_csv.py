@@ -168,7 +168,7 @@ def test_get_rows(file_contents, template_type, expected):
             """
                 phone number,name
                 07700900460, test1
-                +447700 900 460,test2
+                +447800 900 460,test2
                 ,
             """,
             'sms',
@@ -609,14 +609,14 @@ def test_errors_when_too_many_rows():
                 07700900463
             """,
             'sms',
-            ['+447700900460'],  # Same as first phone number but in different format
+            ['+447800900460'],  # Same as first phone number but in different format
             3
         ),
         (
             """
                 phone number
                 7700900460
-                447700900461
+                447800900461
                 07700900462
             """,
             'sms',

@@ -56,7 +56,7 @@ def test_receive_notification_returns_received_to_mmg(client, mocker, sample_ser
     mocked = mocker.patch("app.notifications.receive_notifications.tasks.send_inbound_sms_to_service.apply_async")
     data = {
         "ID": "1234",
-        "MSISDN": "447700900855",
+        "MSISDN": "447800900855",
         "Message": "Some message to notify",
         "Trigger": "Trigger?",
         "Number": sample_service_full_permissions.get_inbound_number(),
@@ -143,7 +143,7 @@ def test_receive_notification_without_permissions_does_not_create_inbound_even_w
 
     data = {
         "ID": "1234",
-        "MSISDN": "447700900855",
+        "MSISDN": "447800900855",
         "Message": "Some message to notify",
         "Trigger": "Trigger?",
         "Number": inbound_number.number,

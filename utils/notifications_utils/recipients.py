@@ -468,10 +468,8 @@ def postvalidate_phone_number(number):
     pprint(number)
     pprint("is valid? {}".format(phonenumbers.is_valid_number(number)))
 
-    # TODO: don't think we want to validate. Only want to check if it's a
-    # possible number.
-    # if not phonenumbers.is_valid_number(number):
-    #     raise InvalidPhoneError('Not a valid mobile number')
+    if not phonenumbers.is_valid_number(number):
+        raise InvalidPhoneError('Not a valid mobile number')
 
     return number
 
