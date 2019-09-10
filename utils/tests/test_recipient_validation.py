@@ -245,7 +245,7 @@ def test_phone_number_accepts_valid_international_values(validator, phone_number
 
 @pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
 def test_valid_local_phone_number_can_be_formatted_consistently(phone_number):
-    assert validate_and_format_phone_number_and_require_local(phone_number) == '447123456789'
+    assert validate_and_format_phone_number_and_require_local(phone_number) == '+61412345678'
 
 
 @pytest.mark.parametrize("phone_number, expected_formatted", [
