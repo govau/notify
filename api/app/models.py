@@ -1172,6 +1172,16 @@ class NotificationStatusTypes(db.Model):
 
 
 class Notification(db.Model):
+    """
+
+    Attributes:
+        normalised_to: A formatted version of the to field.
+            If the notification type is SMS, this is the E.164 formatted phone
+            number.
+            If the notification type is email, this is the email address
+            stripped of all white space,.
+    """
+
     __tablename__ = 'notifications'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
