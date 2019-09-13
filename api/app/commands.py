@@ -40,7 +40,7 @@ from app.utils import (
     get_sydney_midnight_in_utc,
     get_midnight_for_day_before,
 )
-from app import telstra_sms_client
+from app import telstra_sms_client, twilio_sms_client
 
 
 @click.group(name='command', help='Additional commands')
@@ -334,6 +334,33 @@ def get_telstra_message_status(message_id):
     print('Telstra status: {}'.format(msg.delivery_status))
     if msg.delivery_status:
         print('Notify status: {}'.format(get_telstra_responses(msg.delivery_status)))
+
+
+@notify_command(name='buy-twilio-available-phone-number')
+@click.option('-c', '--country_code',
+              required=True,
+              help="The ISO country code of the country from which to purchase the phone number",
+              )
+@click.option('-a', '--address_sid',
+              required=True,
+              help="The Twilio address SID that must be supplied when purchasing the phone number",
+              )
+def buy_twilio_available_phone_number(country_code, address_sid):
+    incoming_phone_number = twilio_sms_client.buy_available_phone_number(country_code, address_sid)
+
+    if incoming_phone_number is None:
+        current_app.logger.error('Could not find an available phone number to buy')
+        sys.exit(1)
+
+    print('Purchased phone number: {}'.format(incoming_phone_number.phone_number))
+    print('SID: {}'.format(incoming_phone_number.sid))
+    print('Capabilities: {}'.format(incoming_phone_number.capabilities))
+
+    sql = "insert into inbound_numbers values('{}', '{}', 'twilio', null, True, now(), null);"
+    db.session.execute(sql.format(uuid.uuid4(), incoming_phone_number.phone_number))
+    db.session.commit()
+
+    print('Inbound phone number now available to allocate')
 
 
 @notify_command(name='remove-sms-sender')

@@ -473,7 +473,7 @@ class InboundNumber(db.Model):
     __tablename__ = "inbound_numbers"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    number = db.Column(db.String(11), unique=True, nullable=False)
+    number = db.Column(db.String(12), unique=True, nullable=False)
     provider = db.Column(db.String(), nullable=False)
     service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), unique=True, index=True, nullable=True)
     service = db.relationship(Service, backref=db.backref("inbound_number", uselist=False))
@@ -503,7 +503,7 @@ class ServiceSmsSender(db.Model):
     __tablename__ = "service_sms_senders"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    sms_sender = db.Column(db.String(11), nullable=False)
+    sms_sender = db.Column(db.String(12), nullable=False)
     service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=False, unique=False)
     service = db.relationship(Service, backref=db.backref("service_sms_senders", uselist=True))
     is_default = db.Column(db.Boolean, nullable=False, default=True)

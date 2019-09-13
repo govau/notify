@@ -41,6 +41,10 @@ def send_sms_to_provider(notification):
         return
 
     if notification.status == 'created':
+        # TODO: issue is that this does not get the provider based on who owns
+        # the inbound number. The notification.reply_to_text below is the phone
+        # number that we should send from, but we need to look at that and see
+        # who the provider is.
         provider = provider_to_use(SMS_TYPE, notification.id, notification.international)
         current_app.logger.debug(
             "Starting sending SMS {} to provider at {}".format(notification.id, datetime.utcnow())

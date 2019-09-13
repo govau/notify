@@ -73,3 +73,19 @@ class TwilioSMSClient(SmsClient):
         finally:
             elapsed_time = monotonic() - start_time
             self.logger.info("Twilio send SMS request for {} finished in {}".format(reference, elapsed_time))
+
+    def buy_available_phone_number(self, country_code, address_sid):
+        mobile = self._client.available_phone_numbers(country_code).mobile.list(
+            sms_enabled=True,
+            limit=1,
+        )
+
+        for record in mobile:
+            incoming_phone_number = self._client.incoming_phone_numbers.create(
+                address_sid=address_sid,
+                phone_number=record.phone_number,
+            )
+
+            return incoming_phone_number
+
+        return None
