@@ -84,8 +84,17 @@ class TwilioSMSClient(SmsClient):
             incoming_phone_number = self._client.incoming_phone_numbers.create(
                 address_sid=address_sid,
                 phone_number=record.phone_number,
+                sms_url=self.incoming_phone_number_sms_url(),
             )
 
             return incoming_phone_number
 
         return None
+
+    def update_incoming_phone_number(self, sid):
+        self._client.incoming_phone_numbers(sid).update(
+            sms_url=self.incoming_phone_number_sms_url(),
+        )
+
+    def incoming_phone_number_sms_url(self):
+        return "{}/notifications/sms/receive/twilio".format(self._callback_notify_url_host) if self._callback_notify_url_host else ""
