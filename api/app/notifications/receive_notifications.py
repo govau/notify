@@ -1,7 +1,9 @@
+import os
 from datetime import datetime
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, request, abort
 from twilio.twiml.messaging_response import MessagingResponse
+from twilio.request_validator import RequestValidator
 
 from notifications_utils.recipients import try_validate_and_format_phone_number
 
@@ -21,13 +23,7 @@ register_errors(receive_notifications_blueprint)
 def receive_twilio_sms():
     response = MessagingResponse()
 
-    post_data = request.form
-
-    from pprint import pprint
-    pprint("post_data")
-    pprint(post_data)
-
-    # TODO
+    # TODO: auth
     # auth = request.authorization
 
     # if not auth:
@@ -37,6 +33,17 @@ def receive_twilio_sms():
     #         or auth.password not in current_app.config['MMG_INBOUND_SMS_AUTH']:
     #     current_app.logger.warning("Inbound sms (Twilio) incorrect username ({}) or password".format(auth.username))
     #     abort(403)
+
+    # Locally, when using ngrok the URL comes in without HTTPS so force it.
+    url = request.url.replace("http://", "https://")
+    post_data = request.form
+    twilio_signature = request.headers.get('X-Twilio-Signature')
+
+    validator = RequestValidator(os.getenv('TWILIO_AUTH_TOKEN'))
+
+    if not validator.validate(url, post_data, twilio_signature):
+        current_app.logger.warning("Inbound sms (Twilio) signature did not match request")
+        abort(400)
 
     service = fetch_potential_service(post_data['To'], 'twilio')
     if not service:
