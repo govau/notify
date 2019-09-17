@@ -336,6 +336,8 @@ class Config(object):
     FIRETEXT_INBOUND_SMS_AUTH = json.loads(os.environ.get('FIRETEXT_INBOUND_SMS_AUTH', '[]'))
     MMG_INBOUND_SMS_AUTH = json.loads(os.environ.get('MMG_INBOUND_SMS_AUTH', '[]'))
     MMG_INBOUND_SMS_USERNAME = json.loads(os.environ.get('MMG_INBOUND_SMS_USERNAME', '[]'))
+    TWILIO_INBOUND_SMS_AUTH = json.loads(os.environ.get('TWILIO_INBOUND_SMS_AUTH', '[]'))
+    TWILIO_INBOUND_SMS_USERNAME = json.loads(os.environ.get('TWILIO_INBOUND_SMS_USERNAME', '[]'))
 
     ROUTE_SECRET_KEY_1 = os.environ.get('ROUTE_SECRET_KEY_1', '')
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
