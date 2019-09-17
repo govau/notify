@@ -80,7 +80,9 @@ def create_app(application):
     )
     twilio_sms_client.init_app(
         logger=application.logger,
-        callback_notify_url_host=application.config["API_HOST_NAME"]
+        callback_notify_url_host=application.config["API_HOST_NAME"],
+        callback_username=application.config["TWILIO_CALLBACK_USERNAME"],
+        callback_password=application.config["TWILIO_CALLBACK_PASSWORD"],
     )
     aws_ses_client.init_app(
         application.config['AWS_SES_REGION'],

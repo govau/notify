@@ -1,4 +1,6 @@
 from monotonic import monotonic
+import urllib.parse
+
 from app.clients.sms import SmsClient
 from twilio.rest import Client
 
@@ -40,9 +42,11 @@ class TwilioSMSClient(SmsClient):
         self._from_number = from_number
         self._client = Client(account_sid, auth_token)
 
-    def init_app(self, logger, callback_notify_url_host, *args, **kwargs):
+    def init_app(self, logger, callback_notify_url_host, callback_username, callback_password, *args, **kwargs):
         self.logger = logger
         self._callback_notify_url_host = callback_notify_url_host
+        self._callback_username = callback_username
+        self._callback_password = callback_password
 
     @property
     def name(self):
@@ -97,4 +101,15 @@ class TwilioSMSClient(SmsClient):
         )
 
     def incoming_phone_number_sms_url(self):
-        return "{}/notifications/sms/receive/twilio".format(self._callback_notify_url_host) if self._callback_notify_url_host else ""
+        base = self._callback_notify_url_host if self._callback_notify_url_host else ""
+        if base:
+            # Set username and password into the base URL. We make the
+            # assumption here that the base URL does not already include
+            # credentials.
+            scheme = 'https://' if base.startswith('https://') else 'http://'
+            base = base.replace(scheme, '{}{}:{}@'.format(
+                scheme,
+                urllib.parse.quote(self._callback_username),
+                urllib.parse.quote(self._callback_password),
+            ))
+        return "{}/notifications/sms/receive/twilio".format(base)
