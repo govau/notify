@@ -157,6 +157,7 @@ def test_receive_notification_returns_received_to_twilio(notify_db_session, clie
     mocked.assert_called_once_with([str(inbound_sms_id), str(service.id)], queue="notify-internal-tasks")
 
 
+@freeze_time('2017-01-01T01:00:00')
 def test_receive_notification_from_twilio_persists_message(notify_db_session, client, mocker):
     mocker.patch('twilio.request_validator.RequestValidator.validate', return_value=True)
     mocked = mocker.patch("app.notifications.receive_notifications.tasks.send_inbound_sms_to_service.apply_async")

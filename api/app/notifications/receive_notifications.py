@@ -70,7 +70,7 @@ def receive_twilio_sms():
     return str(response), 200
 
 
-def create_inbound_sms_object(service, content, from_number, provider_ref, provider_name, date_received=datetime.utcnow()):
+def create_inbound_sms_object(service, content, from_number, provider_ref, provider_name):
     user_number = try_validate_and_format_phone_number(
         from_number,
         international=True,
@@ -81,7 +81,7 @@ def create_inbound_sms_object(service, content, from_number, provider_ref, provi
         service=service,
         notify_number=service.get_inbound_number(),
         user_number=user_number,
-        provider_date=date_received,
+        provider_date=datetime.utcnow(),
         provider_reference=provider_ref,
         content=content,
         provider=provider_name
