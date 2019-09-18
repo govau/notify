@@ -103,9 +103,10 @@ def get_user_number(service_id, notification_id):
 
         number_e164 = notification['normalised_to']
 
-        # For old records normalised_to is not right, or not set, so try and
-        # create it on the fly.
-        if not number_e164:
+        # For old records normalised_to may be empty or it may be stored in the
+        # old format (without storing the leading plus sign). If this is the
+        # case, use the to field instead and create the E.164 format on the fly.
+        if not number_e164 or not number_e164.startswith('+'):
             try:
                 number_e164 = validate_and_format_phone_number_and_allow_international(notification['to'])
             except Exception:
