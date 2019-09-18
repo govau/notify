@@ -378,11 +378,6 @@ e164_invalid_chars_re = re.compile(r'[^\+0-9\(\)\s\-]+')
 
 
 def prevalidate_phone_number(number_str, expecting_international_number):
-    from pprint import pprint
-
-    pprint("0: {}".format(expecting_international_number))
-    pprint("1: {}".format(number_str))
-
     # Clean up whitespace
     number_str = strip_and_remove_all_whitespace(number_str)
 
@@ -431,9 +426,6 @@ def prevalidate_phone_number(number_str, expecting_international_number):
             if not number_str.startswith('+'):
                 number_str = f'+{number_str}'
 
-    pprint("2: {}".format(number_str))
-    pprint("3: {}".format(default_region))
-
     try:
         number = phonenumbers.parse(number_str, region=default_region)
     except Exception:
@@ -444,11 +436,9 @@ def prevalidate_phone_number(number_str, expecting_international_number):
 
 
 def postvalidate_phone_number(number):
-    from pprint import pprint
-
     if not phonenumbers.is_possible_number(number):
         reason = phonenumbers.is_possible_number_with_reason(number)
-        pprint(reason)
+
         if f'{number.country_code}' not in COUNTRY_PREFIXES:
             raise InvalidPhoneError('Not a valid country prefix')
 
@@ -463,10 +453,6 @@ def postvalidate_phone_number(number):
 
         if reason == phonenumbers.ValidationResult.INVALID_LENGTH:
             raise InvalidPhoneError('Wrong amount of digits')
-
-    from pprint import pprint
-    pprint(number)
-    pprint("is valid? {}".format(phonenumbers.is_valid_number(number)))
 
     if not phonenumbers.is_valid_number(number):
         raise InvalidPhoneError('Not a valid mobile number')
