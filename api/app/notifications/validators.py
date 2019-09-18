@@ -2,7 +2,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from flask import current_app
 from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.recipients import (
-    validate_and_format_phone_number,
+    validate_and_format_phone_number_and_allow_international,
     validate_and_format_email_address,
     get_international_phone_info
 )
@@ -118,10 +118,7 @@ def validate_and_format_recipient(send_to, key_type, service, notification_type,
                 INTERNATIONAL_SMS_TYPE not in [p.permission for p in service.permissions]:
             raise BadRequestError(message="Cannot send to international mobile numbers")
 
-        return validate_and_format_phone_number(
-            number=send_to,
-            international=international_phone_info.international
-        )
+        return validate_and_format_phone_number_and_allow_international(send_to)
     elif notification_type == EMAIL_TYPE:
         return validate_and_format_email_address(email_address=send_to)
 

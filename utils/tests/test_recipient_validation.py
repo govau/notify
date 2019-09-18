@@ -3,16 +3,19 @@ import pytest
 from functools import partial
 
 from notifications_utils.recipients import (
-    validate_phone_number,
-    validate_and_format_phone_number,
+    NOT_LOCAL_NUMBER_MSG,
+    validate_phone_number_and_require_local,
+    validate_phone_number_and_allow_international,
+    validate_and_format_phone_number_and_require_local,
+    validate_and_format_phone_number_and_allow_international,
     InvalidPhoneError,
     validate_email_address,
     InvalidEmailError,
     allowed_to_send_to,
     InvalidAddressError,
     validate_recipient,
-    is_uk_phone_number,
-    normalise_phone_number,
+    is_local_number,
+    e164_to_phone_number,
     international_phone_info,
     get_international_phone_info,
     format_phone_number_human_readable,
@@ -21,16 +24,20 @@ from notifications_utils.recipients import (
 )
 
 
-valid_uk_phone_numbers = [
-    '7123456789',
-    '07123456789',
-    '07123 456789',
-    '07123-456-789',
-    '00447123456789',
-    '00 44 7123456789',
-    '+447123456789',
-    '+44 7123 456 789',
-    '+44 (0)7123 456 789'
+valid_local_phone_numbers = [
+    '412345678',
+    '0412345678',
+    '0412 345678',
+    '0412-345-678',
+    '61412345678',
+    '610412345678',
+    '+61412345678',
+    '+610412345678',
+    '+61 412 345 678',
+    '(+61) 412 345 678',
+    '+61 0412 345 678',
+    '+61 (0) 412 345 678',
+    '+61(0) 412 345 678',
 ]
 
 
@@ -47,41 +54,39 @@ valid_international_phone_numbers = [
 ]
 
 
-valid_phone_numbers = valid_uk_phone_numbers + valid_international_phone_numbers
+valid_phone_numbers = valid_local_phone_numbers + valid_international_phone_numbers
 
 
-invalid_uk_phone_numbers = sum([
+invalid_local_phone_numbers = sum([
     [
         (phone_number, error) for phone_number in group
     ] for error, group in [
+        ('Wrong amount of digits', (
+            '412345678910',
+        )),
         ('Too many digits', (
-            '712345678910',
-            '0712345678910',
-            '0044712345678910',
-            '0044712345678910',
-            '+44 (0)7123 456 789 10',
+            '61412345678910',
+            '+61 (0)412 345 678 910',
         )),
         ('Not enough digits', (
-            '0712345678',
-            '004471234567',
-            '00447123456',
-            '+44 (0)7123 456 78',
+            '+61412',
+            '+61 412',
+            '+61 412 3',
         )),
-        ('Not a UK mobile number', (
+        (NOT_LOCAL_NUMBER_MSG, (
+            '0412',
+            '0412345678910',
             '08081 570364',
-            '+44 8081 570364',
             '0117 496 0860',
-            '+44 117 496 0860',
             '020 7946 0991',
-            '+44 20 7946 0991',
         )),
         ('Must not contain letters or symbols', (
-            '07890x32109',
-            '07123 456789...',
-            '07123 ☟☜⬇⬆☞☝',
-            '07123☟☜⬇⬆☞☝',
-            '07";DROP TABLE;"',
-            '+44 07ab cde fgh',
+            '04890x32109',
+            '04123 456789...',
+            '04123 ☟☜⬇⬆☞☝',
+            '04123☟☜⬇⬆☞☝',
+            '04";DROP TABLE;"',
+            '+61 07ab cde fgh',
             'ALPHANUM3R1C',
         ))
     ]
@@ -92,7 +97,7 @@ invalid_phone_numbers = list(filter(
     lambda number: number[0] not in {
         '712345678910',   # Could be Russia
     },
-    invalid_uk_phone_numbers
+    invalid_local_phone_numbers
 )) + [
     ('800000000000', 'Not a valid country prefix'),
     ('1234567', 'Not enough digits'),
@@ -152,12 +157,12 @@ invalid_email_addresses = (
 
 @pytest.mark.parametrize("phone_number", valid_international_phone_numbers)
 def test_detect_international_phone_numbers(phone_number):
-    assert is_uk_phone_number(phone_number) is False
+    assert is_local_number(validate_phone_number_and_allow_international(phone_number)) is False
 
 
-@pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
-def test_detect_uk_phone_numbers(phone_number):
-    assert is_uk_phone_number(phone_number) is True
+@pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
+def test_detect_local_phone_numbers(phone_number):
+    assert is_local_number(validate_phone_number_and_require_local(phone_number)) is True
 
 
 @pytest.mark.parametrize("phone_number, expected_info", [
@@ -202,21 +207,6 @@ def test_get_international_info(phone_number, expected_info):
 
 
 @pytest.mark.parametrize('phone_number', [
-    'abcd',
-    '079OO900123',
-    pytest.mark.xfail(''),
-    pytest.mark.xfail('12345'),
-    pytest.mark.xfail('+12345'),
-    pytest.mark.xfail('1-2-3-4-5'),
-    pytest.mark.xfail('1 2 3 4 5'),
-    pytest.mark.xfail('(1)2345'),
-])
-def test_normalise_phone_number_raises_if_unparseable_characters(phone_number):
-    with pytest.raises(InvalidPhoneError):
-        normalise_phone_number(phone_number)
-
-
-@pytest.mark.parametrize('phone_number', [
     '+21 4321 0987',
     '00997 1234 7890',
     '801234-7890'
@@ -228,12 +218,11 @@ def test_get_international_info_raises(phone_number):
     assert str(error.value) == 'Not a valid country prefix'
 
 
-@pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
+@pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
 @pytest.mark.parametrize("validator", [
     partial(validate_recipient, template_type='sms'),
     partial(validate_recipient, template_type='sms', international_sms=False),
-    partial(validate_phone_number),
-    partial(validate_phone_number, international=False),
+    partial(validate_phone_number_and_require_local),
 ])
 def test_phone_number_accepts_valid_values(validator, phone_number):
     try:
@@ -245,7 +234,7 @@ def test_phone_number_accepts_valid_values(validator, phone_number):
 @pytest.mark.parametrize("phone_number", valid_phone_numbers)
 @pytest.mark.parametrize("validator", [
     partial(validate_recipient, template_type='sms', international_sms=True),
-    partial(validate_phone_number, international=True),
+    partial(validate_phone_number_and_allow_international),
 ])
 def test_phone_number_accepts_valid_international_values(validator, phone_number):
     try:
@@ -254,31 +243,28 @@ def test_phone_number_accepts_valid_international_values(validator, phone_number
         pytest.fail('Unexpected InvalidPhoneError')
 
 
-@pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
-def test_valid_uk_phone_number_can_be_formatted_consistently(phone_number):
-    assert validate_and_format_phone_number(phone_number) == '447123456789'
+@pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
+def test_valid_local_phone_number_can_be_formatted_consistently(phone_number):
+    assert validate_and_format_phone_number_and_require_local(phone_number) == '+61412345678'
 
 
 @pytest.mark.parametrize("phone_number, expected_formatted", [
-    ('71234567890', '71234567890'),
-    ('1-202-555-0104', '12025550104'),
-    ('+12025550104', '12025550104'),
-    ('0012025550104', '12025550104'),
-    ('+0012025550104', '12025550104'),
-    ('23051234567', '23051234567'),
+    ('71234567890', '+71234567890'),
+    ('1-202-555-0104', '+12025550104'),
+    ('+12025550104', '+12025550104'),
+    ('0012025550104', '+12025550104'),
+    ('+0012025550104', '+12025550104'),
+    ('230 5 421 4567', '+23054214567'),
 ])
 def test_valid_international_phone_number_can_be_formatted_consistently(phone_number, expected_formatted):
-    assert validate_and_format_phone_number(
-        phone_number, international=True
-    ) == expected_formatted
+    assert validate_and_format_phone_number_and_allow_international(phone_number) == expected_formatted
 
 
-@pytest.mark.parametrize("phone_number, error_message", invalid_uk_phone_numbers)
+@pytest.mark.parametrize("phone_number, error_message", invalid_local_phone_numbers)
 @pytest.mark.parametrize("validator", [
     partial(validate_recipient, template_type='sms'),
     partial(validate_recipient, template_type='sms', international_sms=False),
-    partial(validate_phone_number),
-    partial(validate_phone_number, international=False),
+    partial(validate_phone_number_and_require_local),
 ])
 def test_phone_number_rejects_invalid_values(validator, phone_number, error_message):
     with pytest.raises(InvalidPhoneError) as e:
@@ -289,7 +275,7 @@ def test_phone_number_rejects_invalid_values(validator, phone_number, error_mess
 @pytest.mark.parametrize("phone_number, error_message", invalid_phone_numbers)
 @pytest.mark.parametrize("validator", [
     partial(validate_recipient, template_type='sms', international_sms=True),
-    partial(validate_phone_number, international=True),
+    partial(validate_phone_number_and_allow_international),
 ])
 def test_phone_number_rejects_invalid_international_values(validator, phone_number, error_message):
     with pytest.raises(InvalidPhoneError) as e:
@@ -365,11 +351,11 @@ def test_validate_address_allows_any_non_empty_value(column):
     'address_line_6',
     'postcode',
 ])
-def test_non_ascii_address_line_raises_invalid_address_error(column):
-    invalid_address = u'\u041F\u0435\u0442\u044F'
-    with pytest.raises(InvalidAddressError) as e:
-        validate_recipient(invalid_address, 'letter', column=column)
-    assert str(e.value) == u'Can’t include \u041F, \u0435, \u0442 or \u044F'
+def test_non_ascii_address_line_is_fine(column):
+    valid_address = u'\u041F\u0435\u0442\u044F'
+    assert validate_recipient(
+        valid_address, 'letter', column=column
+    ) == valid_address
 
 
 def test_valid_address_line_does_not_raise_error():
@@ -377,10 +363,10 @@ def test_valid_address_line_does_not_raise_error():
     assert validate_recipient(invalid_address, 'letter', column='address_line_1')
 
 
-@pytest.mark.parametrize("phone_number", valid_uk_phone_numbers)
+@pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
 def test_validates_against_whitelist_of_phone_numbers(phone_number):
-    assert allowed_to_send_to(phone_number, ['07123456789', '07700900460', 'test@example.com'])
-    assert not allowed_to_send_to(phone_number, ['07700900460', '07700900461', 'test@example.com'])
+    assert allowed_to_send_to(phone_number, ['0412345678', '07800900460', 'test@example.com'])
+    assert not allowed_to_send_to(phone_number, ['0412000000', '07800900461', 'test@example.com'])
 
 
 @pytest.mark.parametrize("email_address", valid_email_addresses)
@@ -389,20 +375,22 @@ def test_validates_against_whitelist_of_email_addresses(email_address):
 
 
 @pytest.mark.parametrize("phone_number, expected_formatted", [
-    ('07900900123', '07900 900123'),  # UK
-    ('+44(0)7900900123', '07900 900123'),  # UK
-    ('447900900123', '07900 900123'),  # UK
-    ('20-12-1234-1234', '+20 121 234 1234'),  # Egypt
-    ('00201212341234', '+20 121 234 1234'),  # Egypt
-    ('1664 0000000', '+1 664-000-0000'),  # Montserrat
-    ('7 499 1231212', '+7 499 123-12-12'),  # Moscow (Russia)
-    ('1-202-555-0104', '+1 202-555-0104'),  # Washington DC (USA)
+    ('+61412345678', '0412 345 678'),  # AU
+    ('+61(0)412345678', '0412 345 678'),  # AU
+
+    ('+44(0)7900900123', '+44 7900 900123'),  # UK
+    ('+447900900123', '+44 7900 900123'),  # UK
+    ('+20-12-1234-1234', '+20 121 234 1234'),  # Egypt
+    ('+201212341234', '+20 121 234 1234'),  # Egypt
+    ('+1664 0000000', '+1 664-000-0000'),  # Montserrat
+    ('+7 499 1231212', '+7 499 123-12-12'),  # Moscow (Russia)
+    ('+1-202-555-0104', '+1 202-555-0104'),  # Washington DC (USA)
     ('+23051234567', '+230 5123 4567'),  # Mauritius
-    ('33(0)1 12345678', '+33 1 12 34 56 78'),  # Paris (France)
-    ('33(0)1 12 34 56 78 90 12 34', '+33 112345678901234'),  # Long, not real, number
+    ('+33(0)1 12345678', '+33 1 12 34 56 78'),  # Paris (France)
+    ('+33(0)1 12 34 56 78 90 12 34', '+33 112345678901234'),  # Long, not real, number
 ])
-def test_format_uk_and_international_phone_numbers(phone_number, expected_formatted):
-    assert format_phone_number_human_readable(phone_number) == expected_formatted
+def test_format_local_and_international_phone_numbers(phone_number, expected_formatted):
+    assert format_phone_number_human_readable(e164_to_phone_number(phone_number)) == expected_formatted
 
 
 @pytest.mark.parametrize("recipient, expected_formatted", [
@@ -413,8 +401,8 @@ def test_format_uk_and_international_phone_numbers(phone_number, expected_format
     (None, ''),
     ('foo', 'foo'),
     ('TeSt@ExAmPl3.com', 'test@exampl3.com'),
-    ('+4407900 900 123', '447900900123'),
-    ('+1 800 555 5555', '+1 800 555 5555'),
+    ('+61 0412 345 678', '+61412345678'),
+    ('+1 800 555 5555', '+18005555555'),
 ])
 def test_format_recipient(recipient, expected_formatted):
     assert format_recipient(recipient) == expected_formatted
@@ -422,7 +410,3 @@ def test_format_recipient(recipient, expected_formatted):
 
 def test_try_format_recipient_doesnt_throw():
     assert try_validate_and_format_phone_number('ALPHANUM3R1C') == 'ALPHANUM3R1C'
-
-
-def test_format_phone_number_human_readable_doenst_throw():
-    assert format_phone_number_human_readable('ALPHANUM3R1C') == 'ALPHANUM3R1C'

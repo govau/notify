@@ -360,7 +360,7 @@ def test_registration_from_org_invite_has_different_email_or_organisation(
 
     response = client.post(url_for('main.register_from_org_invite'), data={
         'name': 'Test User',
-        'mobile_number': '+4407700900460',
+        'mobile_number': '+4407800900460',
         'password': 'validPassword!',
         'email_address': session['invited_org_user']['email_address'],
         'organisation': session['invited_org_user']['organisation']
@@ -385,7 +385,7 @@ def test_org_user_registers_with_email_already_in_use(
 
     response = client.post(url_for('main.register_from_org_invite'), data={
         'name': 'Test User',
-        'mobile_number': '+4407700900460',
+        'mobile_number': '+4407800900460',
         'password': 'validPassword!',
         'email_address': session['invited_org_user']['email_address'],
         'organisation': session['invited_org_user']['organisation']
@@ -419,7 +419,7 @@ def test_org_user_registration(
     response = client.post(url_for('main.register_from_org_invite'), data={
         'name': 'Test User',
         'email_address': session['invited_org_user']['email_address'],
-        'mobile_number': '+4407700900460',
+        'mobile_number': '+4407800900460',
         'password': 'validPassword!',
         'organisation': session['invited_org_user']['organisation']
     })
@@ -431,14 +431,14 @@ def test_org_user_registration(
     mock_register_user.assert_called_once_with(
         'Test User',
         session['invited_org_user']['email_address'],
-        '+4407700900460',
+        '+4407800900460',
         'validPassword!',
         'sms_auth'
     )
     mock_send_verify_code.assert_called_once_with(
         '6ce466d0-fd6a-11e5-82f5-e0accb9d11a6',
         'sms',
-        '+4407700900460',
+        '+4407800900460',
     )
 
 

@@ -579,7 +579,7 @@ def test_add_existing_user_to_another_service_doesnot_change_old_permissions(sam
         name='Other Test User',
         email_address='other_user@digital.cabinet-office.gov.uk',
         password='password',
-        mobile_number='+447700900987'
+        mobile_number='+447800900987'
     )
     save_model_user(other_user)
     service_two = Service(name="service_two",
@@ -686,15 +686,15 @@ def test_fetch_stats_for_today_only_includes_today(notify_db, notify_db_session,
     # two created email, one failed email, and one created sms
     with freeze_time('2001-01-01T23:59:00'):
         # just_before_midnight_yesterday
-        create_notification(notify_db, None, to_field='1', status='delivered')
+        create_notification(notify_db, None, to_field='0412345678', status='delivered')
 
     with freeze_time('2001-01-02T00:01:00'):
         # just_after_midnight_today
-        create_notification(notify_db, None, to_field='2', status='failed')
+        create_notification(notify_db, None, to_field='0412345677', status='failed')
 
     with freeze_time('2001-01-02T12:00:00'):
         # right_now
-        create_notification(notify_db, None, to_field='3', status='created')
+        create_notification(notify_db, None, to_field='0412345676', status='created')
 
         stats = dao_fetch_todays_stats_for_service(sample_template.service_id)
 
@@ -833,12 +833,12 @@ def test_dao_fetch_todays_stats_for_all_services_only_includes_today(notify_db, 
     # just_before_midnight_yesterday
     # 02/01/2001 23:59:00 AEDT
     with freeze_time('2001-01-02T12:59:00'):
-        create_notification(notify_db, None, to_field='1', status='delivered')
+        create_notification(notify_db, None, to_field='0412345678', status='delivered')
 
     # just_after_midnight_today
     # 03/01/2001 10:01:00 AEDT
     with freeze_time('2001-01-02T23:01:00'):
-        create_notification(notify_db, None, to_field='2', status='failed')
+        create_notification(notify_db, None, to_field='0412345677', status='failed')
 
     # today
     # 03/01/2001 10:00:00 AEDT

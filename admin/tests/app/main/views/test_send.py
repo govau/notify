@@ -2800,11 +2800,11 @@ def test_sms_sender_is_previewed(
 
     mocker.patch('app.main.views.send.s3download', return_value="""
         phone number,date,thing
-        7700900986,foo,bar
+        7800900986,foo,bar
     """)
 
     with client_request.session_transaction() as session:
-        session['recipient'] = '7700900986'
+        session['recipient'] = '7800900986'
         session['placeholders'] = {}
         session['file_uploads'] = {
             fake_uuid: {

@@ -15,7 +15,7 @@ from sqlalchemy import UniqueConstraint, CheckConstraint, Index
 from notifications_utils.columns import Columns
 from notifications_utils.recipients import (
     validate_email_address,
-    validate_phone_number,
+    validate_phone_number_and_allow_international,
     try_validate_and_format_phone_number,
     InvalidPhoneError,
     InvalidEmailError
@@ -568,7 +568,7 @@ class ServiceWhitelist(db.Model):
 
         try:
             if recipient_type == MOBILE_TYPE:
-                validate_phone_number(recipient, international=True)
+                validate_phone_number_and_allow_international(recipient)
                 instance.recipient = recipient
             elif recipient_type == EMAIL_TYPE:
                 validate_email_address(recipient)
@@ -1172,6 +1172,16 @@ class NotificationStatusTypes(db.Model):
 
 
 class Notification(db.Model):
+    """
+
+    Attributes:
+        normalised_to: A formatted version of the to field.
+            If the notification type is SMS, this is the E.164 formatted phone
+            number.
+            If the notification type is email, this is the email address
+            stripped of all white space,.
+    """
+
     __tablename__ = 'notifications'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

@@ -260,6 +260,13 @@ def strip_whitespace(value, extra_characters=''):
     return value
 
 
+def strip_and_remove_all_whitespace(value):
+    for character in string.whitespace + OBSCURE_WHITESPACE:
+        value = value.replace(character, '')
+
+    return value.strip(string.whitespace)
+
+
 def strip_and_remove_obscure_whitespace(value):
     for character in OBSCURE_WHITESPACE:
         value = value.replace(character, '')

@@ -28,9 +28,8 @@ from notifications_utils import logging, request_helper, formatters
 from notifications_utils.clients import DeskproClient
 from notifications_utils.clients.statsd.statsd_client import StatsdClient
 from notifications_utils.recipients import (
-    validate_phone_number,
-    InvalidPhoneError,
     format_phone_number_human_readable,
+    e164_to_phone_number,
 )
 from notifications_utils.formatters import formatted_list
 from werkzeug.exceptions import abort
@@ -308,14 +307,6 @@ def format_delta(date):
         past_tense='{} ago',
         precision=1
     )
-
-
-def valid_phone_number(phone_number):
-    try:
-        validate_phone_number(phone_number)
-        return True
-    except InvalidPhoneError:
-        return False
 
 
 def format_notification_type(notification_type):
@@ -602,7 +593,6 @@ def add_template_filters(application):
         format_datetime_normal,
         format_datetime_short,
         format_time,
-        valid_phone_number,
         linkable_name,
         format_date,
         format_date_normal,
@@ -617,5 +607,6 @@ def add_template_filters(application):
         formatted_list,
         nl2br,
         format_phone_number_human_readable,
+        e164_to_phone_number,
     ]:
         application.add_template_filter(fn)

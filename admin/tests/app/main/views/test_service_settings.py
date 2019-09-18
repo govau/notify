@@ -2096,12 +2096,12 @@ def test_set_inbound_sms_when_inbound_number_is_not_set(
 
 @pytest.mark.parametrize('user, expected_paragraphs', [
     (active_user_with_permissions, [
-        'Your service can receive text messages sent to 07700900123.',
+        'Your service can receive text messages sent to 07800900123.',
         'If you want to turn this feature off, get in touch with the Notify team.',
         'You can set up callbacks for received text messages on the API integration page.',
     ]),
     (active_user_no_api_key_permission, [
-        'Your service can receive text messages sent to 07700900123.',
+        'Your service can receive text messages sent to 07800900123.',
         'If you want to turn this feature off, get in touch with the Notify team.',
     ]),
 ])
@@ -2115,7 +2115,7 @@ def test_set_inbound_sms_when_inbound_number_is_set(
 ):
     service_one['permissions'] = ['inbound_sms']
     mocker.patch('app.inbound_number_client.get_inbound_sms_number_for_service', return_value={
-        'data': {'number': '07700900123'}
+        'data': {'number': '07800900123'}
     })
     client.login(user(fake_uuid), mocker, service_one)
     response = client.get(url_for(

@@ -5,7 +5,7 @@ from unittest.mock import ANY
 
 import pytest
 from flask import current_app
-from notifications_utils.recipients import validate_and_format_phone_number
+from notifications_utils.recipients import validate_and_format_phone_number_and_require_local
 from requests import HTTPError
 
 import app
@@ -85,7 +85,7 @@ def test_should_send_personalised_template_to_correct_sms_provider_and_persist(
     )
 
     twilio_sms_client.send_sms.assert_called_once_with(
-        to=validate_and_format_phone_number("+61412345678"),
+        to=validate_and_format_phone_number_and_require_local("+61412345678"),
         content="Sample service: Hello Jo\nHere is <em>some HTML</em> & entities",
         reference=str(db_notification.id),
         sender=current_app.config['FROM_NUMBER']
@@ -183,7 +183,7 @@ def test_send_sms_should_use_template_version_from_notification_not_latest(
     )
 
     twilio_sms_client.send_sms.assert_called_once_with(
-        to=validate_and_format_phone_number("+61412345678"),
+        to=validate_and_format_phone_number_and_require_local("+61412345678"),
         content="Sample service: This is a template:\nwith a newline",
         reference=str(db_notification.id),
         sender=current_app.config['FROM_NUMBER']
@@ -579,7 +579,7 @@ def test_should_send_sms_to_international_providers(
     )
 
     twilio_sms_client.send_sms.assert_called_with(
-        to="61412888999",
+        to="+61412888999",
         content=ANY,
         reference=str(db_notification_au.id),
         sender=current_app.config['FROM_NUMBER']
@@ -590,7 +590,7 @@ def test_should_send_sms_to_international_providers(
     )
 
     twilio_sms_client.send_sms.assert_called_with(
-        to="61412111222",
+        to="+61412111222",
         content=ANY,
         reference=str(db_notification_international.id),
         sender=current_app.config['FROM_NUMBER']
@@ -731,7 +731,7 @@ def test_send_sms_to_provider_should_format_phone_number(
 
     send_to_providers.send_sms_to_provider(sample_notification)
 
-    assert send_mock.call_args[1]['to'] == '61412345678'
+    assert send_mock.call_args[1]['to'] == '+61412345678'
 
 
 def test_send_email_to_provider_should_format_email_address(sample_email_notification, mocker):

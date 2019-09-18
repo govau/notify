@@ -16,10 +16,10 @@ from marshmallow_sqlalchemy import field_for
 
 from notifications_utils.recipients import (
     validate_email_address,
+    validate_phone_number_and_allow_international,
+    validate_and_format_phone_number_and_allow_international,
     InvalidEmailError,
-    validate_phone_number,
     InvalidPhoneError,
-    validate_and_format_phone_number
 )
 
 from app import ma
@@ -125,7 +125,7 @@ class UserSchema(BaseSchema):
     def validate_mobile_number(self, value):
         try:
             if value is not None:
-                validate_phone_number(value, international=True)
+                validate_phone_number_and_allow_international(value)
         except InvalidPhoneError as error:
             raise ValidationError('Invalid phone number: {}'.format(error))
 
@@ -157,7 +157,7 @@ class UserUpdateAttributeSchema(BaseSchema):
     def validate_mobile_number(self, value):
         try:
             if value is not None:
-                validate_phone_number(value, international=True)
+                validate_phone_number_and_allow_international(value)
         except InvalidPhoneError as error:
             raise ValidationError('Invalid phone number: {}'.format(error))
 
@@ -407,13 +407,13 @@ class SmsNotificationSchema(NotificationSchema):
     @validates('to')
     def validate_to(self, value):
         try:
-            validate_phone_number(value, international=True)
+            validate_phone_number_and_allow_international(value)
         except InvalidPhoneError as error:
             raise ValidationError('Invalid phone number: {}'.format(error))
 
     @post_load
     def format_phone_number(self, item):
-        item['to'] = validate_and_format_phone_number(item['to'], international=True)
+        item['to'] = validate_and_format_phone_number_and_allow_international(item['to'])
         return item
 
 

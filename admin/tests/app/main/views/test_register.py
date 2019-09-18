@@ -33,7 +33,7 @@ def test_logged_in_user_redirects_to_choose_account(
 
 
 @pytest.mark.parametrize('phone_number_to_register_with', [
-    '+4407700900460',
+    '+4407800900460',
     '+1800-555-555',
 ])
 @pytest.mark.parametrize('password', [
@@ -126,7 +126,7 @@ def test_should_add_user_details_to_session(
     user_data = {
         'name': 'Test Codes',
         'email_address': 'notfound@example.gov.uk',
-        'mobile_number': '+4407700900460',
+        'mobile_number': '+4407800900460',
         'password': 'validPassword!'
     }
 
@@ -160,7 +160,7 @@ def test_register_with_existing_email_sends_emails(
     user_data = {
         'name': 'Already Hasaccount',
         'email_address': api_user_active.email_address,
-        'mobile_number': '+4407700900460',
+        'mobile_number': '+4407800900460',
         'password': 'validPassword!'
     }
 
@@ -191,7 +191,7 @@ def test_register_from_invite(
         data={
             'name': 'Registered in another Browser',
             'email_address': invited_user.email_address,
-            'mobile_number': '+4407700900460',
+            'mobile_number': '+4407800900460',
             'service': str(invited_user.id),
             'password': 'somreallyhardthingtoguess',
             'auth_type': 'sms_auth'

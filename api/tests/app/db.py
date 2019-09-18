@@ -54,6 +54,9 @@ from app.dao.invited_user_dao import save_invited_user
 from app.dao.email_branding_dao import dao_create_email_branding
 from app.dao.organisation_dao import dao_create_organisation
 from app.dao.permissions_dao import permission_dao
+from notifications_utils.recipients import (
+    validate_and_format_phone_number_and_allow_international,
+)
 
 
 def create_user(mobile_number="+61412345678", email="notify@digital.cabinet-office.gov.uk", state='active', id_=None):
@@ -210,6 +213,9 @@ def create_notification(
     if to_field is None:
         to_field = '+61412345678' if template.template_type == SMS_TYPE else 'test@example.com'
 
+    if normalised_to is None and template.template_type == SMS_TYPE:
+        normalised_to = validate_and_format_phone_number_and_allow_international(to_field)
+
     if status != 'created':
         sent_at = sent_at or datetime.utcnow()
         updated_at = updated_at or datetime.utcnow()
@@ -303,7 +309,7 @@ def create_service_permission(service_id, permission=EMAIL_TYPE):
 def create_inbound_sms(
     service,
     notify_number=None,
-    user_number='447700900111',
+    user_number='+61412345678',
     provider_date=None,
     provider_reference=None,
     content='Hello',

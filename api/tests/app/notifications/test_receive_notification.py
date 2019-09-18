@@ -56,7 +56,7 @@ def test_receive_notification_returns_received_to_mmg(client, mocker, sample_ser
     mocked = mocker.patch("app.notifications.receive_notifications.tasks.send_inbound_sms_to_service.apply_async")
     data = {
         "ID": "1234",
-        "MSISDN": "447700900855",
+        "MSISDN": "447800900855",
         "Message": "Some message to notify",
         "Trigger": "Trigger?",
         "Number": sample_service_full_permissions.get_inbound_number(),
@@ -143,7 +143,7 @@ def test_receive_notification_without_permissions_does_not_create_inbound_even_w
 
     data = {
         "ID": "1234",
-        "MSISDN": "447700900855",
+        "MSISDN": "447800900855",
         "Message": "Some message to notify",
         "Trigger": "Trigger?",
         "Number": inbound_number.number,
@@ -232,7 +232,7 @@ def test_create_inbound_mmg_sms_object(sample_service_full_permissions):
 
     assert inbound_sms.service_id == sample_service_full_permissions.id
     assert inbound_sms.notify_number == sample_service_full_permissions.get_inbound_number()
-    assert inbound_sms.user_number == '61412345678'
+    assert inbound_sms.user_number == '+61412345678'
     assert inbound_sms.provider_date == datetime(2017, 1, 1, 16, 00, 00)
     assert inbound_sms.provider_reference == 'bar'
     assert inbound_sms._content != 'hello there 📩'
@@ -333,7 +333,7 @@ def test_receive_notification_from_firetext_persists_message(notify_db_session, 
     persisted = InboundSms.query.first()
     assert persisted is not None
     assert persisted.notify_number == '0412345678'
-    assert persisted.user_number == '61487654321'
+    assert persisted.user_number == '+61487654321'
     assert persisted.service == service
     assert persisted.content == 'this is a message'
     assert persisted.provider == 'firetext'
@@ -357,7 +357,7 @@ def test_receive_notification_from_firetext_persists_message_with_normalized_pho
     assert result['status'] == 'ok'
     persisted = InboundSms.query.first()
     assert persisted is not None
-    assert persisted.user_number == '61499999999'
+    assert persisted.user_number == '+61499999999'
 
 
 def test_returns_ok_to_firetext_if_mismatched_sms_sender(notify_db_session, client, mocker):

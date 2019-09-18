@@ -1,10 +1,9 @@
-import string
 import re
 import sys
 import csv
 import phonenumbers
 from contextlib import suppress
-from functools import lru_cache, partial
+from functools import lru_cache
 from itertools import islice
 from collections import OrderedDict, namedtuple
 from orderedset import OrderedSet
@@ -12,7 +11,11 @@ from orderedset import OrderedSet
 from flask import current_app
 
 from . import EMAIL_REGEX_PATTERN, hostname_part, tld_part
-from notifications_utils.formatters import strip_and_remove_obscure_whitespace, strip_whitespace, OBSCURE_WHITESPACE
+from notifications_utils.formatters import (
+    strip_and_remove_obscure_whitespace,
+    strip_and_remove_all_whitespace,
+    strip_whitespace,
+)
 from notifications_utils.template import Template
 from notifications_utils.columns import Columns, Row, Cell
 from notifications_utils.international_billing_rates import (
@@ -21,8 +24,9 @@ from notifications_utils.international_billing_rates import (
 )
 
 
-uk_prefix = '44'
-au_prefix = '61'
+LOCAL_CALLING_CODE = 61
+LOCAL_REGION_CODE = "AU"
+NOT_LOCAL_NUMBER_MSG = "Not an AU mobile number"
 
 first_column_headings = {
     'email': ['email address'],
@@ -322,46 +326,30 @@ class InvalidAddressError(InvalidEmailError):
     pass
 
 
-def normalise_phone_number(number):
-
-    for character in string.whitespace + OBSCURE_WHITESPACE + '()-+':
-        number = number.replace(character, '')
-
-    try:
-        list(map(int, number))
-    except ValueError:
-        raise InvalidPhoneError('Must not contain letters or symbols')
-
-    return number.lstrip('0')
+def is_local_number(number):
+    return number.country_code == LOCAL_CALLING_CODE
 
 
-def is_uk_phone_number(number):
+def format_phone_number(number):
+    """Formats number using E.164 phone number formatting.
 
-    if (
-        (number.startswith('0') and not number.startswith('00'))
-    ):
-        return True
+    At the time of writing, E.164 is recommended by Twilio and Telstra:
 
-    number = normalise_phone_number(number)
+    "Twilio strongly encourages using E.164 phone number formatting for all
+    phone numbers both in the ‘To’ and ‘From’ fields. This is an
+    internationally-recognized standard phone number format that will help to
+    ensure deliverability of calls and SMS messages across the globe."
 
-    if (
-        number.startswith(au_prefix) or
-        (number.startswith('7') and len(number) < 11)
-    ):
-        return True
+    See https://support.twilio.com/hc/en-us/articles/223183008-Formatting-International-Phone-Numbers
+    See https://www.twilio.com/docs/glossary/what-e164
+    See https://dev.telstra.com/content/messaging-api#operation/Send%20SMS
 
-    return False
-
-
-def is_au_phone_number(number):
-    number = normalise_phone_number(number)
-
-    if (
-        number.startswith(au_prefix) or
-        (number.startswith('4') and len(number) < 10)
-    ):
-        return True
-    return False
+    Args:
+        number: A phonenumbers.PhoneNumber object.
+    Returns:
+        An E.164 formatted string corresponding to the given phone number.
+    """
+    return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
 
 
 international_phone_info = namedtuple('PhoneNumber', [
@@ -372,21 +360,13 @@ international_phone_info = namedtuple('PhoneNumber', [
 
 
 def get_international_phone_info(number):
-
-    number = validate_phone_number(number, international=True)
-    prefix = get_international_prefix(number)
+    number = validate_phone_number_and_allow_international(number)
+    prefix = f'{number.country_code}'
 
     return international_phone_info(
-        international=(prefix != au_prefix),
+        international=not is_local_number(number),
         country_prefix=prefix,
         billable_units=get_billable_units_for_prefix(prefix)
-    )
-
-
-def get_international_prefix(number):
-    return next(
-        (prefix for prefix in COUNTRY_PREFIXES if number.startswith(prefix)),
-        None
     )
 
 
@@ -394,55 +374,131 @@ def get_billable_units_for_prefix(prefix):
     return INTERNATIONAL_BILLING_RATES[prefix]['billable_units']
 
 
-def validate_au_phone_number(number, column=None):
+e164_invalid_chars_re = re.compile(r'[^\+0-9\(\)\s\-]+')
 
-    number = normalise_phone_number(number).lstrip(au_prefix).lstrip('0')
 
-    if not number.startswith('4'):
-        raise InvalidPhoneError('Not an AU mobile number')
+def prevalidate_phone_number(number_str, expecting_international_number):
+    # Clean up whitespace
+    number_str = strip_and_remove_all_whitespace(number_str)
 
-    if len(number) > 9:
-        raise InvalidPhoneError('Too many digits')
+    # We don't need any dashes/hyphens in the number.
+    number_str = number_str.replace('-', '')
 
-    if len(number) < 9:
+    # If the number starts with a left bracket then it's probably in the format
+    # (+44) 753-987-8354, so we need to make sure to strip out the brackets.
+    # Note: if the number is in the format +44 (0) 753-987-8354 then we don't
+    # want to strip out the brackets, hence the check for the opening bracket.
+    if number_str.startswith('('):
+        for character in {'(', ')'}:
+            number_str = number_str.replace(character, '')
+
+    # If the number contains obscure characters, exit early giving a user-level
+    # error message to help them diagnose it.
+    if bool(re.search(e164_invalid_chars_re, number_str)):
+        raise InvalidPhoneError('Must not contain letters or symbols')
+
+    if len(number_str) == 0:
         raise InvalidPhoneError('Not enough digits')
 
-    return '{}{}'.format(au_prefix, number)
+    number = None
+    default_region = LOCAL_REGION_CODE
 
+    if expecting_international_number:
+        # Check if it's a local number. If it is, then don't do anything and the
+        # region code will stay as local.
 
-def validate_phone_number(number, column=None, international=False):
+        # If the number starts with a 0, it should be a local number.
+        if number_str.startswith('0'):
+            # TODO: this line is AU specific, not "local" specific.
+            if len(number_str) != 10:
+                raise InvalidPhoneError(NOT_LOCAL_NUMBER_MSG)
+            pass
+        # If the number starts with a 4 and is length 9, it's a local number.
+        # TODO: this line is AU specific, not "local" specific.
+        elif number_str.startswith('4') and len(number_str) == 9:
+            pass
+        else:
+            # If this expected to be an international number, we make sure the
+            # region is unset.
+            default_region = phonenumbers.UNKNOWN_REGION
+            # If this expected to be an international number, it should start
+            # with a '+' in order to be parsable.
+            if not number_str.startswith('+'):
+                number_str = f'+{number_str}'
 
-    if (not international) or is_au_phone_number(number):
-        return validate_au_phone_number(number)
-
-    number = normalise_phone_number(number)
-
-    if len(number) < 8:
-        raise InvalidPhoneError('Not enough digits')
-
-    if get_international_prefix(number) is None:
-        raise InvalidPhoneError('Not a valid country prefix')
+    try:
+        number = phonenumbers.parse(number_str, region=default_region)
+    except Exception:
+        # TODO: message
+        raise InvalidPhoneError('Did not parse as region {}'.format(default_region))
 
     return number
 
 
-validate_and_format_phone_number = validate_phone_number
+def postvalidate_phone_number(number):
+    if not phonenumbers.is_possible_number(number):
+        reason = phonenumbers.is_possible_number_with_reason(number)
+
+        if f'{number.country_code}' not in COUNTRY_PREFIXES:
+            raise InvalidPhoneError('Not a valid country prefix')
+
+        if reason == phonenumbers.ValidationResult.INVALID_COUNTRY_CODE:
+            raise InvalidPhoneError('Not a valid country prefix')
+
+        if reason == phonenumbers.ValidationResult.TOO_SHORT:
+            raise InvalidPhoneError('Not enough digits')
+
+        if reason == phonenumbers.ValidationResult.TOO_LONG:
+            raise InvalidPhoneError('Too many digits')
+
+        if reason == phonenumbers.ValidationResult.INVALID_LENGTH:
+            raise InvalidPhoneError('Wrong amount of digits')
+
+    if not phonenumbers.is_valid_number(number):
+        raise InvalidPhoneError('Not a valid mobile number')
+
+    return number
 
 
-def try_validate_and_format_phone_number(number, column=None, international=None, log_msg=None):
+def validate_phone_number_and_require_local(number_str):
+    number = prevalidate_phone_number(number_str, expecting_international_number=False)
+
+    if not is_local_number(number):
+        raise InvalidPhoneError(NOT_LOCAL_NUMBER_MSG)
+
+    return postvalidate_phone_number(number)
+
+
+def validate_phone_number_and_allow_international(number_str):
+    number = prevalidate_phone_number(number_str, expecting_international_number=True)
+
+    return postvalidate_phone_number(number)
+
+
+def validate_and_format_phone_number_and_require_local(number_str):
+    return format_phone_number(validate_phone_number_and_require_local(number_str))
+
+
+def validate_and_format_phone_number_and_allow_international(number_str):
+    return format_phone_number(validate_phone_number_and_allow_international(number_str))
+
+
+def try_validate_and_format_phone_number(number, international=None, log_msg=None):
     """
     For use in places where you shouldn't error if the phone number is invalid - for example if firetext pass us
     something in
     """
     try:
-        return validate_and_format_phone_number(number, column, international)
+        if international:
+            return validate_and_format_phone_number_and_allow_international(number)
+        return validate_and_format_phone_number_and_require_local(number)
     except InvalidPhoneError as exc:
         if log_msg:
             current_app.logger.warning('{}: {}'.format(log_msg, exc))
         return number
 
 
-def validate_email_address(email_address, column=None):  # noqa (C901 too complex)
+def validate_email_address(email_address):  # noqa (C901 too complex)
     # almost exactly the same as by https://github.com/wtforms/wtforms/blob/master/wtforms/validators.py,
     # with minor tweaks for SES compatibility - to avoid complications we are a lot stricter with the local part
     # than neccessary - we don't allow any double quotes or semicolons to prevent SES Technical Failures
@@ -501,11 +557,13 @@ def validate_address(address_line, column):
 
 
 def validate_recipient(recipient, template_type, column=None, international_sms=False):
-    return {
-        'email': validate_email_address,
-        'sms': partial(validate_phone_number, international=international_sms),
-        'letter': validate_address,
-    }[template_type](recipient, column)
+    if template_type == 'email':
+        return validate_email_address(recipient)
+    if template_type == 'sms':
+        fn = validate_phone_number_and_allow_international if international_sms else validate_and_format_phone_number_and_require_local
+        return fn(recipient)
+    if template_type == 'letter':
+        return validate_address(recipient, column)
 
 
 @lru_cache(maxsize=32, typed=False)
@@ -513,28 +571,33 @@ def format_recipient(recipient):
     if not isinstance(recipient, str):
         return ''
     with suppress(InvalidPhoneError):
-        return validate_and_format_phone_number(recipient)
+        return validate_and_format_phone_number_and_allow_international(recipient)
     with suppress(InvalidEmailError):
         return validate_and_format_email_address(recipient)
     return recipient
 
 
-def format_phone_number_human_readable(phone_number):
-    try:
-        phone_number = validate_phone_number(phone_number, international=True)
-    except InvalidPhoneError:
-        # if there was a validation error, we want to shortcut out here, but still display the number on the front end
-        return phone_number
-    international_phone_info = get_international_phone_info(phone_number)
+def e164_to_phone_number(number_str):
+    number_str = strip_and_remove_all_whitespace(number_str)
 
-    return phonenumbers.format_number(
-        phonenumbers.parse('+' + phone_number, None),
-        (
-            phonenumbers.PhoneNumberFormat.INTERNATIONAL
-            if international_phone_info.international
-            else phonenumbers.PhoneNumberFormat.NATIONAL
-        )
-    )
+    return phonenumbers.parse(number_str)
+
+
+def format_phone_number_human_readable(number):
+    """Formats number as a human readable phone number.
+
+    If the given number is a local number, the human readable format is the
+    national format. Otherwise, the human readable format is the international
+    format.
+
+    Args:
+        number: A phonenumbers.PhoneNumber object.
+    Returns:
+        A nationally formatted number or an internationally formatted number.
+    """
+    format = phonenumbers.PhoneNumberFormat.NATIONAL if is_local_number(number) else phonenumbers.PhoneNumberFormat.INTERNATIONAL
+
+    return phonenumbers.format_number(number, format)
 
 
 def allowed_to_send_to(recipient, whitelist):
