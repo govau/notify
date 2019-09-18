@@ -32,7 +32,8 @@ def receive_twilio_sms():
         current_app.logger.warning("Inbound sms (Twilio) incorrect username ({}) or password".format(auth.username))
         abort(403)
 
-    # Locally, when using ngrok the URL comes in without HTTPS so force it.
+    # Locally, when using ngrok the URL comes in without HTTPS so force it
+    # otherwise the Twilio signature validator will fail.
     url = request.url.replace("http://", "https://")
     post_data = request.form
     twilio_signature = request.headers.get('X-Twilio-Signature')
@@ -44,6 +45,7 @@ def receive_twilio_sms():
         abort(400)
 
     service = fetch_potential_service(post_data['To'], 'twilio')
+
     if not service:
         # Since this is an issue with our service <-> number mapping, or no
         # inbound_sms service permission we should still tell Twilio that we
@@ -56,7 +58,6 @@ def receive_twilio_sms():
                                         content=post_data["Body"],
                                         from_number=post_data['From'],
                                         provider_ref=post_data["MessageSid"],
-                                        date_received=datetime.utcnow(),
                                         provider_name="twilio")
 
     tasks.send_inbound_sms_to_service.apply_async([str(inbound.id), str(service.id)], queue=QueueNames.NOTIFY)
@@ -69,7 +70,7 @@ def receive_twilio_sms():
     return str(response), 200
 
 
-def create_inbound_sms_object(service, content, from_number, provider_ref, date_received, provider_name):
+def create_inbound_sms_object(service, content, from_number, provider_ref, provider_name, date_received=datetime.utcnow()):
     user_number = try_validate_and_format_phone_number(
         from_number,
         international=True,
