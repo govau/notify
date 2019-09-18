@@ -246,8 +246,8 @@ def test_twilio_inbound_sms_auth(notify_db_session, notify_api, client, mocker, 
     data = urllib.parse.urlencode({'MessageSid': '1', 'From': '+61412999999', 'To': '+61412345678', 'Body': 'this is a message'})
 
     with set_config_values(notify_api, {
-        'TWILIO_INBOUND_SMS_USERNAME': usernames,
-        'TWILIO_INBOUND_SMS_AUTH': passwords,
+        'TWILIO_INBOUND_SMS_USERNAMES': usernames,
+        'TWILIO_INBOUND_SMS_PASSWORDS': passwords,
     }):
         response = twilio_post(client, data, auth=auth)
         assert response.status_code == status_code

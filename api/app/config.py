@@ -333,11 +333,8 @@ class Config(object):
     FREE_SMS_TIER_FRAGMENT_COUNT = 25000
 
     SMS_INBOUND_WHITELIST = json.loads(os.environ.get('SMS_INBOUND_WHITELIST', '[]'))
-    FIRETEXT_INBOUND_SMS_AUTH = json.loads(os.environ.get('FIRETEXT_INBOUND_SMS_AUTH', '[]'))
-    MMG_INBOUND_SMS_AUTH = json.loads(os.environ.get('MMG_INBOUND_SMS_AUTH', '[]'))
-    MMG_INBOUND_SMS_USERNAME = json.loads(os.environ.get('MMG_INBOUND_SMS_USERNAME', '[]'))
-    TWILIO_INBOUND_SMS_AUTH = json.loads(os.environ.get('TWILIO_INBOUND_SMS_AUTH', '[]'))
-    TWILIO_INBOUND_SMS_USERNAME = json.loads(os.environ.get('TWILIO_INBOUND_SMS_USERNAME', '[]'))
+    TWILIO_INBOUND_SMS_USERNAMES = json.loads(os.environ.get('TWILIO_INBOUND_SMS_USERNAMES', '[]'))
+    TWILIO_INBOUND_SMS_PASSWORDS = json.loads(os.environ.get('TWILIO_INBOUND_SMS_PASSWORDS', '[]'))
     TWILIO_CALLBACK_USERNAME = os.environ.get('TWILIO_CALLBACK_USERNAME', '')
     TWILIO_CALLBACK_PASSWORD = os.environ.get('TWILIO_CALLBACK_PASSWORD', '')
 
@@ -422,9 +419,8 @@ class Test(Development):
     API_HOST_NAME = "http://localhost:6011"
 
     SMS_INBOUND_WHITELIST = ['203.0.113.195']
-    FIRETEXT_INBOUND_SMS_AUTH = ['testkey']
-    MMG_INBOUND_SMS_AUTH = ['testkey']
-    MMG_INBOUND_SMS_USERNAME = ['username']
+    TWILIO_INBOUND_SMS_USERNAMES = ['username']
+    TWILIO_INBOUND_SMS_PASSWORDS = ['password']
     TEMPLATE_PREVIEW_API_HOST = 'http://localhost:9999'
 
 
