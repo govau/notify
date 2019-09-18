@@ -4,7 +4,6 @@ from unittest.mock import call
 import urllib.parse
 from freezegun import freeze_time
 import pytest
-from flask import json
 
 from app.notifications.receive_notifications import (
     create_inbound_sms_object,
