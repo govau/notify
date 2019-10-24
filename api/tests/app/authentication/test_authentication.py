@@ -106,7 +106,7 @@ def test_admin_auth_should_not_allow_request_with_no_iat(client, sample_api_key)
 
 
 def test_should_not_allow_invalid_secret(client, sample_api_key):
-    token = create_jwt_token(
+    token = create_jwt_token(  # nosec
         secret="not-so-secret",
         client_id=str(sample_api_key.service_id))
     response = client.get(

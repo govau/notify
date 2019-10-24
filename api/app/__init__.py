@@ -1,5 +1,5 @@
 import os
-import random
+import secrets
 import string
 import uuid
 
@@ -288,7 +288,7 @@ def create_uuid():
 
 
 def create_random_identifier():
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+    return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
 
 
 def process_user_agent(user_agent_string):

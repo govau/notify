@@ -147,7 +147,7 @@ def test_update_user_attribute(client, sample_user, user_attribute, user_value):
 
 
 def test_update_user_password(notify_api, notify_db, notify_db_session, sample_user):
-    password = 'newpassword'
+    password = 'newpassword'  # nosec
     assert not sample_user.check_password(password)
     update_user_password(sample_user, password)
     assert sample_user.check_password(password)

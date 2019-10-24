@@ -20,7 +20,7 @@ from tests.app.db import create_inbound_number, create_service, create_service_w
 from tests.app.conftest import sample_service
 
 
-def firetext_post(client, data, auth=True, password='testkey'):
+def firetext_post(client, data, auth=True, password='testkey'):  # nosec
     headers = [
         ('Content-Type', 'application/x-www-form-urlencoded'),
     ]
@@ -36,7 +36,7 @@ def firetext_post(client, data, auth=True, password='testkey'):
     )
 
 
-def mmg_post(client, data, auth=True, password='testkey'):
+def mmg_post(client, data, auth=True, password='testkey'):  # nosec
     headers = [
         ('Content-Type', 'application/json'),
     ]

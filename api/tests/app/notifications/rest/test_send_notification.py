@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 import pytest
 from datetime import datetime
@@ -1027,7 +1027,7 @@ def test_create_template_raises_invalid_request_when_content_too_large(
         create_template_object_for_notification(template,
                                                 {'long_text':
                                                     ''.join(
-                                                        random.choice(string.ascii_uppercase + string.digits) for _ in
+                                                        secrets.choice(string.ascii_uppercase + string.digits) for _ in
                                                         range(SMS_CHAR_COUNT_LIMIT + 1))})
         if should_error:
             pytest.fail("expected an InvalidRequest")
