@@ -915,7 +915,7 @@ def test_add_existing_user_to_another_service_with_all_permissions(notify_api,
             assert result['data'][0]['email_address'] == user_already_in_service.email_address
 
             # add new user to service
-            user_to_add = User(
+            user_to_add = User(  # nosec
                 name='Invited User',
                 email_address='invited@digital.cabinet-office.gov.uk',
                 password='password',
@@ -975,7 +975,7 @@ def test_add_existing_user_to_another_service_with_send_permissions(notify_api,
     with notify_api.test_request_context():
         with notify_api.test_client() as client:
             # they must exist in db first
-            user_to_add = User(
+            user_to_add = User(  # nosec
                 name='Invited User',
                 email_address='invited@digital.cabinet-office.gov.uk',
                 password='password',
@@ -1018,7 +1018,7 @@ def test_add_existing_user_to_another_service_with_manage_permissions(notify_api
     with notify_api.test_request_context():
         with notify_api.test_client() as client:
             # they must exist in db first
-            user_to_add = User(
+            user_to_add = User(  # nosec
                 name='Invited User',
                 email_address='invited@digital.cabinet-office.gov.uk',
                 password='password',
@@ -1061,7 +1061,7 @@ def test_add_existing_user_to_another_service_with_manage_api_keys(notify_api,
     with notify_api.test_request_context():
         with notify_api.test_client() as client:
             # they must exist in db first
-            user_to_add = User(
+            user_to_add = User(  # nosec
                 name='Invited User',
                 email_address='invited@digital.cabinet-office.gov.uk',
                 password='password',
@@ -1100,7 +1100,7 @@ def test_add_existing_user_to_non_existing_service_returns404(notify_api,
                                                               sample_user):
     with notify_api.test_request_context():
         with notify_api.test_client() as client:
-            user_to_add = User(
+            user_to_add = User(  # nosec
                 name='Invited User',
                 email_address='invited@digital.cabinet-office.gov.uk',
                 password='password',

@@ -1,6 +1,6 @@
 import base64
 import json
-import random
+import secrets
 import string
 from datetime import datetime, timedelta
 
@@ -473,7 +473,7 @@ def test_should_return_404_if_no_templates_for_service_with_id(client, sample_se
 
 def test_create_400_for_over_limit_content(client, notify_api, sample_user, sample_service, fake_uuid):
     limit = SMS_CHAR_COUNT_LIMIT
-    content = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(limit + 1))
+    content = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(limit + 1))
     data = {
         'name': 'too big template',
         'template_type': SMS_TYPE,
@@ -499,7 +499,7 @@ def test_create_400_for_over_limit_content(client, notify_api, sample_user, samp
 def test_update_400_for_over_limit_content(client, notify_api, sample_user, sample_template):
     limit = SMS_CHAR_COUNT_LIMIT
     json_data = json.dumps({
-        'content': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(limit + 1)),
+        'content': ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(limit + 1)),
         'created_by': str(sample_user.id)
     })
     auth_header = create_authorization_header()

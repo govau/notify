@@ -53,7 +53,7 @@ class TwilioSMSClient(SmsClient):
 
     def send_sms(self, to, content, reference, sender=None):
         # could potentially select from potential numbers like this
-        # from_number = random.choice(self._client.incoming_phone_numbers.list()).phone_number
+        # from_number = secrets.choice(self._client.incoming_phone_numbers.list()).phone_number
 
         start_time = monotonic()
         from_number = sender or self._from_number

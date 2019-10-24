@@ -175,7 +175,7 @@ def test_should_add_user_to_service(sample_user):
                       created_by=sample_user)
     dao_create_service(service, sample_user)
     assert sample_user in Service.query.first().users
-    new_user = User(
+    new_user = User(  # nosec
         name='Test User',
         email_address='new_user@digital.cabinet-office.gov.uk',
         password='password',
@@ -193,7 +193,7 @@ def test_should_remove_user_from_service(sample_user):
                       restricted=False,
                       created_by=sample_user)
     dao_create_service(service, sample_user)
-    new_user = User(
+    new_user = User(  # nosec
         name='Test User',
         email_address='new_user@digital.cabinet-office.gov.uk',
         password='password',
@@ -246,7 +246,7 @@ def test_get_all_only_services_user_has_access_to(service_factory, sample_user):
     service_factory.get('service 1', sample_user, email_from='service.1')
     service_factory.get('service 2', sample_user, email_from='service.2')
     service_3 = service_factory.get('service 3', sample_user, email_from='service.3')
-    new_user = User(
+    new_user = User(  # nosec
         name='Test User',
         email_address='new_user@digital.cabinet-office.gov.uk',
         password='password',
@@ -575,7 +575,7 @@ def test_add_existing_user_to_another_service_doesnot_change_old_permissions(sam
     test_user_permissions = Permission.query.filter_by(service=service_one, user=sample_user).all()
     assert len(test_user_permissions) == 8
 
-    other_user = User(
+    other_user = User(  # nosec
         name='Other Test User',
         email_address='other_user@digital.cabinet-office.gov.uk',
         password='password',
