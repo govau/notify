@@ -108,87 +108,6 @@ def purge_functional_test_data(user_email_prefix):
 
 
 @notify_command()
-def backfill_notification_statuses():
-    """
-    DEPRECATED. Populates notification_status.
-
-    This will be used to populate the new `Notification._status_fkey` with the old
-    `Notification._status_enum`
-    """
-    LIMIT = 250000
-    subq = "SELECT id FROM notification_history WHERE notification_status is NULL LIMIT {}".format(LIMIT)
-    update = "UPDATE notification_history SET notification_status = status WHERE id in ({})".format(subq)
-    result = db.session.execute(subq).fetchall()
-
-    while len(result) > 0:
-        db.session.execute(update)
-        print('commit {} updates at {}'.format(LIMIT, datetime.utcnow()))
-        db.session.commit()
-        result = db.session.execute(subq).fetchall()
-
-
-@notify_command()
-def update_notification_international_flag():
-    """
-    DEPRECATED. Set notifications.international=false.
-    """
-    # 250,000 rows takes 30 seconds to update.
-    subq = "select id from notifications where international is null limit 250000"
-    update = "update notifications set international = False where id in ({})".format(subq)
-    result = db.session.execute(subq).fetchall()
-
-    while len(result) > 0:
-        db.session.execute(update)
-        print('commit 250000 updates at {}'.format(datetime.utcnow()))
-        db.session.commit()
-        result = db.session.execute(subq).fetchall()
-
-    # Now update notification_history
-    subq_history = "select id from notification_history where international is null limit 250000"
-    update_history = "update notification_history set international = False where id in ({})".format(subq_history)
-    result_history = db.session.execute(subq_history).fetchall()
-    while len(result_history) > 0:
-        db.session.execute(update_history)
-        print('commit 250000 updates at {}'.format(datetime.utcnow()))
-        db.session.commit()
-        result_history = db.session.execute(subq_history).fetchall()
-
-
-@notify_command()
-def fix_notification_statuses_not_in_sync():
-    """
-    DEPRECATED.
-    This will be used to correct an issue where Notification._status_enum and NotificationHistory._status_fkey
-    became out of sync. See 979e90a.
-
-    Notification._status_enum is the source of truth so NotificationHistory._status_fkey will be updated with
-    these values.
-    """
-    MAX = 10000
-
-    subq = "SELECT id FROM notifications WHERE cast (status as text) != notification_status LIMIT {}".format(MAX)
-    update = "UPDATE notifications SET notification_status = status WHERE id in ({})".format(subq)
-    result = db.session.execute(subq).fetchall()
-
-    while len(result) > 0:
-        db.session.execute(update)
-        print('Committed {} updates at {}'.format(len(result), datetime.utcnow()))
-        db.session.commit()
-        result = db.session.execute(subq).fetchall()
-
-    subq_hist = "SELECT id FROM notification_history WHERE cast (status as text) != notification_status LIMIT {}" \
-        .format(MAX)
-    update = "UPDATE notification_history SET notification_status = status WHERE id in ({})".format(subq_hist)
-    result = db.session.execute(subq_hist).fetchall()
-
-    while len(result) > 0:
-        db.session.execute(update)
-        print('Committed {} updates at {}'.format(len(result), datetime.utcnow()))
-        db.session.commit()
-        result = db.session.execute(subq_hist).fetchall()
-
-
-@notify_command()
 @click.option('-y', '--year', required=True, help="e.g. 2017", type=int)
 def populate_monthly_billing(year):
     """
@@ -281,29 +200,28 @@ def backfill_processing_time(start_date, end_date):
         send_processing_time_for_start_and_end(process_start_date, process_end_date)
 
 
-@notify_command()
-def populate_annual_billing():
+@notify_command('populate-annual-billing')
+@click.option('-y', '--year', required=True, type=int,
+              help="""The year to populate the annual billing data for, e.g. 2019""")
+def populate_annual_billing(year):
     """
-    add annual_billing for 2016, 2017 and 2018.
+    add annual_billing for given year.
     """
-    financial_year = [2016, 2017, 2018]
+    sql = """
+    INSERT INTO annual_billing(id, service_id, free_sms_fragment_limit, financial_year_start,
+            created_at, updated_at)
+        SELECT uuid_in(md5(random()::text || now()::text)::cstring), id, 250000, :year, :now, :now
+        FROM services
+        WHERE id NOT IN(
+            SELECT service_id
+            FROM annual_billing
+            WHERE financial_year_start = :year)
+    """
 
-    for fy in financial_year:
-        populate_data = """
-        INSERT INTO annual_billing(id, service_id, free_sms_fragment_limit, financial_year_start,
-                created_at, updated_at)
-            SELECT uuid_in(md5(random()::text || now()::text)::cstring), id, 250000, {}, '{}', '{}'
-            FROM services
-            WHERE id NOT IN(
-                SELECT service_id
-                FROM annual_billing
-                WHERE financial_year_start={})
-        """.format(fy, datetime.utcnow(), datetime.utcnow(), fy)
+    result = db.session.execute(sql, {"year": year, "now": datetime.utcnow()})
+    db.session.commit()
 
-        services_result1 = db.session.execute(populate_data)
-        db.session.commit()
-
-        print("Populated annual billing {} for {} services".format(fy, services_result1.rowcount))
+    print("Populated annual billing {} for {} services".format(year, result.rowcount))
 
 
 @notify_command(name='list-routes')
