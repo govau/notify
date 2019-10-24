@@ -28,7 +28,7 @@ tests:
 	$(RUNNER) python setup.py test
 
 check-vulnerabilities:
-	$(RUNNER) bandit -r . -x tests -ll
+	$(RUNNER) bandit -c bandit.yml -r . -x tests -l
 
 lint:
 	$(RUNNER) flake8 notifications_utils

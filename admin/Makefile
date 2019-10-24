@@ -68,7 +68,7 @@ tests: version-file
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
 
 check-vulnerabilities:
-	$(RUNNER) bandit -r . -x node_modules,tests -ll
+	$(RUNNER) bandit -c bandit.yml -r . -x node_modules,tests -l
 
 run-gulp: ## Continuously build css
 	ADMIN_SENTRY_DSN=${ADMIN_SENTRY_DSN} \
