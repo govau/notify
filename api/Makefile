@@ -70,7 +70,7 @@ fmt:
 	$(RUNNER) autopep8 --in-place --recursive .
 
 check-vulnerabilities:
-	$(RUNNER) bandit -x migration,tests,app/commands.py -r . -ll
+	$(RUNNER) bandit -c bandit.yml -x migration,tests,app/commands.py -r . -l
 
 tests: version-file
 	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
