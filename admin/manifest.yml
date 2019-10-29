@@ -1,6 +1,6 @@
 defaults: &defaults
   buildpack: python_buildpack
-  instances: 2
+  instances: 5
   memory: 1G
   services:
     - notify-shared
