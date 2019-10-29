@@ -1,6 +1,8 @@
 from flask_login import current_user
 from flask import has_request_context, request, abort
+import sentry_sdk
 from notify.base import BaseAPIClient
+from notify.errors import APIError
 from notify import __version__
 
 
@@ -43,6 +45,17 @@ class NotifyAdminAPIClient(BaseAPIClient):
         # stateful modifications to that service
         if current_service and not current_service['active'] and not current_user.platform_admin:
             abort(403)
+
+    def get(self, *args, **kwargs):
+        try:
+            return super().get(*args, **kwargs)
+        except APIError as e:
+            if e.response is not None and e.response.headers is not None:
+                with sentry_sdk.configure_scope() as scope:
+                    for key, val in e.response.headers.items():
+                        scope.set_extra("api_resp_header_{}".format(key.lower()), val)
+
+            raise e
 
     def post(self, *args, **kwargs):
         self.check_inactive_service()
