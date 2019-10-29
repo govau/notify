@@ -20,7 +20,7 @@ defaults: &defaults
 applications:
   - name: notify-api
     <<: *defaults
-    instances: 2
+    instances: 5
     command: make run-production
     routes:
       - route: rest-api.notify.gov.au
