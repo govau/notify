@@ -107,7 +107,9 @@ td {
 }
 
 .list {
-  list-style-position: inside;
+  // we don't like this for now
+  //
+  // list-style-position: inside;
 }
 
 details summary {
