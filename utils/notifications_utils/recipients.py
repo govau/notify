@@ -485,8 +485,7 @@ def validate_and_format_phone_number_and_allow_international(number_str):
 
 def try_validate_and_format_phone_number(number, international=None, log_msg=None):
     """
-    For use in places where you shouldn't error if the phone number is invalid - for example if firetext pass us
-    something in
+    For use in places where you shouldn't error if the phone number is invalid.
     """
     try:
         if international:

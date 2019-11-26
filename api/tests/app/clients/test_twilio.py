@@ -52,7 +52,7 @@ def test_should_return_correct_details_for_technical_failure():
     get_twilio_responses('failed') == 'technical-failure'
 
 
-def test_should_be_raise_if_unrecognised_status_code():
+def test_should_raise_if_unrecognised_status_code():
     with pytest.raises(KeyError) as e:
         get_twilio_responses('unknown_status')
     assert 'unknown_status' in str(e.value)

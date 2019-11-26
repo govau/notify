@@ -18,6 +18,7 @@ from app.celery.celery import NotifyCelery
 from app.clients import Clients
 from app.clients.email.smtp import SMTPClient
 from app.clients.email.aws_ses import AwsSesClient
+from app.clients.sms.sap import SAPSMSClient
 from app.clients.sms.telstra import TelstraSMSClient
 from app.clients.sms.twilio import TwilioSMSClient
 from app.clients.performance_platform.performance_platform_client import PerformancePlatformClient
@@ -30,6 +31,10 @@ db = SQLAlchemy()
 migrate = Migrate()
 ma = Marshmallow()
 notify_celery = NotifyCelery()
+sap_sms_client = SAPSMSClient(
+    client_id=os.getenv('SAP_CLIENT_ID'),
+    client_secret=os.getenv('SAP_CLIENT_SECRET'),
+)
 telstra_sms_client = TelstraSMSClient(
     client_id=os.getenv('TELSTRA_MESSAGING_CLIENT_ID'),
     client_secret=os.getenv('TELSTRA_MESSAGING_CLIENT_SECRET'),
@@ -74,13 +79,19 @@ def create_app(application):
     deskpro_client.init_app(application)
     statsd_client.init_app(application)
     logging.init_app(application, statsd_client)
+    sap_sms_client.init_app(
+        logger=application.logger,
+        notify_host=application.config["API_HOST_NAME"]
+    )
     telstra_sms_client.init_app(
         logger=application.logger,
-        callback_notify_url_host=application.config["API_HOST_NAME"]
+        notify_host=application.config["API_HOST_NAME"]
     )
     twilio_sms_client.init_app(
         logger=application.logger,
-        callback_notify_url_host=application.config["API_HOST_NAME"]
+        notify_host=application.config["API_HOST_NAME"],
+        callback_username=application.config["TWILIO_CALLBACK_USERNAME"],
+        callback_password=application.config["TWILIO_CALLBACK_PASSWORD"],
     )
     aws_ses_client.init_app(
         application.config['AWS_SES_REGION'],
@@ -94,7 +105,7 @@ def create_app(application):
     redis_store.init_app(application)
     performance_platform_client.init_app(application)
     clients.init_app(
-        sms_clients=[twilio_sms_client, telstra_sms_client],
+        sms_clients=[sap_sms_client, telstra_sms_client, twilio_sms_client],
         email_clients=[aws_ses_client, smtp_client]
     )
 

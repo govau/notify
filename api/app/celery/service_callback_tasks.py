@@ -137,7 +137,7 @@ def create_encrypted_callback_data(notification, service_callback_api):
     data = {
         "notification_id": str(notification.id),
         "notification_client_reference": notification.client_reference,
-        "notification_to": notification.to,
+        "notification_to": notification.normalised_to,
         "notification_status": notification.status,
         "notification_created_at": notification.created_at.strftime(DATETIME_FORMAT),
         "notification_updated_at":

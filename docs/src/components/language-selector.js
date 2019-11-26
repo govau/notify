@@ -1,5 +1,5 @@
 import React, { createContext, Fragment } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import Select from 'react-select'
 import PropTypes from 'prop-types'
 
@@ -99,30 +99,34 @@ const Languages = props => (
       <Fragment>
         <H3>Select language</H3>
         <Nav>
-          {languageOptions.map(({ value, label }) =>
-            value === current ? (
-              <ActiveNavLanguageLink
-                key={label}
-                tabIndex="0"
-                onClick={() => {
-                  changeLanguage(value)
-                  props.onChange(value)
-                }}
-              >
-                {label}
-              </ActiveNavLanguageLink>
-            ) : (
-              <NavLanguageLink
-                key={label}
-                onClick={() => {
-                  changeLanguage(value)
-                  props.onChange(value)
-                }}
-              >
-                {label}
-              </NavLanguageLink>
+          {languageOptions
+            .filter(({ value }) =>
+              !props.only ? true : props.only.includes(value)
             )
-          )}
+            .map(({ value, label }) =>
+              value === current ? (
+                <ActiveNavLanguageLink
+                  key={label}
+                  tabIndex="0"
+                  onClick={() => {
+                    changeLanguage(value)
+                    props.onChange(value)
+                  }}
+                >
+                  {label}
+                </ActiveNavLanguageLink>
+              ) : (
+                <NavLanguageLink
+                  key={label}
+                  onClick={() => {
+                    changeLanguage(value)
+                    props.onChange(value)
+                  }}
+                >
+                  {label}
+                </NavLanguageLink>
+              )
+            )}
         </Nav>
       </Fragment>
     )}
@@ -132,6 +136,7 @@ const Languages = props => (
 Languages.propTypes = {
   /** Called when a language is selected. Selected language is passed as only parameter. */
   onChange: PropTypes.func,
+  only: PropTypes.array,
 }
 
 Languages.defaultProps = {
