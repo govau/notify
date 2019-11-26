@@ -10,7 +10,7 @@ if __name__ == '__main__':
         if tunnel['proto'] != 'https':
             continue
 
-        if tunnel['config']['addr'] != 'localhost:6011':
+        if tunnel['config']['addr'] != 'http://localhost:6011':
             continue
 
         sys.stdout.write(tunnel['public_url'])

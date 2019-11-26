@@ -13,7 +13,7 @@ from tests.app.db import create_service_callback_api
 
 def test_validate_callback_data_returns_none_when_valid():
     form = {'status': 'good',
-            'reference': 'send-sms-code'}
+            'reference': '67f9b762-061d-407e-9111-9addb6a96d60'}
     fields = ['status', 'reference']
     client_name = 'sms client'
 
@@ -61,8 +61,8 @@ def test_outcome_statistics_called_for_successful_callback(sample_notification, 
     callback_api = create_service_callback_api(service=sample_notification.service, url="https://original_url.com")
     reference = str(uuid.uuid4())
 
-    success, error = process_sms_client_response(status='3', provider_reference=reference, client_name='MMG')
-    assert success == "MMG callback succeeded. reference {} updated".format(str(reference))
+    success, error = process_sms_client_response(status='delivered', provider_reference=reference, client_name='Twilio')
+    assert success == "Twilio callback succeeded. reference {} updated".format(str(reference))
     assert error is None
     encrypted_data = create_encrypted_callback_data(sample_notification, callback_api)
     send_mock.assert_called_once_with([str(sample_notification.id), encrypted_data],
@@ -78,31 +78,24 @@ def test_sms_resonse_does_not_call_send_callback_if_no_db_entry(sample_notificat
         'app.celery.service_callback_tasks.send_delivery_status_to_service.apply_async'
     )
     reference = str(uuid.uuid4())
-    process_sms_client_response(status='3', provider_reference=reference, client_name='MMG')
+    process_sms_client_response(status='delivered', provider_reference=reference, client_name='Twilio')
     send_mock.assert_not_called()
-
-
-def test_process_sms_response_return_success_for_send_sms_code_reference(mocker):
-    success, error = process_sms_client_response(
-        status='000', provider_reference='send-sms-code', client_name='sms-client')
-    assert success == "{} callback succeeded: send-sms-code".format('sms-client')
-    assert error is None
 
 
 def test_process_sms_updates_sent_by_with_client_name_if_not_in_noti(notify_db, sample_notification):
     sample_notification.sent_by = None
     success, error = process_sms_client_response(
-        status='3', provider_reference=str(sample_notification.id), client_name='MMG')
+        status='delivered', provider_reference=str(sample_notification.id), client_name='Twilio')
     assert error is None
-    assert success == 'MMG callback succeeded. reference {} updated'.format(sample_notification.id)
-    assert sample_notification.sent_by == 'mmg'
+    assert success == 'Twilio callback succeeded. reference {} updated'.format(sample_notification.id)
+    assert sample_notification.sent_by == 'twilio'
 
 
 def test_process_sms_does_not_update_sent_by_if_already_set(mocker, notify_db, sample_notification):
     mock_update = mocker.patch('app.notifications.process_client_response.set_notification_sent_by')
-    sample_notification.sent_by = 'MMG'
+    sample_notification.sent_by = 'Twilio'
     process_sms_client_response(
-        status='3', provider_reference=str(sample_notification.id), client_name='MMG')
+        status='delivered', provider_reference=str(sample_notification.id), client_name='Twilio')
     assert not mock_update.called
 
 
@@ -123,6 +116,6 @@ def test_process_sms_response_raises_client_exception_for_unknown_sms_client(moc
 
 def test_process_sms_response_raises_client_exception_for_unknown_status(mocker):
     with pytest.raises(ClientException) as e:
-        process_sms_client_response(status='000', provider_reference=str(uuid.uuid4()), client_name='Firetext')
+        process_sms_client_response(status='000', provider_reference=str(uuid.uuid4()), client_name='Twilio')
 
-    assert "{} callback failed: status {} not found.".format('Firetext', '000') in str(e.value)
+    assert "{} callback failed: status {} not found.".format('Twilio', '000') in str(e.value)

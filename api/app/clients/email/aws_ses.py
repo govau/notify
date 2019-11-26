@@ -5,7 +5,7 @@ from monotonic import monotonic
 from notifications_utils.recipients import InvalidEmailError
 
 from app.clients import STATISTICS_DELIVERED, STATISTICS_FAILURE
-from app.clients.email import (EmailClientException, EmailClient)
+from app.clients import ClientException
 
 ses_response_map = {
     'Permanent': {
@@ -39,11 +39,11 @@ def get_aws_responses(status):
     return ses_response_map[status]
 
 
-class AwsSesClientException(EmailClientException):
+class AwsSesClientException(ClientException):
     pass
 
 
-class AwsSesClient(EmailClient):
+class AwsSesClient:
     '''
     Amazon SES email client.
     '''

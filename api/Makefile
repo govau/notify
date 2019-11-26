@@ -173,6 +173,8 @@ deploy: vendor requirements.txt ## Deploy prod application
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
+	$(MAKE) create-sap-oauth2-client
+
 deploy-celery-worker-sender:
 	APP=notify-celery-worker-sqs-sender $(MAKE) deploy
 
@@ -196,6 +198,13 @@ create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration messa
 create-migration: ## Create an appropriately ordered migration stub
 	$(RUNNER) flask db revision --rev-id $(MIGRATION_NUMBER) --message "$(MIGRATION_MESSAGE)"
 
+# this is a hack because CircleCI env variables are awful
+export SAP_OAUTH2_CLIENT_ID ?= $(SAP_OAUTH2_CLIENT_ID_DEV)
+export SAP_OAUTH2_CLIENT_SECRET ?= $(SAP_OAUTH2_CLIENT_SECRET_DEV)
+
+create-sap-oauth2-client:
+	@$(CF) run-task $(APP)-$(STG) '$$RUNNER flask command create-sap-oauth2-client -i $(SAP_OAUTH2_CLIENT_ID) -s $(SAP_OAUTH2_CLIENT_SECRET)'
+
 clean:
 	-rm -r vendor
 
@@ -205,4 +214,5 @@ clean:
 	run run-celery-worker-sender run-celery-worker run-celery-beat \
 	deploy deploy-api deploy-celery-worker-sender deploy-celery-worker deploy-dev-celery-worker-sender deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat \
 	run-production \
-	create-migration help clean check-vulnerabilities
+	create-migration help clean check-vulnerabilities \
+	create-sap-oauth2-client

@@ -131,6 +131,8 @@ def _should_record_notification_in_history_table(notification):
 
 
 def _decide_permanent_temporary_failure(current_status, status):
+    # TODO: logic which was based on Firetext. Firetext has been removed so need
+    # to validate if we still want this logic.
     # Firetext will send pending, then send either succes or fail.
     # If we go from pending to delivered we need to set failure type as temporary-failure
     if current_status == NOTIFICATION_PENDING and status == NOTIFICATION_PERMANENT_FAILURE:

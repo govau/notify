@@ -461,7 +461,7 @@ def single_notification_json(
         'notification_type': notification_type,
         'api_key': None,
         'job': job_payload,
-        'sent_by': 'mmg'
+        'sent_by': 'twilio'
     }
     return data
 

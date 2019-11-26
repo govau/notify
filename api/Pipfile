@@ -28,6 +28,7 @@ notifications-python-client = "==4.8.1"
 notifications-utils = {path = "./../utils",editable = true}
 Telstra_Messaging = {git = "https://github.com/Telstra/MessagingAPI-SDK-python.git",ref = "1.0.6.1"}
 twilio = "~=6.16"
+saplivelink365 = {git = "https://github.com/govau/sap-live-link-365-client-python.git",ref = "master"}
 boto3 = "==1.10.35"
 sentry-sdk = {extras = ["flask"]}
 itsdangerous = "==1.1.0"

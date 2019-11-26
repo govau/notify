@@ -1,6 +1,4 @@
-import functools
-from monotonic import monotonic
-from app.clients.sms import SmsClient
+from app.clients.sms.utils import timed
 import Telstra_Messaging as telstra
 
 telstra_response_map = {
@@ -15,33 +13,19 @@ telstra_response_map = {
 }
 
 
-def timed(description):
-    def decorator(fn):
-        @functools.wraps(fn)
-        def inner(self, *args, **kwargs):
-            start_time = monotonic()
-            result = fn(self, *args, **kwargs)
-            elapsed_time = monotonic() - start_time
-            self.logger.info(f"{description} finished in {elapsed_time}")
-            return result
-
-        return inner
-    return decorator
-
-
 def get_telstra_responses(status):
     return telstra_response_map[status]
 
 
-class TelstraSMSClient(SmsClient):
+class TelstraSMSClient:
     def __init__(self, client_id=None, client_secret=None, *args, **kwargs):
         super(TelstraSMSClient, self).__init__(*args, **kwargs)
         self._client_id = client_id
         self._client_secret = client_secret
 
-    def init_app(self, logger, callback_notify_url_host, *args, **kwargs):
+    def init_app(self, logger, notify_host, *args, **kwargs):
         self.logger = logger
-        self._callback_notify_url_host = callback_notify_url_host
+        self.notify_host = notify_host
 
     @property
     def name(self):
@@ -58,8 +42,7 @@ class TelstraSMSClient(SmsClient):
     @timed("Telstra send SMS request")
     def send_sms(self, to, content, reference, sender=None):
         telstra_api = telstra.MessagingApi(self._client)
-        notify_host = self._callback_notify_url_host
-        notify_url = f"{notify_host}/notifications/sms/telstra/{reference}" if notify_host else None
+        notify_url = f"{self.notify_host}/notifications/sms/telstra/{reference}" if self.notify_host else None
 
         payload = telstra.SendSMSRequest(
             to=to,

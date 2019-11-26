@@ -46,7 +46,7 @@ def test_should_return_highest_priority_active_provider(
 
     assert send_to_providers.provider_to_use('sms', '1234').name == first.identifier
 
-    first.priority = 20
+    first.priority = 11
     second.priority = 10
 
     provider_details_dao.dao_update_provider_details(first)
@@ -56,7 +56,7 @@ def test_should_return_highest_priority_active_provider(
 
     first.priority = 10
     first.active = False
-    second.priority = 20
+    second.priority = 11
 
     provider_details_dao.dao_update_provider_details(first)
     provider_details_dao.dao_update_provider_details(second)

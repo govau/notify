@@ -6,10 +6,9 @@ from flask import current_app
 from app import statsd_client
 from app.clients import ClientException
 from app.dao import notifications_dao
+from app.clients.sms.sap import get_sap_responses
 from app.clients.sms.telstra import get_telstra_responses
 from app.clients.sms.twilio import get_twilio_responses
-from app.clients.sms.firetext import get_firetext_responses
-from app.clients.sms.mmg import get_mmg_responses
 from app.celery.service_callback_tasks import (
     send_delivery_status_to_service,
     create_encrypted_callback_data,
@@ -19,10 +18,9 @@ from app.dao.notifications_dao import dao_update_notification
 from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
 
 sms_response_mapper = {
+    'SAP': get_sap_responses,
     'Telstra': get_telstra_responses,
     'Twilio': get_twilio_responses,
-    'MMG': get_mmg_responses,
-    'Firetext': get_firetext_responses
 }
 
 
@@ -38,11 +36,8 @@ def validate_callback_data(data, fields, client_name):
 def process_sms_client_response(status, provider_reference, client_name):
     success = None
     errors = None
-    # validate reference
-    if provider_reference == 'send-sms-code':
-        success = "{} callback succeeded: send-sms-code".format(client_name)
-        return success, errors
 
+    # validate reference
     try:
         uuid.UUID(provider_reference, version=4)
     except ValueError:

@@ -54,7 +54,6 @@ from app.dao.provider_details_dao import (
     dao_update_provider_details,
 )
 
-from app.clients.sms.firetext import FiretextClient
 from app.history_meta import create_history
 from tests import create_authorization_header
 from tests.app.db import (
@@ -810,6 +809,14 @@ def current_sms_provider():
 
 
 @pytest.fixture(scope='function')
+def with_active_sap_provider():
+    # Simulate the SAP provider actually being active.
+    sap = get_provider_details_by_identifier('sap')
+    sap.active = True
+    dao_update_provider_details(sap)
+
+
+@pytest.fixture(scope='function')
 def with_active_telstra_provider():
     # Simulate the Telstra provider actually being active.
     # This is required because at the time of writing Telstra is not currently
@@ -826,13 +833,8 @@ def smtp_provider():
 
 
 @pytest.fixture(scope='function')
-def firetext_provider():
-    return ProviderDetails.query.filter_by(identifier='firetext').one()
-
-
-@pytest.fixture(scope='function')
-def mmg_provider():
-    return ProviderDetails.query.filter_by(identifier='mmg').one()
+def twilio_provider():
+    return ProviderDetails.query.filter_by(identifier='twilio').one()
 
 
 @pytest.fixture(scope='function')
@@ -844,7 +846,7 @@ def sample_provider_statistics(notify_db,
                                unit_count=1):
 
     if provider is None:
-        provider = ProviderDetails.query.filter_by(identifier='mmg').first()
+        provider = ProviderDetails.query.filter_by(identifier='twilio').first()
     if day is None:
         day = date.today()
     stats = ProviderStatistics(
@@ -855,18 +857,6 @@ def sample_provider_statistics(notify_db,
     notify_db.session.add(stats)
     notify_db.session.commit()
     return stats
-
-
-@pytest.fixture(scope='function')
-def mock_firetext_client(mocker, statsd_client=None):
-    client = FiretextClient()
-    statsd_client = statsd_client or mocker.Mock()
-    current_app = mocker.Mock(config={
-        'FIRETEXT_API_KEY': 'foo',
-        'FROM_NUMBER': 'bar'
-    })
-    client.init_app(current_app, statsd_client)
-    return client
 
 
 @pytest.fixture(scope='function')
@@ -1062,7 +1052,7 @@ def sample_service_whitelist(notify_db, notify_db_session, service=None, email_a
 @pytest.fixture(scope='function')
 def sample_provider_rate(notify_db, notify_db_session, valid_from=None, rate=None, provider_identifier=None):
     create_provider_rates(
-        provider_identifier=provider_identifier if provider_identifier is not None else 'mmg',
+        provider_identifier=provider_identifier if provider_identifier is not None else 'twilio',
         valid_from=valid_from if valid_from is not None else datetime.utcnow(),
         rate=rate if rate is not None else 1,
     )
@@ -1072,9 +1062,9 @@ def sample_provider_rate(notify_db, notify_db_session, valid_from=None, rate=Non
 def sample_inbound_numbers(notify_db, notify_db_session, sample_service):
     service = create_service(service_name='sample service 2')
     inbound_numbers = list()
-    inbound_numbers.append(create_inbound_number(number='1', provider='mmg'))
-    inbound_numbers.append(create_inbound_number(number='2', provider='mmg', active=False, service_id=service.id))
-    inbound_numbers.append(create_inbound_number(number='3', provider='firetext', service_id=sample_service.id))
+    inbound_numbers.append(create_inbound_number(number='1', provider='twilio'))
+    inbound_numbers.append(create_inbound_number(number='2', provider='twilio', active=False, service_id=service.id))
+    inbound_numbers.append(create_inbound_number(number='3', provider='sap', service_id=sample_service.id))
     return inbound_numbers
 
 
