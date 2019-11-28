@@ -70,6 +70,7 @@ from tests.app.db import (
 from notifications_utils.recipients import (
     validate_and_format_phone_number_and_allow_international,
 )
+from app.sap.oauth2 import OAuth2Client as SAPOAuth2Client
 
 
 @pytest.yield_fixture
@@ -1082,6 +1083,22 @@ def sample_organisation(notify_db, notify_db_session):
     org = Organisation(name='sample organisation')
     dao_create_organisation(org)
     return org
+
+
+@pytest.fixture
+def sample_sap_oauth2_client(notify_db, notify_db_session):
+    client = SAPOAuth2Client(
+        client_id="1234",
+        client_secret="5678"
+    )
+    client.set_client_metadata({
+        "grant_types": [
+            "client_credentials"
+        ]
+    })
+    db.session.add(client)
+    db.session.commit()
+    return client
 
 
 @pytest.fixture

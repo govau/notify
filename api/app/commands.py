@@ -41,6 +41,7 @@ from app.utils import (
     get_midnight_for_day_before,
 )
 from app import telstra_sms_client
+from app.sap.oauth2 import OAuth2Client as SAPOAuth2Client
 
 
 @click.group(name='command', help='Additional commands')
@@ -252,6 +253,40 @@ def get_telstra_message_status(message_id):
     print('Telstra status: {}'.format(msg.delivery_status))
     if msg.delivery_status:
         print('Notify status: {}'.format(get_telstra_responses(msg.delivery_status)))
+
+
+@notify_command(name='create-sap-oauth2-client')
+@click.option('-i', '--client_id', required=True, help="The client's ID")
+@click.option('-s', '--client_secret', required=True, help="The client's secret")
+def create_sap_oauth2_client(client_id, client_secret):
+    """
+    You can generate a secure random string using the following Python code.
+
+    > import string
+    > import secrets
+    > length = 48
+    > ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(length))
+    """
+
+    if len(client_id) != 48:
+        current_app.logger.error('Client ID should be 48 characters long')
+        sys.exit(1)
+    if len(client_id) < 48:
+        current_app.logger.error('Client secret should be at least 48 characters long')
+        sys.exit(1)
+
+    client = SAPOAuth2Client(
+        client_id=client_id,
+        client_secret=client_secret
+    )
+    client.set_client_metadata({
+        "grant_types": [
+            "client_credentials"
+        ]
+    })
+
+    db.session.add(client)
+    db.session.commit()
 
 
 @notify_command(name='remove-sms-sender')

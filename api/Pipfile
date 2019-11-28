@@ -31,6 +31,8 @@ boto3 = "~=1.8"
 sentry-sdk = {extras = ["flask"]}
 itsdangerous = "==1.1.0"
 validatesns = "*"
+authlib = "==0.13"
+cryptography = {git = "https://github.com/pyca/cryptography.git",ref = "master"}
 
 [dev-packages]
 bandit = "==1.5.1"
