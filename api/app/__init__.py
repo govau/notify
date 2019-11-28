@@ -115,6 +115,8 @@ def register_blueprint(application):
     from app.template.rest import template_blueprint
     from app.support.support import support as support_blueprint
     from app.status.healthcheck import status as status_blueprint
+    from app.sap.routes import bp as sap_blueprint
+    from app.sap.oauth2 import configure_oauth as sap_configure_oauth
     from app.job.rest import job_blueprint
     from app.notifications.rest import notifications as notifications_blueprint
     from app.invite.rest import invite as invite_blueprint
@@ -153,6 +155,10 @@ def register_blueprint(application):
 
     status_blueprint.before_request(requires_no_auth)
     application.register_blueprint(status_blueprint)
+
+    sap_configure_oauth(application)
+    sap_blueprint.before_request(requires_no_auth)
+    application.register_blueprint(sap_blueprint)
 
     # delivery receipts
     ses_callback_blueprint.before_request(requires_no_auth)
