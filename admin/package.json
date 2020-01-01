@@ -1,19 +1,26 @@
 {
   "name": "notifications-admin",
+  "private": true,
   "version": "0.0.1",
-  "description": "Admin front end for Notify",
+  "description": "Admin frontend for Notify",
+  "engines": {
+    "node": "^10.x"
+  },
   "scripts": {
     "test": "gulp lint",
     "build": "gulp",
     "watch": "gulp watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alphagov/notifications-admin.git"
-  },
-  "author": "Government Digital Service",
+  "contributors": [
+    {
+      "name": "Government Digital Service"
+    },
+    {
+      "name": "Digital Transformation Agency"
+    }
+  ],
   "license": "MIT",
-  "homepage": "https://github.com/alphagov/notifications-admin#readme",
+  "homepage": "https://github.com/govau/notify/tree/master/admin#readme",
   "dependencies": {
     "@sentry/browser": "^4.6.6",
     "babel-core": "6.26.3",
@@ -40,7 +47,7 @@
     "timeago": "1.6.7"
   },
   "devDependencies": {
-    "gulp-base64": "github:govau/gulp-base64#semver:^1.0",
+    "gulp-base64": "github:govau/gulp-base64#semver:1.0.1",
     "gulp-css-url-adjuster": "0.2.3",
     "gulp-jshint": "2.1.0",
     "gulp-prettyerror": "1.2.1",

@@ -11,15 +11,11 @@ Notify admin application.
 
 ## First-time setup
 
-Languages needed
+Languages and tools needed:
 
 - Python 3.6+
-- [Node](https://nodejs.org/) 7.0.0 or greater
-- [yarn](https://yarnpkg.com/en/) 1.15.0 or greater
-
-```shell
-    brew install node
-```
+- [Node](https://nodejs.org/) 10.x
+- [yarn](https://yarnpkg.com/en/)
 
 The app runs within a virtual environment. We use pipenv for easier environment
 management

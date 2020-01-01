@@ -3,15 +3,15 @@ version: 2
 references:
   node_image: &node_image
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:10.18.0
 
   python_node_image: &python_node_image
     docker:
-      - image: circleci/python:3.6.5-node
+      - image: circleci/python:3.6.8-node
 
   python_node_postgres_images: &python_node_postgres_images
     docker:
-      - image: circleci/python:3.6.5-node
+      - image: circleci/python:3.6.8-node
       - image: circleci/postgres:9.6-alpine
         environment:
           POSTGRES_USER: circleci
@@ -19,7 +19,7 @@ references:
 
   deploy_image: &deploy_image
     docker:
-      - image: circleci/python:3.6.5-node
+      - image: circleci/python:3.6.8-node
 
   undeploy_image: &undeploy_image
     docker:
