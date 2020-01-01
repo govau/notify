@@ -1626,11 +1626,6 @@ extend@^3.0.0, extend@~3.0.1, extend@~3.0.2:
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.2.tgz#f8b1136b4071fbd8eb140aff858b1019ec2915fa"
   integrity sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==
 
-extend@~1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/extend/-/extend-1.2.1.tgz#a0f5fd6cfc83a5fe49ef698d60ec8a624dd4576c"
-  integrity sha1-oPX9bPyDpf5J72mNYOyKYk3UV2w=
-
 extglob@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/extglob/-/extglob-2.0.4.tgz#ad00fe4dc612a9232e8718711dc5cb5ab0285543"
@@ -2025,13 +2020,12 @@ gulp-babel@7.0.0:
     through2 "^2.0.0"
     vinyl-sourcemaps-apply "^0.2.0"
 
-"gulp-base64@github:govau/gulp-base64#semver:^1.0":
+"gulp-base64@github:govau/gulp-base64#semver:1.0.1":
   version "0.1.3"
   resolved "https://codeload.github.com/govau/gulp-base64/tar.gz/dde118bcb5f0705d7e5a45bda640ed801a53d60e"
   dependencies:
     async "~0.2.10"
     buffers "~0.1.1"
-    extend "~1.2.1"
     mime "^2.3.1"
     request "~2.87.0"
     through2 "~0.4.1"
