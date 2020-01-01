@@ -1,6 +1,6 @@
 # Notify
 
-Notify is a service developed by the [DTA](https://www.dta.gov.au) that helps
+Notify is a service developed by the [Digital Transformation Agency](https://www.dta.gov.au) that helps
 government agencies communicate with their users.
 
 This is the open source repository that encompasses all projects that make up
