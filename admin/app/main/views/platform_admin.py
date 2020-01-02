@@ -168,7 +168,7 @@ def platform_admin_reports():
 def trial_services_csv():
     results = service_api_client.get_trial_services_data()["data"]
     trial_services_columns = [
-        "Service ID", "Organisation", "Organisation type", "Service name",
+        "Service ID", "Organisation", "Organisation type", "Domains", "Service name",
         "SMS sent this year", "Emails sent this year", "Letters sent this year"
     ]
     trial_services_data = []
@@ -178,6 +178,7 @@ def trial_services_csv():
             row["service_id"],
             row["organisation_name"],
             row.get("organisation_type", "TODO"),
+            ', '.join(row["domains"]),
             row["service_name"],
             row["sms_totals"],
             row["email_totals"],
@@ -198,7 +199,7 @@ def trial_services_csv():
 def live_services_csv():
     results = service_api_client.get_live_services_data()["data"]
     live_services_columns = [
-        "Service ID", "Organisation", "Organisation type", "Service name", "Consent to research", "Main contact",
+        "Service ID", "Organisation", "Organisation type", "Domains", "Service name", "Consent to research", "Main contact",
         "Contact email", "Contact mobile", "Live date", "SMS volume intent", "Email volume intent",
         "Letter volume intent", "SMS sent this year", "Emails sent this year", "Letters sent this year"
     ]
@@ -209,6 +210,7 @@ def live_services_csv():
             row["service_id"],
             row["organisation_name"],
             row.get("organisation_type", "TODO"),
+            ', '.join(row["domains"]),
             row["service_name"],
             row.get("consent_to_research", "TODO"),
             row["contact_name"],

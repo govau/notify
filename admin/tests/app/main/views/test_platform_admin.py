@@ -1,6 +1,6 @@
 import datetime
 from unittest.mock import ANY
-
+from freezegun import freeze_time
 import pytest
 from bs4 import BeautifulSoup
 from flask import url_for
@@ -852,19 +852,23 @@ def test_get_trial_services_report(client, platform_admin_user, mocker):
         'app.service_api_client.get_trial_services_data',
         return_value={'data': [
             {'service_id': 1, 'service_name': 'jessie the oak tree', 'organisation_name': 'Forest',
-                'organisation_type': 'Ecosystem', 'sms_totals': 300, 'email_totals': 1200, 'letter_totals': 0},
+                'organisation_type': 'Ecosystem', 'sms_totals': 300, 'email_totals': 1200, 'letter_totals': 0,
+                'domains': ['dta.gov.au']
+            },
             {'service_id': 2, 'service_name': 'james the pine tree', 'organisation_name': 'Forest',
-                'organisation_type': 'Ecosystem', 'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0},
+                'organisation_type': 'Ecosystem', 'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0,
+                'domains': [],
+            },
         ]}
     )
     response = client.get(url_for('main.trial_services_csv'))
     assert response.status_code == 200
     report = response.get_data(as_text=True)
     assert report.strip() == (
-        'Service ID,Organisation,Organisation type,Service name,'
+        'Service ID,Organisation,Organisation type,Domains,Service name,'
         + 'SMS sent this year,Emails sent this year,Letters sent this year\r\n'
-        + '1,Forest,Ecosystem,jessie the oak tree,True,Forest fairy,300,1200,0\r\n'
-        + '2,Forest,Ecosystem,james the pine tree,0,0,0'
+        + '1,Forest,Ecosystem,dta.gov.au,jessie the oak tree,300,1200,0\r\n'
+        + '2,Forest,Ecosystem,,james the pine tree,0,0,0'
     )
 
 
@@ -879,21 +883,25 @@ def test_get_live_services_report(client, platform_admin_user, mocker):
                 'consent_to_research': True, 'contact_name': 'Forest fairy', 'organisation_type': 'Ecosystem',
                 'contact_email': 'forest.fairy@fake-service.gov.au', 'contact_mobile': '+61412345678',
                 'live_date': 'Sat, 29 Mar 2014 00:00:00 GMT', 'sms_volume_intent': 100, 'email_volume_intent': 50,
-                'letter_volume_intent': 20, 'sms_totals': 300, 'email_totals': 1200, 'letter_totals': 0},
+                'letter_volume_intent': 20, 'sms_totals': 300, 'email_totals': 1200, 'letter_totals': 0,
+                'domains': ['digital.gov.au', 'dta.gov.au'],
+            },
             {'service_id': 2, 'service_name': 'james the pine tree', 'organisation_name': 'Forest',
                 'consent_to_research': None, 'contact_name': None, 'organisation_type': 'Ecosystem',
                 'contact_email': None, 'contact_mobile': None,
                 'live_date': None, 'sms_volume_intent': None, 'email_volume_intent': 60,
-                'letter_volume_intent': 0, 'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0},
+                'letter_volume_intent': 0, 'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0,
+                'domains': ['dta.gov.au'],
+            },
         ]}
     )
     response = client.get(url_for('main.live_services_csv'))
     assert response.status_code == 200
     report = response.get_data(as_text=True)
     assert report.strip() == (
-        'Service ID,Organisation,Organisation type,Service name,Consent to research,Main contact,Contact email,'
+        'Service ID,Organisation,Organisation type,Domains,Service name,Consent to research,Main contact,Contact email,'
         + 'Contact mobile,Live date,SMS volume intent,Email volume intent,Letter volume intent,SMS sent this year,'
-        + 'Emails sent this year,Letters sent this year\r\n1,Forest,Ecosystem,jessie the oak tree,True,Forest fairy,'
+        + 'Emails sent this year,Letters sent this year\r\n1,Forest,Ecosystem,"digital.gov.au, dta.gov.au",jessie the oak tree,True,Forest fairy,'
         + 'forest.fairy@fake-service.gov.au,+61412345678,29-03-2014,100,50,20,300,1200,0\r\n2,Forest,'
-        + 'Ecosystem,james the pine tree,,,,,,,60,0,0,0,0'
+        + 'Ecosystem,dta.gov.au,james the pine tree,,,,,,,60,0,0,0,0'
     )
