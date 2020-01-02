@@ -10,7 +10,10 @@ from freezegun import freeze_time
 
 from app.celery.scheduled_tasks import daily_stats_template_usage_by_month
 from app.dao.organisation_dao import dao_add_service_to_organisation
-from app.dao.services_dao import dao_remove_user_from_service
+from app.dao.services_dao import (
+    dao_add_user_to_service,
+    dao_remove_user_from_service,
+)
 from app.dao.templates_dao import dao_redact_template
 from app.dao.users_dao import save_model_user
 from app.models import (
@@ -2953,3 +2956,31 @@ def test_get_organisation_for_service_id_return_empty_dict_if_service_not_in_org
         service_id=fake_uuid
     )
     assert response == {}
+
+
+def test_get_service_domains_single_domain(notify_db, notify_db_session):
+    from app.service.rest import get_service_domains
+
+    active_user1 = create_user(email='active1@foo.com', state='active')
+    active_user2 = create_user(email='active2@foo.com', state='active')
+    pending_user = create_user(email='pending@foo.com', state='pending')
+    service = create_service(user=active_user1)
+    dao_add_user_to_service(service, active_user2)
+    dao_add_user_to_service(service, pending_user)
+
+    assert get_service_domains(service.id) == ['foo.com']
+
+
+def test_get_service_domains_multiple_domains(notify_db, notify_db_session):
+    from app.service.rest import get_service_domains
+
+    active_user1 = create_user(email='active1@foo.com', state='active')
+    active_user2 = create_user(email='active2@foo.com', state='active')
+    active_user3 = create_user(email='active3@bar.com', state='active')
+    pending_user = create_user(email='pending@foo.com', state='pending')
+    service = create_service(user=active_user1)
+    dao_add_user_to_service(service, active_user2)
+    dao_add_user_to_service(service, active_user3)
+    dao_add_user_to_service(service, pending_user)
+
+    assert get_service_domains(service.id) == ['bar.com', 'foo.com']
