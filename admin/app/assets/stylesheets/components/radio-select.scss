@@ -1,9 +1,7 @@
 .radio-select {
-
   min-height: 39px;
 
   &-column {
-
     display: inline-block;
     vertical-align: top;
 
@@ -12,12 +10,10 @@
       padding-right: 10px;
       padding-left: 54px - 10px;
     }
-
   }
 
   .js-reset-button,
   .js-category-button {
-
     background: none;
     text-decoration: underline;
     color: $link-colour;
@@ -25,25 +21,27 @@
     display: inline-block;
     vertical-align: top;
     width: auto;
-    padding: 7px 20px 7px 10px;
+    padding: 3px 20px 11px 10px;
     margin-right: 5px;
     cursor: pointer;
 
     &:hover {
       color: $link-hover-colour;
     }
-
   }
 
   .js-reset-button-block {
     display: block;
     width: 100%;
     text-align: left;
+    padding: 3px 0 11px 0;
+  }
+
+  * + .js-reset-button-block {
     padding: 20px 20px $gutter 57px;
   }
 
   .js-enabled & {
-
     overflow: visible;
 
     .multiple-choice {
@@ -53,7 +51,5 @@
     .js-multiple-choice {
       display: block;
     }
-
   }
-
 }
