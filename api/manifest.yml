@@ -30,7 +30,7 @@ applications:
       CF_APP_NAME: notify-api
   - name: notify-celery-worker
     <<: *defaults
-    instances: 4
+    instances: 2
     memory: 4G
     health-check-type: process
     no-route: true

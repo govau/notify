@@ -32,13 +32,14 @@ applications:
       CF_APP_NAME: notify-api-((stg))
   - name: notify-celery-worker-((stg))
     <<: *defaults
+    memory: 1G
     health-check-type: process
     no-route: true
     command: make run-celery-worker
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-celery-worker-((stg))
-      CELERYD_CONCURRENCY: 32
+      CELERYD_CONCURRENCY: 8
   - name: notify-celery-beat-((stg))
     <<: *defaults
     memory: 256M
