@@ -30,13 +30,15 @@ applications:
       CF_APP_NAME: notify-api
   - name: notify-celery-worker
     <<: *defaults
-    instances: 1
+    instances: 4
+    memory: 4G
     health-check-type: process
     no-route: true
     command: make run-celery-worker
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-celery-worker
+      CELERYD_CONCURRENCY: 32
   - name: notify-celery-beat
     <<: *defaults
     instances: 1

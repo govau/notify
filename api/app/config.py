@@ -183,6 +183,7 @@ class Config(object):
     CELERY_ALWAYS_EAGER = True
     """
 
+    CELERYD_CONCURRENCY = os.getenv('CELERYD_CONCURRENCY', 4)
     CELERY_ENABLE_UTC = True
     CELERY_TIMEZONE = 'Australia/Sydney'
     CELERY_ACCEPT_CONTENT = ['json']
