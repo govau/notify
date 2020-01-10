@@ -38,6 +38,7 @@ applications:
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-celery-worker-((stg))
+      CELERYD_CONCURRENCY: 32
   - name: notify-celery-beat-((stg))
     <<: *defaults
     memory: 256M
