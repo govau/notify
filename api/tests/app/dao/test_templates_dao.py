@@ -553,5 +553,5 @@ def test_get_templates_by_ids_successful_for_one_cache_item(notify_db, notify_db
 
 
 def test_get_templates_by_ids_returns_empty_list():
-        assert dao_get_templates_for_cache({}) == []
-        assert dao_get_templates_for_cache(None) == []
+    assert dao_get_templates_for_cache({}) == []
+    assert dao_get_templates_for_cache(None) == []

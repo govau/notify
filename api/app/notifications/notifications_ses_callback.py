@@ -79,17 +79,17 @@ def sns_callback_handler():
     message_type = request.headers.get('x-amz-sns-message-type')
     try:
         verify_message_type(message_type)
-    except InvalidMessageTypeException as ex:
+    except InvalidMessageTypeException:
         raise InvalidRequest("SES-SNS callback failed: invalid message type", 400)
 
     try:
         message = json.loads(request.data)
-    except json.decoder.JSONDecodeError as ex:
+    except json.decoder.JSONDecodeError:
         raise InvalidRequest("SES-SNS callback failed: invalid JSON given", 400)
 
     try:
         validatesns.validate(message, get_certificate=get_certificate)
-    except validatesns.ValidationError as ex:
+    except validatesns.ValidationError:
         raise InvalidRequest("SES-SNS callback failed: validation failed", 400)
 
     if autoconfirm_subscription(message):
