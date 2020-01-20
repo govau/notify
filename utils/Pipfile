@@ -4,23 +4,37 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-notifications-utils = {editable = true,path = "."}
+bleach = "==3.1.0"
+boto3 = "==1.10.35"
+botocore = "==1.13.35"
 itsdangerous = "==1.1.0"
-flask = "~=1.1.1"
+flask = "==1.1.1"
+flask-redis = "==0.4.0"
+jinja2 = "==2.10.3"
+mistune = "==0.8.4"
+monotonic = "==1.5"
+orderedset = "==2.0.1"
+phonenumbers = "==8.11.0"
+pypdf2 = "==1.26.0"
+python-json-logger = "==0.1.11"
+pytz = "==2019.3"
+pyyaml = "==5.2"
+redis = "==3.3.11"
+requests = "==2.22.0"
+smartypants = "==2.0.1"
+statsd = "==3.3.0"
 
 [dev-packages]
 bandit = "==1.5.1"
+flake8 = "==3.7.9"
+freezegun = "==0.3.10"
+notifications-utils = {editable = true,path = "."}
+pipenv-setup = "*"
 pytest = "==3.6.4"
-pytest-mock = "*"
-pytest-cov = "*"
+pytest-cov = "==2.6.0"
+pytest-mock = "==1.10.0"
 pytest-xdist = "==1.22.2"
-requests-mock = "*"
-freezegun = "*"
-"flake8" = "*"
-pyyaml = ">=4.2b4"
-
-[requires]
-python_version = "3.6"
+requests-mock = "==1.4.0"
 
 [pipenv]
 allow_prereleases = true

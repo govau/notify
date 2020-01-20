@@ -49,6 +49,18 @@ version-file: ${APP_VERSION_FILE}
 Pipfile Pipfile.lock:
 	$(PIPENV) install
 
+# cryptography fails to vendor correctly in CI if we pin it to 2.8. The error is:
+# "Could not find a version that satisfies the requirement cryptography==2.8"
+# For now we pin it to some commit in master that seems to work. However, this
+# means that for macOS, installs fail unless we specify some flags.
+# See https://github.com/pyca/cryptography/blob/master/docs/development/getting-started.rst#openssl-on-macos
+
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	export LDFLAGS="-L$(shell brew --prefix openssl@1.1)/lib"
+	export CFLAGS="-I$(shell brew --prefix openssl@1.1)/include"
+endif
+
 install: version-file ## Setup virtualenv and install python dependencies
 	$(PIPENV) install
 
