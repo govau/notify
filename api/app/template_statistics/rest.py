@@ -30,7 +30,7 @@ def get_template_statistics_for_service_by_day(service_id):
     if request.args.get('limit_days'):
         try:
             limit_days = int(request.args['limit_days'])
-        except ValueError as e:
+        except ValueError:
             error = '{} is not an integer'.format(request.args['limit_days'])
             message = {'limit_days': [error]}
             raise InvalidRequest(message, status_code=400)

@@ -462,7 +462,7 @@ def dao_get_notifications_by_to_field(service_id, search_term, notification_type
     for special_character in ('\\', '_', '%', '/'):
         normalised = normalised.replace(
             special_character,
-            '\{}'.format(special_character)
+            '\\{}'.format(special_character)
         )
 
     filters = [
