@@ -19,9 +19,12 @@ SVC_DIFFED     = $(SERVICES:%=diff-service-%)
 SVC_FETCHED    = $(SERVICES:%=fetch-service-%)
 APPLY_ACTION  ?= update
 
-PSQL_SVC_PLAN ?= shared
+PSQL_SVC_PLAN ?= dev-small
 PSQL_SVC_NAME ?= notify-psql-$(STG)
 
+QUEUES              = celery periodic-tasks priority-tasks database-tasks send-sms-tasks send-email-tasks research-mode-tasks statistics-tasks job-tasks retry-tasks notify-internal-tasks process-ftp-tasks create-letters-pdf-tasks service-callbacks letter-tasks antivirus-tasks
+SETUP_SQS_QUEUES    = $(QUEUES:%=setup-sqs-queue-%)
+TEARDOWN_SQS_QUEUES = $(QUEUES:%=teardown-sqs-queue-%)
 
 apply-services: $(SVC_APPLIED)
 
@@ -50,7 +53,8 @@ $(SVC_FETCHED): fetch-service-%:
 	$(CF) curl "/v2/user_provided_service_instances?q=name:$*" | $(JQ) -S ".resources[].entity.credentials" > ups/$(CLD_HOST)/$*.json
 
 create-service-psql:
-	-$(CF) create-service postgres $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
+	-$(CF) create-service postgresql $(PSQL_SVC_PLAN) $(PSQL_SVC_NAME)
+	./bin/cf-wait-for-service $(PSQL_SVC_NAME)
 
 setup-ses-callback: export AWS_ACCESS_KEY_ID ?= $(SES_CALLBACK_AWS_ACCESS_KEY_ID)
 setup-ses-callback: export AWS_SECRET_ACCESS_KEY ?= $(SES_CALLBACK_AWS_SECRET_ACCESS_KEY)
@@ -74,7 +78,27 @@ teardown-ses-callback-%:
 		--subscription-arn `$(AWS) sns list-subscriptions-by-topic \
 			--region $(AWS_REGION) \
 			--topic-arn "$(TOPIC_ARN)" \
-			| $(JQ) -r '.Subscriptions[] | select(.Endpoint == "https://notify-api-f-$*.apps.y.cld.gov.au/notifications/email/ses").SubscriptionArn'`
+			| $(JQ) -r '.Subscriptions[] | select(.Endpoint == "https://notify-api-$*.apps.y.cld.gov.au/notifications/email/ses").SubscriptionArn'`
+
+setup-sqs-queues:
+	$(MAKE) -j $(SETUP_SQS_QUEUES)
+
+# % is the queue name to setup.
+setup-sqs-queue-%:
+	$(CF) create-service sqs standard notify-sqs-$(STG)-$* -c ./cf-sqs-config.json
+	./bin/cf-wait-for-service notify-sqs-$(STG)-$*
+
+# % is the feature environment name to teardown.
+teardown-sqs-queues-%:
+	STG_TO_TEARDOWN=$* $(MAKE) -j $(TEARDOWN_SQS_QUEUES)
+
+# % is the queue name to teardown.
+teardown-sqs-queue-%:
+	-$(CF) unbind-service notify-api-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) unbind-service notify-celery-worker-sender-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) unbind-service notify-celery-worker-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) unbind-service notify-celery-beat-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) delete-service notify-sqs-$(STG_TO_TEARDOWN)-$* -f
 
 list-branches:
 	git ls-remote --heads ${GIT_REMOTE} | egrep "/feat-.*" | $(RUNNER) python remove_feat_prefix.py
@@ -91,17 +115,20 @@ undeploy-feature-branches:
 undeploy-%:
 	-$(CF) unbind-service notify-api-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-f-$* notify-psql-f-$* # TODO: can remove once all such applications are cleaned up
+	-$(CF) unbind-service notify-celery-worker-sender-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-worker-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-beat-f-$* notify-psql-f-$*
 	-$(CF) delete notify-f-$* -f
 	-$(CF) delete notify-api-f-$* -f
 	-$(CF) delete notify-celery-f-$* -f # TODO: can remove once all such applications are cleaned up
+	-$(CF) delete notify-celery-worker-sender-f-$* -f
 	-$(CF) delete notify-celery-worker-f-$* -f
 	-$(CF) delete notify-celery-beat-f-$* -f
 	-$(CF) delete notify-docs-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 
-	-$(MAKE) teardown-ses-callback-$*
+	-$(MAKE) teardown-ses-callback-f-$*
+	-$(MAKE) teardown-sqs-queues-f-$*
 
 .PHONY: prune \
 	list-branches list-apps \
