@@ -201,6 +201,7 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
+      - run: make ci.setup-sqs-queues
       - run: make api.deploy-dev
       # Need the API to be running so that the callback can auto-subscribe.
       - run: make ci.setup-ses-callback
@@ -212,6 +213,7 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
+      - run: make ci.setup-sqs-queues
       - run: make api.deploy-dev-celery-worker
 
   deploy-dev-celery-beat:
@@ -221,6 +223,7 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
+      - run: make ci.setup-sqs-queues
       - run: make api.deploy-dev-celery-beat
 
   deploy-dev-docs:

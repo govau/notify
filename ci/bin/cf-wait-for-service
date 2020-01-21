@@ -1,0 +1,73 @@
+#!/bin/bash
+set -u
+
+VERSION="(development version)"
+
+urlencode() {
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            *) printf '%%%02X' "'$c" ;;
+        esac
+    done
+}
+
+status_of() {
+	local space=$(cat ~/.cf/config.json | jq -r '.SpaceFields.GUID')
+	if [[ -z $space ]]; then
+		echo 2>&1 "no space targeted."
+		exit 1
+	fi
+	local name=$(urlencode $1)
+	local guid=$(cf curl "/v3/service_instances?space_guids=$space&names=$name" | jq -r '.resources[] | select(.name == "'$1'") | .guid')
+	if [[ -z $guid ]]; then
+		echo 2>&1 "service $1 not found."
+		exit 1
+	fi
+	local state=$(cf curl /v2/service_instances/$guid | jq -r '.entity.last_operation.state')
+	if [[ -z $state ]]; then
+		echo 2>&1 "failed to get status of service $1."
+		exit 1
+	fi
+	echo $state
+}
+
+SERVICE=${1:-}
+if [[ -z $SERVICE ]]; then
+	echo >&2 "USAGE: $0 NAME"
+	exit 1
+fi
+
+if [[ ${SERVICE} == "-v" || ${SERVICE} == "--version" ]]; then
+	echo cf-wait-for-service ${VERSION}
+	exit 0
+fi
+if [[ ${SERVICE} == "-h" || ${SERVICE} == "--help" ]]; then
+	echo Usage: "cf-wait-for-service <instance-name>"
+	echo
+	echo cf-wait-for-service watches asynchronously created
+	echo Cloud Foundry service instances, to finish creating
+	echo either succesfully or not, so that you can rely
+	echo on a service being fully created in your automation.
+	echo
+	exit 0
+fi
+
+while true; do
+	STATE=$(status_of $SERVICE)
+	case $STATE in
+	(succeeded)
+		echo "Service $SERVICE finished provisioning succesfully."
+		exit 0
+		;;
+	(*progress)
+		sleep 5
+		;;
+	(*)
+		echo "Service $SERVICE is now in '$STATE' state."
+		exit 1
+		;;
+	esac
+done

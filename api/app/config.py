@@ -8,12 +8,11 @@ from kombu import Exchange, Queue
 from app.models import (
     EMAIL_TYPE, SMS_TYPE, LETTER_TYPE,
 )
+from app.cloudfoundry_config import extract_cloudfoundry_config
+from app.queue_config import extract_predefined_queues
 
-if os.environ.get('VCAP_SERVICES'):
-    # on cloudfoundry, config is a json blob in VCAP_SERVICES - unpack it, and populate
-    # standard environment variables from it
-    from app.cloudfoundry_config import extract_cloudfoundry_config
-    extract_cloudfoundry_config()
+
+extract_cloudfoundry_config()
 
 
 class QueueNames(object):
@@ -89,9 +88,6 @@ class Config(object):
 
     # Hosted graphite statsd prefix
     STATSD_PREFIX = os.getenv('STATSD_PREFIX')
-
-    # Prefix to identify queues in SQS
-    NOTIFICATION_QUEUE_PREFIX = os.getenv('NOTIFICATION_QUEUE_PREFIX')
 
     # URL of redis instance
     REDIS_URL = os.getenv('REDIS_URL')
@@ -170,25 +166,21 @@ class Config(object):
     RESEARCH_CONSENT_TEMPLATE_ID = '73a85db3-d017-4bb3-ba2c-2eb36837f234'
     SUPPORT_QUESTION_FEEDBACK = 'c11f3003-8462-4af6-ba80-fd5719f79e21'
 
-    BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
-
-    """
-    BROKER_URL = 'sqs://'
+    QUEUE_PREFIX = os.getenv('QUEUE_PREFIX', '')
+    BROKER_URL = os.getenv('BROKER_URL', 'sqs://')
     BROKER_TRANSPORT_OPTIONS = {
         'region': AWS_REGION,
         'polling_interval': 1,  # 1 second
         'visibility_timeout': 310,
-        'queue_name_prefix': NOTIFICATION_QUEUE_PREFIX
+        'queue_name_prefix': QUEUE_PREFIX,
+        'predefined_queues': extract_predefined_queues(),
     }
-    CELERY_ALWAYS_EAGER = True
-    """
-
-    CELERYD_CONCURRENCY = os.getenv('CELERYD_CONCURRENCY', 4)
     CELERY_ENABLE_UTC = True
     CELERY_TIMEZONE = 'Australia/Sydney'
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_IMPORTS = ('app.celery.tasks', 'app.celery.scheduled_tasks', 'app.celery.reporting_tasks')
+    CELERYD_CONCURRENCY = os.getenv('CELERYD_CONCURRENCY', 4)
     CELERYBEAT_SCHEDULE = {
         'run-scheduled-jobs': {
             'task': 'run-scheduled-jobs',
@@ -373,17 +365,16 @@ class Development(Config):
 
     NOTIFY_ENVIRONMENT = 'development'
     NOTIFY_LOG_PATH = 'application.log'
-    NOTIFICATION_QUEUE_PREFIX = 'development'
 
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/notification_api')
     REDIS_URL = 'redis://localhost:6379/0'
-    BROKER_URL = 'sqla+{database_url}'.format(database_url=SQLALCHEMY_DATABASE_URI)
 
     STATSD_ENABLED = False
     STATSD_HOST = "localhost"
     STATSD_PORT = 1000
     STATSD_PREFIX = "stats-prefix"
 
+    QUEUE_PREFIX = 'development'
     for queue in QueueNames.all_queues():
         Config.CELERY_QUEUES.append(
             Queue(queue, Exchange('default'), routing_key=queue)

@@ -9,6 +9,21 @@ defaults: &defaults
     - notify-shared
     - notify-api
     - notify-celery
+    - notify-sqs-((stg))-periodic-tasks
+    - notify-sqs-((stg))-priority-tasks
+    - notify-sqs-((stg))-database-tasks
+    - notify-sqs-((stg))-send-sms-tasks
+    - notify-sqs-((stg))-send-email-tasks
+    - notify-sqs-((stg))-research-mode-tasks
+    - notify-sqs-((stg))-statistics-tasks
+    - notify-sqs-((stg))-job-tasks
+    - notify-sqs-((stg))-retry-tasks
+    - notify-sqs-((stg))-notify-internal-tasks
+    - notify-sqs-((stg))-process-ftp-tasks
+    - notify-sqs-((stg))-create-letters-pdf-tasks
+    - notify-sqs-((stg))-service-callbacks
+    - notify-sqs-((stg))-letter-tasks
+    - notify-sqs-((stg))-antivirus-tasks
     - aws
     - telstra
     - twilio
@@ -22,6 +37,7 @@ defaults: &defaults
     API_SENTRY_ENV: dev
     CELERY_SENTRY_ENV: dev
     CREATE_ADMIN_USER: true
+    CF_SERVICE_QUEUE_PREFIX: notify-sqs-((stg))-
 
 applications:
   - name: notify-api-((stg))

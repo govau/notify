@@ -8,10 +8,11 @@ import json
 
 
 def extract_cloudfoundry_config():
-    vcap_services = json.loads(os.environ['VCAP_SERVICES'])
+    vcap_services = json.loads(os.environ.get('VCAP_SERVICES', '{}'))
+
     set_config_env_vars(vcap_services)
 
 
 def set_config_env_vars(vcap_services):
-    # Postgres config
-    os.environ['SQLALCHEMY_DATABASE_URI'] = vcap_services['postgres'][0]['credentials']['uri']
+    if 'postgres' in vcap_services:
+        os.environ['SQLALCHEMY_DATABASE_URI'] = vcap_services['postgres'][0]['credentials']['uri']
