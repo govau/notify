@@ -40,7 +40,7 @@ from app.main.validators import (
     ValidEmail,
     ValidGovEmail,
 )
-
+from app.utils import convert_utc_to_aet
 
 def get_time_value_and_label(future_time):
     return (
@@ -62,12 +62,13 @@ def get_human_time(time):
     )
 
 
-def get_human_day(time, prefix_today_with='T'):
+def get_human_day(aet_time, prefix_today_with='T'):
+    now = convert_utc_to_aet(datetime.utcnow())
     #  Add 1 hour to get ‘midnight today’ instead of ‘midnight tomorrow’
-    time = (time - timedelta(hours=1)).strftime('%A')
-    if time == datetime.utcnow().strftime('%A'):
+    time = (aet_time - timedelta(hours=1)).strftime('%A')
+    if time == now.strftime('%A'):
         return '{}oday'.format(prefix_today_with)
-    if time == (datetime.utcnow() + timedelta(days=1)).strftime('%A'):
+    if time == (now + timedelta(days=1)).strftime('%A'):
         return 'Tomorrow'
     return time
 
@@ -86,7 +87,7 @@ def get_next_hours_until(until):
 
 
 def get_next_days_until(until):
-    now = datetime.utcnow()
+    now = convert_utc_to_aet(datetime.utcnow())
     days = int((until - now).total_seconds() / (60 * 60 * 24))
     return [
         get_human_day(
