@@ -20,6 +20,7 @@ def single_queue_predefined_queues(queue_url, key, secret, queue_name_prefix):
     # TODO: use QueueNames.all_queues() which requires moving QueueNames in here
     # and refactoring all app.config imports to app.queue_config.
     for i, queue_name in enumerate([
+        'celery',
         'periodic-tasks',
         'priority-tasks',
         'database-tasks',

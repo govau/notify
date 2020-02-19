@@ -22,7 +22,7 @@ APPLY_ACTION  ?= update
 PSQL_SVC_PLAN ?= shared
 PSQL_SVC_NAME ?= notify-psql-$(STG)
 
-QUEUES              = periodic-tasks priority-tasks database-tasks send-sms-tasks send-email-tasks research-mode-tasks statistics-tasks job-tasks retry-tasks notify-internal-tasks process-ftp-tasks create-letters-pdf-tasks service-callbacks letter-tasks antivirus-tasks
+QUEUES              = celery periodic-tasks priority-tasks database-tasks send-sms-tasks send-email-tasks research-mode-tasks statistics-tasks job-tasks retry-tasks notify-internal-tasks process-ftp-tasks create-letters-pdf-tasks service-callbacks letter-tasks antivirus-tasks
 SETUP_SQS_QUEUES    = $(QUEUES:%=setup-sqs-queue-%)
 TEARDOWN_SQS_QUEUES = $(QUEUES:%=teardown-sqs-queue-%)
 

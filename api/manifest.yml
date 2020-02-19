@@ -6,6 +6,7 @@ defaults: &defaults
     - notify-shared
     - notify-api
     - notify-celery
+    - notify-sqs-celery
     - notify-sqs-periodic-tasks
     - notify-sqs-priority-tasks
     - notify-sqs-database-tasks
