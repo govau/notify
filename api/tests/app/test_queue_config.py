@@ -56,7 +56,7 @@ def test_extract_predefined_queues_for_cf():
 def test_extract_predefined_queues_for_single_queue():
     queues = extract_predefined_queues()
 
-    assert len(queues) == 15
+    assert len(queues) == 16
 
     assert queues['testing-priority-tasks'] == {
         'url': 'https://sqs.ap-southeast-2.amazonaws.com/single-queue-url',
