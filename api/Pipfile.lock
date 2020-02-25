@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c645e952a41918a1a363efa304ba6eb9b43cd2d529b0009a2ddb9616d0f3052d"
+            "sha256": "f9baf223d47c75a4c319ed57f8c9021f5c6cc8e3ebb2c294cbfdc732cde3ef19"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -362,8 +362,8 @@
             "version": "==3.0.1"
         },
         "kombu": {
-            "git": "https://github.com/jonathaningram/kombu.git",
-            "ref": "abd2d9679ca09add4d9fedb4ce90f1ddc221260e"
+            "git": "https://github.com/govau/kombu.git",
+            "ref": "f3eef17ae492d20f76bdd30d0302ed808ad566f0"
         },
         "mako": {
             "hashes": [
