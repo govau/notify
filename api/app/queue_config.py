@@ -3,15 +3,16 @@ import json
 
 
 def extract_predefined_queues():
+    vcap_services = json.loads(os.environ.get('VCAP_SERVICES', '{}'))
+    queues = cf_predefined_queues(vcap_services)
+
     url = os.environ.get('SQS_QUEUE_URL', '')
     key = os.environ.get('SQS_AWS_ACCESS_KEY_ID', '')
     secret = os.environ.get('SQS_AWS_SECRET_ACCESS_KEY', '')
     if url and key and secret:
-        return single_queue_predefined_queues(url, key, secret, os.getenv('QUEUE_PREFIX', ''))
+        queues.update(single_queue_predefined_queues(url, key, secret, os.getenv('QUEUE_PREFIX', '')))
 
-    vcap_services = json.loads(os.environ.get('VCAP_SERVICES', '{}'))
-
-    return cf_predefined_queues(vcap_services)
+    return queues
 
 
 def single_queue_predefined_queues(queue_url, key, secret, queue_name_prefix):
