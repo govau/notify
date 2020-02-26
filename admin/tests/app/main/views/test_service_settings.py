@@ -1665,8 +1665,8 @@ def test_should_show_page_to_set_organisation_type(
     assert len(labels) == 3
     for index, expected in enumerate((
         'Australian Government',
-        'State Government',
-        'Local Government',
+        'State or territory government',
+        'Local government',
     )):
         assert normalize_spaces(labels[index].text) == expected
 
