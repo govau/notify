@@ -165,8 +165,8 @@ def organisation_type():
         'Who runs this service?',
         choices=[
             ('federal', 'Australian Government'),
-            ('state', 'State Government'),
-            ('local', 'Local Government'),
+            ('state', 'State or territory government'),
+            ('local', 'Local government'),
         ],
         validators=[DataRequired()],
     )
