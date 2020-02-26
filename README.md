@@ -52,6 +52,7 @@ To start the whole app from nothing, you'll need to run the following in
 different shells.
 
 ```
+make api.run-celery-worker-sender
 make api.run-celery-worker
 make admin.run
 ```

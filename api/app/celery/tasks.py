@@ -75,7 +75,7 @@ from app.utils import convert_utc_to_aet
 
 
 @worker_process_shutdown.connect
-def worker_process_shutdown(sender, signal, pid, exitcode):
+def worker_process_shutdown(sender, signal, pid, exitcode, **kwargs):
     current_app.logger.info('Tasks worker shutdown: PID: {} Exitcode: {}'.format(pid, exitcode))
 
 
