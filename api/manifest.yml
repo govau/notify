@@ -45,7 +45,7 @@ applications:
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-api
-  - name: notify-celery-worker-sender
+  - name: notify-celery-worker-sqs-sender
     <<: *defaults
     instances: 4
     memory: 1G
@@ -54,9 +54,9 @@ applications:
     command: make run-celery-worker-sender
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-worker-sender
+      CF_APP_NAME: notify-celery-worker-sqs-sender
       CELERYD_CONCURRENCY: 8
-  - name: notify-celery-worker
+  - name: notify-celery-worker-sqs
     <<: *defaults
     instances: 4
     memory: 1G
@@ -65,9 +65,9 @@ applications:
     command: make run-celery-worker
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-worker
+      CF_APP_NAME: notify-celery-worker-sqs
       CELERYD_CONCURRENCY: 8
-  - name: notify-celery-beat
+  - name: notify-celery-beat-sqs
     <<: *defaults
     instances: 1
     memory: 256M
@@ -76,4 +76,4 @@ applications:
     command: make run-celery-beat
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-beat
+      CF_APP_NAME: notify-celery-beat-sqs

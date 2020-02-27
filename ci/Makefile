@@ -95,6 +95,9 @@ teardown-sqs-queues-%:
 # % is the queue name to teardown.
 teardown-sqs-queue-%:
 	-$(CF) unbind-service notify-api-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) unbind-service notify-celery-worker-sqs-sender-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) unbind-service notify-celery-worker-sqs-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
+	-$(CF) unbind-service notify-celery-beat-sqs-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
 	-$(CF) unbind-service notify-celery-worker-sender-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
 	-$(CF) unbind-service notify-celery-worker-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
 	-$(CF) unbind-service notify-celery-beat-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
@@ -115,6 +118,9 @@ undeploy-feature-branches:
 undeploy-%:
 	-$(CF) unbind-service notify-api-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-f-$* notify-psql-f-$* # TODO: can remove once all such applications are cleaned up
+	-$(CF) unbind-service notify-celery-worker-sqs-sender-f-$* notify-psql-f-$*
+	-$(CF) unbind-service notify-celery-worker-sqs-f-$* notify-psql-f-$*
+	-$(CF) unbind-service notify-celery-beat-sqs-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-worker-sender-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-worker-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-beat-f-$* notify-psql-f-$*
@@ -124,6 +130,9 @@ undeploy-%:
 	-$(CF) delete notify-celery-worker-sender-f-$* -f
 	-$(CF) delete notify-celery-worker-f-$* -f
 	-$(CF) delete notify-celery-beat-f-$* -f
+	-$(CF) delete notify-celery-worker-sqs-sender-f-$* -f
+	-$(CF) delete notify-celery-worker-sqs-f-$* -f
+	-$(CF) delete notify-celery-beat-sqs-f-$* -f
 	-$(CF) delete notify-docs-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
 

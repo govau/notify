@@ -174,22 +174,22 @@ deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 deploy-celery-worker-sender:
-	APP=notify-celery-worker-sender $(MAKE) deploy
+	APP=notify-celery-worker-sqs-sender $(MAKE) deploy
 
 deploy-celery-worker:
-	APP=notify-celery-worker $(MAKE) deploy
+	APP=notify-celery-worker-sqs $(MAKE) deploy
 
 deploy-dev-celery-worker-sender:
-	APP=notify-celery-worker-sender $(MAKE) deploy-dev
+	APP=notify-celery-worker-sqs-sender $(MAKE) deploy-dev
 
 deploy-dev-celery-worker:
-	APP=notify-celery-worker $(MAKE) deploy-dev
+	APP=notify-celery-worker-sqs $(MAKE) deploy-dev
 
 deploy-celery-beat:
-	APP=notify-celery-beat $(MAKE) deploy
+	APP=notify-celery-beat-sqs $(MAKE) deploy
 
 deploy-dev-celery-beat:
-	APP=notify-celery-beat $(MAKE) deploy-dev
+	APP=notify-celery-beat-sqs $(MAKE) deploy-dev
 
 create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
