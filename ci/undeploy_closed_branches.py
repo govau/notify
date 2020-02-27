@@ -5,13 +5,12 @@ import subprocess
 prefixes = [
     'notify-f-',
     'notify-api-f-',
-    'notify-celery-f-',  # TODO: can remove once all such applications are cleaned up
     'notify-celery-worker-sqs-sender-f-',
     'notify-celery-worker-sqs-f-',
     'notify-celery-beat-sqs-f-',
-    'notify-celery-worker-sender-f-',
-    'notify-celery-worker-f-',
-    'notify-celery-beat-f-',
+    'notify-celery-worker-sender-f-',  # TODO: can be removed once apps are deleted
+    'notify-celery-worker-f-',  # TODO: can be removed once apps are deleted
+    'notify-celery-beat-f-',  # TODO: can be removed once apps are deleted
     'notify-docs-f-',
     'notify-psql-f-',
 ]
