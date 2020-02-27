@@ -51,7 +51,6 @@ You need to run the api application and a local celery instance.
 ```
 
 ```shell
-    make run-celery-worker-sender
     make run-celery-worker
 ```
 

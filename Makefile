@@ -50,8 +50,8 @@ cf-login-prod:
 
 DIRS        = api admin utils status docs
 TARGETS     = install install-dev build check-vulnerabilities clean deploy deploy-dev test
-API_TARGETS = run-celery-worker-sender run-celery-worker run-celery-beat deploy-celery-worker-sender deploy-celery-worker deploy-dev-celery-worker-sender deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat
-CI_TARGETS  = create-service-psql setup-ses-callback setup-sqs-queues
+API_TARGETS = run-celery-worker run-celery-beat deploy-celery-worker deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat
+CI_TARGETS  = create-service-psql setup-ses-callback
 ANY_TARGETS = $(TARGETS) $(API_TARGETS) $(CI_TARGETS)
 
 $(ANY_TARGETS:%=\%.%):

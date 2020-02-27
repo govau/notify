@@ -6,7 +6,6 @@ prefixes = [
     'notify-f-',
     'notify-api-f-',
     'notify-celery-f-',  # TODO: can remove once all such applications are cleaned up
-    'notify-celery-worker-sender-f-',
     'notify-celery-worker-f-',
     'notify-celery-beat-f-',
     'notify-docs-f-',

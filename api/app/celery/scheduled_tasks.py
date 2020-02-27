@@ -76,7 +76,7 @@ import pytz
 
 
 @worker_process_shutdown.connect
-def worker_process_shutdown(sender, signal, pid, exitcode, **kwargs):
+def worker_process_shutdown(sender, signal, pid, exitcode):
     current_app.logger.info('Scheduled tasks worker shutdown: PID: {} Exitcode: {}'.format(pid, exitcode))
 
 
