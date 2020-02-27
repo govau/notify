@@ -24,6 +24,10 @@ from app.dao.monthly_billing_dao import (
     get_monthly_billing_by_notification_type,
     get_service_ids_that_need_billing_populated
 )
+from app.dao.notifications_dao import (
+    get_notification_by_id,
+    dao_get_notification_history_by_id,
+)
 from app.dao.provider_rates_dao import create_provider_rates as dao_create_provider_rates
 from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
 from app.dao.services_dao import (
@@ -66,6 +70,27 @@ class notify_command:
         command_group.add_command(wrapper)
 
         return wrapper
+
+
+@notify_command()
+@click.option('-n', '--notification_id', required=True, type=click.UUID)
+def debug_notification(notification_id):
+    """
+    Print debug information about a particular notification.
+    """
+    notification = get_notification_by_id(notification_id)
+    if not notification:
+        current_app.logger.error(f"Could not find the notification with ID {notification_id}")
+        sys.exit(1)
+    from pprint import pprint
+    pprint("Notification:")
+    pprint(vars(notification))
+    history = dao_get_notification_history_by_id(notification_id)
+    if not history:
+        current_app.logger.error(f"Could not find the notification history with ID {notification_id}")
+        sys.exit(1)
+    pprint("History:")
+    pprint(vars(history))
 
 
 @notify_command()

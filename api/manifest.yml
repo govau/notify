@@ -6,6 +6,22 @@ defaults: &defaults
     - notify-shared
     - notify-api
     - notify-celery
+    - notify-sqs-celery
+    - notify-sqs-periodic-tasks
+    - notify-sqs-priority-tasks
+    - notify-sqs-database-tasks
+    - notify-sqs-send-sms-tasks
+    - notify-sqs-send-email-tasks
+    - notify-sqs-research-mode-tasks
+    - notify-sqs-statistics-tasks
+    - notify-sqs-job-tasks
+    - notify-sqs-retry-tasks
+    - notify-sqs-notify-internal-tasks
+    - notify-sqs-process-ftp-tasks
+    - notify-sqs-create-letters-pdf-tasks
+    - notify-sqs-service-callbacks
+    - notify-sqs-letter-tasks
+    - notify-sqs-antivirus-tasks
     - aws
     - telstra
     - twilio
@@ -16,6 +32,7 @@ defaults: &defaults
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify.gov.au
     API_HOST_NAME: https://rest-api.notify.gov.au
+    CF_SERVICE_QUEUE_PREFIX: notify-sqs-
 
 applications:
   - name: notify-api
@@ -28,18 +45,29 @@ applications:
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-api
-  - name: notify-celery-worker
+  - name: notify-celery-worker-sqs-sender
     <<: *defaults
-    instances: 2
-    memory: 4G
+    instances: 4
+    memory: 1G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-sender
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-sqs-sender
+      CELERYD_CONCURRENCY: 8
+  - name: notify-celery-worker-sqs
+    <<: *defaults
+    instances: 4
+    memory: 1G
     health-check-type: process
     no-route: true
     command: make run-celery-worker
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-worker
-      CELERYD_CONCURRENCY: 32
-  - name: notify-celery-beat
+      CF_APP_NAME: notify-celery-worker-sqs
+      CELERYD_CONCURRENCY: 8
+  - name: notify-celery-beat-sqs
     <<: *defaults
     instances: 1
     memory: 256M
@@ -48,4 +76,4 @@ applications:
     command: make run-celery-beat
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-beat
+      CF_APP_NAME: notify-celery-beat-sqs

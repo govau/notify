@@ -122,9 +122,17 @@ run: version-file ## Run a development server (reloading)
 run-gunicorn: version-file ## Run a production server
 	$(RUNNER) $(GUNICORN) -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
-run-celery-worker: version-file ## Run background workers
+run-celery-worker-sender: version-file ## Run background sender workers
+	NOTIFY_CELERY_CMD=worker-sender \
+		$(RUNNER) celery -A run_celery.notify_celery worker \
+			--loglevel=INFO \
+			-Q send-sms-tasks,send-email-tasks
+
+run-celery-worker: version-file ## Run background non-sender workers
 	NOTIFY_CELERY_CMD=worker \
-		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
+		$(RUNNER) celery -A run_celery.notify_celery worker \
+			--loglevel=INFO \
+			-X send-sms-tasks,send-email-tasks
 
 run-celery-beat: version-file ## Run scheduled tasks
 	NOTIFY_CELERY_CMD=beat \
@@ -165,17 +173,23 @@ deploy: vendor requirements.txt ## Deploy prod application
 deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
+deploy-celery-worker-sender:
+	APP=notify-celery-worker-sqs-sender $(MAKE) deploy
+
 deploy-celery-worker:
-	APP=notify-celery-worker $(MAKE) deploy
+	APP=notify-celery-worker-sqs $(MAKE) deploy
+
+deploy-dev-celery-worker-sender:
+	APP=notify-celery-worker-sqs-sender $(MAKE) deploy-dev
 
 deploy-dev-celery-worker:
-	APP=notify-celery-worker $(MAKE) deploy-dev
+	APP=notify-celery-worker-sqs $(MAKE) deploy-dev
 
 deploy-celery-beat:
-	APP=notify-celery-beat $(MAKE) deploy
+	APP=notify-celery-beat-sqs $(MAKE) deploy
 
 deploy-dev-celery-beat:
-	APP=notify-celery-beat $(MAKE) deploy-dev
+	APP=notify-celery-beat-sqs $(MAKE) deploy-dev
 
 create-migration: MIGRATION_NUMBER  ?= $(shell $(RUNNER) flask db current | $(RUNNER) python scripts/next_revision.py)
 create-migration: MIGRATION_MESSAGE ?= $(shell bash -c 'read -p "Migration message: " message; echo $$message')
@@ -188,7 +202,7 @@ clean:
 .PHONY:
 	install install-dev setup-db \
 	setup-test-db test lint fmt tests $(APP_TESTS) $(DAO_TESTS) test-roots \
-	run run-celery-worker run-celery-beat \
-	deploy deploy-api deploy-celery-worker deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat \
+	run run-celery-worker-sender run-celery-worker run-celery-beat \
+	deploy deploy-api deploy-celery-worker-sender deploy-celery-worker deploy-dev-celery-worker-sender deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat \
 	run-production \
 	create-migration help clean check-vulnerabilities
