@@ -14,7 +14,7 @@ from app.models import NOTIFICATION_TECHNICAL_FAILURE
 
 
 @worker_process_shutdown.connect
-def worker_process_shutdown(sender, signal, pid, exitcode, **kwargs):
+def worker_process_shutdown(sender, signal, pid, exitcode):
     current_app.logger.info('Provider worker shutdown: PID: {} Exitcode: {}'.format(pid, exitcode))
 
 

@@ -1,7 +1,7 @@
 defaults: &defaults
   buildpacks:
     - python_buildpack
-  instances: 4
+  instances: 1
   memory: 512M
   disk_quota: 500MB
   services:
@@ -9,22 +9,6 @@ defaults: &defaults
     - notify-shared
     - notify-api
     - notify-celery
-    - notify-sqs-((stg))-celery
-    - notify-sqs-((stg))-periodic-tasks
-    - notify-sqs-((stg))-priority-tasks
-    - notify-sqs-((stg))-database-tasks
-    - notify-sqs-((stg))-send-sms-tasks
-    - notify-sqs-((stg))-send-email-tasks
-    - notify-sqs-((stg))-research-mode-tasks
-    - notify-sqs-((stg))-statistics-tasks
-    - notify-sqs-((stg))-job-tasks
-    - notify-sqs-((stg))-retry-tasks
-    - notify-sqs-((stg))-notify-internal-tasks
-    - notify-sqs-((stg))-process-ftp-tasks
-    - notify-sqs-((stg))-create-letters-pdf-tasks
-    - notify-sqs-((stg))-service-callbacks
-    - notify-sqs-((stg))-letter-tasks
-    - notify-sqs-((stg))-antivirus-tasks
     - aws
     - telstra
     - twilio
@@ -38,7 +22,6 @@ defaults: &defaults
     API_SENTRY_ENV: dev
     CELERY_SENTRY_ENV: dev
     CREATE_ADMIN_USER: true
-    CF_SERVICE_QUEUE_PREFIX: notify-sqs-((stg))-
 
 applications:
   - name: notify-api-((stg))
@@ -47,16 +30,6 @@ applications:
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-api-((stg))
-  - name: notify-celery-worker-sender-((stg))
-    <<: *defaults
-    memory: 1G
-    health-check-type: process
-    no-route: true
-    command: make run-celery-worker-sender
-    env:
-      <<: *defaults_env
-      CF_APP_NAME: notify-celery-worker-sender-((stg))
-      CELERYD_CONCURRENCY: 8
   - name: notify-celery-worker-((stg))
     <<: *defaults
     memory: 1G
