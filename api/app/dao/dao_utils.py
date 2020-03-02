@@ -38,3 +38,10 @@ def version_class(model_class, history_cls=None):
 
 def dao_rollback():
     db.session.rollback()
+
+
+def is_duplicate_key_integrity_error(e):
+    if hasattr(e, 'orig') and hasattr(e.orig, 'pgerror') and e.orig.pgerror \
+            and ('duplicate key value violates unique constraint' in e.orig.pgerror):
+        return True
+    return False
