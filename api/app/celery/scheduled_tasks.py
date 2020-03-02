@@ -8,7 +8,10 @@ from celery.signals import worker_process_shutdown
 from flask import current_app
 from notifications_utils.statsd_decorators import statsd
 from sqlalchemy import and_
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import (
+    SQLAlchemyError,
+    IntegrityError,
+)
 
 from app.aws import s3
 from app import notify_celery
@@ -47,6 +50,9 @@ from app.dao.provider_details_dao import (
 )
 from app.dao.users_dao import delete_codes_older_created_more_than_a_day_ago
 from app.dao.jobs_dao import dao_update_job
+from app.dao.dao_utils import (
+    is_duplicate_key_integrity_error,
+)
 from app.models import (
     Job,
     Notification,
@@ -482,12 +488,24 @@ def daily_stats_template_usage_by_month():
 
     for result in results:
         if result.template_id:
-            insert_or_update_stats_for_template(
-                result.template_id,
-                result.month,
-                result.year,
-                result.count
-            )
+            try:
+                insert_or_update_stats_for_template(
+                    result.template_id,
+                    result.month,
+                    result.year,
+                    result.count
+                )
+            except IntegrityError as e:
+                # SQS is at-least-once message delivery which means this celery
+                # task handler may fire more than once. If there is an
+                # IntegrityError of the duplicate key kind it means that the task
+                # message was delivered more than once.
+                if not is_duplicate_key_integrity_error(e):
+                    raise e
+
+                current_app.logger.info(
+                    f"Ignoring duplicate key IntegrityError for template: {result.template_id}, month: {result.month}, year: {result.year}, count: {result.count}"
+                )
 
 
 @notify_celery.task(name='raise-alert-if-no-letter-ack-file')
