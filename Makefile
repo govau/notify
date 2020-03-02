@@ -2,8 +2,8 @@ CLD_Y       ?= y.cld.gov.au
 CLD_B       ?= b.cld.gov.au
 CLD_HOST    ?= $(CLD_Y)
 CF_API      ?= https://api.system.$(CLD_HOST)
-CF_ORG      ?= dta
-CF_SPACE    ?= notifications
+CF_ORG      ?= dta_notify
+CF_SPACE    ?= notify
 CF_HOME     ?= $(HOME)
 CF          ?= cf
 
@@ -45,7 +45,7 @@ cf-login-prod:
 	  CF_USERNAME=${CF_B_USER}\
 	  CF_PASSWORD=${CF_B_PASSWORD}\
 	  CLD_HOST=${CLD_B}\
-	  CF_SPACE=notify\
+	  CF_ORG=dta\
 	  cf-login
 
 DIRS        = api admin utils status docs
