@@ -1,7 +1,7 @@
 defaults: &defaults
   buildpacks:
     - python_buildpack
-  instances: 4
+  instances: 1
   memory: 512M
   disk_quota: 500MB
   services:
