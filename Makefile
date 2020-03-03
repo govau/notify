@@ -29,19 +29,20 @@ endif
 all: install
 
 # this is a hack because CircleCI env variables are awful
+CF_USER     ?= $(CF_USERNAME)
 CF_PASSWORD ?= $(CF_PASSWORD_STAGING)
 
 cf-login:
 	@$(CF) login\
 		-a "${CF_API}"\
-		-u "${CF_USERNAME}"\
+		-u "${CF_USER}"\
 		-p "${CF_PASSWORD}"\
 		-o "${CF_ORG}"\
 		-s "${CF_SPACE}"
 
 cf-login-prod:
 	@$(MAKE)\
-	  CF_USERNAME=${CF_B_USER}\
+	  CF_USER=${CF_B_USER}\
 	  CF_PASSWORD=${CF_B_PASSWORD}\
 	  CLD_HOST=${CLD_B}\
 	  CF_ORG=dta\
