@@ -29,7 +29,6 @@ endif
 all: install
 
 # this is a hack because CircleCI env variables are awful
-CF_USERNAME ?= $(CF_USERNAME)
 CF_PASSWORD ?= $(CF_PASSWORD_STAGING)
 
 cf-login:
