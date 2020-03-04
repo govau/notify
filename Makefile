@@ -23,15 +23,15 @@ endif
 all: install
 
 # this is a hack because CircleCI env variables are awful
-export CF_API_STAGING ?= $(CF_API_STAGING)
-export CF_USERNAME ?= $(CF_USERNAME)
-export CF_PASSWORD_STAGING ?= $(CF_PASSWORD_STAGING)
+export XXX ?= $(CF_API_STAGING)
+export YYY ?= $(CF_USERNAME)
+export ZZZ ?= $(CF_PASSWORD_STAGING)
 
 cf-login:
 	@$(CF) login\
-		-a "${CF_API_STAGING}"\
-		-u "${CF_USERNAME}"\
-		-p "${CF_PASSWORD_STAGING}"\
+		-a "${XXX}"\
+		-u "${YYY}"\
+		-p "${ZZZ}"\
 		-o "dta_notify"\
 		-s "notify"
 
