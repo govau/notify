@@ -24,11 +24,11 @@ all: install
 
 cf-login:
 	@$(CF) login\
-		-a "https://api.system.y.cld.gov.au"\
+		-a "${CF_API_STAGING}"\
 		-u "${CF_USERNAME}"\
 		-p "${CF_PASSWORD_STAGING}"\
 		-o "dta_notify"\
-		-s "notify"
+		-s "${CF_SPACE}"
 
 cf-login-prod:
 	@$(CF) login\
@@ -36,7 +36,7 @@ cf-login-prod:
 		-u "${CF_B_USER}"\
 		-p "${CF_B_PASSWORD}"\
 		-o "dta"\
-		-s "notify"
+		-s "${CF_SPACE}"
 
 DIRS        = api admin utils status docs
 TARGETS     = install install-dev build check-vulnerabilities clean deploy deploy-dev test
