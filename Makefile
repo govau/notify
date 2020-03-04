@@ -22,6 +22,11 @@ endif
 
 all: install
 
+# this is a hack because CircleCI env variables are awful
+export CF_API_STAGING ?= $(CF_API_STAGING)
+export CF_USERNAME ?= $(CF_USERNAME)
+export CF_PASSWORD_STAGING ?= $(CF_PASSWORD_STAGING)
+
 cf-login:
 	@$(CF) login\
 		-a "${CF_API_STAGING}"\
