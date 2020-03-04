@@ -22,16 +22,11 @@ endif
 
 all: install
 
-# this is a hack because CircleCI env variables are awful
-# export XXX ?= $(CF_API_STAGING)
-# export YYY ?= $(CF_USERNAME)
-export ZZZ ?= $(CF_PASSWORD_STAGING)
-
 cf-login:
 	$(CF) login\
 		-a "https://api.system.y.cld.gov.au"\
 		-u "ci-dta_notify-notify"\
-		-p "${ZZZ}"\
+		-p "${CF_PASSWORD_STAGING}"\
 		-o "dta_notify"\
 		-s "notify"
 
