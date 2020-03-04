@@ -33,7 +33,11 @@ CF_USER     ?= $(CF_USERNAME)
 CF_PASSWORD ?= $(CF_PASSWORD_STAGING)
 
 cf-login:
-	$(CF) login\
+	@echo ${CF_API}
+	@echo ${CF_USER}
+	@echo ${CF_ORGAN}
+	@echo ${CF_SPACE}
+	@$(CF) login\
 		-a "${CF_API}"\
 		-u "${CF_USER}"\
 		-p "${CF_PASSWORD}"\
