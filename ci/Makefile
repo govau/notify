@@ -8,7 +8,6 @@ JQ            ?= jq
 DIFF          ?= diff
 
 CLD_Y         ?= y.cld.gov.au
-CLD_B         ?= b.cld.gov.au
 CLD_HOST      ?= $(CLD_Y)
 STG           ?= dev
 

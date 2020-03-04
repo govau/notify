@@ -1,11 +1,5 @@
-CLD_Y       ?= y.cld.gov.au
-CLD_B       ?= b.cld.gov.au
-CLD_HOST    ?= $(CLD_Y)
-CF_API      ?= https://api.system.$(CLD_HOST)
-CF_ORGAN    ?= dta_notify
-CF_SPACE    ?= notify
-CF_HOME     ?= $(HOME)
-CF          ?= cf
+CF_HOME ?= $(HOME)
+CF      ?= cf
 
 # deploys can respond to STG env variable if they support
 # feature branches or alternate production builds
@@ -28,29 +22,21 @@ endif
 
 all: install
 
-# this is a hack because CircleCI env variables are awful
-CF_USER     ?= $(CF_USERNAME)
-CF_PASSWORD ?= $(CF_PASSWORD_STAGING)
-
 cf-login:
-	@echo ${CF_API}
-	@echo ${CF_USER}
-	@echo ${CF_ORGAN}
-	@echo ${CF_SPACE}
 	@$(CF) login\
-		-a "${CF_API}"\
-		-u "${CF_USER}"\
-		-p "${CF_PASSWORD}"\
-		-o "${CF_ORGAN}"\
-		-s "${CF_SPACE}"
+		-a "${CF_API_STAGING}"\
+		-u "${CF_USERNAME}"\
+		-p "${CF_PASSWORD_STAGING}"\
+		-o "dta_notify"\
+		-s "notify"
 
 cf-login-prod:
-	@$(MAKE)\
-	  CF_USER=${CF_B_USER}\
-	  CF_PASSWORD=${CF_B_PASSWORD}\
-	  CLD_HOST=${CLD_B}\
-	  CF_ORGAN=dta\
-	  cf-login
+	@$(CF) login\
+		-a "https://api.system.b.cld.gov.au"\
+		-u "${CF_B_USER}"\
+		-p "${CF_B_PASSWORD}"\
+		-o "dta"\
+		-s "notify"
 
 DIRS        = api admin utils status docs
 TARGETS     = install install-dev build check-vulnerabilities clean deploy deploy-dev test
