@@ -25,7 +25,7 @@ all: install
 cf-login:
 	$(CF) login\
 		-a "https://api.system.y.cld.gov.au"\
-		-u "ci-dta_notify-notify"\
+		-u "${CF_USERNAME}"\
 		-p "${CF_PASSWORD_STAGING}"\
 		-o "dta_notify"\
 		-s "notify"
