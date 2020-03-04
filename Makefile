@@ -23,7 +23,7 @@ endif
 all: install
 
 cf-login:
-	$(CF) login\
+	@$(CF) login\
 		-a "https://api.system.y.cld.gov.au"\
 		-u "${CF_USERNAME}"\
 		-p "${CF_PASSWORD_STAGING}"\
