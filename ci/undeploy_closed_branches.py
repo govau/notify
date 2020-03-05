@@ -8,9 +8,6 @@ prefixes = [
     'notify-celery-worker-sqs-sender-f-',
     'notify-celery-worker-sqs-f-',
     'notify-celery-beat-sqs-f-',
-    'notify-celery-worker-sender-f-',  # TODO: can be removed once apps are deleted
-    'notify-celery-worker-f-',  # TODO: can be removed once apps are deleted
-    'notify-celery-beat-f-',  # TODO: can be removed once apps are deleted
     'notify-docs-f-',
     'notify-psql-f-',
 ]

@@ -97,9 +97,6 @@ teardown-sqs-queue-%:
 	-$(CF) unbind-service notify-celery-worker-sqs-sender-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
 	-$(CF) unbind-service notify-celery-worker-sqs-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
 	-$(CF) unbind-service notify-celery-beat-sqs-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$*
-	-$(CF) unbind-service notify-celery-worker-sender-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$* # TODO: can be removed once apps are deleted
-	-$(CF) unbind-service notify-celery-worker-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$* # TODO: can be removed once apps are deleted
-	-$(CF) unbind-service notify-celery-beat-$(STG_TO_TEARDOWN) notify-sqs-$(STG_TO_TEARDOWN)-$* # TODO: can be removed once apps are deleted
 	-$(CF) delete-service notify-sqs-$(STG_TO_TEARDOWN)-$* -f
 
 list-branches:
@@ -119,14 +116,8 @@ undeploy-%:
 	-$(CF) unbind-service notify-celery-worker-sqs-sender-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-worker-sqs-f-$* notify-psql-f-$*
 	-$(CF) unbind-service notify-celery-beat-sqs-f-$* notify-psql-f-$*
-	-$(CF) unbind-service notify-celery-worker-sender-f-$* notify-psql-f-$* # TODO: can be removed once apps are deleted
-	-$(CF) unbind-service notify-celery-worker-f-$* notify-psql-f-$* # TODO: can be removed once apps are deleted
-	-$(CF) unbind-service notify-celery-beat-f-$* notify-psql-f-$* # TODO: can be removed once apps are deleted
 	-$(CF) delete notify-f-$* -f
 	-$(CF) delete notify-api-f-$* -f
-	-$(CF) delete notify-celery-worker-sender-f-$* -f # TODO: can be removed once apps are deleted
-	-$(CF) delete notify-celery-worker-f-$* -f # TODO: can be removed once apps are deleted
-	-$(CF) delete notify-celery-beat-f-$* -f # TODO: can be removed once apps are deleted
 	-$(CF) delete notify-celery-worker-sqs-sender-f-$* -f
 	-$(CF) delete notify-celery-worker-sqs-f-$* -f
 	-$(CF) delete notify-celery-beat-sqs-f-$* -f
