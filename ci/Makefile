@@ -1,4 +1,4 @@
-CF_SPACE_ID   ?= 0bf1f9db-79b3-4745-a4a8-a2208bd5fefe
+CF_SPACE_ID   ?= 9016f67f-0bb2-48e7-aad9-00d9b755ee61
 GIT_REMOTE    ?= https://github.com/govau/notify
 PIPENV        ?= pipenv
 RUNNER        ?= $(PIPENV) run
