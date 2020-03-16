@@ -132,7 +132,7 @@ run-celery-worker: version-file ## Run background non-sender workers
 	NOTIFY_CELERY_CMD=worker \
 		$(RUNNER) celery -A run_celery.notify_celery worker \
 			--loglevel=INFO \
-			-X send-sms-tasks,send-email-tasks
+			-X send-sms-tasks,send-email-tasks,priority-tasks
 
 run-celery-beat: version-file ## Run scheduled tasks
 	NOTIFY_CELERY_CMD=beat \
