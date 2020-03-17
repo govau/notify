@@ -55,7 +55,7 @@ Pipfile Pipfile.lock:
 # means that for macOS, installs fail unless we specify some flags.
 # See https://github.com/pyca/cryptography/blob/master/docs/development/getting-started.rst#openssl-on-macos
 
-UNAME := $(shell uname)
+UNAME = $(shell uname)
 ifeq ($(UNAME), Darwin)
 	export LDFLAGS="-L$(shell brew --prefix openssl@1.1)/lib"
 	export CFLAGS="-I$(shell brew --prefix openssl@1.1)/include"
@@ -64,7 +64,13 @@ endif
 install: version-file ## Setup virtualenv and install python dependencies
 	$(PIPENV) install
 
+# need to install pycurl with extra install options. this makes use of
+# LDFLAGS and CFLAGS above to find openssl location
+#
+# https://pip.pypa.io/en/stable/reference/pip_install/#cmdoption-install-option
+# http://pycurl.io/docs/latest/install.html#ssl
 install-dev: ## Setup everything in dev mode for testing
+	$(PIPENV) run pip install pycurl --install-option="--with-openssl"
 	$(PIPENV) install --dev
 
 setup-db: version-file ## Run database migrations
