@@ -30,13 +30,15 @@
             {{ big_number(sms_sent, 'sent', smaller=True) }}
             {{ big_number(sms_free_allowance, 'free allowance', smaller=True) }}
             {{ big_number(sms_allowance_remaining, 'free allowance remaining', smaller=True) }}
-            {% if sms_chargeable %}
-              {{ big_number(
-                sms_chargeable,
-                'at {:.2f} cents per message'.format(sms_rate * 100),
-                smaller=True
-              ) }}
-            {% endif %}
+            {#
+              {% if sms_chargeable %}
+                {{ big_number(
+                  sms_chargeable,
+                  'at {:.2f} cents per message'.format(sms_rate * 100),
+                  smaller=True
+                ) }}
+              {% endif %}
+            #}
           </div>
         </div>
         {#
@@ -57,12 +59,14 @@
         </div>
         <div class='column-one-half'>
           <div class="keyline-block">
+            {#
             {{ big_number(
               (sms_chargeable * sms_rate),
               'spent',
               currency="$",
               smaller=True
             ) }}
+            #}
           </div>
         </div>
         {#
