@@ -65,7 +65,7 @@ fmt:
 	$(RUNNER) autopep8 --in-place --recursive .
 
 tests: version-file
-	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
+	$(RUNNER) pytest -n4 $(PYTEST_ARGS) tests
 
 check-vulnerabilities:
 	$(RUNNER) bandit -c bandit.yml -r . -x node_modules,tests -l
