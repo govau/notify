@@ -100,6 +100,8 @@
               {{ month.name }}
             {% endcall %}
             {% call field(align='left') %}
+            To be confirmed
+            {#
               {{ big_number(
                 (sms_rate * month.paid) + month.letter_total,
                 currency="$",
@@ -125,6 +127,7 @@
                 {% endif %}
               {% endfor %}
             </ul>
+            #}
             {% endcall %}
           {% endcall %}
         </div>
