@@ -85,16 +85,16 @@ check-vulnerabilities:
 	$(RUNNER) bandit -c bandit.yml -x migration -r . -l
 
 tests: version-file
-	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests
+	$(RUNNER) pytest -n4 $(PYTEST_ARGS) tests
 
 $(APP_TESTS): test-%: version-file
-	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/$*
+	$(RUNNER) pytest -n4 $(PYTEST_ARGS) tests/app/$*
 
 $(DAO_TESTS): test-dao-%: version-file
-	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/dao/$*
+	$(RUNNER) pytest -n4 $(PYTEST_ARGS) tests/app/dao/$*
 
 test-roots: version-file
-	$(RUNNER) py.test -n4 $(PYTEST_ARGS) tests/app/*.py
+	$(RUNNER) pytest -n4 $(PYTEST_ARGS) tests/app/*.py
 
 wait-for-docker-test-db:
 	@number=1 ; while [[ $$number -le 10 ]] ; do \
