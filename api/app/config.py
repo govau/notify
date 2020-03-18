@@ -1,4 +1,5 @@
 from datetime import timedelta, time
+import ssl
 import os
 import json
 
@@ -9,7 +10,6 @@ from app.models import (
     EMAIL_TYPE, SMS_TYPE, LETTER_TYPE,
 )
 from app.cloudfoundry_config import extract_cloudfoundry_config
-from app.queue_config import extract_predefined_queues
 
 
 extract_cloudfoundry_config()
@@ -166,15 +166,9 @@ class Config(object):
     RESEARCH_CONSENT_TEMPLATE_ID = '73a85db3-d017-4bb3-ba2c-2eb36837f234'
     SUPPORT_QUESTION_FEEDBACK = 'c11f3003-8462-4af6-ba80-fd5719f79e21'
 
-    QUEUE_PREFIX = os.getenv('QUEUE_PREFIX', '')
-    BROKER_URL = os.getenv('BROKER_URL', 'sqs://')
-    BROKER_TRANSPORT_OPTIONS = {
-        'region': AWS_REGION,
-        'polling_interval': 1,  # 1 second
-        'visibility_timeout': 310,
-        'queue_name_prefix': QUEUE_PREFIX,
-        'predefined_queues': extract_predefined_queues(),
-    }
+    NOTIFICATION_QUEUE_PREFIX = os.getenv('NOTIFICATION_QUEUE_PREFIX', '')
+    BROKER_URL = REDIS_URL
+
     CELERY_ENABLE_UTC = True
     CELERY_TIMEZONE = 'Australia/Sydney'
     CELERY_ACCEPT_CONTENT = ['json']
@@ -296,7 +290,10 @@ class Config(object):
             'options': {'queue': QueueNames.PERIODIC}
         }
     }
-    CELERY_QUEUES = []
+    CELERY_QUEUES = [
+        Queue(queue, Exchange('default'), routing_key=queue)
+        for queue in QueueNames.all_queues()
+    ]
 
     NOTIFICATIONS_ALERT = 5  # five mins
     FROM_NUMBER = 'development'
@@ -367,18 +364,15 @@ class Development(Config):
     NOTIFY_LOG_PATH = 'application.log'
 
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/notification_api')
-    REDIS_URL = 'redis://localhost:6379/0'
+    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    BROKER_URL = REDIS_URL
 
     STATSD_ENABLED = False
     STATSD_HOST = "localhost"
     STATSD_PORT = 1000
     STATSD_PREFIX = "stats-prefix"
 
-    QUEUE_PREFIX = 'development'
-    for queue in QueueNames.all_queues():
-        Config.CELERY_QUEUES.append(
-            Queue(queue, Exchange('default'), routing_key=queue)
-        )
+    NOTIFICATION_QUEUE_PREFIX = 'development'
 
     API_HOST_NAME = os.getenv('API_HOST_NAME', 'http://localhost:6011')
     API_RATE_LIMIT_ENABLED = True
@@ -400,11 +394,6 @@ class Test(Development):
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_TEST_DATABASE_URI', 'postgresql://localhost/test_notification_api')
 
     BROKER_URL = 'you-forgot-to-mock-celery-in-your-tests://'
-
-    for queue in QueueNames.all_queues():
-        Config.CELERY_QUEUES.append(
-            Queue(queue, Exchange('default'), routing_key=queue)
-        )
 
     API_RATE_LIMIT_ENABLED = True
     API_HOST_NAME = "http://localhost:6011"
@@ -456,6 +445,10 @@ class Live(Config):
     API_RATE_LIMIT_ENABLED = True
     CHECK_PROXY_HEADER = True
     NOTIFY_SUPPORT_EMAIL = 'notify-support@dta.gov.au'
+    BROKER_USE_SSL = {
+        'ssl_cert_reqs': ssl.CERT_REQUIRED,
+        'ssl_ca_certs': '/etc/ssl/certs/ca-certificates.crt'
+    }
 
 
 class CloudFoundryConfig(Config):

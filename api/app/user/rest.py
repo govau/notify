@@ -359,7 +359,6 @@ def send_already_registered_email(user_id):
     )
 
     send_notification_to_queue(saved_notification, False, queue=QueueNames.NOTIFY)
-
     return jsonify({}), 204
 
 

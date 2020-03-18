@@ -569,6 +569,12 @@ def process_incomplete_jobs(job_ids):
         process_incomplete_job(job_id)
 
 
+@notify_celery.task(name='check-celery-health')
+def check_celery_health(message):
+    print('celery is healthy')
+    print('the message we got is: %s' % message)
+
+
 def process_incomplete_job(job_id):
 
     job = dao_get_job_by_id(job_id)

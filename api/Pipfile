@@ -5,8 +5,7 @@ name = "pypi"
 
 [packages]
 cffi = "==1.11.5"
-celery = {extras = ["sqs"],version = "==4.4.0"}
-kombu = {git = "https://github.com/govau/kombu.git",ref = "sqs-no-list-queues"}
+celery = {extras = ["redis"],version = "==4.4.0"}
 docopt = "==0.6.2"
 Flask-Bcrypt = "==0.7.1"
 flask-marshmallow = "==0.8.0"

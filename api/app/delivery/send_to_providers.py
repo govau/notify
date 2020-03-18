@@ -30,9 +30,7 @@ from app.models import (
     NOTIFICATION_TECHNICAL_FAILURE,
     NOTIFICATION_SENT,
     NOTIFICATION_SENDING,
-    NOTIFICATION_PERMANENT_FAILURE
 )
-import Telstra_Messaging as telstra
 
 
 def send_sms_to_provider(notification):
@@ -77,10 +75,6 @@ def send_sms_to_provider(notification):
                     reference=str(notification.id),
                     sender=notification.reply_to_text
                 )
-            except telstra.rest.ApiException as e:
-                current_app.logger.error(f"Telstra send SMS request for {str(notification.id)} failed with API exception: {str(e)}")
-
-                update_notification(notification, provider, status=NOTIFICATION_PERMANENT_FAILURE)
             except Exception as e:
                 dao_toggle_sms_provider(provider.name)
                 raise e

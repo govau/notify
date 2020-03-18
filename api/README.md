@@ -32,6 +32,15 @@ Install postgres. this can be done easily through homebrew
     brew services start postgresql
 ```
 
+### Redis
+
+Install redis. this can be done easily through homebrew
+
+```shell
+    brew install redis
+    brew services start redis
+```
+
 Then create a working database with the command `createdb notification_api`.
 
 ## To run the application
@@ -51,7 +60,6 @@ You need to run the api application and a local celery instance.
 ```
 
 ```shell
-    make run-celery-worker-sender
     make run-celery-worker
 ```
 

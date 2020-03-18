@@ -5,9 +5,8 @@ import subprocess
 prefixes = [
     'notify-f-',
     'notify-api-f-',
-    'notify-celery-worker-sqs-sender-f-',
-    'notify-celery-worker-sqs-f-',
-    'notify-celery-beat-sqs-f-',
+    'notify-celery-worker-f-',
+    'notify-celery-beat-f-',
     'notify-docs-f-',
     'notify-psql-f-',
 ]

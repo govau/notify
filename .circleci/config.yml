@@ -201,20 +201,10 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
-      - run: make ci.setup-sqs-queues
+      - run: make ci.create-service-redis
       - run: make api.deploy-dev
       # Need the API to be running so that the callback can auto-subscribe.
       - run: make ci.setup-ses-callback
-
-  deploy-dev-celery-worker-sender:
-    <<: *deploy_image
-    steps:
-      - *cf_install
-      - *attach_workspace
-      - *cf_login
-      - run: make ci.create-service-psql
-      - run: make ci.setup-sqs-queues
-      - run: make api.deploy-dev-celery-worker-sender
 
   deploy-dev-celery-worker:
     <<: *deploy_image
@@ -223,7 +213,7 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
-      - run: make ci.setup-sqs-queues
+      - run: make ci.create-service-redis
       - run: make api.deploy-dev-celery-worker
 
   deploy-dev-celery-beat:
@@ -233,7 +223,7 @@ jobs:
       - *attach_workspace
       - *cf_login
       - run: make ci.create-service-psql
-      - run: make ci.setup-sqs-queues
+      - run: make ci.create-service-redis
       - run: make api.deploy-dev-celery-beat
 
   deploy-dev-docs:
@@ -260,14 +250,6 @@ jobs:
       - *attach_workspace
       - *cf_login_prod
       - run: make api.deploy
-
-  deploy-prod-celery-worker-sender:
-    <<: *deploy_image
-    steps:
-      - *cf_install
-      - *attach_workspace
-      - *cf_login_prod
-      - run: make api.deploy-celery-worker-sender
 
   deploy-prod-celery-worker:
     <<: *deploy_image
@@ -359,10 +341,6 @@ workflows:
           requires:
             - build-api
 
-      - deploy-dev-celery-worker-sender:
-          requires:
-            - build-api
-
       - deploy-dev-celery-worker:
           requires:
             - build-api
@@ -391,7 +369,6 @@ workflows:
             - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
-            - deploy-dev-celery-worker-sender
             - deploy-dev-celery-worker
             - deploy-dev-celery-beat
             - deploy-dev-docs
@@ -402,11 +379,6 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-prod-api:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
-
-      - deploy-prod-celery-worker-sender:
           <<: *master_branch
           requires:
             - unlock-prod-deploy
