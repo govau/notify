@@ -19,8 +19,8 @@ def upgrade():
     op.get_bind()
     op.execute("UPDATE provider_rates SET rate = 6.0 WHERE provider_id = (SELECT id FROM provider_details WHERE identifier = 'telstra')")
     op.execute("UPDATE provider_rates SET rate = 6.0 WHERE provider_id = (SELECT id FROM provider_details WHERE identifier = 'twilio')")
-    op.execute("UPDATE RATES SET rate = 0.06 WHERE valid_from = '2017-06-30 14:00:00'")
-    op.execute("UPDATE RATES SET rate = 0.06 WHERE valid_from = '2016-05-18 00:00:00'")
+    op.execute("UPDATE rates SET rate = 0.06 WHERE valid_from = '2017-06-30 14:00:00'")
+    op.execute("UPDATE rates SET rate = 0.06 WHERE valid_from = '2016-05-18 00:00:00'")
 
 
 def downgrade():
