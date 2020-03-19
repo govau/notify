@@ -33,7 +33,7 @@
               {% if sms_chargeable %}
                 {{ big_number(
                   sms_chargeable,
-                  'at {:.3g}cents per message (excl. GST)'.format(sms_rate * 100),
+                  'at {:.3g}c per message (excl. GST)'.format(sms_rate * 100),
                   smaller=True
                 ) }}
               {% endif %}
