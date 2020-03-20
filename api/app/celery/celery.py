@@ -5,6 +5,7 @@ from celery import Celery, Task
 
 def make_task(app):
     class NotifyTask(Task):
+        abstract = True
         start = None
 
         def on_success(self, retval, task_id, args, kwargs):
@@ -24,13 +25,12 @@ def make_task(app):
             # ensure task has flask context to access config, logger, etc
             with app.app_context():
                 self.start = time.time()
-                return self.run(*args, **kwargs)
+                return super().__call__(*args, **kwargs)
 
     return NotifyTask
 
 
 class NotifyCelery(Celery):
-
     def init_app(self, app):
         super().__init__(
             app.import_name,

@@ -14,6 +14,7 @@ from sqlalchemy import func
 from notifications_utils.statsd_decorators import statsd
 
 from app import db, DATETIME_FORMAT, encryption, redis_store
+from app.celery.tasks import check_celery_health
 from app.celery.scheduled_tasks import send_total_sent_notifications_to_performance_platform
 from app.celery.service_callback_tasks import send_delivery_status_to_service
 from app.celery.letters_pdf_tasks import create_letters_pdf
@@ -320,6 +321,13 @@ def create_sap_oauth2_client(client_id, client_secret):
               help="SMS sender ID of the non-default sender ID to be removed")
 def remove_sms_sender(sms_sender_id):
     sms_sender_dao.dao_remove_sms_sender(sms_sender_id)
+
+
+@notify_command(name='run-health-check')
+@click.option('-m', '--message', required=True, help="the message to send")
+def run_health_check(message):
+    print('running health check')
+    print(check_celery_health.apply_async((message,), queue=QueueNames.NOTIFY))
 
 
 @notify_command(name='contact-users')
