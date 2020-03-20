@@ -90,7 +90,7 @@ class Config(object):
     STATSD_PREFIX = os.getenv('STATSD_PREFIX')
 
     # URL of redis instance
-    REDIS_URL = os.getenv('REDIS_URL')
+    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
     REDIS_ENABLED = os.getenv('REDIS_ENABLED') == '1'
     EXPIRE_CACHE_TEN_MINUTES = 600
     EXPIRE_CACHE_EIGHT_DAYS = 8 * 24 * 60 * 60
@@ -167,7 +167,7 @@ class Config(object):
     SUPPORT_QUESTION_FEEDBACK = 'c11f3003-8462-4af6-ba80-fd5719f79e21'
 
     NOTIFICATION_QUEUE_PREFIX = os.getenv('NOTIFICATION_QUEUE_PREFIX', '')
-    BROKER_URL = REDIS_URL
+    BROKER_URL = os.getenv('BROKER_URL', REDIS_URL)
 
     CELERY_ENABLE_UTC = True
     CELERY_TIMEZONE = 'Australia/Sydney'
@@ -364,8 +364,6 @@ class Development(Config):
     NOTIFY_LOG_PATH = 'application.log'
 
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://localhost/notification_api')
-    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-    BROKER_URL = REDIS_URL
 
     STATSD_ENABLED = False
     STATSD_HOST = "localhost"
