@@ -37,7 +37,13 @@ from app.dao.services_dao import (
     dao_fetch_all_services
 )
 import app.dao.service_sms_sender_dao as sms_sender_dao
-from app.dao.users_dao import (delete_model_user, delete_user_verify_codes)
+from app.dao.users_dao import (
+    delete_model_user,
+    delete_user_verify_codes,
+    get_users_by_platform_admin,
+    grant_platform_admin_by_email,
+    revoke_platform_admin_by_email,
+)
 from app.models import PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
 from app.performance_platform.processing_time import (send_processing_time_for_start_and_end)
 from app.utils import (
@@ -256,6 +262,28 @@ def list_routes():
     """List URLs of all application routes."""
     for rule in sorted(current_app.url_map.iter_rules(), key=lambda r: r.rule):
         print("{:10} {}".format(", ".join(rule.methods - set(['OPTIONS', 'HEAD'])), rule.rule))
+
+
+@notify_command()
+def list_platform_admins():
+    print('>> Start listing platform admins')
+    for user in sorted(get_users_by_platform_admin(), key=lambda u: u.email_address):
+        print(user.email_address)
+    print('<< End listing platform admins')
+
+
+@notify_command()
+@click.option('-e', '--email_address', required=True,
+              help="""Full email address of the admin to revoke""")
+def revoke_platform_admin(email_address):
+    revoke_platform_admin_by_email(email_address)
+
+
+@notify_command()
+@click.option('-u', '--username', required=True,
+              help="""Name of org member to promote as platform admin""")
+def grant_platform_admin(username):
+    grant_platform_admin_by_email(f"{username}@dta.gov.au")
 
 
 @notify_command(name='provision-telstra')

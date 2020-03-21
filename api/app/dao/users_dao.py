@@ -113,6 +113,22 @@ def get_users_by_partial_email(email):
     return User.query.filter(User.email_address.ilike("%{}%".format(email))).all()
 
 
+def get_users_by_platform_admin():
+    return User.query.filter_by(platform_admin=True).all()
+
+
+def grant_platform_admin_by_email(email_address):
+    changes = {'platform_admin': True}
+    db.session.query(User).filter(User.email_address == email_address).update(changes)
+    db.session.commit()
+
+
+def revoke_platform_admin_by_email(email_address):
+    changes = {'platform_admin': False}
+    db.session.query(User).filter(User.email_address == email_address).update(changes)
+    db.session.commit()
+
+
 def increment_failed_login_count(user):
     user.failed_login_count += 1
     db.session.add(user)
