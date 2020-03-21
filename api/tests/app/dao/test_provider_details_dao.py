@@ -125,8 +125,8 @@ def test_get_current_sms_provider_returns_correct_provider(restore_provider_deta
 @pytest.mark.parametrize('sap_enabled, identifier, expected', [
     ('', 'telstra', 'twilio'),
     ('', 'twilio', 'telstra'),
-    ('true', 'sap', 'twilio'),
-    ('true', 'twilio', 'sap'),
+    ('true', 'sap', 'telstra'),
+    ('true', 'telstra', 'sap'),
 ])
 def test_get_alternative_sms_provider_returns_expected_provider(monkeypatch, notify_db, sap_enabled, identifier, expected):
     monkeypatch.setenv('FEATURE_SAP_ENABLED', sap_enabled)
