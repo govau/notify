@@ -350,13 +350,6 @@ def create_sap_oauth2_client(client_id, client_secret):
         raise ex
 
 
-@notify_command(name='run-health-check')
-@click.option('-m', '--message', required=True, help="the message to send")
-def run_health_check(message):
-    print('running health check')
-    print(check_celery_health.apply_async((message,), queue=QueueNames.NOTIFY))
-
-
 @notify_command(name='twilio-buy-available-phone-number')
 @click.option('-c', '--country_code',
               required=True,
@@ -393,6 +386,13 @@ def twilio_buy_available_phone_number(country_code, address_sid):
               help="SMS sender ID of the non-default sender ID to be removed")
 def remove_sms_sender(sms_sender_id):
     sms_sender_dao.dao_remove_sms_sender(sms_sender_id)
+
+
+@notify_command(name='run-health-check')
+@click.option('-m', '--message', required=True, help="the message to send")
+def run_health_check(message):
+    print('running health check')
+    print(check_celery_health.apply_async((message,), queue=QueueNames.NOTIFY))
 
 
 @notify_command(name='insert-inbound-number')
