@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from time import monotonic
 
 import itertools
-import dateutil
+from dateutil import parser as dateutil_parser
 import ago
 from itsdangerous import BadSignature
 from flask import (
@@ -239,7 +239,7 @@ def format_datetime_relative(date):
 
 
 def format_datetime_aet_tmp(date):
-    return convert_utc_to_aet(date).strftime('%A %d %B %Y %-I:%M%p (Australian Eastern Time)')
+    return convert_utc_to_aet(dateutil_parser.parse(date)).strftime('%A %d %B %Y %-I:%M%p (Australian Eastern Time)')
 
 
 def format_datetime_numeric(date):
