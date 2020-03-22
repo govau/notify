@@ -2,6 +2,7 @@ from collections import OrderedDict
 from csv import DictReader
 from io import StringIO
 from pathlib import Path
+from datetime import datetime
 
 import pytest
 from freezegun import freeze_time
@@ -537,4 +538,4 @@ def test_format_datetime_relative(time, human_readable_datetime):
 ])
 def test_get_human_day(current_time, time, human_day):
     with freeze_time(current_time):
-        assert get_human_day(time) == human_day
+        assert get_human_day(datetime.strptime(time, '%Y-%m-%d %H:%M')) == human_day
