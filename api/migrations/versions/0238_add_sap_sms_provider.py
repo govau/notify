@@ -20,7 +20,7 @@ def upgrade():
     )
 
     op.execute((
-        "INSERT INTO provider_rates (id, valid_from, rate, provider_id) VALUES ('{}', '{}', 4.0, "
+        "INSERT INTO provider_rates (id, valid_from, rate, provider_id) VALUES ('{}', '{}', 6.0, "
         "(SELECT id FROM provider_details WHERE identifier = 'sap'))").format(uuid.uuid4(), datetime.utcnow()))
 
     op.execute(
