@@ -5,6 +5,7 @@ from time import monotonic
 
 import itertools
 from dateutil import parser as dateutil_parser
+import pytz
 import ago
 from itsdangerous import BadSignature
 from flask import (
@@ -238,8 +239,13 @@ def format_datetime_relative(date):
     )
 
 
+# TODO: there's a lot of work to be done cleaning up date and time formatting.
+# E.g. need to go from GMT/BST to AET in a lot of places and need to fix tests.
+# However, a bigger question is whether we should be formatting things in AET
+# anyway. This excludes and/or alienates non-eastern coast Notify users.
 def format_datetime_aet_tmp(date):
-    return convert_utc_to_aet(dateutil_parser.parse(date)).strftime('%A %d %B %Y %-I:%M%p (Australian Eastern Time)')
+    date = dateutil_parser.parse(date).replace(tzinfo=None)
+    return convert_utc_to_aet(date).strftime('%A %d %B %Y %-I:%M%p (Australian Eastern Time)')
 
 
 def format_datetime_numeric(date):
