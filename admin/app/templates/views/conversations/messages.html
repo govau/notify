@@ -16,6 +16,9 @@
           {{ message.content | string }}
           {% if message.status == 'delivered' %}
             <div class="sms-message-status sms-message-status-outbound">
+              <pre>{{ message.created_at }}</pre>
+            </div>
+            <div class="sms-message-status sms-message-status-outbound">
               {{ message.created_at | format_datetime_relative }}
             </div>
           {% elif message.status in ['pending', 'sending', 'created'] %}
