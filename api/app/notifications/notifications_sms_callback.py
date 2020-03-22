@@ -15,7 +15,7 @@ register_errors(sms_callback_blueprint)
 @require_oauth(scope=None)
 def process_sap_response(notification_id):
     client_name = 'SAP'
-    data = json.loads(request.data)
+    data = request.json
     errors = validate_callback_data(data=data,
                                     fields=['messageId', 'status'],
                                     client_name=client_name)

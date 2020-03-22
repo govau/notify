@@ -25,7 +25,7 @@ register_errors(receive_notifications_blueprint)
 def receive_sap_sms():
     response = MessagingResponse()
 
-    data = json.loads(request.data)
+    data = request.json
 
     service = fetch_potential_service(data['originatingAddress'], 'sap')
 
