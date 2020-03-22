@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from flask import Blueprint, current_app, request, abort, json
+from flask import Blueprint, current_app, request, abort
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
 
