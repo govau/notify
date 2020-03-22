@@ -18,6 +18,7 @@ defaults: &defaults
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify.gov.au
     API_HOST_NAME: https://rest-api.notify.gov.au
+    FEATURE_SAP_ENABLED: true
 
 applications:
   - name: notify-api
