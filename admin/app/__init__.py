@@ -238,6 +238,10 @@ def format_datetime_relative(date):
     )
 
 
+def format_datetime_aet_tmp(date):
+    return convert_utc_to_aet(date).strftime('%A %d %B %Y %-I:%M%p (Australian Eastern Time)')
+
+
 def format_datetime_numeric(date):
     return '{} {}'.format(
         format_date_numeric(date),
