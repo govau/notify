@@ -4,6 +4,8 @@ from datetime import datetime, timedelta, timezone
 from time import monotonic
 
 import itertools
+from dateutil import parser as dateutil_parser
+import pytz
 import ago
 from itsdangerous import BadSignature
 from flask import (
@@ -63,7 +65,7 @@ from app.notify_client.user_api_client import user_api_client
 from app.commands import setup_commands
 from app.utils import requires_auth
 from app.utils import get_cdn_domain
-from app.utils import gmt_timezones
+from app.utils import (gmt_timezones, convert_utc_to_aet)
 
 login_manager = LoginManager()
 csrf = CSRFProtect()
@@ -237,6 +239,15 @@ def format_datetime_relative(date):
     )
 
 
+# TODO: there's a lot of work to be done cleaning up date and time formatting.
+# E.g. need to go from GMT/BST to AET in a lot of places and need to fix tests.
+# However, a bigger question is whether we should be formatting things in AET
+# anyway. This excludes and/or alienates non-eastern coast Notify users.
+def format_datetime_aet_tmp(date):
+    date = dateutil_parser.parse(date).replace(tzinfo=None)
+    return convert_utc_to_aet(date).strftime('%A %d %B %Y %-I:%M%p (Australian Eastern Time)')
+
+
 def format_datetime_numeric(date):
     return '{} {}'.format(
         format_date_numeric(date),
@@ -253,14 +264,15 @@ def format_time_24h(date):
 
 
 def get_human_day(time):
+    now = convert_utc_to_aet(datetime.utcnow())
 
     #  Add 1 minute to transform 00:00 into ‘midnight today’ instead of ‘midnight tomorrow’
-    date = (gmt_timezones(time) - timedelta(minutes=1)).date()
-    if date == (datetime.utcnow() + timedelta(days=1)).date():
+    date = (convert_utc_to_aet(time) - timedelta(minutes=1)).date()
+    if date == (now + timedelta(days=1)).date():
         return 'tomorrow'
-    if date == datetime.utcnow().date():
+    if date == now.date():
         return 'today'
-    if date == (datetime.utcnow() - timedelta(days=1)).date():
+    if date == (now - timedelta(days=1)).date():
         return 'yesterday'
     return _format_datetime_short(date)
 
@@ -598,6 +610,7 @@ def add_template_filters(application):
         format_date_normal,
         format_date_short,
         format_datetime_relative,
+        format_datetime_aet_tmp,
         format_delta,
         format_notification_status,
         format_notification_type,

@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 import Collapsible from './collapsible'
-import P from './core/paragraph'
 
 const BaseHeader = styled.div`
   background-color: #f3f5f5;

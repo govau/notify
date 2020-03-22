@@ -2,12 +2,16 @@ from collections import OrderedDict
 from csv import DictReader
 from io import StringIO
 from pathlib import Path
+from datetime import datetime
 
 import pytest
 from freezegun import freeze_time
 from tests.conftest import fake_uuid
 
-from app import format_datetime_relative
+from app import (
+    format_datetime_relative,
+    get_human_day,
+)
 from app.utils import (
     AgreementInfo,
     Spreadsheet,
@@ -475,6 +479,7 @@ def test_validate_government_domain_data():
         }
 
 
+# TODO: these test cases are still assuming GMT/BST, need to change to AET.
 @pytest.mark.parametrize('time, human_readable_datetime', [
     ('2018-03-14 09:00', '14 March at 9:00am'),
     ('2018-03-14 15:00', '14 March at 3:00pm'),
@@ -513,3 +518,24 @@ def test_validate_government_domain_data():
 def test_format_datetime_relative(time, human_readable_datetime):
     with freeze_time('2018-03-21 12:00'):
         assert format_datetime_relative(time) == human_readable_datetime
+
+
+# These tests are accurate for AET.
+@pytest.mark.parametrize('current_time, time, human_day', [
+    # event occurred 22/03/2020 10:34am
+    ('2020-03-21 23:35', '2020-03-21 23:34', 'today'),  # current time is 1m after the event
+    ('2020-03-22 23:35', '2020-03-21 23:34', 'yesterday'),  # current time is 1d after the event
+    ('2020-03-20 23:35', '2020-03-21 23:34', 'tomorrow'),  # current time is 1d before the event
+
+    # event occurred 22/03/2020 10:34am
+    ('2020-03-22 05:34', '2020-03-21 23:34', 'today'),  # 6 hours later is 'today'
+    ('2020-03-22 11:34', '2020-03-21 23:34', 'today'),  # 12 hours later is 'today'
+    ('2020-03-22 12:59', '2020-03-21 23:34', 'today'),  # just before midnight is 'today'
+    ('2020-03-23 00:00', '2020-03-21 23:34', 'yesterday'),  # at midnight is 'yesterday'
+    ('2020-03-23 01:00', '2020-03-21 23:34', 'yesterday'),  # at 1am the next day is 'yesterday'
+    ('2020-03-24 01:00', '2020-03-21 23:34', '22 March'),  # at 1am the day after is '22 March'
+    ('2020-04-24 01:00', '2020-03-21 23:34', '22 March'),  # the next month is '22 March'
+])
+def test_get_human_day(current_time, time, human_day):
+    with freeze_time(current_time):
+        assert get_human_day(datetime.strptime(time, '%Y-%m-%d %H:%M')) == human_day

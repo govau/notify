@@ -77,7 +77,7 @@ from tests.app.aws.test_s3 import single_s3_object_stub
 from tests.conftest import set_config_values
 
 
-def _create_slow_delivery_notification(provider='mmg'):
+def _create_slow_delivery_notification(provider='twilio'):
     now = datetime.utcnow()
     five_minutes_from_now = now + timedelta(minutes=5)
     service = Service.query.get(current_app.config['FUNCTIONAL_TEST_PROVIDER_SERVICE_ID'])

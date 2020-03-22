@@ -1,5 +1,6 @@
 from urllib import parse
 from datetime import datetime
+from sqlalchemy.orm.exc import NoResultFound
 
 from flask import current_app
 from notifications_utils.recipients import (
@@ -13,6 +14,7 @@ from app.dao.notifications_dao import (
     dao_update_notification
 )
 from app.dao.provider_details_dao import (
+    get_provider_details_by_identifier,
     get_provider_details_by_notification_type,
     dao_toggle_sms_provider
 )
@@ -41,7 +43,19 @@ def send_sms_to_provider(notification):
         return
 
     if notification.status == 'created':
-        provider = provider_to_use(SMS_TYPE, notification.id, notification.international)
+        # TODO: issue is that this does not get the provider based on who owns
+        # the inbound number. The notification.reply_to_text below is the phone
+        # number that we should send from, but we need to look at that and see
+        # who the provider is.
+        # TODO: now that we do get the right provider, the issue is that the
+        # reply to text could be different because the service is able to choose
+        # the sender when sending a message. So we need to check if the sender
+        # ID that was chosen is also an inbound number.
+        provider = None
+        if service.inbound_number and service.inbound_number.active:
+            provider = inbound_number_provider_to_use(service.inbound_number, notification.id)
+        else:
+            provider = provider_to_use(SMS_TYPE, notification.id, notification.international)
         current_app.logger.debug(
             "Starting sending SMS {} to provider at {}".format(notification.id, datetime.utcnow())
         )
@@ -161,6 +175,15 @@ def update_notification(notification, provider, status=None):
     else:
         notification.status = NOTIFICATION_SENDING
     dao_update_notification(notification)
+
+
+def inbound_number_provider_to_use(inbound_number, notification_id):
+    try:
+        get_provider_details_by_identifier(inbound_number.provider)
+    except NoResultFound:
+        raise Exception("Could not find {} provider when trying to send notification {}".format(inbound_number.provider, notification_id))
+
+    return clients.get_client_by_name_and_type(inbound_number.provider, SMS_TYPE)
 
 
 def provider_to_use(notification_type, notification_id, international=False):

@@ -21,7 +21,10 @@ temp_fail_email = "temp-fail@simulator.notify"
 
 
 def send_sms_response(provider, notification_id, to):
-    if provider == "telstra":
+    if provider == "sap":
+        headers = {"Content-type": "application/json"}
+        body = sap_callback(notification_id, to)
+    elif provider == "telstra":
         headers = {"Content-type": "application/json"}
         body = telstra_callback(notification_id, to)
     elif provider == "twilio":
@@ -69,6 +72,21 @@ def make_request(notification_type, provider, notification_id, data, headers):
     finally:
         current_app.logger.info("Mocked provider callback request finished")
     return response.json()
+
+
+def sap_callback(notification_id, to):
+    if to.strip().endswith(temp_fail):
+        status = "ERROR"  # We don't seem to have a SAP state for temp fail
+    elif to.strip().endswith(perm_fail):
+        status = "ERROR"
+    else:
+        status = "DELIVERED"
+
+    return json.dumps({
+        "messageId": "XXXX",
+        "recipient": to,
+        "status": status,
+    })
 
 
 def telstra_callback(notification_id, to):

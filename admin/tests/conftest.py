@@ -469,7 +469,7 @@ def multiple_available_inbound_numbers(mocker):
                 'created_at': '2017-10-18T16:57:14.154185Z',
                 'id': '781d9c60-7a7e-46b7-9896-7b045b992fa7',
                 'number': '0712121214',
-                'provider': 'mmg',
+                'provider': 'twilio',
                 'service': None,
                 'updated_at': None
             }, {
@@ -477,7 +477,7 @@ def multiple_available_inbound_numbers(mocker):
                 'created_at': '2017-10-18T16:57:22.585806Z',
                 'id': '781d9c60-7a7e-46b7-9896-7b045b992fa5',
                 'number': '0712121215',
-                'provider': 'mmg',
+                'provider': 'twilio',
                 'service': None,
                 'updated_at': None
             }, {
@@ -485,7 +485,7 @@ def multiple_available_inbound_numbers(mocker):
                 'created_at': '2017-10-18T16:57:38.585806Z',
                 'id': '781d9c61-7a7e-46b7-9896-7b045b992fa5',
                 'number': '0712121216',
-                'provider': 'mmg',
+                'provider': 'twilio',
                 'service': None,
                 'updated_at': None
             }

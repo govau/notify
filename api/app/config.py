@@ -77,15 +77,6 @@ class Config(object):
     # DB conection string
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
 
-    # MMG API Key
-    MMG_API_KEY = os.getenv('MMG_API_KEY')
-
-    # Firetext API Key
-    FIRETEXT_API_KEY = os.getenv("FIRETEXT_API_KEY")
-
-    # Firetext simluation key
-    LOADTESTING_API_KEY = os.getenv("LOADTESTING_API_KEY")
-
     # Hosted graphite statsd prefix
     STATSD_PREFIX = os.getenv('STATSD_PREFIX')
 
@@ -323,9 +314,10 @@ class Config(object):
     FREE_SMS_TIER_FRAGMENT_COUNT = 25000
 
     SMS_INBOUND_WHITELIST = json.loads(os.environ.get('SMS_INBOUND_WHITELIST', '[]'))
-    FIRETEXT_INBOUND_SMS_AUTH = json.loads(os.environ.get('FIRETEXT_INBOUND_SMS_AUTH', '[]'))
-    MMG_INBOUND_SMS_AUTH = json.loads(os.environ.get('MMG_INBOUND_SMS_AUTH', '[]'))
-    MMG_INBOUND_SMS_USERNAME = json.loads(os.environ.get('MMG_INBOUND_SMS_USERNAME', '[]'))
+    TWILIO_INBOUND_SMS_USERNAMES = json.loads(os.environ.get('TWILIO_INBOUND_SMS_USERNAMES', '[]'))
+    TWILIO_INBOUND_SMS_PASSWORDS = json.loads(os.environ.get('TWILIO_INBOUND_SMS_PASSWORDS', '[]'))
+    TWILIO_CALLBACK_USERNAME = os.environ.get('TWILIO_CALLBACK_USERNAME', '')
+    TWILIO_CALLBACK_PASSWORD = os.environ.get('TWILIO_CALLBACK_PASSWORD', '')
 
     ROUTE_SECRET_KEY_1 = os.environ.get('ROUTE_SECRET_KEY_1', '')
     ROUTE_SECRET_KEY_2 = os.environ.get('ROUTE_SECRET_KEY_2', '')
@@ -338,8 +330,6 @@ class Config(object):
     TEMPLATE_PREVIEW_API_KEY = os.environ.get('TEMPLATE_PREVIEW_API_KEY', 'my-secret-key')
 
     LETTER_PROCESSING_DEADLINE = time(17, 30)
-
-    MMG_URL = "https://api.mmg.co.uk/json/api.php"
 
 
 ######################
@@ -397,9 +387,8 @@ class Test(Development):
     API_HOST_NAME = "http://localhost:6011"
 
     SMS_INBOUND_WHITELIST = ['203.0.113.195']
-    FIRETEXT_INBOUND_SMS_AUTH = ['testkey']
-    MMG_INBOUND_SMS_AUTH = ['testkey']
-    MMG_INBOUND_SMS_USERNAME = ['username']
+    TWILIO_INBOUND_SMS_USERNAMES = ['username']
+    TWILIO_INBOUND_SMS_PASSWORDS = ['password']
     TEMPLATE_PREVIEW_API_HOST = 'http://localhost:9999'
 
 

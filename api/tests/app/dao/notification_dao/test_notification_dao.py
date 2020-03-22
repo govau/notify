@@ -417,7 +417,7 @@ def test_should_by_able_to_update_status_by_reference(sample_email_template, smt
     assert Notification.query.get(notification.id).status == 'delivered'
 
 
-def test_should_by_able_to_update_status_by_id(sample_template, sample_job, mmg_provider):
+def test_should_by_able_to_update_status_by_id(sample_template, sample_job):
     with freeze_time('2000-01-01 12:00:00'):
         data = _notification_json(sample_template, job_id=sample_job.id, status='sending')
         notification = Notification(**data)
@@ -591,7 +591,7 @@ def test_should_return_zero_count_if_no_notification_with_reference():
 
 def test_create_notification_creates_notification_with_personalisation(notify_db, notify_db_session,
                                                                        sample_template_with_placeholders,
-                                                                       sample_job, mmg_provider):
+                                                                       sample_job):
     assert Notification.query.count() == 0
 
     data = sample_notification(notify_db=notify_db, notify_db_session=notify_db_session,
@@ -613,7 +613,7 @@ def test_create_notification_creates_notification_with_personalisation(notify_db
     assert {'name': 'Jo'} == notification_from_db.personalisation
 
 
-def test_save_notification_creates_sms(sample_template, sample_job, mmg_provider):
+def test_save_notification_creates_sms(sample_template, sample_job):
     assert Notification.query.count() == 0
 
     data = _notification_json(sample_template, job_id=sample_job.id)
@@ -746,7 +746,7 @@ def test_update_notification_with_research_mode_service_does_not_create_or_updat
     assert NotificationHistory.query.count() == 0
 
 
-def test_not_save_notification_and_not_create_stats_on_commit_error(sample_template, sample_job, mmg_provider):
+def test_not_save_notification_and_not_create_stats_on_commit_error(sample_template, sample_job):
     random_id = str(uuid.uuid4())
 
     assert Notification.query.count() == 0
@@ -760,7 +760,7 @@ def test_not_save_notification_and_not_create_stats_on_commit_error(sample_templ
     assert Job.query.get(sample_job.id).notifications_sent == 0
 
 
-def test_save_notification_and_increment_job(sample_template, sample_job, mmg_provider):
+def test_save_notification_and_increment_job(sample_template, sample_job):
     assert Notification.query.count() == 0
     data = _notification_json(sample_template, job_id=sample_job.id)
 
@@ -783,7 +783,7 @@ def test_save_notification_and_increment_job(sample_template, sample_job, mmg_pr
     assert Notification.query.count() == 2
 
 
-def test_save_notification_and_increment_correct_job(notify_db, notify_db_session, sample_template, mmg_provider):
+def test_save_notification_and_increment_correct_job(notify_db, notify_db_session, sample_template):
     from tests.app.conftest import sample_job
     job_1 = sample_job(notify_db, notify_db_session, sample_template.service)
     job_2 = sample_job(notify_db, notify_db_session, sample_template.service)
@@ -807,7 +807,7 @@ def test_save_notification_and_increment_correct_job(notify_db, notify_db_sessio
     assert job_1.id != job_2.id
 
 
-def test_save_notification_with_no_job(sample_template, mmg_provider):
+def test_save_notification_with_no_job(sample_template):
     assert Notification.query.count() == 0
     data = _notification_json(sample_template)
 
@@ -852,7 +852,7 @@ def test_get_notifications_by_reference(sample_template):
     assert len(all_notifications) == 2
 
 
-def test_save_notification_no_job_id(sample_template, mmg_provider):
+def test_save_notification_no_job_id(sample_template):
     assert Notification.query.count() == 0
     data = _notification_json(sample_template)
 
@@ -1585,7 +1585,7 @@ def test_slow_provider_delivery_returns_for_sent_notifications(
         create_notification,
         template=sample_template,
         status='delivered',
-        sent_by='mmg',
+        sent_by='twilio',
         updated_at=five_minutes_from_now
     )
 
@@ -1595,7 +1595,7 @@ def test_slow_provider_delivery_returns_for_sent_notifications(
 
     slow_delivery = is_delivery_slow_for_provider(
         sent_at=one_minute_from_now,
-        provider='mmg',
+        provider='twilio',
         threshold=2,
         delivery_time=timedelta(minutes=3),
         service_id=sample_template.service.id,
@@ -1617,7 +1617,7 @@ def test_slow_provider_delivery_observes_threshold(
         template=sample_template,
         status='delivered',
         sent_at=now,
-        sent_by='mmg',
+        sent_by='twilio',
         updated_at=five_minutes_from_now
     )
 
@@ -1626,7 +1626,7 @@ def test_slow_provider_delivery_observes_threshold(
 
     slow_delivery = is_delivery_slow_for_provider(
         sent_at=now,
-        provider='mmg',
+        provider='twilio',
         threshold=3,
         delivery_time=timedelta(minutes=5),
         service_id=sample_template.service.id,
@@ -1680,7 +1680,7 @@ def test_slow_provider_delivery_does_not_return_for_standard_delivery_time(
         template=sample_template,
         created_at=now,
         sent_at=now,
-        sent_by='mmg',
+        sent_by='twilio',
         status='delivered'
     )
 
@@ -1690,7 +1690,7 @@ def test_slow_provider_delivery_does_not_return_for_standard_delivery_time(
 
     slow_delivery = is_delivery_slow_for_provider(
         sent_at=now,
-        provider='mmg',
+        provider='twilio',
         threshold=2,
         delivery_time=timedelta(minutes=5),
         service_id=sample_template.service.id,

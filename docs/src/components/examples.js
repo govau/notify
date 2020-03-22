@@ -66,15 +66,19 @@ export const Provider = ({ source = 'data', ...props }) => (
 export default ({ reference, title }) => (
   <PageHeadings>
     {headings => (
-      <>
-        <LanguageSelector
-          onChange={language => {
-            const path = getSectionPath(headings, title)
-            path && window.history.pushState(null, null, `${path}-${language}`)
-          }}
-        />
-        <Context.Consumer>
-          {examples => (
+      <Context.Consumer>
+        {examples => (
+          <>
+            <LanguageSelector
+              onChange={language => {
+                const path = getSectionPath(headings, title)
+                path &&
+                  window.history.pushState(null, null, `${path}-${language}`)
+              }}
+              only={(examples.get(reference) || []).map(
+                example => example.frontmatter.lang
+              )}
+            />
             <CurrentLanguage>
               {language => {
                 const ex = (examples.get(reference) || []).find(
@@ -91,9 +95,9 @@ export default ({ reference, title }) => (
                 return <MDXRenderer scope={scope}>{ex.code.body}</MDXRenderer>
               }}
             </CurrentLanguage>
-          )}
-        </Context.Consumer>
-      </>
+          </>
+        )}
+      </Context.Consumer>
     )}
   </PageHeadings>
 )

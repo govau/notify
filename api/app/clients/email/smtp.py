@@ -2,10 +2,8 @@ import smtplib
 import uuid
 from email.message import EmailMessage
 
-from app.clients.email import EmailClient
 
-
-class SMTPClient(EmailClient):
+class SMTPClient:
     def __init__(
             self,
             addr=None,
