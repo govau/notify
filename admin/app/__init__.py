@@ -604,6 +604,7 @@ def add_template_filters(application):
         format_date_normal,
         format_date_short,
         format_datetime_relative,
+        format_datetime_aet_tmp,
         format_delta,
         format_notification_status,
         format_notification_type,
