@@ -1,3 +1,5 @@
+import json
+
 from app.clients.sms.utils import timed
 import Telstra_Messaging as telstra
 
@@ -51,11 +53,31 @@ class TelstraSMSClient:
             notify_url=notify_url
         )
 
+        # Avoid circular imports by importing this file later.
+        from app.models import (
+            NOTIFICATION_SENDING,
+            NOTIFICATION_PERMANENT_FAILURE,
+        )
+
         try:
             resp = telstra_api.send_sms(payload)
             message = resp.messages[0]
             self.logger.info(f"Telstra send SMS request for {reference} succeeded: {message.message_id}")
 
+            return message.message_id, NOTIFICATION_SENDING
+        except telstra.rest.ApiException as e:
+            try:
+                messages = json.loads(e.body)["messages"]
+
+                if e.status == 400 and len(messages) > 0 and messages[0]["code"] == "TO-MSISDN-NOT-VALID" and messages[0]["deliveryStatus"] == "DeliveryImpossible":
+                    self.logger.info(f"Telstra send SMS request for {reference} failed with API exception, status: {e.status}, reason: {e.reason}, message code: {messages[0]['code']}, message delivery status: {messages[0]['deliveryStatus']}")
+
+                    return None, NOTIFICATION_PERMANENT_FAILURE
+            except ValueError:
+                pass
+
+            self.logger.error(f"Telstra send SMS request for {reference} failed with API exception")
+            raise e
         except Exception as e:
             self.logger.error(f"Telstra send SMS request for {reference} failed")
             raise e
