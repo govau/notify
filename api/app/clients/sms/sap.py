@@ -74,6 +74,11 @@ class SAPSMSClient:
             order = resp.livelink_order_ids[0]
             self.logger.info(f"SAP send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
 
+            # Avoid circular imports by importing this file later.
+            from app.models import (
+                NOTIFICATION_SENDING
+            )
+            return order.livelink_order_id[0], NOTIFICATION_SENDING
         except Exception as e:
             self.logger.error(f"SAP send SMS request for {reference} failed")
             raise e

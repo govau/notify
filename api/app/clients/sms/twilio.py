@@ -77,6 +77,12 @@ class TwilioSMSClient:
             elapsed_time = monotonic() - start_time
             self.logger.info("Twilio send SMS request for {} finished in {}".format(reference, elapsed_time))
 
+        # Avoid circular imports by importing this file later.
+        from app.models import (
+            NOTIFICATION_SENDING
+        )
+        return message.sid, NOTIFICATION_SENDING
+
     def buy_available_phone_number(self, country_code, address_sid):
         mobile = self._client.available_phone_numbers(country_code).mobile.list(
             sms_enabled=True,

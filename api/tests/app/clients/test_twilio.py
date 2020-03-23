@@ -4,6 +4,9 @@ from urllib.parse import parse_qsl
 
 from app import twilio_sms_client
 from app.clients.sms.twilio import get_twilio_responses
+from app.models import (
+    NOTIFICATION_SENDING,
+)
 from twilio.base.exceptions import TwilioRestException
 
 
@@ -68,7 +71,10 @@ def test_send_sms_calls_twilio_correctly(notify_api, mocker):
     with requests_mock.Mocker() as request_mock:
         request_mock.post('https://api.twilio.com/2010-04-01/Accounts/TWILIO_TEST_ACCOUNT_SID_XXX/Messages.json',
                           json=response_dict, status_code=200)
-        twilio_sms_client.send_sms(to, content, reference)
+        reference, status = twilio_sms_client.send_sms(to, content, reference)
+
+    assert reference == 'MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    assert status == NOTIFICATION_SENDING
 
     assert request_mock.call_count == 1
     req = request_mock.request_history[0]

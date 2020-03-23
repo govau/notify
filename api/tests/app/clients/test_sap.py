@@ -5,6 +5,9 @@ import saplivelink365
 
 from app import sap_sms_client
 from app.clients.sms.sap import get_sap_responses
+from app.models import (
+    NOTIFICATION_SENDING,
+)
 
 
 responses = Responses()
@@ -77,7 +80,10 @@ def test_send_sms_calls_sap_correctly(notify_db_session, notify_api, mocker):
                   content_type='application/json',
                   )
 
-    sap_sms_client.send_sms(to, content, reference)
+    reference, status = sap_sms_client.send_sms(to, content, reference)
+
+    assert reference == '123456789'
+    assert status == NOTIFICATION_SENDING
 
     assert len(responses.calls) == 2
 
