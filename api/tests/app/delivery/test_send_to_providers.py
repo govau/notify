@@ -23,7 +23,8 @@ from app.models import (
     BRANDING_ORG,
     BRANDING_NOTIFY,
     BRANDING_BOTH,
-    BRANDING_ORG_BANNER
+    BRANDING_ORG_BANNER,
+    NOTIFICATION_SENDING
 )
 from tests.app.db import (
     create_service,
@@ -78,7 +79,7 @@ def test_should_send_personalised_template_to_correct_sms_provider_and_persist(
                                           status='created',
                                           reply_to_text=sample_sms_template_with_html.service.get_default_sms_sender())
 
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
 
     send_to_providers.send_sms_to_provider(
         db_notification
@@ -96,6 +97,7 @@ def test_should_send_personalised_template_to_correct_sms_provider_and_persist(
     assert notification.status == 'sending'
     assert notification.sent_at <= datetime.utcnow()
     assert notification.sent_by == 'twilio'
+    assert notification.reference == 'MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
     assert notification.billable_units == 1
     assert notification.personalisation == {"name": "Jo"}
 
@@ -110,7 +112,7 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
         personalisation={'name': 'Jo'}
     )
 
-    mocker.patch('app.aws_ses_client.send_email', return_value=['reference', 'sending'])
+    mocker.patch('app.aws_ses_client.send_email', return_value=['02080171097832b0-3d3075e5-9732-4e76-962d-4613429fc8af-000000', 'sending'])
 
     send_to_providers.send_email_to_provider(
         db_notification
@@ -130,6 +132,7 @@ def test_should_send_personalised_template_to_correct_email_provider_and_persist
 
     notification = Notification.query.filter_by(id=db_notification.id).one()
     assert notification.status == 'sending'
+    assert notification.reference == '02080171097832b0-3d3075e5-9732-4e76-962d-4613429fc8af-000000'
     assert notification.sent_at <= datetime.utcnow()
     assert notification.sent_by == 'ses'
     assert notification.personalisation == {"name": "Jo"}
@@ -167,7 +170,7 @@ def test_send_sms_should_use_template_version_from_notification_not_latest(
     db_notification = create_notification(template=sample_template, to_field='+61412345678', status='created',
                                           reply_to_text=sample_template.service.get_default_sms_sender())
 
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
 
     version_on_notification = sample_template.version
 
@@ -195,6 +198,7 @@ def test_send_sms_should_use_template_version_from_notification_not_latest(
     assert persisted_notification.template_version == version_on_notification
     assert persisted_notification.template_version != sample_template.version
     assert persisted_notification.status == 'sending'
+    assert persisted_notification.reference == 'MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
     assert not persisted_notification.personalisation
 
 
@@ -205,7 +209,7 @@ def test_send_sms_should_use_template_version_from_notification_not_latest(
 def test_should_call_send_sms_response_task_if_research_mode(
         notify_db, sample_service, sample_notification, mocker, research_mode, key_type
 ):
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     if research_mode:
@@ -254,7 +258,7 @@ def test_should_leave_as_created_if_fake_callback_function_fails(sample_notifica
 def test_should_set_billable_units_to_zero_in_research_mode_or_test_key(
         notify_db, sample_service, sample_notification, mocker, research_mode, key_type):
 
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     if research_mode:
@@ -274,7 +278,7 @@ def test_should_not_send_to_provider_when_status_is_not_created(
     mocker
 ):
     notification = create_notification(template=sample_template, status='sending')
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     response_mock = mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     send_to_providers.send_sms_to_provider(
@@ -298,7 +302,7 @@ def test_should_send_sms_with_downgraded_content(notify_db_session, mocker):
         personalisation={'misc': placeholder}
     )
 
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
 
     send_to_providers.send_sms_to_provider(db_notification)
 
@@ -314,7 +318,7 @@ def test_send_sms_should_use_service_sms_sender(
         sample_service,
         sample_template,
         mocker):
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
 
     sms_sender = create_service_sms_sender(service=sample_service, sms_sender='123456', is_default=False)
     db_notification = create_notification(template=sample_template, sms_sender_id=sms_sender.id,
@@ -496,7 +500,7 @@ def test_get_logo_url(base_url, expected_url):
 
 
 def test_should_not_set_billable_units_if_research_mode(notify_db, sample_service, sample_notification, mocker):
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     sample_service.research_mode = True
@@ -527,7 +531,7 @@ def test_should_update_billable_units_according_to_research_mode_and_key_type(
     key_type,
     billable_units
 ):
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     if research_mode:
@@ -572,7 +576,7 @@ def test_should_send_sms_to_international_providers(
         reply_to_text=sample_sms_template_with_html.service.get_default_sms_sender()
     )
 
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
 
     send_to_providers.send_sms_to_provider(
         db_notification_au
@@ -601,8 +605,10 @@ def test_should_send_sms_to_international_providers(
 
     assert notification_au.status == 'sending'
     assert notification_au.sent_by == 'twilio'
+    assert notification_au.reference == 'MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
     assert notification_int.status == 'sent'
     assert notification_int.sent_by == 'twilio'
+    assert notification_int.reference == 'MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 
 
 def test_should_send_international_sms_with_formatted_phone_number(
@@ -616,7 +622,7 @@ def test_should_send_international_sms_with_formatted_phone_number(
         international=True
     )
 
-    send_notification_mock = mocker.patch('app.twilio_sms_client.send_sms')
+    send_notification_mock = mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     send_to_providers.send_sms_to_provider(
@@ -637,7 +643,7 @@ def test_should_set_international_phone_number_to_sent_status(
         international=True
     )
 
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     mocker.patch('app.delivery.send_to_providers.send_sms_response')
 
     send_to_providers.send_sms_to_provider(
@@ -664,7 +670,7 @@ def test_should_handle_sms_sender_and_prefix_message(
     expected_sender,
     expected_content,
 ):
-    mocker.patch('app.twilio_sms_client.send_sms')
+    mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
     service = create_service_with_defined_sms_sender(sms_sender_value=sms_sender, prefix_sms=prefix_sms)
     template = create_template(service, content='bar')
     notification = create_notification(template, reply_to_text=sms_sender)
@@ -727,7 +733,7 @@ def test_send_sms_to_provider_should_format_phone_number(
     mocker,
 ):
     sample_notification.to = '+61 (412) 345-678'
-    send_mock = mocker.patch('app.twilio_sms_client.send_sms')
+    send_mock = mocker.patch('app.twilio_sms_client.send_sms', return_value=['MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', NOTIFICATION_SENDING])
 
     send_to_providers.send_sms_to_provider(sample_notification)
 
