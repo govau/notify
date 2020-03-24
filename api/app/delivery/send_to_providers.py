@@ -82,25 +82,29 @@ def send_sms_to_provider(notification):
                 dao_update_notification(notification)
                 raise
         else:
+            status = None
+
             try:
-                provider.send_sms(
+                reference, status = provider.send_sms(
                     to=notification.normalised_to,
                     content=str(template),
                     reference=str(notification.id),
                     sender=notification.reply_to_text
                 )
-            except Exception as e:
-                dao_toggle_sms_provider(provider.name)
-                raise e
-            else:
+
+                notification.reference = reference
                 notification.billable_units = template.fragment_count
-                status = None
+
                 # An international notification (i.e. a text message with an
                 # abroad recipient phone number) instantly get marked as "sent".
                 # It might later get marked as "delivered" when the provider
                 # status callback is triggered.
                 if notification.international:
                     status = NOTIFICATION_SENT
+            except Exception as e:
+                dao_toggle_sms_provider(provider.name)
+                raise e
+            else:
                 update_notification(notification, provider, status=status)
 
         current_app.logger.debug(
