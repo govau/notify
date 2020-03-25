@@ -21,6 +21,10 @@ from app.celery.service_callback_tasks import send_delivery_status_to_service
 from app.celery.letters_pdf_tasks import create_letters_pdf
 from app.clients.sms.telstra import get_telstra_responses
 from app.config import QueueNames
+from app.dao.jobs_dao import (
+    dao_get_jobs,
+    dao_get_job_by_id,
+)
 from app.dao.monthly_billing_dao import (
     create_or_update_monthly_billing,
     get_monthly_billing_by_notification_type,
@@ -660,3 +664,58 @@ def populate_redis_template_usage(service_id, day):
             current_app.config['EXPIRE_CACHE_EIGHT_DAYS'],
             raise_exception=True
         )
+
+
+@notify_command()
+def list_jobs():
+    print_jobs(dao_get_jobs())
+
+
+@notify_command(name='get-job')
+@click.option('-j', '--job_id', required=True, type=click.UUID)
+def get_job(job_id):
+    job = dao_get_job_by_id(job_id)
+    print_jobs([job])
+
+
+def print_jobs(jobs):
+    writer = csv.writer(sys.stdout)
+    writer.writerow([
+        'job_id',
+        'job_status',
+        'service_id',
+        'service_name',
+        'created_at',
+        'updated_at',
+        'notification_count',
+        'notifications_sent',
+        'notifications_delivered',
+        'notifications_failed',
+        'processing_started',
+        'processing_finished',
+        'processing_time',
+        'scheduled_for',
+    ])
+
+    for job in jobs:
+        processing_time = None
+
+        if job.processing_started is not None and job.processing_finished is not None:
+            processing_time = (job.processing_finished - job.processing_started).total_seconds()
+
+        writer.writerow([
+            job.id,
+            job.job_status,
+            job.service.id,
+            job.service.name,
+            job.created_at,
+            job.updated_at,
+            job.notification_count,
+            job.notifications_sent,
+            job.notifications_delivered,
+            job.notifications_failed,
+            job.processing_started,
+            job.processing_finished,
+            processing_time,
+            job.scheduled_for,
+        ])

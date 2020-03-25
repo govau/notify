@@ -9,6 +9,7 @@ from app.dao.jobs_dao import (
     dao_get_job_by_service_id_and_job_id,
     dao_create_job,
     dao_update_job,
+    dao_get_jobs,
     dao_get_jobs_by_service_id,
     dao_set_scheduled_jobs_to_pending,
     dao_get_future_scheduled_job_by_id_and_service_id,
@@ -151,6 +152,22 @@ def test_create_job(sample_template):
 def test_get_job_by_id(sample_job):
     job_from_db = dao_get_job_by_service_id_and_job_id(sample_job.service.id, sample_job.id)
     assert sample_job == job_from_db
+
+
+def test_get_jobs(notify_db, notify_db_session, sample_template):
+    one_job = create_job(notify_db, notify_db_session, sample_template.service, sample_template)
+
+    other_user = create_user(email="test@digital.cabinet-office.gov.uk")
+    other_service = create_service(notify_db, notify_db_session, user=other_user, service_name="other service",
+                                   email_from='other.service')
+    other_template = create_template(notify_db, notify_db_session, service=other_service)
+    other_job = create_job(notify_db, notify_db_session, service=other_service, template=other_template)
+
+    jobs = dao_get_jobs().all()
+
+    assert len(jobs) == 2
+    assert jobs[0] == other_job
+    assert jobs[1] == one_job
 
 
 def test_get_jobs_for_service(notify_db, notify_db_session, sample_template):

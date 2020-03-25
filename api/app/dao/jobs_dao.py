@@ -42,6 +42,22 @@ def dao_get_notification_outcomes_for_job(service_id, job_id):
     ).all()
 
 
+def dao_get_jobs(limit_days=None, statuses=None):
+    query_filter = [
+        Job.original_file_name != current_app.config['TEST_MESSAGE_FILENAME'],
+        Job.original_file_name != current_app.config['ONE_OFF_MESSAGE_FILENAME'],
+    ]
+    if limit_days is not None:
+        query_filter.append(cast(Job.created_at, sql_date) >= days_ago(limit_days))
+    if statuses is not None and statuses != ['']:
+        query_filter.append(
+            Job.job_status.in_(statuses)
+        )
+    return Job.query \
+        .filter(*query_filter) \
+        .order_by(Job.processing_started.desc(), Job.created_at.desc())
+
+
 def dao_get_job_by_service_id_and_job_id(service_id, job_id):
     return Job.query.filter_by(service_id=service_id, id=job_id).one()
 
