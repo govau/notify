@@ -206,7 +206,7 @@ jobs:
       # Need the API to be running so that the callback can auto-subscribe.
       - run: make ci.setup-ses-callback
 
-  deploy-dev-celery-worker:
+  deploy-dev-celery-worker-default:
     <<: *deploy_image
     steps:
       - *cf_install
@@ -214,7 +214,57 @@ jobs:
       - *cf_login
       - run: make ci.create-service-psql
       - run: make ci.create-service-redis
-      - run: make api.deploy-dev-celery-worker
+      - run: make api.deploy-dev-celery-worker-default
+
+  deploy-dev-celery-worker-priority:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make ci.create-service-redis
+      - run: make api.deploy-dev-celery-worker-priority
+
+  deploy-dev-celery-worker-sender:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make ci.create-service-redis
+      - run: make api.deploy-dev-celery-worker-sender
+
+  deploy-dev-celery-worker-callbacks:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make ci.create-service-redis
+      - run: make api.deploy-dev-celery-worker-callbacks
+
+  deploy-dev-celery-worker-retrys:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make ci.create-service-redis
+      - run: make api.deploy-dev-celery-worker-retrys
+
+  deploy-dev-celery-worker-internal:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make ci.create-service-redis
+      - run: make api.deploy-dev-celery-worker-internal
 
   deploy-dev-celery-beat:
     <<: *deploy_image
@@ -251,13 +301,53 @@ jobs:
       - *cf_login_prod
       - run: make api.deploy
 
-  deploy-prod-celery-worker:
+  deploy-prod-celery-worker-default:
     <<: *deploy_image
     steps:
       - *cf_install
       - *attach_workspace
       - *cf_login_prod
-      - run: make api.deploy-celery-worker
+      - run: make api.deploy-celery-worker-default
+
+  deploy-prod-celery-worker-priority:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-worker-priority
+
+  deploy-prod-celery-worker-sender:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-worker-sender
+
+  deploy-prod-celery-worker-callbacks:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-worker-callbacks
+
+  deploy-prod-celery-worker-retrys:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-worker-retrys
+
+  deploy-prod-celery-worker-internal:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-worker-internal
 
   deploy-prod-celery-beat:
     <<: *deploy_image
@@ -341,7 +431,27 @@ workflows:
           requires:
             - build-api
 
-      - deploy-dev-celery-worker:
+      - deploy-dev-celery-worker-default:
+          requires:
+            - build-api
+
+      - deploy-dev-celery-worker-priority:
+          requires:
+            - build-api
+
+      - deploy-dev-celery-worker-sender:
+          requires:
+            - build-api
+
+      - deploy-dev-celery-worker-callbacks:
+          requires:
+            - build-api
+
+      - deploy-dev-celery-worker-retrys:
+          requires:
+            - build-api
+
+      - deploy-dev-celery-worker-internal:
           requires:
             - build-api
 
@@ -369,7 +479,12 @@ workflows:
             - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
-            - deploy-dev-celery-worker
+            - deploy-dev-celery-worker-default
+            - deploy-dev-celery-worker-priority
+            - deploy-dev-celery-worker-sender
+            - deploy-dev-celery-worker-callbacks
+            - deploy-dev-celery-worker-retrys
+            - deploy-dev-celery-worker-internal
             - deploy-dev-celery-beat
             - deploy-dev-docs
 
@@ -383,7 +498,32 @@ workflows:
           requires:
             - unlock-prod-deploy
 
-      - deploy-prod-celery-worker:
+      - deploy-prod-celery-worker-default:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery-worker-priority:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery-worker-sender:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery-worker-callbacks:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery-worker-retrys:
+          <<: *master_branch
+          requires:
+            - unlock-prod-deploy
+
+      - deploy-prod-celery-worker-internal:
           <<: *master_branch
           requires:
             - unlock-prod-deploy

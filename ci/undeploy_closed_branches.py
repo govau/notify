@@ -5,7 +5,13 @@ import subprocess
 prefixes = [
     'notify-f-',
     'notify-api-f-',
-    'notify-celery-worker-f-',
+    'notify-celery-worker-f-',  # TODO: remove once all cleaned up
+    'notify-celery-worker-default-f-',
+    'notify-celery-worker-priority-f-',
+    'notify-celery-worker-sender-f-',
+    'notify-celery-worker-callbacks-f-',
+    'notify-celery-worker-retrys-f-',
+    'notify-celery-worker-internal-f-',
     'notify-celery-beat-f-',
     'notify-docs-f-',
     'notify-psql-f-',

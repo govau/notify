@@ -120,9 +120,39 @@ run-celery-events:
 	NOTIFY_CELERY_CMD=events \
 		$(RUNNER) celery -A run_celery.notify_celery events
 
-run-celery-worker: version-file ## Run background non-sender workers
+run-celery-worker: version-file ## Run background workers (all queues, useful for development)
 	NOTIFY_CELERY_CMD=worker \
 		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO
+
+run-celery-worker-default: version-file ## Run background workers (default implies all other non-dedicated queues)
+	NOTIFY_CELERY_CMD=worker-default \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO \
+			-X priority-tasks,send-email-tasks,send-sms-tasks,service-callbacks,retry-tasks,notify-internal-tasks
+
+run-celery-worker-priority: version-file ## Run background workers (priority queue)
+	NOTIFY_CELERY_CMD=worker-priority \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO \
+			-Q priority-tasks
+
+run-celery-worker-sender: version-file ## Run background workers (send email and SMS queues)
+	NOTIFY_CELERY_CMD=worker-sender \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO \
+			-Q send-email-tasks,send-sms-tasks
+
+run-celery-worker-callbacks: version-file ## Run background workers (service callbacks queue)
+	NOTIFY_CELERY_CMD=worker-callbacks \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO \
+			-Q service-callbacks
+
+run-celery-worker-retrys: version-file ## Run background workers (retry tasks queue)
+	NOTIFY_CELERY_CMD=worker-retrys \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO \
+			-Q retry-tasks
+
+run-celery-worker-internal: version-file ## Run background workers (Notify internal tasks queue)
+	NOTIFY_CELERY_CMD=worker-internal \
+		$(RUNNER) celery -A run_celery.notify_celery worker --loglevel=INFO \
+			-Q notify-internal-tasks
 
 run-celery-beat: version-file ## Run scheduled tasks
 	NOTIFY_CELERY_CMD=beat \
@@ -165,11 +195,23 @@ deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
 
 	$(MAKE) create-sap-oauth2-client
 
-deploy-celery-worker:
-	APP=notify-celery-worker $(MAKE) deploy
+deploy-dev-celery-worker-default:
+	APP=notify-celery-worker-default $(MAKE) deploy-dev
 
-deploy-dev-celery-worker:
-	APP=notify-celery-worker $(MAKE) deploy-dev
+deploy-dev-celery-worker-priority:
+	APP=notify-celery-worker-priority $(MAKE) deploy-dev
+
+deploy-dev-celery-worker-sender:
+	APP=notify-celery-worker-sender $(MAKE) deploy-dev
+
+deploy-dev-celery-worker-callbacks:
+	APP=notify-celery-worker-callbacks $(MAKE) deploy-dev
+
+deploy-dev-celery-worker-retrys:
+	APP=notify-celery-worker-retrys $(MAKE) deploy-dev
+
+deploy-dev-celery-worker-internal:
+	APP=notify-celery-worker-internal $(MAKE) deploy-dev
 
 deploy-celery-beat:
 	APP=notify-celery-beat $(MAKE) deploy
@@ -196,7 +238,10 @@ clean:
 	install install-dev setup-db \
 	setup-test-db test lint fmt tests $(APP_TESTS) $(DAO_TESTS) test-roots \
 	run run-celery-worker run-celery-beat \
-	deploy deploy-api deploy-celery-worker deploy-dev-celery-worker deploy-celery-beat deploy-dev-celery-beat \
+	run-celery-worker-default run-celery-worker-priority run-celery-worker-sender run-celery-worker-callbacks run-celery-worker-retrys run-celery-worker-internal \
+	deploy deploy-api \
+	deploy-dev-celery-worker-default deploy-dev-celery-worker-priority deploy-dev-celery-worker-sender deploy-dev-celery-worker-callbacks deploy-dev-celery-worker-retrys deploy-dev-celery-worker-internal \
+	deploy-celery-beat deploy-dev-celery-beat \
 	run-production \
 	create-migration help clean check-vulnerabilities \
 	create-sap-oauth2-client
