@@ -195,6 +195,24 @@ deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt
 
 	$(MAKE) create-sap-oauth2-client
 
+deploy-celery-worker-default:
+	APP=notify-celery-worker-default $(MAKE) deploy
+
+deploy-celery-worker-priority:
+	APP=notify-celery-worker-priority $(MAKE) deploy
+
+deploy-celery-worker-sender:
+	APP=notify-celery-worker-sender $(MAKE) deploy
+
+deploy-celery-worker-callbacks:
+	APP=notify-celery-worker-callbacks $(MAKE) deploy
+
+deploy-celery-worker-retrys:
+	APP=notify-celery-worker-retrys $(MAKE) deploy
+
+deploy-celery-worker-internal:
+	APP=notify-celery-worker-internal $(MAKE) deploy
+
 deploy-dev-celery-worker-default:
 	APP=notify-celery-worker-default $(MAKE) deploy-dev
 
