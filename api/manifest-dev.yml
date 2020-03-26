@@ -32,15 +32,60 @@ applications:
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-api-((stg))
-  - name: notify-celery-worker-((stg))
+  - name: notify-celery-worker-default-((stg))
     <<: *defaults
     memory: 1G
     health-check-type: process
     no-route: true
-    command: make run-celery-worker
+    command: make run-celery-worker-default
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-worker-((stg))
+      CF_APP_NAME: notify-celery-worker-default-((stg))
+  - name: notify-celery-worker-priority-((stg))
+    <<: *defaults
+    memory: 750M
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-priority
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-priority-((stg))
+  - name: notify-celery-worker-sender-((stg))
+    <<: *defaults
+    memory: 1G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-sender
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-sender-((stg))
+  - name: notify-celery-worker-callbacks-((stg))
+    <<: *defaults
+    memory: 750M
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-callbacks
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-callbacks-((stg))
+  - name: notify-celery-worker-retrys-((stg))
+    <<: *defaults
+    memory: 750M
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-retrys
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-retrys-((stg))
+  - name: notify-celery-worker-internal-((stg))
+    <<: *defaults
+    memory: 750M
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-internal
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-internal-((stg))
   - name: notify-celery-beat-((stg))
     <<: *defaults
     memory: 256M

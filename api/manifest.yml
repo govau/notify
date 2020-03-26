@@ -31,17 +31,72 @@ applications:
     env:
       <<: *defaults_env
       CF_APP_NAME: notify-api
-  - name: notify-celery-worker
+  - name: notify-celery-worker-default
     <<: *defaults
     instances: 4
     memory: 2G
     health-check-type: process
     no-route: true
-    command: make run-celery-worker
+    command: make run-celery-worker-default
     env:
       <<: *defaults_env
-      CF_APP_NAME: notify-celery-worker
+      CF_APP_NAME: notify-celery-worker-default
       CELERYD_CONCURRENCY: 6
+  - name: notify-celery-worker-priority
+    <<: *defaults
+    instances: 2
+    memory: 1G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-priority
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-priority
+      CELERYD_CONCURRENCY: 4
+  - name: notify-celery-worker-sender
+    <<: *defaults
+    instances: 4
+    memory: 2G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-sender
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-sender
+      CELERYD_CONCURRENCY: 6
+  - name: notify-celery-worker-callbacks
+    <<: *defaults
+    instances: 2
+    memory: 1G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-callbacks
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-callbacks
+      CELERYD_CONCURRENCY: 4
+  - name: notify-celery-worker-retrys
+    <<: *defaults
+    instances: 2
+    memory: 1G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-retrys
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-retrys
+      CELERYD_CONCURRENCY: 6
+  - name: notify-celery-worker-internal
+    <<: *defaults
+    instances: 2
+    memory: 1G
+    health-check-type: process
+    no-route: true
+    command: make run-celery-worker-internal
+    env:
+      <<: *defaults_env
+      CF_APP_NAME: notify-celery-worker-internal
+      CELERYD_CONCURRENCY: 4
   - name: notify-celery-beat
     <<: *defaults
     instances: 1

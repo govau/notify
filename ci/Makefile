@@ -100,7 +100,13 @@ undeploy-%:
 	-$(CF) unbind-service notify-api-f-$* notify-redis-f-$*
 	-$(CF) delete notify-f-$* -f
 	-$(CF) delete notify-api-f-$* -f
-	-$(CF) delete notify-celery-worker-f-$* -f
+	-$(CF) delete notify-celery-worker-f-$* -f # TODO: remove once all cleaned up
+	-$(CF) delete notify-celery-worker-default-f-$* -f
+	-$(CF) delete notify-celery-worker-priority-f-$* -f
+	-$(CF) delete notify-celery-worker-sender-f-$* -f
+	-$(CF) delete notify-celery-worker-callbacks-f-$* -f
+	-$(CF) delete notify-celery-worker-retrys-f-$* -f
+	-$(CF) delete notify-celery-worker-internal-f-$* -f
 	-$(CF) delete notify-celery-beat-f-$* -f
 	-$(CF) delete notify-docs-f-$* -f
 	-$(CF) delete-service notify-psql-f-$* -f
