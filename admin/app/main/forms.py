@@ -880,12 +880,12 @@ class ServiceReceiveMessagesCallbackForm(StripWhitespaceForm):
 class ServiceDeliveryStatusCallbackForm(StripWhitespaceForm):
     url = StringField(
         "URL",
-        validators=[DataRequired(message='Can’t be empty'),
+        validators=[validators.Optional(),
                     Regexp(regex="^https.*", message='Must be a valid https URL')]
     )
     bearer_token = PasswordFieldShowHasContent(
         "Bearer token",
-        validators=[DataRequired(message='Can’t be empty'),
+        validators=[validators.Optional(),
                     Length(min=10, message='Must be at least 10 characters')]
     )
 

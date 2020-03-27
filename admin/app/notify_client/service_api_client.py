@@ -453,6 +453,11 @@ class ServiceAPIClient(NotifyAdminAPIClient):
             data['bearer_token'] = bearer_token
         return self.post("/service/{}/delivery-receipt-api/{}".format(service_id, callback_api_id), data)
 
+    def delete_service_callback_api(self, service_id, callback_api_id):
+        return self.delete("/service/{}/delivery-receipt-api/{}".format(
+            service_id, callback_api_id
+        ))
+
     def create_service_callback_api(self, service_id, url, bearer_token, user_id):
         data = {
             "url": url,

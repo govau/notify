@@ -26,7 +26,8 @@ from app.dao.service_inbound_api_dao import (
 from app.dao.service_callback_api_dao import (
     save_service_callback_api,
     get_service_callback_api,
-    reset_service_callback_api
+    reset_service_callback_api,
+    delete_service_callback_api
 )
 
 service_callback_blueprint = Blueprint('service_callback', __name__, url_prefix='/service/<uuid:service_id>')
@@ -103,6 +104,17 @@ def fetch_service_callback_api(service_id, callback_api_id):
     callback_api = get_service_callback_api(callback_api_id, service_id)
 
     return jsonify(data=callback_api.serialize()), 200
+
+@service_callback_blueprint.route('/delivery-receipt-api/<uuid:callback_api_id>', methods=['DELETE'])
+def remove_service_callback_api(service_id, callback_api_id):
+    callback_api = get_service_callback_api(callback_api_id, service_id)
+
+    if not callback_api:
+        error = 'Service delivery receipt callback API not found'
+        raise InvalidRequest(error, status_code=404)
+
+    delete_service_callback_api(callback_api)
+    return '', 204
 
 
 def handle_sql_error(e, table_name):
