@@ -19,6 +19,7 @@ from app.dao.notifications_dao import (
     dao_timeout_notifications,
     dao_update_notification,
     dao_update_notifications_by_reference,
+    dao_notifications_hung_at_sent,
     delete_notifications_created_more_than_a_week_ago_by_type,
     get_notification_by_id,
     get_notification_for_job,
@@ -2234,3 +2235,27 @@ def test_notifications_not_yet_sent_return_no_rows(sample_service, notification_
 
     results = notifications_not_yet_sent(older_than, notification_type)
     assert len(results) == 0
+
+
+def test_notifications_hung_at_sent_excludes_other_statuses(sample_template):
+    for status in NOTIFICATION_STATUS_TYPES:
+        create_notification(sample_template, status=status)
+
+    results = dao_notifications_hung_at_sent('sms')
+    assert len(results) == 1
+
+
+@freeze_time('2016-10-18T10:00')
+def test_notifications_hung_at_sent_only_checks_recent_messages(sample_template):
+    right_now = datetime.utcnow()
+    yesterday = right_now - timedelta(hours=24)
+    tomorrow = right_now + timedelta(hours=24)
+
+    create_notification(sample_template, status='sending')
+    create_notification(sample_template, status='sending', created_at=yesterday)
+
+    # TODO: this could be wrong. do we care if this happens?
+    create_notification(sample_template, status='sending', created_at=tomorrow)
+
+    results = dao_notifications_hung_at_sent('sms')
+    assert len(results) == 2

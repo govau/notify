@@ -1,5 +1,6 @@
 import json
 
+from app.clients.sms import PollableSMSClient
 from app.clients.sms.utils import timed
 import Telstra_Messaging as telstra
 
@@ -19,7 +20,7 @@ def get_telstra_responses(status):
     return telstra_response_map[status]
 
 
-class TelstraSMSClient:
+class TelstraSMSClient(PollableSMSClient):
     def __init__(self, client_id=None, client_secret=None, *args, **kwargs):
         super(TelstraSMSClient, self).__init__(*args, **kwargs)
         self._client_id = client_id
@@ -39,6 +40,15 @@ class TelstraSMSClient:
 
     def get_name(self):
         return self.name
+
+    @timed("Telstra get message status request")
+    def get_message_status(self, message_id):
+        telstra_api = telstra.MessagingApi(self._client)
+        return telstra_api.get_sms_status(message_id=message_id)
+
+    def check_message_status(self, reference, **options):
+        for message in self.get_message_status(reference):
+            yield reference, message.delivery_status
 
     # https://dev.telstra.com/content/messaging-api#operation/Send%20SMS
     @timed("Telstra send SMS request")
@@ -88,12 +98,6 @@ class TelstraSMSClient:
         telstra_api = telstra.ProvisioningApi(self._client)
         req = telstra.ProvisionNumberRequest(active_days=1825)
         telstra_api.create_subscription(req)
-
-    # https://dev.telstra.com/content/messaging-api#operation/Get%20SMS%20Status
-    @timed("Telstra get message status request")
-    def get_message_status(self, message_id):
-        telstra_api = telstra.MessagingApi(self._client)
-        return telstra_api.get_sms_status(message_id=message_id)
 
     # TODO: cache this call. token is valid for 1 hr.
     # https://dev.telstra.com/content/messaging-api#tag/Authentication

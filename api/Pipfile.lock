@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4cf17f275a22c59ec5a9fda5f984d71ad7a2b0a78d235d17ba646c9c71c41895"
+            "sha256": "d306c46a02aa63c0639bf282b7435d37ec423b910e5da2ff220c3251e3c2fa4e"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -603,7 +603,7 @@
         },
         "saplivelink365": {
             "git": "https://github.com/govau/sap-live-link-365-client-python.git",
-            "ref": "9b9957e149c1c6eeec7ebb2837417f6939787505"
+            "ref": "e9037d7dc3a3d6b81a1e2a6d2b85bab0065013c7"
         },
         "sentry-sdk": {
             "extras": [
@@ -649,10 +649,10 @@
         },
         "twilio": {
             "hashes": [
-                "sha256:284040aa4cd504d67e95cde17db38d4d11454ac8bd43cab94f66694241b962af"
+                "sha256:39b949c671f1b29259c85569de58e6a4c8b04e13aba08d2d20ddba9d7c304573"
             ],
             "index": "pypi",
-            "version": "==6.37.0"
+            "version": "==6.38.0"
         },
         "urllib3": {
             "hashes": [
@@ -1054,10 +1054,10 @@
         },
         "pyaml": {
             "hashes": [
-                "sha256:9914879e6ac5cbf09b8cd5d3ba09e241ffcfd91c689cddc8d8b66a68c1c7e640",
-                "sha256:b077066dec4a1a834e376bd69b8b38677c69c62b270160cde35d76dc40ca9ec1"
+                "sha256:29a5c2a68660a799103d6949167bd6c7953d031449d08802386372de1db6ad71",
+                "sha256:67081749a82b72c45e5f7f812ee3a14a03b3f5c25ff36ec3b290514f8c4c4b99"
             ],
-            "version": "==20.3.1"
+            "version": "==20.4.0"
         },
         "pycodestyle": {
             "hashes": [
