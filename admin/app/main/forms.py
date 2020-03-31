@@ -866,7 +866,6 @@ class ServiceInboundNumberForm(StripWhitespaceForm):
 class CallbackForm(StripWhitespaceForm):
 
     def validate(self):
-        print(" CallbackForm url value", self.url.data)
         return super().validate() or self.url.data == ''
 
 
