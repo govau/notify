@@ -863,8 +863,14 @@ class ServiceInboundNumberForm(StripWhitespaceForm):
         ]
     )
 
+class CallbackForm(StripWhitespaceForm):
 
-class ServiceReceiveMessagesCallbackForm(StripWhitespaceForm):
+    def validate(self):
+        print(" CallbackForm url value", self.url.data)
+        return super().validate() or self.url.data == ''
+
+
+class ServiceReceiveMessagesCallbackForm(CallbackForm):
     url = StringField(
         "URL",
         validators=[DataRequired(message='Can’t be empty'),
@@ -877,7 +883,7 @@ class ServiceReceiveMessagesCallbackForm(StripWhitespaceForm):
     )
 
 
-class ServiceDeliveryStatusCallbackForm(StripWhitespaceForm):
+class ServiceDeliveryStatusCallbackForm(CallbackForm):
     url = StringField(
         "URL",
         validators=[validators.Optional(),

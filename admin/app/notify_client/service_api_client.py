@@ -346,6 +346,11 @@ class ServiceAPIClient(NotifyAdminAPIClient):
             )
         )['data']
 
+    def delete_service_inbound_api(self, service_id, callback_api_id):
+        return self.delete("/service/{}/inbound-api/{}".format(
+            service_id, callback_api_id
+        ))
+
     def get_reply_to_email_addresses(self, service_id):
         return self.get(
             "/service/{}/email-reply-to".format(
