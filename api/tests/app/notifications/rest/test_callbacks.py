@@ -157,7 +157,7 @@ def test_sap_callback_should_return_400_if_no_status(client, sample_sap_oauth2_c
 
     assert response.status_code == 400
     assert json_resp['result'] == 'error'
-    assert json_resp['message'] == ['SAP callback failed: status missing']
+    assert json_resp['message'] == ['sap callback failed: status missing']
 
 
 def test_sap_callback_should_set_status_technical_failure_if_status_unknown(client, sample_sap_oauth2_client, notify_db, notify_db_session, mocker):
@@ -178,7 +178,7 @@ def test_sap_callback_should_set_status_technical_failure_if_status_unknown(clie
         sap_post(client, sample_sap_oauth2_client, notification.id, data)
 
     assert get_notification_by_id(notification.id).status == 'technical-failure'
-    assert 'SAP callback failed: status UNKNOWN not found.' in str(e.value)
+    assert 'sap callback failed: status UNKNOWN not found.' in str(e.value)
 
 
 def test_sap_callback_returns_200_when_notification_id_is_not_a_valid_uuid(client, sample_sap_oauth2_client, mocker):
@@ -196,7 +196,7 @@ def test_sap_callback_returns_200_when_notification_id_is_not_a_valid_uuid(clien
 
     assert response.status_code == 400
     assert json_resp['result'] == 'error'
-    assert json_resp['message'] == 'SAP callback with invalid reference 1234'
+    assert json_resp['message'] == 'sap callback with invalid reference 1234'
 
 
 def test_sap_callback_returns_200_if_notification_not_found(client, sample_sap_oauth2_client, notify_db, notify_db_session, mocker):
@@ -248,7 +248,7 @@ def test_sap_callback_should_update_notification_status(notify_db, notify_db_ses
 
     assert response.status_code == 200
     assert json_resp['result'] == 'success'
-    assert json_resp['message'] == 'SAP callback succeeded. reference {} updated'.format(
+    assert json_resp['message'] == 'sap callback succeeded. reference {} updated'.format(
         notification.id
     )
 
@@ -289,7 +289,7 @@ def test_sap_callback_should_update_notification_status_failed(notify_db, notify
 
     assert response.status_code == 200
     assert json_resp['result'] == 'success'
-    assert json_resp['message'] == 'SAP callback succeeded. reference {} updated'.format(
+    assert json_resp['message'] == 'sap callback succeeded. reference {} updated'.format(
         notification.id
     )
     assert get_notification_by_id(notification.id).status == 'permanent-failure'

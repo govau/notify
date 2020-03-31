@@ -241,6 +241,14 @@ def get_notification_by_id(notification_id, _raise=False):
         return Notification.query.filter_by(id=notification_id).first()
 
 
+@statsd(namespace="dao")
+def get_notification_by_reference(reference, _raise=False):
+    if _raise:
+        return Notification.query.filter_by(reference=reference).one()
+    else:
+        return Notification.query.filter_by(reference=reference).first()
+
+
 def get_notifications(filter_dict=None):
     return _filter_query(Notification.query, filter_dict=filter_dict)
 
@@ -611,6 +619,17 @@ def dao_get_count_of_letters_to_process_for_date(date_to_process=None):
     ).count()
 
     return count_of_letters_to_process_for_date
+
+
+def dao_notifications_hung_at_sent(notification_type, in_last_seconds=360):
+    since_date = datetime.utcnow() - timedelta(seconds=in_last_seconds)
+
+    notifications = Notification.query.filter(
+        Notification.notification_type == notification_type,
+        Notification.created_at >= since_date,
+        Notification.status == NOTIFICATION_SENDING
+    ).all()
+    return notifications
 
 
 def notifications_not_yet_sent(should_be_sending_after_seconds, notification_type):

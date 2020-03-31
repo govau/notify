@@ -1,4 +1,6 @@
+import datetime
 from cachelib import SimpleCache
+from app.clients.sms import PollableSMSClient
 from app.clients.sms.utils import timed
 from saplivelink365 import Configuration, ApiClient, AuthorizationApi, SMSV20Api
 
@@ -17,7 +19,7 @@ def get_sap_responses(status):
     return sap_response_map[status]
 
 
-class SAPSMSClient:
+class SAPSMSClient(PollableSMSClient):
     def __init__(self, client_id=None, client_secret=None, *args, **kwargs):
         super(SAPSMSClient, self).__init__(*args, **kwargs)
         self._client_id = client_id
@@ -37,6 +39,44 @@ class SAPSMSClient:
 
     def get_name(self):
         return self.name
+
+    # https://livelink.sapmobileservices.com/documentation/guides/sms-channel/delivery_statuses/#pulling-acks
+    def query_sms_statuses(self, reference, start_time, end_time):
+        # SAP expects yyyyMMddHHmm
+        fmt_string = '%Y%m%d%H%M'
+        start_utc_time = int(start_time.strftime(fmt_string))
+        end_utc_time = int(end_time.strftime(fmt_string))
+
+        page_index = 0
+        page_count = 1
+        sms_api = SMSV20Api(self._client)
+
+        while page_index < page_count:
+            response = sms_api.query_status_using_get1(
+                order_id=reference,
+                status='DELIVERED',
+                page_index=page_index + 1,
+                start_utc_time=start_utc_time,
+                end_utc_time=end_utc_time
+            )
+            page_index = response.page_index
+            page_count = response.page_count
+            for message in response.sap_notification:
+                yield message.order_id, message.status
+
+        self.logger.info(f"SAP query for SMS status scanned {page_count} pages")
+
+    @timed("SAP get message status request")
+    def check_message_status(self, reference, sent_at=None, **options):
+        jitter = datetime.timedelta(hours=12)
+
+        if not sent_at:
+            return
+
+        start_time = sent_at - jitter
+        end_time = sent_at + jitter
+
+        yield from self.query_sms_statuses(reference, start_time, end_time)
 
     @timed("SAP send SMS request")
     def send_sms(self, to, content, reference, sender=None):

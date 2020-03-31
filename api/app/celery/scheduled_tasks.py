@@ -1,6 +1,7 @@
 from datetime import (
     date,
     datetime,
+    timezone,
     timedelta
 )
 
@@ -41,6 +42,7 @@ from app.dao.notifications_dao import (
     delete_notifications_created_more_than_a_week_ago_by_type,
     dao_get_count_of_letters_to_process_for_date,
     dao_get_scheduled_notifications,
+    dao_notifications_hung_at_sent,
     set_scheduled_notification_to_processed,
     notifications_not_yet_sent
 )
@@ -63,6 +65,10 @@ from app.models import (
     JOB_STATUS_ERROR,
     SMS_TYPE,
     EMAIL_TYPE
+)
+from app.notifications.notifications_sms_callback import (
+    get_message_status_checker,
+    record_notification_status
 )
 from app.notifications.process_notifications import send_notification_to_queue
 from app.celery.tasks import (
@@ -120,6 +126,59 @@ def send_scheduled_notifications():
     except SQLAlchemyError:
         current_app.logger.exception("Failed to send scheduled notifications")
         raise
+
+
+@notify_celery.task(name='check-notification-status')
+@statsd(namespace="tasks")
+def check_notification_status(
+        notification_type,
+        notification_provider,
+        notification_reference,
+        notification_sent_at_timestamp):
+    # we isolate this unit of work so that if something goes wrong it just
+    # fails to record the status and dies off
+
+    # we send through timestamp as utc int because datetime.fromisoformat does
+    # not exist until python3.7 and datetime type cannot be serialised
+    notification_sent_at = datetime.utcfromtimestamp(notification_sent_at_timestamp)
+
+    # this will fail gently if there is no checker for the associated
+    # notification type or proivder, by just returning an empty generator
+    check_message_status = get_message_status_checker(notification_type, notification_provider)
+
+    for reference, response in check_message_status(
+            notification_reference,
+            sent_at=notification_sent_at):
+
+        success, errors = record_notification_status(
+            notification_provider,
+            reference,
+            response
+        )
+
+        if errors:
+            current_app.logger.exception(f"check notification status - record status failed: {errors}")
+            continue
+
+        current_app.logger.info(f"check notification status success: {success}")
+
+
+@notify_celery.task(name='check-notifications-status')
+@statsd(namespace="tasks")
+def check_notifications_status():
+    # check notifications stuck at sending for the last 4 hours
+
+    four_hours = 60 * 60 * 4
+    sms_to_check = dao_notifications_hung_at_sent(SMS_TYPE, in_last_seconds=four_hours)
+    email_to_check = dao_notifications_hung_at_sent(EMAIL_TYPE, in_last_seconds=four_hours)
+    notifications_to_check = sms_to_check + email_to_check
+
+    for notification in notifications_to_check:
+        check_notification_status.apply_async([
+            notification.notification_type, notification.sent_by,
+            notification.reference,
+            notification.sent_at.replace(tzinfo=timezone.utc).timestamp()
+        ], queue=QueueNames.NOTIFY)
 
 
 @notify_celery.task(name="delete-verify-codes")

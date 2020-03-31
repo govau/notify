@@ -212,6 +212,11 @@ class Config(object):
             'schedule': crontab(),  # Every minute
             'options': {'queue': QueueNames.PERIODIC}
         },
+        'check-notifications-status': {
+            'task': 'check-notifications-status',
+            'schedule': crontab(minute='*/5'),
+            'options': {'queue': QueueNames.PERIODIC}
+        },
         'timeout-sending-notifications': {
             'task': 'timeout-sending-notifications',
             'schedule': crontab(hour=3, minute=0),
