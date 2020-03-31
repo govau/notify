@@ -697,3 +697,88 @@ def test_post_email_notification_with_invalid_reply_to_id_returns_400(client, sa
     assert 'email_reply_to_id {} does not exist in database for service id {}'. \
         format(fake_uuid, sample_email_template.service_id) in resp_json['errors'][0]['message']
     assert 'BadRequestError' in resp_json['errors'][0]['error']
+
+
+@pytest.mark.parametrize(
+    "notification_type, key_send_to, send_to, callback_data, error",
+    [
+        ("sms", "phone_number", "+61412345678", {'status_callback_url': 'https://localhost/callback'}, "status_callback_bearer_token is a required property"),
+        ("email", "email_address", "sample@email.com", {'status_callback_url': 'https://localhost/callback'}, "status_callback_bearer_token is a required property"),
+        ("sms", "phone_number", "+61412345678", {'status_callback_url': 'http://localhost/callback', 'status_callback_bearer_token': '1234567890'}, "status_callback_url is not a valid https url"),
+        ("email", "email_address", "sample@email.com", {'status_callback_url': 'http://localhost/callback', 'status_callback_bearer_token': '1234567890'}, "status_callback_url is not a valid https url"),
+        ("sms", "phone_number", "+61412345678", {'status_callback_url': 'https://localhost/callback', 'status_callback_bearer_token': '123456789'}, "status_callback_bearer_token 123456789 is too short"),
+        ("email", "email_address", "sample@email.com", {'status_callback_url': 'https://localhost/callback', 'status_callback_bearer_token': '123456789'}, "status_callback_bearer_token 123456789 is too short"),
+    ]
+)
+def test_notification_returns_400_for_invalid_status_callback(client, sample_template, notification_type, key_send_to, send_to, callback_data, error):
+    data = {
+        key_send_to: send_to,
+        'template_id': str(sample_template.id),
+    }
+
+    data.update(callback_data)
+
+    auth_header = create_authorization_header(service_id=sample_template.service_id)
+
+    response = client.post(
+        path='/v2/notifications/{}'.format(notification_type),
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+
+    assert response.status_code == 400
+    assert response.headers['Content-type'] == 'application/json'
+    error_resp = json.loads(response.get_data(as_text=True))
+    assert error_resp['status_code'] == 400
+    assert {'error': 'ValidationError', 'message': error} in error_resp['errors']
+
+
+def test_post_sms_notification_with_status_callback_returns_201(client, sample_template_with_placeholders, mocker):
+    mocked = mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
+    data = {
+        'phone_number': '+61412345678',
+        'template_id': str(sample_template_with_placeholders.id),
+        'personalisation': {'Name': 'Jo'},
+        'status_callback_url': 'https://localhost/callback',
+        'status_callback_bearer_token': '1234567890',
+    }
+
+    auth_header = create_authorization_header(service_id=sample_template_with_placeholders.service_id)
+
+    response = client.post(
+        path='/v2/notifications/sms',
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+    assert response.status_code == 201
+    resp_json = json.loads(response.get_data(as_text=True))
+    assert validate(resp_json, post_sms_response) == resp_json
+    notifications = Notification.query.all()
+    assert len(notifications) == 1
+    assert notifications[0].status_callback_url == 'https://localhost/callback'
+    assert notifications[0].status_callback_bearer_token == '1234567890'
+    assert mocked.called
+
+
+def test_post_email_notification_with_status_callback_returns_201(client, sample_email_template_with_placeholders, mocker):
+    mocked = mocker.patch('app.celery.provider_tasks.deliver_email.apply_async')
+    data = {
+        'email_address': 'sample@email.com',
+        'template_id': str(sample_email_template_with_placeholders.id),
+        'personalisation': {'Name': 'Jo'},
+        'status_callback_url': 'https://localhost/callback',
+        'status_callback_bearer_token': '1234567890',
+    }
+
+    auth_header = create_authorization_header(service_id=sample_email_template_with_placeholders.service_id)
+
+    response = client.post(
+        path='/v2/notifications/email',
+        data=json.dumps(data),
+        headers=[('Content-Type', 'application/json'), auth_header])
+    assert response.status_code == 201
+    resp_json = json.loads(response.get_data(as_text=True))
+    assert validate(resp_json, post_email_response) == resp_json
+    notifications = Notification.query.all()
+    assert len(notifications) == 1
+    assert notifications[0].status_callback_url == 'https://localhost/callback'
+    assert notifications[0].status_callback_bearer_token == '1234567890'
+    assert mocked.called

@@ -4,7 +4,7 @@ from app.models import (
     NOTIFICATION_STATUS_LETTER_RECEIVED,
     TEMPLATE_TYPES
 )
-from app.schema_validation.definitions import (uuid, personalisation, letter_personalisation)
+from app.schema_validation.definitions import (uuid, personalisation, letter_personalisation, https_url)
 
 
 template = {
@@ -137,9 +137,14 @@ post_sms_request = {
         "template_id": uuid,
         "personalisation": personalisation,
         "scheduled_for": {"type": ["string", "null"], "format": "datetime_within_next_day"},
-        "sms_sender_id": uuid
+        "sms_sender_id": uuid,
+        "status_callback_url": https_url,
+        "status_callback_bearer_token": {"type": "string", "minLength": 10},
     },
     "required": ["phone_number", "template_id"],
+    "dependencies": {
+        "status_callback_url": {"required": ["status_callback_bearer_token"]}
+    },
     "additionalProperties": False
 }
 
@@ -183,9 +188,14 @@ post_email_request = {
         "template_id": uuid,
         "personalisation": personalisation,
         "scheduled_for": {"type": ["string", "null"], "format": "datetime_within_next_day"},
-        "email_reply_to_id": uuid
+        "email_reply_to_id": uuid,
+        "status_callback_url": https_url,
+        "status_callback_bearer_token": {"type": "string", "minLength": 10},
     },
     "required": ["email_address", "template_id"],
+    "dependencies": {
+        "status_callback_url": {"required": ["status_callback_bearer_token"]}
+    },
     "additionalProperties": False
 }
 
