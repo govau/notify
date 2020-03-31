@@ -193,7 +193,9 @@ def process_sms_or_email_notification(*, form, notification_type, api_key, templ
         key_type=api_key.key_type,
         client_reference=form.get('reference', None),
         simulated=simulated,
-        reply_to_text=reply_to_text
+        reply_to_text=reply_to_text,
+        status_callback_url=form.get('status_callback_url', None),
+        status_callback_bearer_token=form.get('status_callback_bearer_token', None),
     )
 
     scheduled_for = form.get("scheduled_for", None)

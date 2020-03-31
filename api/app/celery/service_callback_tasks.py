@@ -144,8 +144,8 @@ def create_encrypted_callback_data(notification, service_callback_api):
             notification.updated_at.strftime(DATETIME_FORMAT) if notification.updated_at else None,
         "notification_sent_at": notification.sent_at.strftime(DATETIME_FORMAT) if notification.sent_at else None,
         "notification_type": notification.notification_type,
-        "service_callback_api_url": service_callback_api.url,
-        "service_callback_api_bearer_token": service_callback_api.bearer_token,
+        "service_callback_api_url": notification.status_callback_url if notification.status_callback_url else service_callback_api.url,
+        "service_callback_api_bearer_token": notification.status_callback_bearer_token if notification.status_callback_bearer_token else service_callback_api.bearer_token,
     }
     return encryption.encrypt(data)
 
@@ -162,8 +162,8 @@ def create_delivery_status_callback_data(notification, service_callback_api):
             notification.updated_at.strftime(DATETIME_FORMAT) if notification.updated_at else None,
         "notification_sent_at": notification.sent_at.strftime(DATETIME_FORMAT) if notification.sent_at else None,
         "notification_type": notification.notification_type,
-        "service_callback_api_url": service_callback_api.url,
-        "service_callback_api_bearer_token": service_callback_api.bearer_token,
+        "service_callback_api_url": notification.status_callback_url if notification.status_callback_url else service_callback_api.url,
+        "service_callback_api_bearer_token": notification.status_callback_bearer_token if notification.status_callback_bearer_token else service_callback_api.bearer_token,
     }
     return encryption.encrypt(data)
 

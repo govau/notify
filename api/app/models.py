@@ -1254,6 +1254,9 @@ class Notification(db.Model):
 
     reply_to_text = db.Column(db.String, nullable=True)
 
+    status_callback_url = db.Column(db.String(), nullable=True)
+    _status_callback_bearer_token = db.Column("status_callback_bearer_token", db.String(), nullable=True)
+
     __table_args__ = (
         db.ForeignKeyConstraint(
             ['template_id', 'template_version'],
@@ -1261,6 +1264,17 @@ class Notification(db.Model):
         ),
         {}
     )
+
+    @property
+    def status_callback_bearer_token(self):
+        if self._status_callback_bearer_token:
+            return encryption.decrypt(self._status_callback_bearer_token)
+        return None
+
+    @status_callback_bearer_token.setter
+    def status_callback_bearer_token(self, status_callback_bearer_token):
+        if status_callback_bearer_token:
+            self._status_callback_bearer_token = encryption.encrypt(str(status_callback_bearer_token))
 
     @property
     def personalisation(self):

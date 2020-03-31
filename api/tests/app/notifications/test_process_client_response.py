@@ -69,6 +69,26 @@ def test_outcome_statistics_called_for_successful_callback(sample_notification, 
                                       queue="service-callbacks")
 
 
+def test_delivery_status_callback_calls_for_notification_with_callback(sample_notification_with_callback, mocker):
+    mocker.patch(
+        'app.notifications.process_client_response.notifications_dao.update_notification_status_by_id',
+        return_value=sample_notification_with_callback
+    )
+    send_mock = mocker.patch(
+        'app.celery.service_callback_tasks.send_delivery_status_to_service.apply_async'
+    )
+    reference = str(uuid.uuid4())
+
+    success, error = process_sms_client_response(status='delivered', provider_reference=reference, client_name='Twilio')
+    assert success == "Twilio callback succeeded. reference {} updated".format(str(reference))
+    assert error is None
+    encrypted_data = create_encrypted_callback_data(sample_notification_with_callback, None)
+    send_mock.assert_called_once_with(
+        [str(sample_notification_with_callback.id), encrypted_data],
+        queue="service-callbacks",
+    )
+
+
 def test_sms_resonse_does_not_call_send_callback_if_no_db_entry(sample_notification, mocker):
     mocker.patch(
         'app.notifications.process_client_response.notifications_dao.update_notification_status_by_id',

@@ -545,7 +545,9 @@ def sample_notification(
     client_reference=None,
     rate_multiplier=1.0,
     scheduled_for=None,
-    normalised_to=None
+    normalised_to=None,
+    status_callback_url=None,
+    status_callback_bearer_token=None,
 ):
     if created_at is None:
         created_at = datetime.utcnow()
@@ -593,7 +595,9 @@ def sample_notification(
         'updated_at': created_at if status in NOTIFICATION_STATUS_TYPES_COMPLETED else None,
         'client_reference': client_reference,
         'rate_multiplier': rate_multiplier,
-        'normalised_to': normalised_to
+        'normalised_to': normalised_to,
+        'status_callback_url': status_callback_url,
+        'status_callback_bearer_token': status_callback_bearer_token,
     }
     if job_row_number is not None:
         data['job_row_number'] = job_row_number
@@ -610,6 +614,16 @@ def sample_notification(
         db.session.commit()
 
     return notification
+
+
+@pytest.fixture(scope='function')
+def sample_notification_with_callback(notify_db, notify_db_session):
+    return sample_notification(
+        notify_db,
+        notify_db_session,
+        status_callback_url='https://localhost/callback',
+        status_callback_bearer_token='1234567890',
+    )
 
 
 @pytest.fixture
