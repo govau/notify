@@ -105,7 +105,6 @@ create-docker-test-db:
 		--name "$(DOCKER_CONTAINER_PREFIX)notify-test-db" \
 		-p $(DOCKER_TEST_DB_PORT):5432 \
 		-e POSTGRES_PASSWORD="" \
-		-e POSTGRES_HOST_AUTH_METHOD=trust \
 		-e POSTGRES_DB="test_notification_api" \
 		postgres:9.6
 
