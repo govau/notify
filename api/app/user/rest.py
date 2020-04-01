@@ -79,6 +79,9 @@ def create_user():
     if not req_json.get('password', None):
         errors.update({'password': ['Missing data for required field.']})
         raise InvalidRequest(errors, status_code=400)
+    if req_json.get('platform_admin'):
+        errors.update({'platform_admin': ['Unknown field name.']})
+        raise InvalidRequest(errors, status_code=400)
     save_model_user(user_to_create, pwd=req_json.get('password'))
     result = user_to_create.serialize()
     return jsonify(data=result), 201
