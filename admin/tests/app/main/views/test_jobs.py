@@ -336,3 +336,47 @@ def test_should_show_updates_for_one_job_as_json(
 @freeze_time("2016-01-10 12:00:00.000000")
 def test_time_left(job_created_at, expected_message):
     assert get_time_left(job_created_at) == expected_message
+
+
+
+@pytest.mark.parametrize('original_file_contents', [
+    """
+        phone_number
+        07800900123
+    """,
+    """
+        phone_number, a, b, c
+        07800900123,  🐜,🐝,🦀
+    """,
+    """
+        "phone_number", "a", "b", "c"
+        "07800900123","🐜,🐜","🐝,🐝","🦀"
+    """,
+])
+@freeze_time("2016-01-01 11:09:00.061258")
+def test_should_download_csv_even_with_unicode_in_template_name(
+    logged_in_client,
+    service_one,
+    active_user_with_permissions,
+    mock_get_unicode_service_template,
+    mock_get_job,
+    mocker,
+    mock_get_notifications,
+    fake_uuid,
+    original_file_contents,
+):
+    mocker.patch(
+        'app.main.s3_client.s3download',
+        return_value=original_file_contents,
+    )
+
+    response = logged_in_client.get(url_for(
+        'main.view_job_csv',
+        service_id=service_one['id'],
+        job_id=fake_uuid
+    ))
+
+    assert response.status_code == 200
+
+    for header, header_value in response.headers:
+        header_value.encode('ascii') # this throws exception if not ascii
