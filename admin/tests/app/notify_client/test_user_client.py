@@ -88,6 +88,13 @@ def test_client_only_updates_allowed_attributes(mocker):
     assert str(error.value) == 'Not allowed to update user attributes: id'
 
 
+def test_client_cannot_update_platform_admin_attribute(mocker):
+    mocker.patch('app.notify_client.current_user', platform_admin=True)
+    with pytest.raises(TypeError) as error:
+        user_api_client.update_user_attribute('platform_admin', platform_admin=True)
+    assert str(error.value) == 'Not allowed to update user attributes: platform_admin'
+
+
 def test_client_updates_password_separately(mocker, api_user_active):
     expected_url = '/user/{}/update-password'.format(api_user_active.id)
     expected_params = {'_password': 'newpassword'}

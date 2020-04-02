@@ -132,6 +132,29 @@ def test_post_user_without_auth_type(admin_request, notify_db_session):
     assert user.auth_type == SMS_AUTH_TYPE
 
 
+def test_post_user_with_platform_admin(client, notify_db_session):
+    assert User.query.count() == 0
+    data = {
+        "name": "Test User",
+        "email_address": "user@digital.cabinet-office.gov.au",
+        "password": "password",
+        "mobile_number": "+61412345678",
+        "permissions": {},
+        "auth_type": EMAIL_AUTH_TYPE,
+        "platform_admin": True
+    }
+    auth_header = create_authorization_header()
+    headers = [('Content-Type', 'application/json'), auth_header]
+    resp = client.post(
+        url_for('user.create_user'),
+        data=json.dumps(data),
+        headers=headers)
+    assert resp.status_code == 400
+    assert User.query.count() == 0
+    json_resp = json.loads(resp.get_data(as_text=True))
+    assert {'platform_admin': ['Unknown field name.']} == json_resp['message']
+
+
 def test_post_user_missing_attribute_email(client, notify_db, notify_db_session):
     """
     Tests POST endpoint '/' missing attribute email.
@@ -644,6 +667,16 @@ def test_cannot_update_user_password_using_attributes_method(admin_request, samp
         _expected_status=400
     )
     assert resp['message']['_schema'] == ['Unknown field name password']
+
+
+def test_cannot_update_user_platform_admin_using_attributes_method(admin_request, sample_user):
+    resp = admin_request.post(
+        'user.update_user_attribute',
+        user_id=sample_user.id,
+        _data={'platform_admin': True},
+        _expected_status=400
+    )
+    assert resp['message']['_schema'] == ['Unknown field name platform_admin']
 
 
 def test_get_orgs_and_services_only_returns_active(admin_request, sample_user):
