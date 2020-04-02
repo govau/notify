@@ -135,7 +135,7 @@ def view_job_csv(service_id, job_id):
             'Content-Disposition': 'inline; filename="{} - {}.csv"'.format(
                 template['name'],
                 format_datetime_short(job['created_at'])
-            )
+            ).encode('ascii', 'ignore')
         }
     )
 
