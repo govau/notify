@@ -163,3 +163,13 @@ def test_fetch_service_callback_api(client, sample_service):
 
     assert response.status_code == 200
     assert json.loads(response.get_data(as_text=True))["data"] == service_callback_api.serialize()
+
+
+def test_delete_service_callback_api(client, sample_service):
+    service_callback_api = create_service_callback_api(service=sample_service)
+
+    response = client.delete(
+        "/service/{}/delivery-receipt-api/{}".format(sample_service.id, service_callback_api.id),
+        headers=[create_authorization_header()])
+
+    assert response.status_code == 204

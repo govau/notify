@@ -863,8 +863,13 @@ class ServiceInboundNumberForm(StripWhitespaceForm):
         ]
     )
 
+class CallbackForm(StripWhitespaceForm):
 
-class ServiceReceiveMessagesCallbackForm(StripWhitespaceForm):
+    def validate(self):
+        return super().validate() or self.url.data == ''
+
+
+class ServiceReceiveMessagesCallbackForm(CallbackForm):
     url = StringField(
         "URL",
         validators=[DataRequired(message='Can’t be empty'),
@@ -877,15 +882,15 @@ class ServiceReceiveMessagesCallbackForm(StripWhitespaceForm):
     )
 
 
-class ServiceDeliveryStatusCallbackForm(StripWhitespaceForm):
+class ServiceDeliveryStatusCallbackForm(CallbackForm):
     url = StringField(
         "URL",
-        validators=[DataRequired(message='Can’t be empty'),
+        validators=[validators.Optional(),
                     Regexp(regex="^https.*", message='Must be a valid https URL')]
     )
     bearer_token = PasswordFieldShowHasContent(
         "Bearer token",
-        validators=[DataRequired(message='Can’t be empty'),
+        validators=[validators.Optional(),
                     Length(min=10, message='Must be at least 10 characters')]
     )
 
