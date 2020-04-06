@@ -9,3 +9,7 @@ def create_provider_rates(provider_identifier, valid_from, rate):
 
     provider_rates = ProviderRates(provider_id=provider.id, valid_from=valid_from, rate=rate)
     db.session.add(provider_rates)
+
+
+def list_provider_rates():
+    return ProviderRates.query.all()
