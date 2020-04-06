@@ -34,7 +34,13 @@ from app.dao.notifications_dao import (
     get_notification_by_id,
     dao_get_notification_history_by_id,
 )
-from app.dao.provider_rates_dao import create_provider_rates as dao_create_provider_rates
+from app.dao.provider_rates_dao import (
+    create_provider_rates as dao_create_provider_rates,
+    list_provider_rates as dao_list_provider_rates,
+)
+from app.dao.rates_dao import (
+    list_rates as dao_list_rates,
+)
 from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
 from app.dao.services_dao import (
     delete_service_and_all_associated_db_objects,
@@ -115,6 +121,46 @@ def create_provider_rates(provider_name, cost, valid_from):
     """
     cost = Decimal(cost)
     dao_create_provider_rates(provider_name, valid_from, cost)
+
+
+@notify_command()
+def list_provider_rates():
+    writer = csv.writer(sys.stdout)
+    writer.writerow([
+        'id',
+        'valid_from',
+        'rate',
+        'provider_id',
+        'provider_identifier',
+    ])
+
+    for r in dao_list_provider_rates():
+        writer.writerow([
+            r.id,
+            r.valid_from,
+            r.rate,
+            r.provider.id,
+            r.provider.identifier,
+        ])
+
+
+@notify_command()
+def list_rates():
+    writer = csv.writer(sys.stdout)
+    writer.writerow([
+        'id',
+        'valid_from',
+        'rate',
+        'notification_type',
+    ])
+
+    for r in dao_list_rates():
+        writer.writerow([
+            r.id,
+            r.valid_from,
+            r.rate,
+            r.notification_type,
+        ])
 
 
 @notify_command()
