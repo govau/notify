@@ -62,6 +62,7 @@ from app.utils import (
     cache_key_for_service_template_usage_per_day,
     get_sydney_midnight_in_utc,
     get_midnight_for_day_before,
+    convert_aet_to_utc,
 )
 from app import telstra_sms_client, twilio_sms_client
 from app.sap.oauth2 import OAuth2Client as SAPOAuth2Client
@@ -218,14 +219,17 @@ def purge_functional_test_data(user_email_prefix):
 
 
 @notify_command()
-@click.option('-y', '--year', required=True, help="e.g. 2017", type=int)
-def populate_monthly_billing(year):
+@click.option('-y', '--year', required=True, help="e.g. 2017 (note: 2016/2017 is referred to as '2017'—ask an accountant and they'll refer to that FY as '2017')", type=int)
+@click.option('-s', '--service_id', required=False, help="provide this to restrict the services to update to the given service", type=click.UUID)
+def populate_monthly_billing(year, service_id):
     """
     Populate monthly billing table for all services for a given year.
     """
     def populate(service_id, year, month):
-        # TODO: generated billing_month should be in UTC but this is untested.
-        create_or_update_monthly_billing(service_id, billing_month=datetime(year, month, 1))
+        aet_billing_month = datetime(year, month, 1)
+        utc_billing_month = convert_aet_to_utc(aet_billing_month)
+        create_or_update_monthly_billing(service_id, billing_month=utc_billing_month)
+
         sms_res = get_monthly_billing_by_notification_type(
             service_id, datetime(year, month, 1), SMS_TYPE
         )
@@ -236,25 +240,36 @@ def populate_monthly_billing(year):
             service_id, datetime(year, month, 1), 'letter'
         )
 
-        print("Finished populating data for {} for service id {}".format(month, str(service_id)))
-        print('SMS: {}'.format(sms_res.monthly_totals))
-        print('Email: {}'.format(email_res.monthly_totals))
-        print('Letter: {}'.format(letter_res.monthly_totals))
+        sms_totals = sms_res.monthly_totals if sms_res else 0
+        email_totals = email_res.monthly_totals if email_res else 0
+        letter_totals = letter_res.monthly_totals if letter_res else 0
+
+        print(f"Finished populating data for {month} for service id {str(service_id)}")
+        print(f"SMS: {sms_totals}")
+        print(f"Email: {email_totals}")
+        print(f"Letter: {letter_totals}")
+
+    aet_start_date = datetime(year - 1, 7, 1)
+    aet_end_date = datetime(year, 6, 30)
+
+    utc_start_date = convert_aet_to_utc(aet_start_date)
+    utc_end_date = convert_aet_to_utc(aet_end_date)
 
     service_ids = get_service_ids_that_need_billing_populated(
-        start_date=datetime(2016, 5, 1), end_date=datetime(2017, 8, 16)
+        start_date=utc_start_date, end_date=utc_end_date
     )
     start, end = 1, 13
 
-    if year == 2016:
-        start = 4
+    for sid in service_ids:
+        if service_id is not None and service_id != sid.service_id:
+            print(f"Skipped service {str(sid)} due to flag")
+            continue
 
-    for service_id in service_ids:
-        print('Starting to populate data for service {}'.format(str(service_id)))
-        print('Starting populating monthly billing for {}'.format(year))
+        print(f"Starting to populate data for service {str(sid)}")
+        print(f"Starting populating monthly billing for {year}")
         for i in range(start, end):
-            print('Population for {}-{}'.format(i, year))
-            populate(service_id, year, i)
+            print(f"Population for {i}-{year}")
+            populate(sid, year, i)
 
 
 @notify_command()
