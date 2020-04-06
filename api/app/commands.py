@@ -28,7 +28,8 @@ from app.dao.jobs_dao import (
 from app.dao.monthly_billing_dao import (
     create_or_update_monthly_billing,
     get_monthly_billing_by_notification_type,
-    get_service_ids_that_need_billing_populated
+    get_service_ids_that_need_billing_populated,
+    get_all_monthly_billing,
 )
 from app.dao.notifications_dao import (
     get_notification_by_id,
@@ -160,6 +161,31 @@ def list_rates():
             r.valid_from,
             r.rate,
             r.notification_type,
+        ])
+
+
+@notify_command()
+def list_monthly_billing():
+    writer = csv.writer(sys.stdout)
+    writer.writerow([
+        'id',
+        'service_id',
+        'notification_type',
+        'monthly_totals',
+        'updated_at',
+        'start_date',
+        'end_date',
+    ])
+
+    for r in get_all_monthly_billing():
+        writer.writerow([
+            r.id,
+            r.service_id,
+            r.notification_type,
+            r.monthly_totals,
+            r.updated_at,
+            r.start_date,
+            r.end_date,
         ])
 
 
