@@ -90,6 +90,10 @@ def get_monthly_billing_entry(service_id, start_date, notification_type):
     return entry
 
 
+def get_all_monthly_billing():
+    return MonthlyBilling.query.all()
+
+
 @statsd(namespace="dao")
 def get_yearly_billing_data_for_date_range(
     service_id, start_date, end_date, notification_types
