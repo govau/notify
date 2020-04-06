@@ -42,7 +42,7 @@ def send_delivery_status_to_service(self, notification_id,
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer {}'.format(status_update['service_callback_api_bearer_token'])
             },
-            timeout=60
+            timeout=15
         )
         current_app.logger.info('send_delivery_status_to_service sending {} to {}, response {}'.format(
             notification_id,
@@ -101,7 +101,7 @@ def _send_data_to_service_callback_api(self, data, service_callback_url, token, 
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer {}'.format(token)
             },
-            timeout=60
+            timeout=15
         )
         current_app.logger.info('{} sending {} to {}, response {}'.format(
             function_name,
