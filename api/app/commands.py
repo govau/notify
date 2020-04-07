@@ -14,10 +14,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 from notifications_utils.statsd_decorators import statsd
 
-from app import db, DATETIME_FORMAT, encryption, redis_store
+from app import db, redis_store
 from app.celery.tasks import check_celery_health
 from app.celery.scheduled_tasks import send_total_sent_notifications_to_performance_platform
-from app.celery.service_callback_tasks import send_delivery_status_to_service
 from app.celery.letters_pdf_tasks import create_letters_pdf
 from app.clients.sms.telstra import get_telstra_responses
 from app.config import QueueNames
@@ -42,7 +41,6 @@ from app.dao.provider_rates_dao import (
 from app.dao.rates_dao import (
     list_rates as dao_list_rates,
 )
-from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
 from app.dao.services_dao import (
     delete_service_and_all_associated_db_objects,
     dao_fetch_all_services_by_user,
@@ -57,6 +55,7 @@ from app.dao.users_dao import (
     revoke_platform_admin_by_email,
 )
 from app.models import PROVIDERS, SMS_PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
+from app.notifications.callbacks import check_for_callback_and_send_delivery_status_to_service
 from app.performance_platform.processing_time import (send_processing_time_for_start_and_end)
 from app.utils import (
     cache_key_for_service_template_usage_per_day,
@@ -551,11 +550,6 @@ def replay_create_pdf_letters(notification_id):
               help="""The service that the callbacks are for""")
 def replay_service_callbacks(file_name, service_id):
     print("Start send service callbacks for service: ", service_id)
-    callback_api = get_service_delivery_status_callback_api_for_service(service_id=service_id)
-    if not callback_api:
-        print("Callback api was not found for service: {}".format(service_id))
-        return
-
     errors = []
     notifications = []
     file = open(file_name)
@@ -573,21 +567,7 @@ def replay_service_callbacks(file_name, service_id):
         raise Exception("Some notifications for the given references were not found")
 
     for n in notifications:
-        data = {
-            "notification_id": str(n.id),
-            "notification_client_reference": n.client_reference,
-            "notification_to": n.to,
-            "notification_status": n.status,
-            "notification_created_at": n.created_at.strftime(DATETIME_FORMAT),
-            "notification_updated_at": n.updated_at.strftime(DATETIME_FORMAT),
-            "notification_sent_at": n.sent_at.strftime(DATETIME_FORMAT),
-            "notification_type": n.notification_type,
-            "service_callback_api_url": callback_api.url,
-            "service_callback_api_bearer_token": callback_api.bearer_token,
-        }
-        encrypted_status_update = encryption.encrypt(data)
-        send_delivery_status_to_service.apply_async([str(n.id), encrypted_status_update],
-                                                    queue=QueueNames.CALLBACKS)
+        check_for_callback_and_send_delivery_status_to_service(n)
 
     print("Replay service status for service: {}. Sent {} notification status updates to the queue".format(
         service_id, len(notifications)))

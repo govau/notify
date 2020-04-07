@@ -7,7 +7,7 @@ from app.notifications.process_client_response import (
     validate_callback_data,
     process_sms_client_response
 )
-from app.celery.service_callback_tasks import create_encrypted_callback_data
+from app.celery.service_callback_tasks import create_delivery_status_callback_data
 from tests.app.db import create_service_callback_api
 
 
@@ -64,7 +64,7 @@ def test_outcome_statistics_called_for_successful_callback(sample_notification, 
     success, error = process_sms_client_response(status='delivered', provider_reference=reference, client_name='twilio')
     assert success == "twilio callback succeeded. reference {} updated".format(str(reference))
     assert error is None
-    encrypted_data = create_encrypted_callback_data(sample_notification, callback_api)
+    encrypted_data = create_delivery_status_callback_data(sample_notification, callback_api)
     send_mock.assert_called_once_with([str(sample_notification.id), encrypted_data],
                                       queue="service-callbacks")
 
@@ -82,7 +82,7 @@ def test_delivery_status_callback_calls_for_notification_with_callback(sample_no
     success, error = process_sms_client_response(status='delivered', provider_reference=reference, client_name='twilio')
     assert success == "twilio callback succeeded. reference {} updated".format(str(reference))
     assert error is None
-    encrypted_data = create_encrypted_callback_data(sample_notification_with_callback, None)
+    encrypted_data = create_delivery_status_callback_data(sample_notification_with_callback, None)
     send_mock.assert_called_once_with(
         [str(sample_notification_with_callback.id), encrypted_data],
         queue="service-callbacks",
