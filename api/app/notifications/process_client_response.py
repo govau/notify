@@ -9,13 +9,9 @@ from app.dao import notifications_dao
 from app.clients.sms.sap import get_sap_responses
 from app.clients.sms.telstra import get_telstra_responses
 from app.clients.sms.twilio import get_twilio_responses
-from app.celery.service_callback_tasks import (
-    send_delivery_status_to_service,
-    create_encrypted_callback_data,
-)
-from app.config import QueueNames
 from app.dao.notifications_dao import dao_update_notification
-from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
+from app.notifications.callbacks import check_for_callback_and_send_delivery_status_to_service
+
 
 sms_response_mapper = {
     'sap': get_sap_responses,
@@ -92,14 +88,7 @@ def _process_for_status(notification_status, client_name, provider_reference):
             notification.sent_at
         )
 
-    service_callback_api = get_service_delivery_status_callback_api_for_service(service_id=notification.service_id)
-
-    # If a status callback was provided on the notification or if the service
-    # has a service_callback_api record, then queue the callback task.
-    if (notification.status_callback_url and notification.status_callback_bearer_token) or service_callback_api:
-        encrypted_notification = create_encrypted_callback_data(notification, service_callback_api)
-        send_delivery_status_to_service.apply_async([str(notification.id), encrypted_notification],
-                                                    queue=QueueNames.CALLBACKS)
+    check_for_callback_and_send_delivery_status_to_service(notification)
 
     success = "{} callback succeeded. reference {} updated".format(client_name, provider_reference)
     return success

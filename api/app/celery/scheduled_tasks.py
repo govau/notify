@@ -66,6 +66,7 @@ from app.models import (
     SMS_TYPE,
     EMAIL_TYPE
 )
+from app.notifications.callbacks import check_for_callback_and_send_delivery_status_to_service
 from app.notifications.notifications_sms_callback import (
     get_message_status_checker,
     record_notification_status
@@ -79,11 +80,6 @@ from app.utils import (
     convert_utc_to_aet
 )
 from app.v2.errors import JobIncompleteError
-from app.dao.service_callback_api_dao import get_service_delivery_status_callback_api_for_service
-from app.celery.service_callback_tasks import (
-    send_delivery_status_to_service,
-    create_encrypted_callback_data,
-)
 import pytz
 
 
@@ -275,12 +271,7 @@ def timeout_notifications():
 
     notifications = technical_failure_notifications + temporary_failure_notifications
     for notification in notifications:
-        # queue callback task only if the service_callback_api exists
-        service_callback_api = get_service_delivery_status_callback_api_for_service(service_id=notification.service_id)
-        if service_callback_api:
-            encrypted_notification = create_encrypted_callback_data(notification, service_callback_api)
-            send_delivery_status_to_service.apply_async([str(notification.id), encrypted_notification],
-                                                        queue=QueueNames.CALLBACKS)
+        check_for_callback_and_send_delivery_status_to_service(notification)
 
     current_app.logger.info(
         "Timeout period reached for {} notifications, status has been updated.".format(len(notifications)))
