@@ -2,7 +2,6 @@
 .big-number {
   display: block;
   margin: 2rem;
-  font-size: 2em;
   font-weight: bold;
 
   &-number {
@@ -14,8 +13,8 @@
 
   &-label {
     display: inline-block;
-    padding-bottom: 10px;
-    font-size: 0.475em;
+    padding-bottom: 2rem;
+    font-size: 1.8rem;
     font-weight: normal;
   }
 
@@ -61,7 +60,7 @@
   }
 
   .big-number-label {
-    font-size: 0.475em;
+    font-size: 1.8rem;
   }
 
   %big-number-status,
