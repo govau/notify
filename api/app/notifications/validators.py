@@ -1,5 +1,6 @@
 from sqlalchemy.orm.exc import NoResultFound
 from flask import current_app
+from cachelib import SimpleCache
 from notifications_utils import SMS_CHAR_COUNT_LIMIT
 from notifications_utils.recipients import (
     validate_and_format_phone_number_and_allow_international,
@@ -23,6 +24,9 @@ from app.dao.service_email_reply_to_dao import dao_get_reply_to_by_id
 from app.dao.service_letter_contact_dao import dao_get_letter_contact_by_id
 
 
+daily_message_limit_cache = SimpleCache(default_timeout=15)
+
+
 def check_service_over_api_rate_limit(service, api_key):
     if current_app.config['API_RATE_LIMIT_ENABLED'] and current_app.config['REDIS_ENABLED']:
         cache_key = rate_limit_cache_key(service.id, api_key.key_type)
@@ -34,29 +38,22 @@ def check_service_over_api_rate_limit(service, api_key):
 
 
 def check_service_over_daily_message_limit(key_type, service):
-    if key_type != KEY_TYPE_TEST:
-        if current_app.config['REDIS_ENABLED']:
-            cache_key = daily_limit_cache_key(service.id)
-            service_stats = redis_store.get(cache_key)
-            if not service_stats:
-                service_stats = services_dao.fetch_todays_total_message_count(service.id)
-                redis_store.set(cache_key, service_stats, ex=3600)
-            if int(service_stats) >= service.message_limit:
-                current_app.logger.error(
-                    "service {} has been rate limited for daily use sent {} limit {}".format(
-                        service.id, int(service_stats), service.message_limit)
-                )
-                raise TooManyRequestsError(service.message_limit)
-            return
+    if key_type == KEY_TYPE_TEST:
+        return
 
-        # TODO: remove this block when redis is re-enabled in live
+    cache_key = daily_limit_cache_key(service.id)
+    service_stats = daily_message_limit_cache.get(cache_key)
+
+    if not service_stats:
         service_stats = services_dao.fetch_todays_total_message_count(service.id)
-        if int(service_stats) >= service.message_limit:
-            current_app.logger.error(
-                "service {} has been rate limited for daily use sent {} limit {}".format(
-                    service.id, int(service_stats), service.message_limit)
-            )
-            raise TooManyRequestsError(service.message_limit)
+        daily_message_limit_cache.set(cache_key, service_stats)
+
+    if int(service_stats) >= service.message_limit:
+        current_app.logger.error(
+            "service {} has been rate limited for daily use sent {} limit {}".format(
+                service.id, int(service_stats), service.message_limit)
+        )
+        raise TooManyRequestsError(service.message_limit)
 
 
 def check_rate_limiting(service, api_key):

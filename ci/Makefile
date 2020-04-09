@@ -114,10 +114,16 @@ undeploy-%:
 
 	-$(MAKE) teardown-ses-callback-f-$*
 
+LOADTESTING_CMDS = run
+
+$(LOADTESTING_CMDS:%=loadtesting-%): loadtesting-%:
+	$(MAKE) -C loadtesting $*
+
 .PHONY: prune \
 	list-branches list-apps \
 	list-services list-deployed-features \
 	create-service-psql \
 	create-service-redis \
 	setup-ses-callback \
+	$(LOADTESTING_CMDS:%=loadtesting-%) \
 	$(SVC_APPLIED) $(SVC_CREATED) $(SVC_DIFFED) $(SVC_FETCHED)
