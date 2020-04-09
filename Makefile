@@ -41,7 +41,7 @@ cf-login-prod:
 DIRS        = api admin utils status docs
 TARGETS     = install install-dev build check-vulnerabilities clean deploy deploy-dev test
 API_TARGETS = run-celery-worker run-celery-worker-default run-celery-worker-priority run-celery-worker-sender run-celery-worker-callbacks run-celery-worker-retrys run-celery-worker-internal run-celery-beat deploy-celery-worker-default deploy-celery-worker-priority deploy-celery-worker-sender deploy-celery-worker-callbacks deploy-celery-worker-retrys deploy-celery-worker-internal deploy-dev-celery-worker-default deploy-dev-celery-worker-priority deploy-dev-celery-worker-sender deploy-dev-celery-worker-callbacks deploy-dev-celery-worker-retrys deploy-dev-celery-worker-internal deploy-celery-beat deploy-dev-celery-beat
-CI_TARGETS  = create-service-psql create-service-redis setup-ses-callback
+CI_TARGETS  = create-service-psql create-service-redis setup-ses-callback loadtesting-run
 ANY_TARGETS = $(TARGETS) $(API_TARGETS) $(CI_TARGETS)
 
 $(ANY_TARGETS:%=\%.%):
@@ -56,4 +56,4 @@ $(API_TARGETS):
 $(CI_TARGETS):
 	$(MAKE) ci.$@
 
-.PHONY: cf-login cf-login-prod $(TARGETS) $(API_TARGETS) $(CI_TARGETS)
+.PHONY: cf-login cf-login-prod $(ANY_TARGETS)

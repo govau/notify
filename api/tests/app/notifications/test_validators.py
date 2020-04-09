@@ -45,12 +45,12 @@ def test_check_service_message_limit_in_cache_with_unrestricted_service_is_allow
         key_type,
         sample_service,
         mocker):
-    mocker.patch('app.notifications.validators.redis_store.get', return_value=1)
-    mocker.patch('app.notifications.validators.redis_store.set')
+    mocker.patch('app.notifications.validators.daily_message_limit_cache.get', return_value=1)
+    mocker.patch('app.notifications.validators.daily_message_limit_cache.set')
     mocker.patch('app.notifications.validators.services_dao')
 
     check_service_over_daily_message_limit(key_type, sample_service)
-    app.notifications.validators.redis_store.set.assert_not_called()
+    app.notifications.validators.daily_message_limit_cache.set.assert_not_called()
     assert not app.notifications.validators.services_dao.mock_calls
 
 
@@ -59,11 +59,11 @@ def test_check_service_message_limit_in_cache_under_message_limit_passes(
         key_type,
         sample_service,
         mocker):
-    mocker.patch('app.notifications.validators.redis_store.get', return_value=1)
-    mocker.patch('app.notifications.validators.redis_store.set')
+    mocker.patch('app.notifications.validators.daily_message_limit_cache.get', return_value=1)
+    mocker.patch('app.notifications.validators.daily_message_limit_cache.set')
     mocker.patch('app.notifications.validators.services_dao')
     check_service_over_daily_message_limit(key_type, sample_service)
-    app.notifications.validators.redis_store.set.assert_not_called()
+    app.notifications.validators.daily_message_limit_cache.set.assert_not_called()
     assert not app.notifications.validators.services_dao.mock_calls
 
 
@@ -84,11 +84,12 @@ def test_should_set_cache_value_as_value_from_database_if_cache_not_set(
     with freeze_time("2016-01-01 12:00:00.000000"):
         for x in range(5):
             create_notification(notify_db, notify_db_session, service=sample_service)
-        mocker.patch('app.notifications.validators.redis_store.get', return_value=None)
-        mocker.patch('app.notifications.validators.redis_store.set')
+
+        mocker.patch('app.notifications.validators.daily_message_limit_cache.get', return_value=None)
+        mocker.patch('app.notifications.validators.daily_message_limit_cache.set')
         check_service_over_daily_message_limit(key_type, sample_service)
-        app.notifications.validators.redis_store.set.assert_called_with(
-            str(sample_service.id) + "-2016-01-01-count", 5, ex=3600
+        app.notifications.validators.daily_message_limit_cache.set.assert_called_with(
+            str(sample_service.id) + "-2016-01-01-count", 5
         )
 
 
@@ -105,8 +106,8 @@ def test_should_not_access_database_if_redis_disabled(notify_api, sample_service
 @pytest.mark.parametrize('key_type', ['team', 'normal'])
 def test_check_service_message_limit_over_message_limit_fails(key_type, notify_db, notify_db_session, mocker):
     with freeze_time("2016-01-01 12:00:00.000000"):
-        mocker.patch('app.redis_store.get', return_value=None)
-        mocker.patch('app.notifications.validators.redis_store.set')
+        mocker.patch('app.notifications.validators.daily_message_limit_cache.get', return_value=None)
+        mocker.patch('app.notifications.validators.daily_message_limit_cache.set')
 
         service = create_service(notify_db, notify_db_session, restricted=True, limit=4)
         for x in range(5):
@@ -116,8 +117,8 @@ def test_check_service_message_limit_over_message_limit_fails(key_type, notify_d
         assert e.value.status_code == 429
         assert e.value.message == 'Exceeded send limits (4) for today'
         assert e.value.fields == []
-        app.notifications.validators.redis_store.set.assert_called_with(
-            str(service.id) + "-2016-01-01-count", 5, ex=3600
+        app.notifications.validators.daily_message_limit_cache.set.assert_called_with(
+            str(service.id) + "-2016-01-01-count", 5
         )
 
 
@@ -128,8 +129,8 @@ def test_check_service_message_limit_in_cache_over_message_limit_fails(
         key_type,
         mocker):
     with freeze_time("2016-01-01 12:00:00.000000"):
-        mocker.patch('app.redis_store.get', return_value=5)
-        mocker.patch('app.notifications.validators.redis_store.set')
+        mocker.patch('app.notifications.validators.daily_message_limit_cache.get', return_value=5)
+        mocker.patch('app.notifications.validators.daily_message_limit_cache.set')
         mocker.patch('app.notifications.validators.services_dao')
 
         service = create_service(notify_db, notify_db_session, restricted=True, limit=4)
@@ -138,7 +139,7 @@ def test_check_service_message_limit_in_cache_over_message_limit_fails(
         assert e.value.status_code == 429
         assert e.value.message == 'Exceeded send limits (4) for today'
         assert e.value.fields == []
-        app.notifications.validators.redis_store.set.assert_not_called()
+        app.notifications.validators.daily_message_limit_cache.set.assert_not_called()
         assert not app.notifications.validators.services_dao.mock_calls
 
 
