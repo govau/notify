@@ -8,7 +8,9 @@ SendEmailResponse response = client.sendEmail(
   emailAddress,
   personalisation,
   reference,
-  emailReplyToId
+  emailReplyToId,
+  statusCallbackUrl,
+  statusCallbackBearerToken
 );
 ```
 
@@ -57,10 +59,40 @@ This is an email reply-to address specified by you to receive replies from your 
 1. Select Change to specify the email address to receive replies, and select Save.
 
 ```java inline nonumbers
-String emailReplyToId='8e222534-7f05-4972-86e3-17c5d9f894e2'
+String emailReplyToId = '8e222534-7f05-4972-86e3-17c5d9f894e2'
 ```
 
 If you do not have an `emailReplyToId`, you can leave out this argument.
+
+  </Parameter>
+
+  <Parameter optional name="statusCallbackUrl" kind="String">
+
+The status callback arguments allow you to receive delivery status updates to a server of your choice. If you do not use this argument and you have set up a delivery status callback URL on your Notify service, then that will be used.
+
+This is an HTTPS URL of the server that you would like delivery status updates to be sent to.
+
+```java inline nonumbers
+String statusCallbackUrl = 'https://example.com/callback'
+```
+
+For more information on this option see the <Link to="/callbacks">callbacks</Link> documentation.
+
+  </Parameter>
+
+  <Parameter optional name="statusCallbackBearerToken" kind="String">
+
+This is the bearer token that Notify will use when making a request to your server so that you can authenticate requests.
+
+For example:
+
+```java inline nonumbers
+String statusCallbackBearerToken = 'secure-bearer-token'
+```
+
+If you provide a `statusCallbackUrl` you must provide this argument.
+
+For more information on this option see the <Link to="/callbacks">callbacks</Link> documentation.
 
   </Parameter>
 </Parameters>
