@@ -35,13 +35,15 @@ The phone number of the recipient you want to send to.
 
 #### Options
 
+You can pass each of the options below to the `options` slice when calling `SendSMS`.
+
 <Parameters>
   <Parameter optional name="Personalisation" kind="[]struct{ Key string, Value interface{} }">
 
 If a template has placeholder fields for personalised information such as name or application date, you must provide their values in a struct. For example:
 
 ```go inline
-p := notify.Personalisation{
+option := notify.Personalisation{
 	{"name", "Kim"},
 	{"age", 31},
 	{"colours", []string{"red", "blue"}},
@@ -54,7 +56,9 @@ p := notify.Personalisation{
 A unique identifier you create. This reference identifies a single unique notification or a batch of notifications.
 
 ```go inline nonumbers
-r := notify.Reference("batch-abc")
+option := notify.Reference(
+	"batch-abc",
+)
 ```
 
   </Parameter>
@@ -66,12 +70,36 @@ Specifies the identifier of the SMS sender to set for the notification. The iden
 If you omit this argument your default SMS sender will be set for the notification.
 
 ```go inline nonumbers
-s := notify.SMSSenderID("8e222534-7f05-4972-86e3-17c5d9f894e2")
+option := notify.SMSSenderID(
+	"8e222534-7f05-4972-86e3-17c5d9f894e2",
+)
 ```
 
   </Parameter>
+
+  <Parameter optional name="StatusCallback" kind="string, string">
+
+This option allows you to receive delivery status updates to a server of your choice. If you do not use this option and you have set up a delivery status callback URL on your Notify service, then that will be used.
+
+The first argument is an HTTPS URL of the server that you would like delivery status updates to be sent to.
+
+The second argument is the bearer token that Notify will use when making a request to your server so that you can authenticate requests.
+
+```go inline nonumbers
+option := notify.StatusCallback(
+	"https://example.com/callback",
+	"secure-bearer-token",
+)
+```
+
+For more information on this option see the <Link to="/callbacks">callbacks</Link> documentation.
+
+  </Parameter>
+
 </Parameters>
+
 </Panel>
+
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
 If the request is successful a `SentSMS` struct is returned, for example:

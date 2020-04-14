@@ -8,7 +8,9 @@ SendSmsResponse response = client.sendSms(
   phoneNumber,
   personalisation,
   reference,
-  smsSenderId
+  smsSenderId,
+  statusCallbackUrl,
+  statusCallbackBearerToken
 );
 ```
 
@@ -65,6 +67,37 @@ In this screen, you can then either:
 If you do not have a smsSenderId, you can leave out this argument.
 
   </Parameter>
+
+  <Parameter optional name="statusCallbackUrl" kind="String">
+
+The status callback arguments allow you to receive delivery status updates to a server of your choice. If you do not use this argument and you have set up a delivery status callback URL on your Notify service, then that will be used.
+
+This is an HTTPS URL of the server that you would like delivery status updates to be sent to.
+
+```java inline nonumbers
+String statusCallbackUrl = 'https://example.com/callback'
+```
+
+For more information on this option see the <Link to="/callbacks">callbacks</Link> documentation.
+
+  </Parameter>
+
+  <Parameter optional name="statusCallbackBearerToken" kind="String">
+
+This is the bearer token that Notify will use when making a request to your server so that you can authenticate requests.
+
+For example:
+
+```java inline nonumbers
+String statusCallbackBearerToken = 'secure-bearer-token'
+```
+
+If you provide a `statusCallbackUrl` you must provide this argument.
+
+For more information on this option see the <Link to="/callbacks">callbacks</Link> documentation.
+
+  </Parameter>
+
 </Parameters>
 </Panel>
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
