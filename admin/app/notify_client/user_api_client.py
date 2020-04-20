@@ -207,8 +207,8 @@ class UserApiClient(NotifyAdminAPIClient):
         data = {'email': new_email}
         self.post(endpoint, data)
 
-    def get_organisations_and_services_for_user(self, user):
-        endpoint = '/user/{}/organisations-and-services'.format(user.id)
+    def get_organisations_and_services_for_user(self, user_id):
+        endpoint = '/user/{}/organisations-and-services'.format(user_id)
         return self.get(endpoint)
 
 

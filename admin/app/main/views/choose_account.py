@@ -20,7 +20,7 @@ def services_or_dashboard():
 @main.route("/accounts")
 @login_required
 def choose_account():
-    orgs_and_services = user_api_client.get_organisations_and_services_for_user(current_user)
+    orgs_and_services = user_api_client.get_organisations_and_services_for_user(current_user.id)
 
     return render_template(
         'views/choose-account.html',
