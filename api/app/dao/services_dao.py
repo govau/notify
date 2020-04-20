@@ -90,6 +90,7 @@ def dao_fetch_trial_services_data():
         Service.organisation_type,
         Service.name.label("service_name"),
         Service.count_as_live,
+        Service.created_at.label("service_created_date"),
         case([
             (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
         ], else_=0).label("email_totals"),
@@ -135,6 +136,7 @@ def dao_fetch_trial_services_data():
             results.append({
                 "service_id": row.id,
                 "service_name": row.service_name,
+                "created_date": row.service_created_date,
                 "organisation_name": row.organisation_name,
                 "organisation_type": row.organisation_type,
                 "sms_totals": row.sms_totals,
@@ -161,6 +163,7 @@ def dao_fetch_live_services_data():
         User.email_address,
         User.mobile_number,
         Service.go_live_at.label("live_date"),
+        Service.created_at.label("service_created_date"),
         case([
             (this_year_ft_billing.c.notification_type == 'email', func.sum(this_year_ft_billing.c.notifications_sent))
         ], else_=0).label("email_totals"),
@@ -220,6 +223,7 @@ def dao_fetch_live_services_data():
                 "contact_email": row.email_address,
                 "contact_mobile": row.mobile_number,
                 "live_date": row.live_date,
+                "created_date": row.service_created_date,
                 "sms_volume_intent": None,  # TODO real value when col exists in DB
                 "email_volume_intent": None,  # TODO real value when col exists in DB
                 "letter_volume_intent": None,  # TODO real value when col exists in DB

@@ -289,7 +289,8 @@ def test_dao_fetch_trial_services_data(sample_user, mock):
 
     assert len(results) == 1
     assert results == [
-        {'service_id': mock.ANY, 'service_name': 'restricted', 'organisation_name': 'test_org_1',
+        {'service_id': mock.ANY, 'service_name': 'restricted',
+            'created_date': datetime(2019, 7, 23, 10, 0), 'organisation_name': 'test_org_1',
             'organisation_type': 'central', 'sms_totals': 2, 'email_totals': 0, 'letter_totals': 0},
     ]
 
@@ -328,16 +329,19 @@ def test_dao_fetch_live_services_data(sample_user, mock):
         {'service_id': mock.ANY, 'service_name': 'Sample service', 'organisation_name': 'test_org_1',
             'organisation_type': 'central', 'consent_to_research': None, 'contact_name': 'Test User',
             'contact_email': 'notify@digital.cabinet-office.gov.uk', 'contact_mobile': '+61412345678',
-            'live_date': datetime(2014, 4, 20, 10, 0), 'sms_volume_intent': None, 'email_volume_intent': None,
+            'live_date': datetime(2014, 4, 20, 10, 0), 'created_date': datetime(2019, 7, 23, 10, 0),
+            'sms_volume_intent': None, 'email_volume_intent': None,
             'letter_volume_intent': None, 'sms_totals': 2, 'email_totals': 1, 'letter_totals': 1},
         {'service_id': mock.ANY, 'service_name': 'third', 'organisation_name': None, 'consent_to_research': None,
             'organisation_type': 'central', 'contact_name': None, 'contact_email': None,
-            'contact_mobile': None, 'live_date': datetime(2016, 4, 20, 10, 0), 'sms_volume_intent': None,
+            'contact_mobile': None, 'live_date': datetime(2016, 4, 20, 10, 0),
+            'created_date': datetime(2019, 7, 23, 10, 0), 'sms_volume_intent': None,
             'email_volume_intent': None, 'letter_volume_intent': None,
             'sms_totals': 0, 'email_totals': 0, 'letter_totals': 0},
         {'service_id': mock.ANY, 'service_name': 'second', 'organisation_name': None, 'consent_to_research': None,
             'contact_name': 'Test User', 'contact_email': 'notify@digital.cabinet-office.gov.uk',
-            'contact_mobile': '+61412345678', 'live_date': datetime(2017, 4, 20, 10, 0), 'sms_volume_intent': None,
+            'contact_mobile': '+61412345678', 'live_date': datetime(2017, 4, 20, 10, 0),
+            'created_date': datetime(2019, 7, 23, 10, 0), 'sms_volume_intent': None,
             'organisation_type': 'central', 'email_volume_intent': None, 'letter_volume_intent': None,
             'sms_totals': 0, 'email_totals': 0, 'letter_totals': 1}
     ]

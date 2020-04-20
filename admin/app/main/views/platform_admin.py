@@ -168,14 +168,16 @@ def platform_admin_reports():
 def trial_services_csv():
     results = service_api_client.get_trial_services_data()["data"]
     trial_services_columns = [
-        "Service ID", "Organisation", "Organisation type", "Domains", "Service name",
-        "SMS sent this year", "Emails sent this year", "Letters sent this year"
+        "Service ID", "Created date", "Organisation", "Organisation type",
+        "Domains", "Service name", "SMS sent this year",
+        "Emails sent this year", "Letters sent this year"
     ]
     trial_services_data = []
     trial_services_data.append(trial_services_columns)
     for row in results:
         trial_services_data.append([
             row["service_id"],
+            datetime.strptime(row["created_date"], '%a, %d %b %Y %X %Z').strftime("%d-%m-%Y"),
             row["organisation_name"],
             row.get("organisation_type", "TODO"),
             ', '.join(row["domains"]),
@@ -200,7 +202,7 @@ def live_services_csv():
     results = service_api_client.get_live_services_data()["data"]
     live_services_columns = [
         "Service ID", "Organisation", "Organisation type", "Domains", "Service name", "Consent to research", "Main contact",
-        "Contact email", "Contact mobile", "Live date", "SMS volume intent", "Email volume intent",
+        "Contact email", "Contact mobile", "Live date", "Created date", "SMS volume intent", "Email volume intent",
         "Letter volume intent", "SMS sent this year", "Emails sent this year", "Letters sent this year"
     ]
     live_services_data = []
@@ -219,6 +221,7 @@ def live_services_csv():
             datetime.strptime(
                 row["live_date"], '%a, %d %b %Y %X %Z'
             ).strftime("%d-%m-%Y") if row["live_date"] else None,
+            datetime.strptime(row["created_date"], '%a, %d %b %Y %X %Z').strftime("%d-%m-%Y"),
             row.get("sms_volume_intent", "TODO"),
             row.get("email_volume_intent", "TODO"),
             row.get("letter_volume_intent", "TODO"),
