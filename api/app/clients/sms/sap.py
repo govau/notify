@@ -2,7 +2,7 @@ import datetime
 from cachelib import SimpleCache
 from app.clients.sms import PollableSMSClient
 from app.clients.sms.utils import timed
-from saplivelink365 import Configuration, ApiClient, AuthorizationApi, SMSV20Api
+from saplivelink365 import Configuration, ApiClient, AuthorizationApi, SMSV20Api, ApiException
 
 # See https://livelink.sapmobileservices.com/documentation/guides/sms-channel/delivery_statuses/#body-description
 sap_response_map = {
@@ -119,6 +119,12 @@ class SAPSMSClient(PollableSMSClient):
                 NOTIFICATION_SENDING
             )
             return order.livelink_order_id[0], NOTIFICATION_SENDING
+        except ApiException as e:
+            if e.status == 401:
+                key = 'auth'
+                access_token = None
+                auth_cache.set(key, access_token)
+                raise e
         except Exception as e:
             self.logger.error(f"SAP send SMS request for {reference} failed")
             raise e
