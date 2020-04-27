@@ -99,6 +99,7 @@ class Config(object):
 
     # Notify support email
     NOTIFY_SUPPORT_EMAIL = os.environ.get('NOTIFY_SUPPORT_EMAIL', 'notify-support-dev@dta.gov.au')
+    NOTIFY_RESEARCH_EMAIL = os.environ.get('NOTIFY_RESEARCH_EMAIL', NOTIFY_SUPPORT_EMAIL)
 
     # Deskpro
     DESKPRO_API_HOST = os.environ.get('DESKPRO_API_HOST')
@@ -437,6 +438,7 @@ class Live(Config):
     API_RATE_LIMIT_ENABLED = True
     CHECK_PROXY_HEADER = True
     NOTIFY_SUPPORT_EMAIL = 'notify-support@dta.gov.au'
+    NOTIFY_RESEARCH_EMAIL = 'notify-research-user@dta.gov.au'
     BROKER_USE_SSL = {
         'ssl_cert_reqs': ssl.CERT_REQUIRED,
         'ssl_ca_certs': '/etc/ssl/certs/ca-certificates.crt'

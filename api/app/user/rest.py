@@ -322,7 +322,7 @@ def send_support_user_research_consent(user_id):
     notification = persist_notification(
         template_id=template.id,
         template_version=template.version,
-        recipient=current_app.config['NOTIFY_SUPPORT_EMAIL'],
+        recipient=current_app.config['NOTIFY_RESEARCH_EMAIL'],
         service=service,
         personalisation={
             'name': user.name,
