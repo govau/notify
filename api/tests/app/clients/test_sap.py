@@ -116,7 +116,7 @@ def test_send_sms_raises_if_sap_errors(notify_db_session, notify_api, mocker):
                   )
     responses.add('POST', '/api/v2/sms',
                   body='not JSON',
-                  status=500,
+                  status=401,
                   content_type='text/html',
                   )
 
