@@ -122,8 +122,15 @@ class SAPSMSClient(PollableSMSClient):
         except ApiException as e:
             if e.status == 401:
                 key = 'auth'
-                access_token = None
-                auth_cache.set(key, access_token)
+                auth_api = AuthorizationApi(ApiClient(Configuration(
+                    username=self._client_id,
+                    password=self._client_secret,
+                )))
+
+                resp = auth_api.token_authorization_using_post1('client_credentials')
+
+                access_token = resp.access_token
+                auth_cache.set(key, access_token, timeout=30 * 60)
                 raise e
         except Exception as e:
             self.logger.error(f"SAP send SMS request for {reference} failed")
