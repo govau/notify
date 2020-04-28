@@ -110,15 +110,7 @@ class SAPSMSClient(PollableSMSClient):
         }
 
         try:
-            resp = sms_api.send_sms_using_post(body=body)
-            order = resp.livelink_order_ids[0]
-            self.logger.info(f"SAP send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
-
-            # Avoid circular imports by importing this file later.
-            from app.models import (
-                NOTIFICATION_SENDING
-            )
-            return order.livelink_order_id[0], NOTIFICATION_SENDING
+            return self.post_sms_request(sms_api=sms_api, body=body, reference=reference)
         except ApiException as e:
             if e.status == 401:
                 key = 'auth'
@@ -128,10 +120,16 @@ class SAPSMSClient(PollableSMSClient):
                 )))
 
                 resp = auth_api.token_authorization_using_post1('client_credentials')
-
                 access_token = resp.access_token
                 auth_cache.set(key, access_token, timeout=30 * 60)
-                raise e
+                conf = Configuration()
+                conf.access_token = access_token
+                sms_api = SMSV20Api(ApiClient(conf))
+                try:
+                    return self.post_sms_request(sms_api=sms_api, body=body, reference=reference)
+                except Exception as e:
+                    self.logger.error(f"SAP send SMS request for {reference} failed with API exception")
+                    raise e
         except Exception as e:
             self.logger.error(f"SAP send SMS request for {reference} failed")
             raise e
@@ -158,3 +156,14 @@ class SAPSMSClient(PollableSMSClient):
         conf.access_token = access_token
 
         return conf
+
+    def post_sms_request(self, sms_api, body, reference):
+        resp = sms_api.send_sms_using_post(body=body)
+        order = resp.livelink_order_ids[0]
+        self.logger.info(f"SAP send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
+
+        # Avoid circular imports by importing this file later.
+        from app.models import (
+            NOTIFICATION_SENDING
+        )
+        return order.livelink_order_id[0], NOTIFICATION_SENDING
