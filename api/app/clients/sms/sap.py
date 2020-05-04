@@ -2,7 +2,7 @@ import datetime
 from cachelib import SimpleCache
 from app.clients.sms import PollableSMSClient
 from app.clients.sms.utils import timed
-from saplivelink365 import Configuration, ApiClient, AuthorizationApi, SMSV20Api, ApiException
+from saplivelink365 import Configuration, ApiClient, AuthorizationApi, SMSV20Api
 
 # See https://livelink.sapmobileservices.com/documentation/guides/sms-channel/delivery_statuses/#body-description
 sap_response_map = {
@@ -79,7 +79,7 @@ class SAPSMSClient(PollableSMSClient):
         yield from self.query_sms_statuses(reference, start_time, end_time)
 
     @timed("SAP send SMS request")
-    def send_sms(self, to, content, reference, sender=None):
+    def send_sms(self, to, content, reference, sender=None, retry=True):
         sms_api = SMSV20Api(self._client)
 
         from app.sap.oauth2 import OAuth2Client
@@ -110,30 +110,31 @@ class SAPSMSClient(PollableSMSClient):
         }
 
         try:
-            return self.post_sms_request(sms_api=sms_api, body=body, reference=reference)
-        except ApiException as e:
-            if e.status == 401:
+            resp = sms_api.send_sms_using_post(body=body)
+            order = resp.livelink_order_ids[0]
+            self.logger.info(f"SAP send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
+
+            # Avoid circular imports by importing this file later.
+            from app.models import (
+                NOTIFICATION_SENDING
+            )
+            return order.livelink_order_id[0], NOTIFICATION_SENDING
+        except Exception as e:
+            if e.status == 401 and retry:
                 key = 'auth'
                 auth_api = AuthorizationApi(ApiClient(Configuration(
                     username=self._client_id,
                     password=self._client_secret,
                 )))
-
                 resp = auth_api.token_authorization_using_post1('client_credentials')
                 access_token = resp.access_token
                 auth_cache.set(key, access_token, timeout=30 * 60)
-                conf = Configuration()
-                conf.access_token = access_token
-                sms_api = SMSV20Api(ApiClient(conf))
-                try:
-                    return self.post_sms_request(sms_api=sms_api, body=body, reference=reference)
-                except Exception as e:
-                    self.logger.error(f"SAP send SMS request for {reference} failed with API exception")
-                    raise e
-        except Exception as e:
-            self.logger.error(f"SAP send SMS request for {reference} failed")
-            raise e
-
+                return self.send_sms(
+                    to, content, reference, sender, retry = False
+                )
+            else:
+                self.logger.error(f"SAP send SMS request for {reference} failed")
+                raise e
     @property
     @timed("SAP auth request")
     def with_auth_config(self):
@@ -147,23 +148,10 @@ class SAPSMSClient(PollableSMSClient):
             )))
 
             resp = auth_api.token_authorization_using_post1('client_credentials')
-
             access_token = resp.access_token
 
             auth_cache.set(key, access_token, timeout=30 * 60)  # 30 minutes (token is valid for 45 minutes)
-
         conf = Configuration()
         conf.access_token = access_token
 
         return conf
-
-    def post_sms_request(self, sms_api, body, reference):
-        resp = sms_api.send_sms_using_post(body=body)
-        order = resp.livelink_order_ids[0]
-        self.logger.info(f"SAP send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
-
-        # Avoid circular imports by importing this file later.
-        from app.models import (
-            NOTIFICATION_SENDING
-        )
-        return order.livelink_order_id[0], NOTIFICATION_SENDING
