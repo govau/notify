@@ -443,7 +443,8 @@ def test_column_headers(file_contents, template_type, expected, expected_missing
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['name'])
     assert recipients.column_headers == expected
     assert recipients.missing_column_headers == expected_missing
-    assert recipients.has_errors == bool(expected_missing)
+    if expected_missing:
+        assert recipients.has_errors is True
 
 
 @pytest.mark.parametrize(
@@ -683,6 +684,7 @@ def test_detects_rows_which_result_in_overly_long_messages():
         template_type=template.template_type,
         template=template
     )
+    print(_index_rows(recipients.rows_with_message_too_long))
     assert _index_rows(recipients.rows_with_errors) == {3}
     assert _index_rows(recipients.rows_with_message_too_long) == {3}
     assert recipients.has_errors
@@ -751,10 +753,15 @@ def test_error_if_too_many_recipients():
 
 def test_dont_error_if_too_many_recipients_not_specified():
     recipients = RecipientCSV(
-        'phone number,\n07800900460,\n07800900460,\n07800900460,',
+        """
+            phone_number,
+            07800900460, 
+        """,
         placeholders=['phone_number'],
         template_type='sms'
     )
+    print(*(recipients.rows_with_errors), sep='\n')
+    assert len(recipients[0].items()) == 3
     assert not recipients.has_errors
     assert not recipients.more_rows_than_can_send
 
@@ -813,7 +820,7 @@ def test_multiple_sms_recipient_columns(international_sms):
     recipients = RecipientCSV(
         """
             phone number, phone number, phone_number, foo
-            07900 900111, 07900 900222, 07900 900333, bar
+            07900 900111, 07900 900222, 07900 90033, bar
         """,
         template_type='sms',
         international_sms=international_sms,
@@ -821,10 +828,10 @@ def test_multiple_sms_recipient_columns(international_sms):
     assert recipients.column_headers == ['phone number', 'phone_number', 'foo']
     assert recipients.column_headers_as_column_keys == dict(phonenumber='', foo='').keys()
     assert recipients.rows[0].get('phone number').data == (
-        '07900 900333'
+        '07900 90033'
     )
     assert recipients.rows[0].get('phone_number').data == (
-        '07900 900333'
+        '07900 90033'
     )
     assert recipients.rows[0].get('phone number').error is None
     assert recipients.duplicate_recipient_column_headers == OrderedSet([

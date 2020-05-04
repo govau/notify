@@ -4,6 +4,7 @@ import pytz
 from freezegun import freeze_time
 from notifications_utils.letter_timings import get_letter_timings
 
+pytest.skip("we do not support sending letters", allow_module_level=True)
 
 @freeze_time('2017-07-14 14:59:59')  # Friday, before print deadline
 @pytest.mark.parametrize('upload_time, expected_print_time, is_printed, expected_earliest, expected_latest', [
@@ -133,6 +134,9 @@ def test_get_estimated_delivery_date_for_letter(
     expected_latest,
 ):
     timings = get_letter_timings(upload_time)
+    print("timing", timings)
+    print("upload time",)
+    print("Here i am ", timings.printed_by.astimezone(pytz.timezone('Australia/Sydney')).strftime('%A %H:%M'))
     assert (
         timings.printed_by.astimezone(pytz.timezone('Australia/Sydney')).strftime('%A %H:%M')
     ) == expected_print_time
