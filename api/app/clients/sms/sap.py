@@ -129,12 +129,11 @@ class SAPSMSClient(PollableSMSClient):
                 resp = auth_api.token_authorization_using_post1('client_credentials')
                 access_token = resp.access_token
                 auth_cache.set(key, access_token, timeout=30 * 60)
-                return self.send_sms(
-                    to, content, reference, sender, retry = False
-                )
+                return self.send_sms(to, content, reference, sender, retry=False)
             else:
                 self.logger.error(f"SAP send SMS request for {reference} failed")
                 raise e
+
     @property
     @timed("SAP auth request")
     def with_auth_config(self):
