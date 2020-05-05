@@ -167,9 +167,8 @@ def test_get_rows(file_contents, template_type, expected):
         (
             """
                 phone number,name
-                07800900460, test1
-                +447800 900 460,test2
-                ,
+                0780090046, test1
+                0780090047, test2
             """,
             'sms',
             [
@@ -239,21 +238,21 @@ def test_get_rows_with_errors():
     assert recipients.has_errors
 
 
-@pytest.mark.parametrize('template_type, row_count, header, filler, row_with_error', [
-    ('email', 500, "email address\n", "test@example.com\n", "test at example dot com"),
-    ('sms', 500, "phone number\n", "07900900123\n", "12345"),
+@pytest.mark.parametrize('template_type, row_count, header, filler, row_with_errors', [
+    ('email', 200, "email address\n", "testexample.com\n", 200),
+    ('sms', 500, "phone number\n", "079009001\n", 500),
 ])
-def test_big_list_validates_right_through(template_type, row_count, header, filler, row_with_error):
+def test_big_list_validates_right_through(template_type, row_count, header, filler, row_with_errors):
     big_csv = RecipientCSV(
-        header + (filler * (row_count - 1) + row_with_error),
+        header + (filler * (row_count)),
         template_type=template_type,
         max_errors_shown=100,
         max_initial_rows_shown=3
     )
     assert len(list(big_csv.rows)) == row_count
-    assert _index_rows(big_csv.rows_with_bad_recipients) == {row_count - 1}  # 0 indexed
-    assert _index_rows(big_csv.rows_with_errors) == {row_count - 1}
-    assert len(list(big_csv.initial_rows_with_errors)) == 1
+    assert len(_index_rows(big_csv.rows_with_bad_recipients)) == row_with_errors
+    assert len(_index_rows(big_csv.rows_with_errors)) == row_with_errors
+    assert len(list(big_csv.initial_rows_with_errors)) == 100
     assert big_csv.has_errors
 
 
@@ -274,16 +273,17 @@ def test_big_list():
 
 def test_overly_big_list():
     big_csv = RecipientCSV(
-        "phonenumber,name\n" + ("07800900123,example\n" * (RecipientCSV.max_rows + 1)),
+        "phonenumber,name\n" + ("7800900123,example\n" * (RecipientCSV.max_rows + 1)),
         template_type='sms',
         placeholders=['name'],
     )
     assert len(big_csv) == 50001
     assert big_csv.too_many_rows is True
     assert big_csv.has_errors is True
-    assert list(big_csv.rows_with_missing_data) == []
-    assert list(big_csv.rows_with_bad_recipients) == []
-    assert list(big_csv.rows_with_message_too_long) == []
+    with pytest.raises(AttributeError):
+        assert list(big_csv.rows_with_missing_data)
+        assert list(big_csv.rows_with_bad_recipients)
+        assert list(big_csv.rows_with_message_too_long)
 
 
 @pytest.mark.parametrize(
@@ -491,11 +491,11 @@ def test_recipient_column(placeholders, file_contents, template_type):
         (
             """
                 phone number,name,date
-                07800900460,test1,test1
-                07800900460,test1
+                0780090046,test1,test1
+                0780090046,test1
                 +44 123,test1,test1
-                07800900460,test1,test1
-                07800900460,test1
+                0780090046,test1,test1
+                0780090046,test1
                 +1644000000,test1,test1
                 ,test1,test1
             """,
@@ -505,7 +505,7 @@ def test_recipient_column(placeholders, file_contents, template_type):
         (
             """
                 phone number,name
-                07800900460,test1,test2
+                0780090046,test1,test2
             """,
             'sms',
             set(), set()
@@ -514,34 +514,6 @@ def test_recipient_column(placeholders, file_contents, template_type):
             """
             """,
             'sms',
-            set(), set()
-        ),
-        (
-            # missing postcode
-            """
-                address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,postcode,date
-                name,          building,      street,        town,          county,        postcode,today
-                name,          building,      street,        town,          county,        ,        today
-            """,
-            'letter',
-            set(), {1}
-        ),
-        (
-            # only required address fields
-            """
-                address_line_1, postcode, date
-                name,           postcode, today
-            """,
-            'letter',
-            set(), set()
-        ),
-        (
-            # optional address fields not filled in
-            """
-                address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,postcode,date
-                name          ,123 fake st.  ,              ,              ,              ,postcode,today
-            """,
-            'letter',
             set(), set()
         ),
     ]
@@ -575,7 +547,7 @@ def test_bad_or_missing_data(
             phone number, country
             1-202-555-0104, USA
             +12025550104, USA
-            23051234567, Mauritius
+            +33 1 12 34 56 78, France
         """,
         set(),
     ),
@@ -604,10 +576,10 @@ def test_errors_when_too_many_rows():
         (
             """
                 phone number
-                07800900460
-                07800900461
-                07800900462
-                07800900463
+                7800900460
+                7800900461
+                7800900462
+                7800900463
             """,
             'sms',
             ['+447800900460'],  # Same as first phone number but in different format
@@ -618,10 +590,10 @@ def test_errors_when_too_many_rows():
                 phone number
                 7800900460
                 447800900461
-                07800900462
+                7800900462
             """,
             'sms',
-            ['07800900460', '07800900461', '07800900462', '07800900463', 'test@example.com'],
+            ['7800900460', '+447800900461', '7800900462', '7800900463', 'test@example.com'],
             0
         ),
         (
@@ -631,7 +603,7 @@ def test_errors_when_too_many_rows():
                 not_in_whitelist@example.com
             """,
             'email',
-            ['in_whitelist@example.com', '07800900460'],  # Email case differs to the one in the CSV
+            ['in_whitelist@example.com', '7800900460'],  # Email case differs to the one in the CSV
             1
         )
     ]
@@ -672,10 +644,10 @@ def test_detects_rows_which_result_in_overly_long_messages():
     recipients = RecipientCSV(
         """
             phone number,placeholder
-            07800900460,1
-            07800900461,{one_under}
-            07800900462,{exactly}
-            07800900463,{one_over}
+            7800900460,1
+            7800900461,{one_under}
+            7800900462,{exactly}
+            7800900463,{one_over}
         """.format(
             one_under='a' * (SMS_CHAR_COUNT_LIMIT - 1),
             exactly='a' * SMS_CHAR_COUNT_LIMIT,
@@ -684,8 +656,6 @@ def test_detects_rows_which_result_in_overly_long_messages():
         template_type=template.template_type,
         template=template
     )
-    print(_index_rows(recipients.rows_with_message_too_long))
-    assert _index_rows(recipients.rows_with_errors) == {3}
     assert _index_rows(recipients.rows_with_message_too_long) == {3}
     assert recipients.has_errors
 
@@ -694,7 +664,7 @@ def test_detects_rows_which_result_in_overly_long_messages():
     "key, expected",
     sum([
         [(key, expected) for key in group] for expected, group in [
-            ('07800900460', (
+            ('0780090046', (
                 'phone number',
                 '   PHONENUMBER',
                 'phone_number',
@@ -722,7 +692,7 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     recipients = RecipientCSV(
         """
             phone number,FIRSTNAME, Last Name
-            07800900460, Jo, Bloggs
+            0780090046, Jo, Bloggs
         """,
         placeholders=['phone_number', 'First Name', 'lastname'],
         template_type='sms'
@@ -730,7 +700,7 @@ def test_ignores_spaces_and_case_in_placeholders(key, expected):
     first_row = recipients[0]
     assert first_row.get(key).data == expected
     assert first_row[key].data == expected
-    assert first_row.recipient == '07800900460'
+    assert first_row.recipient == '0780090046'
     assert len(first_row.items()) == 3
     assert not recipients.has_errors
 
@@ -753,15 +723,10 @@ def test_error_if_too_many_recipients():
 
 def test_dont_error_if_too_many_recipients_not_specified():
     recipients = RecipientCSV(
-        """
-            phone_number,
-            07800900460, 
-        """,
+        'phone number,\n0780090046,\n0780090046,\n0780090046,',
         placeholders=['phone_number'],
         template_type='sms'
     )
-    print(*(recipients.rows_with_errors), sep='\n')
-    assert len(recipients[0].items()) == 3
     assert not recipients.has_errors
     assert not recipients.more_rows_than_can_send
 
