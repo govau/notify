@@ -134,9 +134,6 @@ def test_get_estimated_delivery_date_for_letter(
     expected_latest,
 ):
     timings = get_letter_timings(upload_time)
-    print("timing", timings)
-    print("upload time",)
-    print("Here i am ", timings.printed_by.astimezone(pytz.timezone('Australia/Sydney')).strftime('%A %H:%M'))
     assert (
         timings.printed_by.astimezone(pytz.timezone('Australia/Sydney')).strftime('%A %H:%M')
     ) == expected_print_time
