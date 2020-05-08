@@ -12,6 +12,7 @@ sap_response_map = {
     'ERROR': 'permanent-failure',
 }
 
+_AUTH_CACHE_KEY = 'auth'
 auth_cache = SimpleCache()
 
 
@@ -79,7 +80,7 @@ class SAPSMSClient(PollableSMSClient):
         yield from self.query_sms_statuses(reference, start_time, end_time)
 
     @timed("SAP send SMS request")
-    def send_sms(self, to, content, reference, sender=None, retry=True):
+    def send_sms(self, to, content, reference, sender=None, in_retry=False):
         sms_api = SMSV20Api(self._client)
 
         from app.sap.oauth2 import OAuth2Client
@@ -120,25 +121,21 @@ class SAPSMSClient(PollableSMSClient):
             )
             return order.livelink_order_id[0], NOTIFICATION_SENDING
         except Exception as e:
-            if e.status == 401 and retry:
-                key = 'auth'
-                auth_api = AuthorizationApi(ApiClient(Configuration(
-                    username=self._client_id,
-                    password=self._client_secret,
-                )))
-                resp = auth_api.token_authorization_using_post1('client_credentials')
-                access_token = resp.access_token
-                auth_cache.set(key, access_token, timeout=30 * 60)
-                return self.send_sms(to, content, reference, sender, retry=False)
-            else:
+            if e.status == 401 and in_retry:
                 self.logger.error(f"SAP send SMS request for {reference} failed")
                 raise e
+
+        self.clear_cache()
+        return self.send_sms(to, content, reference, sender=sender, in_retry=True)
+
+    def clear_cache(self):
+        auth_cache.delete(_AUTH_CACHE_KEY)
 
     @property
     @timed("SAP auth request")
     def with_auth_config(self):
-        key = 'auth'
-        access_token = auth_cache.get(key)
+        access_token = auth_cache.get(_AUTH_CACHE_KEY)
+        print('access_oktne', access_token)
 
         if access_token is None:
             auth_api = AuthorizationApi(ApiClient(Configuration(
@@ -149,7 +146,9 @@ class SAPSMSClient(PollableSMSClient):
             resp = auth_api.token_authorization_using_post1('client_credentials')
             access_token = resp.access_token
 
-            auth_cache.set(key, access_token, timeout=30 * 60)  # 30 minutes (token is valid for 45 minutes)
+            # cache for 15 minutes (token is valid for 45 minutes)
+            auth_cache.set(_AUTH_CACHE_KEY, access_token, timeout=15 * 60)
+
         conf = Configuration()
         conf.access_token = access_token
 
