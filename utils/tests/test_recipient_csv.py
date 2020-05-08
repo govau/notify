@@ -238,21 +238,21 @@ def test_get_rows_with_errors():
     assert recipients.has_errors
 
 
-@pytest.mark.parametrize('template_type, row_count, header, filler, row_with_errors', [
-    ('email', 200, "email address\n", "testexample.com\n", 200),
-    ('sms', 500, "phone number\n", "079009001\n", 500),
+@pytest.mark.parametrize('template_type, row_count, header, filler, row_with_error', [
+    ('email', 500, "email address\n", "test@example.com\n", "test at example dot com"),
+    ('sms', 500, "phone number\n", "0790090012\n", "12345"),
 ])
-def test_big_list_validates_right_through(template_type, row_count, header, filler, row_with_errors):
+def test_big_list_validates_right_through(template_type, row_count, header, filler, row_with_error):
     big_csv = RecipientCSV(
-        header + (filler * (row_count)),
+        header + (filler * (row_count - 1) + row_with_error),
         template_type=template_type,
         max_errors_shown=100,
         max_initial_rows_shown=3
     )
     assert len(list(big_csv.rows)) == row_count
-    assert len(_index_rows(big_csv.rows_with_bad_recipients)) == row_with_errors
-    assert len(_index_rows(big_csv.rows_with_errors)) == row_with_errors
-    assert len(list(big_csv.initial_rows_with_errors)) == 100
+    assert _index_rows(big_csv.rows_with_bad_recipients) == {row_count - 1}  # 0 indexed
+    assert _index_rows(big_csv.rows_with_errors) == {row_count - 1}
+    assert len(list(big_csv.initial_rows_with_errors)) == 1
     assert big_csv.has_errors
 
 
