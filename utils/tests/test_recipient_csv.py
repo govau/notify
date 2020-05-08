@@ -389,9 +389,9 @@ def test_get_recipient_respects_order(file_contents,
         (
             """
                 phone number,name
-                07800900460,test1
-                07800900460,test1
-                07800900460,test1
+                0780090046,test1
+                0780090047,test1
+                0780090048,test1
             """,
             'sms',
             ['phone number', 'name'],
@@ -443,8 +443,7 @@ def test_column_headers(file_contents, template_type, expected, expected_missing
     recipients = RecipientCSV(file_contents, template_type=template_type, placeholders=['name'])
     assert recipients.column_headers == expected
     assert recipients.missing_column_headers == expected_missing
-    if expected_missing:
-        assert recipients.has_errors is True
+    assert recipients.has_errors == bool(expected_missing)
 
 
 @pytest.mark.parametrize(
