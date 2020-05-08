@@ -390,8 +390,8 @@ def test_get_recipient_respects_order(file_contents,
             """
                 phone number,name
                 0780090046,test1
-                0780090047,test1
-                0780090048,test1
+                0412345678,test1
+                0423876543,test1
             """,
             'sms',
             ['phone number', 'name'],
@@ -515,6 +515,34 @@ def test_recipient_column(placeholders, file_contents, template_type):
             'sms',
             set(), set()
         ),
+        (
+            # missing postcode
+            """
+                address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,postcode,date
+                name,          building,      street,        town,          county,        postcode,today
+                name,          building,      street,        town,          county,        ,        today
+            """,
+            'letter',
+            set(), {1}
+        ),
+        (
+            # only required address fields
+            """
+                address_line_1, postcode, date
+                name,           postcode, today
+            """,
+            'letter',
+            set(), set()
+        ),
+        (
+            # optional address fields not filled in
+            """
+                address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,postcode,date
+                name          ,123 fake st.  ,              ,              ,              ,postcode,today
+            """,
+            'letter',
+            set(), set()
+        ),
     ]
 )
 @pytest.mark.parametrize('partial_instance', [
@@ -545,7 +573,8 @@ def test_bad_or_missing_data(
         """
             phone number, country
             1-202-555-0104, USA
-            +12025550104, USA
+            +12025550104, USA,
+            +2304123456, Mauritius
             +33 1 12 34 56 78, France
         """,
         set(),
