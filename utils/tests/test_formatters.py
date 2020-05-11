@@ -35,15 +35,15 @@ from notifications_utils.template import (
 @pytest.mark.parametrize(
     "url", [
         "http://example.com",
-        "http://www.gov.uk/",
-        "https://www.gov.uk/",
-        "http://service.gov.uk",
-        "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-        pytest.param("http://service.gov.uk/blah.ext?q=one two three", marks=pytest.mark.xfail),
+        "http://www.gov.au/",
+        "https://www.gov.au/",
+        "http://service.gov.au",
+        "http://service.gov.au/blah.ext?q=a%20b%20c&order=desc#fragment",
+        pytest.mark.xfail("http://service.gov.au/blah.ext?q=one two three"),
     ]
 )
 def test_makes_links_out_of_URLs(url):
-    link = '<a style="word-wrap: break-word; color: #005ea5;" href="{}">{}</a>'.format(url, url)
+    link = '<a style="word-wrap: break-word;" href="{}">{}</a>'.format(url, url)
     assert (notify_email_markdown(url) == (
         '<p style="Margin: 0 0 20px 0; font-size: 19px; line-height: 25px; color: #0B0C0C;">'
         '{}'

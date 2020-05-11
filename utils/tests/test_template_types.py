@@ -42,9 +42,7 @@ def test_html_email_inserts_body():
     "content", ('DOCTYPE', 'html', 'body', 'hello world')
 )
 def test_default_template(content):
-    assert content in str(HTMLEmailTemplate({
-        'content': 'hello world', 'subject': ''
-    }))
+    assert content in str(HTMLEmailTemplate({'content': 'hello world', 'subject': ''}))
 
 
 @pytest.mark.parametrize(
@@ -274,15 +272,14 @@ def test_markdown_in_templates(
             "http://service.gov.au/blah.ext?q=a%20b%20c&order=desc#fragment",
             "http://service.gov.au/blah.ext?q=a%20b%20c&amp;order=desc#fragment",
         ),
-        pytest.param("example.com", "example.com", marks=pytest.mark.xfail),
-        pytest.param("www.example.com", "www.example.com", marks=pytest.mark.xfail),
-        pytest.param(
+        pytest.mark.xfail(("example.com", "example.com")),
+        pytest.mark.xfail(("www.example.com", "www.example.com")),
+        pytest.mark.xfail((
             "http://service.gov.uk/blah.ext?q=one two three",
             "http://service.gov.uk/blah.ext?q=one two three",
-            marks=pytest.mark.xfail,
-        ),
-        pytest.param("ftp://example.com", "ftp://example.com", marks=pytest.mark.xfail),
-        pytest.param("mailto:test@example.com", "mailto:test@example.com", marks=pytest.mark.xfail),
+        )),
+        pytest.mark.xfail(("ftp://example.com", "ftp://example.com")),
+        pytest.mark.xfail(("mailto:test@example.com", "mailto:test@example.com")),
     ]
 )
 def test_makes_links_out_of_URLs(template_class, url, url_with_entities_replaced):
@@ -898,6 +895,12 @@ def test_templates_remove_whitespace_before_punctuation(
         ),
         mock.call(Markup('subject')),
     ]),
+    pytest.mark.skip(
+        (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+            mock.call(Markup('subject')),
+            mock.call(Markup('<p>content</p>')),
+        ])
+    ),
     (SMSMessageTemplate, {}, [
     ]),
     (SMSPreviewTemplate, {}, [
