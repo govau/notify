@@ -39,7 +39,7 @@ def test_html_email_inserts_body():
 
 
 @pytest.mark.parametrize(
-    "content", ('DOCTYPE', 'html', 'body', 'hello world')
+    "content", ('DOCTYPE', 'html', 'body', 'Notify', 'hello world')
 )
 def test_default_template(content):
     assert content in str(HTMLEmailTemplate({'content': 'hello world', 'subject': ''}))
