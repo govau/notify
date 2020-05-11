@@ -603,7 +603,7 @@
         },
         "saplivelink365": {
             "git": "https://github.com/govau/sap-live-link-365-client-python.git",
-            "ref": "e9037d7dc3a3d6b81a1e2a6d2b85bab0065013c7"
+            "ref": "b214dbb338d450e55695478c192a9aa2990e9f8a"
         },
         "sentry-sdk": {
             "extras": [
