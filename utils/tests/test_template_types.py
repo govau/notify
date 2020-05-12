@@ -39,7 +39,7 @@ def test_html_email_inserts_body():
 
 
 @pytest.mark.parametrize(
-    "content", ('DOCTYPE', 'html', 'body', 'GOV.AU', 'hello world')
+    "content", ('DOCTYPE', 'html', 'body', 'Notify', 'hello world')
 )
 def test_default_template(content):
     assert content in str(HTMLEmailTemplate({'content': 'hello world', 'subject': ''}))
@@ -52,9 +52,9 @@ def test_govau_banner(show_banner):
     email = HTMLEmailTemplate({'content': 'hello world', 'subject': ''})
     email.govau_banner = show_banner
     if show_banner:
-        assert "GOV.AU" in str(email)
+        assert "Notify" in str(email)
     else:
-        assert "GOV.AU" not in str(email)
+        assert "Notify" not in str(email)
 
 
 def test_brand_banner_shows():
@@ -142,7 +142,7 @@ def test_complete_html(complete_html, branding_should_be_present, brand_logo, br
 
 def test_preheader_is_at_start_of_html_emails():
     assert (
-        '<body style="font-family: Helvetica, Arial, sans-serif;font-size: 16px;margin: 0;color:#414141;">\n'
+        '<body style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', \'Roboto\', \'Oxygen\', \'Ubuntu\', \'Cantarell\', \'Fira Sans\', \'Droid Sans\', \'Helvetica Neue\', sans-serif;font-size: 16px;margin: 0;color:#414141;">\n'
         '\n'
         '<span style="display: none;font-size: 1px;color: #fff; max-height: 0;">content…</span>'
     ) in str(
@@ -259,19 +259,18 @@ def test_markdown_in_templates(
 @pytest.mark.parametrize(
     'template_class', [
         HTMLEmailTemplate,
-        EmailPreviewTemplate,
-        SMSPreviewTemplate,
+        EmailPreviewTemplate
     ]
 )
 @pytest.mark.parametrize(
     "url, url_with_entities_replaced", [
         ("http://example.com", "http://example.com"),
-        ("http://www.gov.uk/", "http://www.gov.uk/"),
-        ("https://www.gov.uk/", "https://www.gov.uk/"),
-        ("http://service.gov.uk", "http://service.gov.uk"),
+        ("http://www.gov.au/", "http://www.gov.au/"),
+        ("https://www.gov.au/", "https://www.gov.au/"),
+        ("http://my.gov.au/", "http://my.gov.au/"),
         (
-            "http://service.gov.uk/blah.ext?q=a%20b%20c&order=desc#fragment",
-            "http://service.gov.uk/blah.ext?q=a%20b%20c&amp;order=desc#fragment",
+            "http://service.gov.au/blah.ext?q=a%20b%20c&order=desc#fragment",
+            "http://service.gov.au/blah.ext?q=a%20b%20c&amp;order=desc#fragment",
         ),
         pytest.mark.xfail(("example.com", "example.com")),
         pytest.mark.xfail(("www.example.com", "www.example.com")),
@@ -439,7 +438,7 @@ def test_sms_preview_adds_newlines(nl2br):
         'end'
     ),
     (  # A mess
-        '\t\t\n\r one newline\xa0\n'
+        '\t\t\n\r one newline\n'
         'two newlines\r'
         '\r\n'
         'end\n\n  \r \n \t '
@@ -454,6 +453,7 @@ def test_sms_message_normalises_newlines(content):
     )
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @freeze_time("2012-12-12 12:12:12")
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 @mock.patch('notifications_utils.template.remove_empty_lines', return_value='123 Street')
@@ -580,6 +580,7 @@ def test_letter_preview_renderer(
     ]
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @freeze_time("2001-01-01 12:00:00.000000")
 @mock.patch('notifications_utils.template.LetterPreviewTemplate.jinja_template.render')
 def test_letter_preview_renderer_without_mocks(jinja_template):
@@ -607,6 +608,7 @@ def test_letter_preview_renderer_without_mocks(jinja_template):
     assert jinja_template_locals['logo_file_name'] == 'hm-government.svg'
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @freeze_time("2012-12-12 12:12:12")
 @mock.patch('notifications_utils.template.LetterImageTemplate.jinja_template.render')
 def test_letter_image_renderer(jinja_template):
@@ -713,7 +715,8 @@ def test_subject_line_gets_replaced():
         mock.call('content', {}, html='passthrough', markdown_lists=True)
     ]),
     (HTMLEmailTemplate, {}, [
-        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False)
+        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
+        mock.call('content', {}, html='escape', markdown_lists=True),
     ]),
     (EmailPreviewTemplate, {}, [
         mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
@@ -727,36 +730,38 @@ def test_subject_line_gets_replaced():
         mock.call('((phone number))', {}, with_brackets=False, html='escape'),
         mock.call('content', {}, html='escape', redact_missing_personalisation=False),
     ]),
-    (LetterPreviewTemplate, {'contact_block': 'www.gov.au'}, [
-        mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
-        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
-        mock.call((
-            '((address line 1))\n'
-            '((address line 2))\n'
-            '((address line 3))\n'
-            '((address line 4))\n'
-            '((address line 5))\n'
-            '((address line 6))\n'
-            '((postcode))'
-        ), {}, with_brackets=False, html='escape'),
-        mock.call('www.gov.au', {}, html='escape', redact_missing_personalisation=False),
-    ]),
-    (LetterImageTemplate, {
-        'image_url': 'http://example.com', 'page_count': 1, 'contact_block': 'www.gov.au'
-    }, [
-        mock.call((
-            '((address line 1))\n'
-            '((address line 2))\n'
-            '((address line 3))\n'
-            '((address line 4))\n'
-            '((address line 5))\n'
-            '((address line 6))\n'
-            '((postcode))'
-        ), {}, with_brackets=False, html='escape'),
-        mock.call('www.gov.au', {}, html='escape', redact_missing_personalisation=False),
-        mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
-        mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
-    ]),
+    pytest.mark.skip(
+        (LetterPreviewTemplate, {'contact_block': 'www.gov.au'}, [
+            mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
+            mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
+            mock.call((
+                '((address line 1))\n'
+                '((address line 2))\n'
+                '((address line 3))\n'
+                '((address line 4))\n'
+                '((address line 5))\n'
+                '((address line 6))\n'
+                '((postcode))'
+            ), {}, with_brackets=False, html='escape'),
+            mock.call('www.gov.au', {}, html='escape', redact_missing_personalisation=False),
+        ]),
+        (LetterImageTemplate, {
+            'image_url': 'http://example.com', 'page_count': 1, 'contact_block': 'www.gov.au'
+        }, [
+            mock.call((
+                '((address line 1))\n'
+                '((address line 2))\n'
+                '((address line 3))\n'
+                '((address line 4))\n'
+                '((address line 5))\n'
+                '((address line 6))\n'
+                '((postcode))'
+            ), {}, with_brackets=False, html='escape'),
+            mock.call('www.gov.au', {}, html='escape', redact_missing_personalisation=False),
+            mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
+            mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
+        ])
+    ),
     (Template, {'redact_missing_personalisation': True}, [
         mock.call('content', {}, html='escape', redact_missing_personalisation=True),
     ]),
@@ -812,6 +817,7 @@ def test_templates_handle_html_and_redacting(
             'content'
             '</p>'
         ),
+        mock.call('\n\ncontent'),
         mock.call(Markup('subject')),
         mock.call(Markup('subject')),
     ]),
@@ -831,22 +837,24 @@ def test_templates_handle_html_and_redacting(
     (SMSPreviewTemplate, {}, [
         mock.call('content'),
     ]),
-    (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
-        mock.call(Markup('subject')),
-        mock.call(Markup('<p>content</p>')),
-        mock.call((
-            "<span class='placeholder-no-brackets'>address line 1</span>\n"
-            "<span class='placeholder-no-brackets'>address line 2</span>\n"
-            "<span class='placeholder-no-brackets'>address line 3</span>\n"
-            "<span class='placeholder-no-brackets'>address line 4</span>\n"
-            "<span class='placeholder-no-brackets'>address line 5</span>\n"
-            "<span class='placeholder-no-brackets'>address line 6</span>\n"
-            "<span class='placeholder-no-brackets'>postcode</span>"
-        )),
-        mock.call(Markup('www.gov.uk')),
-        mock.call(Markup('subject')),
-        mock.call(Markup('subject')),
-    ]),
+    pytest.mark.skip(
+        (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+            mock.call(Markup('subject')),
+            mock.call(Markup('<p>content</p>')),
+            mock.call((
+                "<span class='placeholder-no-brackets'>address line 1</span>\n"
+                "<span class='placeholder-no-brackets'>address line 2</span>\n"
+                "<span class='placeholder-no-brackets'>address line 3</span>\n"
+                "<span class='placeholder-no-brackets'>address line 4</span>\n"
+                "<span class='placeholder-no-brackets'>address line 5</span>\n"
+                "<span class='placeholder-no-brackets'>address line 6</span>\n"
+                "<span class='placeholder-no-brackets'>postcode</span>"
+            )),
+            mock.call(Markup('www.gov.uk')),
+            mock.call(Markup('subject')),
+            mock.call(Markup('subject')),
+        ])
+    ),
 ])
 @mock.patch('notifications_utils.template.remove_whitespace_before_punctuation', side_effect=lambda x: x)
 def test_templates_remove_whitespace_before_punctuation(
@@ -876,6 +884,7 @@ def test_templates_remove_whitespace_before_punctuation(
             'content'
             '</p>'
         ),
+        mock.call('\n\ncontent'),
         mock.call(Markup('subject')),
     ]),
     (EmailPreviewTemplate, {}, [
@@ -886,13 +895,15 @@ def test_templates_remove_whitespace_before_punctuation(
         ),
         mock.call(Markup('subject')),
     ]),
+    pytest.mark.skip(
+        (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+            mock.call(Markup('subject')),
+            mock.call(Markup('<p>content</p>')),
+        ])
+    ),
     (SMSMessageTemplate, {}, [
     ]),
     (SMSPreviewTemplate, {}, [
-    ]),
-    (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
-        mock.call(Markup('subject')),
-        mock.call(Markup('<p>content</p>')),
     ]),
 ])
 @mock.patch('notifications_utils.template.make_quotes_smart', side_effect=lambda x: x)
@@ -1560,6 +1571,7 @@ def test_letter_address_format(address, expected):
     assert str(template)
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @freeze_time("2001-01-01 12:00:00.000000")
 @pytest.mark.parametrize('markdown, expected', [
     (
@@ -1645,6 +1657,7 @@ def test_non_sms_ignores_message_too_long(template_class, kwargs):
     assert template.is_message_too_long() is False
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @pytest.mark.parametrize(
     (
         'content,'
@@ -1747,6 +1760,7 @@ def test_letter_preview_uses_non_breaking_hyphens():
     ))
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @freeze_time("2001-01-01 12:00:00.000000")
 def test_nested_lists_in_lettr_markup():
 
@@ -1839,6 +1853,7 @@ def test_plain_text_email_whitespace():
     )
 
 
+@pytest.mark.skip(reason="we do not support sending letters")
 @pytest.mark.parametrize("template_class", [
     LetterPreviewTemplate,
     LetterPrintTemplate,
