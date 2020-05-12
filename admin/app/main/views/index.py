@@ -31,6 +31,9 @@ def error(status_code):
 def verify_mobile():
     return render_template('views/verify-mobile.html')
 
+@main.route('/privacy')
+def privacy():
+    return render_template('views/privacy.html')
 
 @main.route('/cookies')
 def cookies():
