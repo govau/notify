@@ -126,13 +126,7 @@ def test_get_handlers_sets_up_logging_appropriately_without_debug(tmpdir):
 
     handlers = logging.get_handlers(app)
 
-    assert len(handlers) == 2
+    assert len(handlers) == 1
     assert type(handlers[0]) == builtin_logging.StreamHandler
     assert type(handlers[0].formatter) == logging.JSONFormatter
-
-    assert type(handlers[1]) == builtin_logging_handlers.WatchedFileHandler
-    assert type(handlers[1].formatter) == logging.JSONFormatter
-
-    dir_contents = tmpdir.listdir()
-    assert len(dir_contents) == 1
-    assert dir_contents[0].basename == 'foo.json'
+    assert not (tmpdir / 'foo').exists()

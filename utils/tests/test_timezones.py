@@ -16,8 +16,8 @@ def test_utc_string_to_aware_gmt_datetime_rejects_bad_input(input_value):
 
 
 @pytest.mark.parametrize('naive_time, expected_aware_hour', [
-    ('2000-12-1 20:01', '20:01'),
-    ('2000-06-1 20:01', '21:01'),
+    ('2000-12-1 20:01', '07:01'),
+    ('2000-06-1 20:01', '06:01'),
 ])
 def test_utc_string_to_aware_gmt_datetime_handles_summer_and_winter(
     naive_time,

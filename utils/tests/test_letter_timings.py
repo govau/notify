@@ -4,6 +4,7 @@ import pytz
 from freezegun import freeze_time
 from notifications_utils.letter_timings import get_letter_timings
 
+pytest.skip("we do not support sending letters", allow_module_level=True)
 
 @freeze_time('2017-07-14 14:59:59')  # Friday, before print deadline
 @pytest.mark.parametrize('upload_time, expected_print_time, is_printed, expected_earliest, expected_latest', [

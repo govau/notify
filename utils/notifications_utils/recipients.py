@@ -161,7 +161,7 @@ class RecipientCSV():
 
         rows_as_lists_of_columns = self._rows
 
-        next(rows_as_lists_of_columns)  # skip the header row
+        next(rows_as_lists_of_columns, None)  # skip the header row
 
         for index, row in enumerate(rows_as_lists_of_columns):
 

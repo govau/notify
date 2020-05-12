@@ -42,15 +42,12 @@ valid_local_phone_numbers = [
 
 
 valid_international_phone_numbers = [
-    '71234567890',  # Russia
+    '74114567890',  # Russia
     '1-202-555-0104',  # USA
     '+12025550104',  # USA
-    '0012025550104',  # USA
-    '+0012025550104',  # USA
-    '23051234567',  # Mauritius,
-    '+682 12345',  # Cook islands
-    '+3312345678',
-    '003312345678'
+    '2304123456',  # Mauritius,
+    '+682 33345',  # Cook islands
+    '+33109758351',
 ]
 
 
@@ -61,25 +58,6 @@ invalid_local_phone_numbers = sum([
     [
         (phone_number, error) for phone_number in group
     ] for error, group in [
-        ('Wrong amount of digits', (
-            '412345678910',
-        )),
-        ('Too many digits', (
-            '61412345678910',
-            '+61 (0)412 345 678 910',
-        )),
-        ('Not enough digits', (
-            '+61412',
-            '+61 412',
-            '+61 412 3',
-        )),
-        (NOT_LOCAL_NUMBER_MSG, (
-            '0412',
-            '0412345678910',
-            '08081 570364',
-            '0117 496 0860',
-            '020 7946 0991',
-        )),
         ('Must not contain letters or symbols', (
             '04890x32109',
             '04123 456789...',
@@ -88,7 +66,59 @@ invalid_local_phone_numbers = sum([
             '04";DROP TABLE;"',
             '+61 07ab cde fgh',
             'ALPHANUM3R1C',
-        ))
+        )),
+        ('Not enough digits', (
+            '+61412',
+            '+61 412',
+            '+61 412 3',
+            '0412',
+        )),
+        ('Too many digits', (
+            '61412345678910',
+            '+61 (0)412 345 678 910',
+            '0412345678910',
+            '412345678910',
+        )),
+        ('Not a valid mobile number', (
+            '08081 570364',
+            '0117 496 0860',
+            '020 7946 0991',
+        )),
+    ]
+], [])
+
+invalid_international_phone_numbers = sum([
+    [
+        (phone_number, error) for phone_number in group
+    ] for error, group in [
+        ('Must not contain letters or symbols', (
+            '04890x32109',
+            '04123 456789...',
+            '04123 ☟☜⬇⬆☞☝',
+            '04123☟☜⬇⬆☞☝',
+            '04";DROP TABLE;"',
+            '+61 07ab cde fgh',
+            'ALPHANUM3R1C',
+        )),
+        ('Not enough digits', (
+            '+61412',
+            '+61 412',
+            '+61 412 3',
+        )),
+        ('Wrong amount of digits', (
+            '412345678910',
+        )),
+        ('Too many digits', (
+            '61412345678910',
+            '+61 (0)412 345 678 910',
+        )),
+        (NOT_LOCAL_NUMBER_MSG, (
+            '08081 570364',
+            '0117 496 0860',
+            '020 7946 0991',
+            '0412345678910',
+            '0412',
+        )),
     ]
 ], [])
 
@@ -97,7 +127,7 @@ invalid_phone_numbers = list(filter(
     lambda number: number[0] not in {
         '712345678910',   # Could be Russia
     },
-    invalid_local_phone_numbers
+    invalid_international_phone_numbers
 )) + [
     ('800000000000', 'Not a valid country prefix'),
     ('1234567', 'Not enough digits'),
@@ -166,9 +196,9 @@ def test_detect_local_phone_numbers(phone_number):
 
 
 @pytest.mark.parametrize("phone_number, expected_info", [
-    ('07900900123', international_phone_info(
+    ('0290090012', international_phone_info(
         international=False,
-        country_prefix='44',  # UK
+        country_prefix='61',  # Australia
         billable_units=1,
     )),
     ('20-12-1234-1234', international_phone_info(
@@ -176,17 +206,12 @@ def test_detect_local_phone_numbers(phone_number):
         country_prefix='20',  # Egypt
         billable_units=3,
     )),
-    ('00201212341234', international_phone_info(
+    ('+16644912230', international_phone_info(
         international=True,
-        country_prefix='20',  # Egypt
-        billable_units=3,
-    )),
-    ('1664000000000', international_phone_info(
-        international=True,
-        country_prefix='1664',  # Montserrat
+        country_prefix='1',  # Montserrat
         billable_units=1,
     )),
-    ('71234567890', international_phone_info(
+    ('74114567890', international_phone_info(
         international=True,
         country_prefix='7',  # Russia
         billable_units=1,
@@ -196,7 +221,7 @@ def test_detect_local_phone_numbers(phone_number):
         country_prefix='1',  # USA
         billable_units=1,
     )),
-    ('+23051234567', international_phone_info(
+    ('+2304123456', international_phone_info(
         international=True,
         country_prefix='230',  # Mauritius
         billable_units=2,
@@ -208,14 +233,14 @@ def test_get_international_info(phone_number, expected_info):
 
 @pytest.mark.parametrize('phone_number', [
     '+21 4321 0987',
-    '00997 1234 7890',
-    '801234-7890'
+    '997 1234 7890',
+    '801234-7890',
     '(8-0)-1234-7890',
 ])
 def test_get_international_info_raises(phone_number):
     with pytest.raises(InvalidPhoneError) as error:
         get_international_phone_info(phone_number)
-    assert str(error.value) == 'Not a valid country prefix'
+    assert str(error.value) == 'Did not parse as region ZZ'
 
 
 @pytest.mark.parametrize("phone_number", valid_local_phone_numbers)
@@ -249,12 +274,10 @@ def test_valid_local_phone_number_can_be_formatted_consistently(phone_number):
 
 
 @pytest.mark.parametrize("phone_number, expected_formatted", [
-    ('71234567890', '+71234567890'),
+    ('74114567890', '+74114567890'),
     ('1-202-555-0104', '+12025550104'),
     ('+12025550104', '+12025550104'),
-    ('0012025550104', '+12025550104'),
-    ('+0012025550104', '+12025550104'),
-    ('230 5 421 4567', '+23054214567'),
+    ('230 4 123 456', '+2304123456'),
 ])
 def test_valid_international_phone_number_can_be_formatted_consistently(phone_number, expected_formatted):
     assert validate_and_format_phone_number_and_allow_international(phone_number) == expected_formatted
@@ -382,7 +405,7 @@ def test_validates_against_whitelist_of_email_addresses(email_address):
     ('+447900900123', '+44 7900 900123'),  # UK
     ('+20-12-1234-1234', '+20 121 234 1234'),  # Egypt
     ('+201212341234', '+20 121 234 1234'),  # Egypt
-    ('+1664 0000000', '+1 664-000-0000'),  # Montserrat
+    ('+1664 4912230', '+1 664-491-2230'),  # Montserrat
     ('+7 499 1231212', '+7 499 123-12-12'),  # Moscow (Russia)
     ('+1-202-555-0104', '+1 202-555-0104'),  # Washington DC (USA)
     ('+23051234567', '+230 5123 4567'),  # Mauritius
