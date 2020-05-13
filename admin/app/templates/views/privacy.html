@@ -15,14 +15,14 @@
         <li>Australian Government Agencies Privacy Code </li>
     </ul>
     <p>This statement applies to the <b>personal information</b> collected, used and disclosed by the DTA as part of administering 
-        <a href="https://notify.gov.au">Notify</a>. It sets out each type of <b>personal information</b> that we collect and the primary purpose for which we collect that information. You should note that the Privacy Act 1988 (Cth) also allows us to use or disclose your <b>personal information</b> for other purposes.</p>
+        <a href="{{ url_for('main.index') }}">Notify</a>. It sets out each type of <b>personal information</b> that we collect and the primary purpose for which we collect that information. You should note that the Privacy Act 1988 (Cth) also allows us to use or disclose your <b>personal information</b> for other purposes.</p>
     <p>DTA also has a general <a href="https://www.dta.gov.au/our-privacy-policy">Privacy Statement</a> that applies to the DTA as a whole. It includes information about:</p>
     <ul class="list list-bullet">
         <li>the use of cookies by the DTA</li>
         <li>surveys conducted by the DTA</li>
         <li>how to contact DTA if you have a privacy question or issue that does not relate to Notify</li>
     </ul>
-    <p><b>Personal information</b> and <b>sensitive information</b> have the meaning given in the Privacy Act 1988 (Cth). The broader term <b>information</b> should be read as pertaining to both. Other bolded words are defined in the <a href="https://notify.gov.au/features/terms">Terms of Use</a>.</p>
+    <p><b>Personal information</b> and <b>sensitive information</b> have the meaning given in the Privacy Act 1988 (Cth). The broader term <b>information</b> should be read as pertaining to both. Other bolded words are defined in the <a href="{{ url_for('main.terms') }}">Terms of Use</a>.</p>
 
     <h2 class="heading-medium">What information is collected?</h2>
     <h3 class="heading-small">Collection of information about users</h3>
@@ -64,7 +64,7 @@
     <p><b>Information</b> is collected from users through account registrations and uploads submitted to Notify servers.</p>
     <p>During beta for Notify we may be running software on our website that generates usability insights to be captured. We do this for the purpose of understanding what we can improve in Notify. The software tracks mouse paths, clicks, and a variety of other interaction types on Notify.</p>
     <p>We will not let the software capture any <b>personal information</b> that you have not explicitly and knowingly submitted, including your name, email address, phone number or password, or any user data you upload to Notify.</p>
-    <p>Notify uses cookies to remember you once you have logged in and to ensure that your information is kept secure while using the service. The Notify session cookie expires after 8 hours of inactivity. For more information see <a href="https://notify.gov.au/cookies">cookies</a>.</p>
+    <p>Notify uses cookies to remember you once you have logged in and to ensure that your information is kept secure while using the service. The Notify session cookie expires after 8 hours of inactivity. For more information see <a href="{{ url_for('main.cookies') }}">cookies</a>.</p>
     <p>You may contact us to receive more information about how we use these tools to improve Notify. </p>
 
     <h2 class="heading-medium">How is the information held?</h2>
@@ -77,7 +77,7 @@
 
     <h2 class="heading-medium">How is the information protected?</h2>
     <p>We are committed to doing all that we can to keep your <b>information</b> secure. To prevent unauthorised access or disclosure we have put in place technical and organisational procedures to secure the <b>information</b> we collect about you – for example, we protect your <b>information</b> using varying levels of encryption. We also make sure that any third parties that we deal with have an obligation to keep all <b>personal information</b> they process on our behalf secure.</p>
-    <p>The Notify domain  <a href="https://notify.gov.au">https://notify.gov.au</a> is hosted in Australia in secure, government accredited facilities. We apply a range of security controls to protect Notify from unauthorised access, as described in our <b>security statement (TBA)</b>.</p>
+    <p>The Notify domain  <a href="{{ url_for('main.index') }}">https://notify.gov.au</a> is hosted in Australia in secure, government accredited facilities. We apply a range of security controls to protect Notify from unauthorised access, as described in our <b>security statement (TBA)</b>.</p>
     
     <h2 class="heading-medium">What are my rights relating to disclosed information?</h2>
     <p>At any time, you may:</p>
@@ -107,7 +107,7 @@
         <li>Canberra City ACT 2601</li>
     </ul>
     <p>Email: notify-support@digital.gov.au</p>
-    <p>If you contact us via the <a href="https://notify.gov.au">Notify</a> website, our support email or another channel, we will collect any name or contact details that you provide.</p>
+    <p>If you contact us via the <a href="{{ url_for('main.index') }}">Notify</a> website, our support email or another channel, we will collect any name or contact details that you provide.</p>
     <p>This <b>information</b> is collected and disclosed for the purposes of responding to your feedback or request. For example, we may disclose it to another person within your agency if your enquiry relates to an existing Notify account in use by staff at your agency.</p>
     <p>Last Updated: 06/05/2020</p>
 </div>
