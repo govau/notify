@@ -69,6 +69,7 @@ const secondColumn = [
 
 const thirdColumn = [
   { text: 'Pricing', href: notifyUrl('/pricing') },
+  { text: 'Privacy', href: notifyUrl('/privacy') },
   { text: 'Cookies', href: notifyUrl('/cookies') },
   { text: 'Documentation', href: '/' },
 ]
