@@ -1,0 +1,116 @@
+{% extends "withoutnav_template.html" %}
+
+{% block per_page_title %}
+  Privacy
+{% endblock %}
+
+{% block maincolumn_content %}
+
+<div class="grid-row">
+  <div class="column-two-thirds">
+    <h1 class="heading-large">Privacy Statement</h1>
+    <p>The Digital Transformation Agency (DTA) is an Australian Government entity. The DTA is legally required to comply with:</p>
+    <ul class="list list-bullet">
+        <li>the obligations under the Privacy Act 1988 (Cth) applicable to agencies</li>
+        <li>Australian Government Agencies Privacy Code </li>
+    </ul>
+    <p>This statement applies to the <b>personal information</b> collected, used and disclosed by the DTA as part of administering 
+        <a href="{{ url_for('main.index') }}">Notify</a>. It sets out each type of <b>personal information</b> that we collect and the primary purpose for which we collect that information. You should note that the Privacy Act 1988 (Cth) also allows us to use or disclose your <b>personal information</b> for other purposes.</p>
+    <p>DTA also has a general <a href="https://www.dta.gov.au/our-privacy-policy">Privacy Statement</a> that applies to the DTA as a whole. It includes information about:</p>
+    <ul class="list list-bullet">
+        <li>the use of cookies by the DTA</li>
+        <li>surveys conducted by the DTA</li>
+        <li>how to contact DTA if you have a privacy question or issue that does not relate to Notify</li>
+    </ul>
+    <p><b>Personal information</b> and <b>sensitive information</b> have the meaning given in the Privacy Act 1988 (Cth). The broader term <b>information</b> should be read as pertaining to both. Other bolded words are defined in the <a href="{{ url_for('main.terms') }}">Terms of Use</a>.</p>
+
+    <h2 class="heading-medium">What information is collected?</h2>
+    <h3 class="heading-small">Collection of information about users</h3>
+    <p>
+        We collect the following <b>personal information</b> when users sign up to Notify on behalf of government service entities:
+    </p>
+    <ul class="list list-bullet">
+        <li>your name (first name and surname)</li>
+        <li>your email address</li>
+        <li>your mobile phone number</li>
+        <li>a password for you to use to access the service</li>
+    </ul>
+    <h3 class="heading-small">Collection of user's customer information</h3>
+    <p>You will likely upload <b>personal information</b> about your customers to Notify. This <b>information</b> will form the basis of the messages you are sending, for example, your customer’s names, appointment times and locations, status of their applications etc.</p>
+    <p>You may also upload <b>sensitive information</b> to Notify, with examples including:</p>
+    <ul class="list list-bullet">
+        <li>one-time access links to online services</li>
+        <li>authentication codes used in <b>two-factor authentication</b></li>
+    </ul>
+
+    <h2 class="heading-medium">Why is this information collected?</h2>
+    <p>We require your <b>information</b> to ensure only legitimate users of Notify can use it to send notifications.</p>
+    <p>We use your information to check that you are allowed to access Notify and to record your activity when using it.</p>
+    <p>We will not:</p>
+    <ul class="list list-bullet">
+        <li>sell or rent your <b>information</b> to third parties</li>
+        <li>share your <b>information</b> with third parties for marketing purposes</li>
+    </ul>
+    <p>We will share your information if we are required to do so by law – for example, by court order, or to prevent fraud or other crime.</p>
+    <p>We collect these details so that we can:</p>
+    <ul class="list list-bullet">
+        <li>personalise Notify for you</li>
+        <li>enable you to test notifications by sending emails and text messages to yourself</li>
+        <li>enable you to use <b>two-factor authentication</b> to log into Notify</li>
+        <li>get in contact with you about your usage of Notify</li>
+    </ul>
+
+    <h2 class="heading-medium">How is this information collected?</h2>
+    <p><b>Information</b> is collected from users through account registrations and uploads submitted to Notify servers.</p>
+    <p>During beta for Notify we may be running software on our website that generates usability insights to be captured. We do this for the purpose of understanding what we can improve in Notify. The software tracks mouse paths, clicks, and a variety of other interaction types on Notify.</p>
+    <p>We will not let the software capture any <b>personal information</b> that you have not explicitly and knowingly submitted, including your name, email address, phone number or password, or any user data you upload to Notify.</p>
+    <p>Notify uses cookies to remember you once you have logged in and to ensure that your information is kept secure while using the service. The Notify session cookie expires after 8 hours of inactivity. For more information see <a href="{{ url_for('main.cookies') }}">cookies</a>.</p>
+    <p>You may contact us to receive more information about how we use these tools to improve Notify. </p>
+
+    <h2 class="heading-medium">How is the information held?</h2>
+    <p>User <b>personal information</b> collected through Notify is normally retained by the Notify team for a period of at least six months, past the end of its required business use. The end of its required business use is marked by you asking for your account to be deleted. This is to allow review of completed processes, internal auditing, complaint management, quality assurance and business improvement.</p>
+    <p>Customer <b>information</b> is deleted automatically after 7 days.</p>
+    <p>As a government agency, the DTA is also required to comply with the Archives Act 1983 (Cth). This means that the DTA can only delete or amend records where this is consistent with the Archives Act 1983 (Cth). Information about the DTA's activities, including the personal information referred to in this privacy statement, is generally retained with the DTA's record management system for 7 years. Some records may be retained for a longer period.</p>
+    <p>Access to your <b>personal information</b> is restricted to service providers and personnel employed by or contracted to the DTA who need it to provide services to you.</p>
+    <p>Telecommunications providers will also delete <b>information</b> sent using Notify after 7 days unless they are required by law to retain the <b>information</b>.</p>
+    <p>Logs of the messages sent will be stored indefinitely. While the information that is included in the message can be purged after sending, the recipient detail (either phone number or email address) will be kept in the logs. If you do not want Notify to keep copies of the variable information you have used to fill in a template that has been sent, you can configure Notify so that it does not store these details.</p>
+
+    <h2 class="heading-medium">How is the information protected?</h2>
+    <p>We are committed to doing all that we can to keep your <b>information</b> secure. To prevent unauthorised access or disclosure we have put in place technical and organisational procedures to secure the <b>information</b> we collect about you – for example, we protect your <b>information</b> using varying levels of encryption. We also make sure that any third parties that we deal with have an obligation to keep all <b>personal information</b> they process on our behalf secure.</p>
+    <p>The Notify domain  <a href="{{ url_for('main.index') }}">https://notify.gov.au</a> is hosted in Australia in secure, government accredited facilities. We apply a range of security controls to protect Notify from unauthorised access, as described in our <b>security statement (TBA)</b>.</p>
+    
+    <h2 class="heading-medium">What are my rights relating to disclosed information?</h2>
+    <p>At any time, you may:</p>
+    <ul class="list list-bullet">
+        <li>request access to <b>personal information</b> about you that we hold.</li>
+        <li>request the removal of <b>personal information</b> about you that we hold. To the extent possible, with reference to the Archives Act 1983 (Cth), the DTA will comply with this request where it does not impact the ongoing utility of Notify and its related activities.</li>
+        <li>ask us to correct your <b>personal information</b> if you find that it is not accurate, up-to-date, or complete.</li>
+        <li>make a complaint about our handling of your <b>personal information</b>.</li>
+    </ul>
+
+    <h2 class="heading-medium">How we deal with requests or complaints</h2>
+    <p>You can submit requests or complaints to us by email or post, see Contact us for details.</p>
+    <p>We undertake to respond within 30 days. If the request or complaint will take longer to resolve, we will provide you with a date by which we expect to respond.</p>
+    <p>If you are not satisfied with how we have dealt with your complaint you can also submit a complaint to the <a href="https://www.oaic.gov.au/individuals/how-do-i-make-a-privacy-complaint">Office of the Australian Information Commissioner (OAIC)</a>.</p>
+
+    <h2 class="heading-medium">Children’s privacy protection</h2>
+    <p>We understand the importance of protecting children’s privacy online. Our services are not designed for, or intentionally targeted at, children 13 years of age or younger. It is not our policy to intentionally collect or maintain <b>information</b> about anyone under the age of 13.</p>
+
+    <h2 class="heading-medium">Contact us</h2>
+    <p>You can contact the Notify team by email or post:</p>
+    <p>Position title: Product Manager, Notify</p>
+    <h3 class="heading-small">Postal address:</h3>
+    <ul>
+        <li>Notify</li>
+        <li>c/o Digital Transformation Agency</li>
+        <li>PO Box 457</li>
+        <li>Canberra City ACT 2601</li>
+    </ul>
+    <p>Email: notify-support@digital.gov.au</p>
+    <p>If you contact us via the <a href="{{ url_for('main.index') }}">Notify</a> website, our support email or another channel, we will collect any name or contact details that you provide.</p>
+    <p>This <b>information</b> is collected and disclosed for the purposes of responding to your feedback or request. For example, we may disclose it to another person within your agency if your enquiry relates to an existing Notify account in use by staff at your agency.</p>
+    <p>Last Updated: 06/05/2020</p>
+</div>
+</div>
+
+{% endblock %}
