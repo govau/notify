@@ -29,6 +29,9 @@ def get_notifications():
     if 'reference' in _data:
         _data['reference'] = _data['reference'][0]
 
+    if 'template_id' in _data:
+        _data['template_id'] = _data['template_id'][0]
+
     if 'include_jobs' in _data:
         _data['include_jobs'] = _data['include_jobs'][0]
 

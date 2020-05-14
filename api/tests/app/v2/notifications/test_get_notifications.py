@@ -371,6 +371,27 @@ def test_get_all_notifications_filter_by_template_type(client, sample_service):
     assert json_response['notifications'][0]['type'] == "email"
 
 
+def test_get_all_notifications_filter_by_template_id(client, sample_service):
+    email_template_1 = create_template(service=sample_service, template_type="email")
+    email_template_2 = create_template(service=sample_service, template_type="email")
+    sms_template = create_template(service=sample_service, template_type="sms")
+
+    create_notification(template=email_template_1)
+    notification = create_notification(template=email_template_2, to_field="don.draper@scdp.biz")
+    create_notification(template=sms_template)
+
+    auth_header = create_authorization_header(service_id=notification.service_id)
+    response = client.get(
+        path='/v2/notifications?template_id=' + str(email_template_2.id),
+        headers=[('Content-Type', 'application/json'), auth_header])
+
+    json_response = json.loads(response.get_data(as_text=True))
+
+    assert response.status_code == 200
+    assert len(json_response['notifications']) == 1
+    assert json_response['notifications'][0]['email_address'] == "don.draper@scdp.biz"
+
+
 def test_get_all_notifications_filter_by_template_type_invalid_template_type(client, sample_notification):
     auth_header = create_authorization_header(service_id=sample_notification.service_id)
     response = client.get(

@@ -45,9 +45,7 @@ Then create a working database with the command `createdb notification_api`.
 
 ## To run the application
 
-Then, run `make install` to install dependencies.
-
-, set up your environment, and
+Then, run `make install` to install dependencies, set up your environment and
 initialise the database.
 
 You can run `make setup-db` whenever you need to update your database in response
@@ -72,6 +70,21 @@ entire test suite:
 
 ```shell
     make test
+```
+
+If you are having trouble getting all tests to pass, you may need to generate `app/version.py`:
+
+```shell
+    make version-file
+```
+
+And then edit it to look like this:
+
+```shell
+    __commit_sha__ = "?"
+    __time__ = "2020-05-14:15:23:24"
+    __build_job_number__ = "?"
+    __build_job_url__ = "?"
 ```
 
 ## Using docker for your database
