@@ -86,6 +86,7 @@ get_notifications_request = {
                 "enum": TEMPLATE_TYPES
             }
         },
+        "template_id": {"type": "string"},
         "include_jobs": {"enum": ["true", "True"]},
         "older_than": uuid
     },

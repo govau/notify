@@ -318,6 +318,11 @@ def _filter_query(query, filter_dict=None):
         statuses = Notification.substitute_status(statuses)
         query = query.filter(Notification.status.in_(statuses))
 
+    # filter by template id
+    template_id = multidict.get('template_id')
+    if template_id:
+        query = query.filter(Notification.template_id == template_id)
+
     # filter by template
     template_types = multidict.getlist('template_type')
     if template_types:
