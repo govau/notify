@@ -1,10 +1,12 @@
 import itertools
+import collections
 from datetime import datetime
 
 from flask import render_template, request, url_for
 from flask_login import login_required
 
 from app import (
+    billing_api_client,
     complaint_api_client,
     format_date_numeric,
     platform_stats_api_client,
@@ -153,13 +155,105 @@ def platform_admin_services():
     )
 
 
+def generate_year_quarters(year):
+    yield (f'{year}/Q1', (f'{year}-07-01', f'{year}-09-30'))
+    yield (f'{year}/Q2', (f'{year}-10-01', f'{year}-12-31'))
+    yield (f'{year}/Q3', (f'{year+1}-01-01', f'{year+1}-03-31'))
+    yield (f'{year}/Q4', (f'{year+1}-04-01', f'{year+1}-06-30'))
+
+
+SUPPORTED_YEARS = [2018, 2019, 2020, 2021, 2022]
+SUPPORTED_YEAR_QUARTERS = collections.OrderedDict(
+    itertools.chain.from_iterable(
+        generate_year_quarters(year) for year in SUPPORTED_YEARS
+    )
+)
+
 @main.route("/platform-admin/reports")
 @login_required
 @user_is_platform_admin
 def platform_admin_reports():
     return render_template(
-        'views/platform-admin/reports.html'
+        'views/platform-admin/reports.html',
+        supported_year_quarters=SUPPORTED_YEAR_QUARTERS,
     )
+
+
+@main.route("/platform-admin/reports/quarterly-billing.csv")
+@login_required
+@user_is_platform_admin
+def platform_admin_quarterly_billing_csv():
+    year_quarter = request.args.get('year_quarter')
+    start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
+
+    def present_row(billing_data):
+        return [
+                billing_data.get('service_id'),
+                billing_data.get('service_name'),
+                start_date,
+                end_date,
+                billing_data.get('sms_cost'),
+                billing_data.get('sms_total_notifications'),
+                billing_data.get('sms_total_units'),
+                billing_data.get('sms_billable_units'),
+                billing_data.get('sms_rate'),
+            ]
+
+    data = platform_stats_api_client.get_billing_for_all_services({
+        'start_date': start_date,
+        'end_date': end_date
+    })
+
+    columns = [
+        "Service ID", "Service name", "Start date", "End date",
+        "Cost", "SMS Notifications sent", "Total units", "Billable units",
+        "SMS rate",
+    ]
+
+    csv_data = [columns, *(present_row(d) for d in data)]
+    return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': f'inline; filename="quarterly-billing-{year_quarter}.csv"'
+    }
+
+
+@main.route("/platform-admin/reports/quarterly-breakdown.csv")
+@login_required
+@user_is_platform_admin
+def platform_admin_quarterly_breakdown_csv():
+    year_quarter = request.args.get('year_quarter')
+    start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
+
+    def present_row(billing_data):
+        return [
+                billing_data.get('service_id'),
+                billing_data.get('service_name'),
+                start_date,
+                end_date,
+                billing_data.get('notification_type'),
+                billing_data.get('rate'),
+                billing_data.get('rate_multiplier'),
+                billing_data.get('notifications_sent'),
+                billing_data.get('billable_units_sent'),
+                billing_data.get('total_billable_units'),
+            ]
+
+    data = platform_stats_api_client.get_usage_for_all_services({
+        'start_date': start_date,
+        'end_date': end_date
+    })
+
+    columns = [
+        "Service ID", "Service name", "Start date", "End date",
+        "Notification type", "Rate", "Rate multiplier",
+        "Notifications sent", "Billable units sent", "Total billable units"
+    ]
+
+    csv_data = [columns, *(present_row(d) for d in data)]
+    return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': f'inline; filename="quarterly-usage-{year_quarter}.csv"'
+    }
 
 
 @main.route("/platform-admin/reports/trial-services.csv")
