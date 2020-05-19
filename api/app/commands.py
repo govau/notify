@@ -631,7 +631,7 @@ def migrate_data_to_ft_billing(start_date, end_date):
                 from (
                     select
                         n.id,
-                        da.aet_date,
+                        da.bst_date as aet_date,
                         coalesce(n.template_id, '00000000-0000-0000-0000-000000000000') as template_id,
                         coalesce(n.service_id, '00000000-0000-0000-0000-000000000000') as service_id,
                         n.notification_type,

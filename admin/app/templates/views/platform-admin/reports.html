@@ -16,4 +16,19 @@
 <p>
   <a target="_blank" href="{{ url_for('main.live_services_csv') }}">Download live services csv report</a>
 </p>
+
+<form method="GET" action="{{ url_for('main.platform_admin_quarterly_billing_csv') }}">
+    <select name="year_quarter" id="year_quarter">
+        {% for year_quarter in supported_year_quarters %}
+            <option value="{{year_quarter}}">{{year_quarter}}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="generate quarterly sms billing report" />
+    <button
+        type="submit"
+        formaction="{{ url_for('main.platform_admin_quarterly_breakdown_csv') }}">
+        generate quarterly usage report
+    </button>
+</form>
+
 {% endblock %}
