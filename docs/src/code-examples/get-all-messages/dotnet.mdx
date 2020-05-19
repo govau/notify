@@ -1,0 +1,49 @@
+---
+lang: dotnet
+---
+
+```C#
+NotificationList notifications = client.GetNotifications(
+  templateType,
+  status,
+  reference,
+  olderThanId
+);
+```
+
+For each of the below arguments; if an empty string is provided, the respective filter is not applied.
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter name="templateType">
+      Filter messages by the type of template used. Options include:
+      <ul>
+        <li>email</li>
+        <li>sms</li>
+      </ul>
+    </Parameter>
+    <Parameter name="status">
+      Filter messages by message status. Options include:
+      <ul>
+        <li><strong>sending</strong> - the message is queued to be sent by the provider.</li>
+        <li><strong>delivered</strong> - the message was successfully delivered.</li>
+        <li><strong>failed</strong> - this will return all failure statuses permanent-failure, temporary-failure and technical-failure.</li>
+        <li><strong>permanent-failure</strong> - the provider was unable to deliver message, email does not exist; remove this recipient from your list.</li>
+        <li><strong>temporary-failure</strong> - the provider was unable to deliver message, email box was full; you can try to send the message again.</li>
+        <li><strong>technical-failure</strong> - Notify had a technical failure; you can try to send the message again.</li>
+      </ul>
+    </Parameter>
+    <Parameter name="reference">
+      Filter messages by reference supplied at time of sending.
+    </Parameter>
+    <Parameter name="olderThanId">
+      Specify a message ID to only retrieve messages older than that message.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+  If the request is successful, `object` the client returns a `NotificationList`. This is a `List` of `Notification` objects as defined in "Get a single message".
+
+</Panel>

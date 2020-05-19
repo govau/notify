@@ -7,15 +7,20 @@ import Contents from 'components/table-of-contents'
 
 # Get message status
 
+You can use the Notify API to retrieve the status of one or more messages.
+
+In the code, we call these status objects `Notifications`, which provide message metadata as well as delivery status. You can only retrieve information for messages up to seven days old.
+
 <Contents />
 
-## Get a single message
+## Get the status of one message
 
-You can use the Notify API to get a single message. This allows you to get information about the message such as:
-
-- message delivery status
-- message metadata
-
-You can only retrieve a message that is 7 days old or newer.
+You can use the Notify API to get a single message status.
 
 <Examples reference="get-message-by-id" title="Get a single message" />
+
+## Get the status of multiple messages
+
+You can also use the Notify API to find the status of multiple messages at the same time.
+
+<Examples reference="get-all-messages" title="Get multiple messages" />
