@@ -16,4 +16,14 @@
 <p>
   <a target="_blank" href="{{ url_for('main.live_services_csv') }}">Download live services csv report</a>
 </p>
+
+{% for service, breakdown in service_breakdown %}
+    <h2 class="heading-small">{{service.name}}</h2>
+
+    {% for month in breakdown %}
+        {{breakdown}}
+        <p>{{month.name}}: {{month.free}} - {{month.paid}}</p>
+    {% endfor %}
+{% endfor %}
+
 {% endblock %}

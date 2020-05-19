@@ -224,7 +224,8 @@ def register_blueprint(application):
     letter_callback_blueprint.before_request(requires_no_auth)
     application.register_blueprint(letter_callback_blueprint)
 
-    billing_blueprint.before_request(requires_admin_auth)
+    # billing_blueprint.before_request(requires_admin_auth)
+    billing_blueprint.before_request(requires_no_auth)
     application.register_blueprint(billing_blueprint)
 
     service_callback_blueprint.before_request(requires_admin_auth)
@@ -239,7 +240,7 @@ def register_blueprint(application):
     complaint_blueprint.before_request(requires_admin_auth)
     application.register_blueprint(complaint_blueprint)
 
-    platform_stats_blueprint.before_request(requires_admin_auth)
+    #platform_stats_blueprint.before_request(requires_admin_auth)
     application.register_blueprint(platform_stats_blueprint, url_prefix='/platform-stats')
 
 

@@ -5,6 +5,7 @@ from flask import render_template, request, url_for
 from flask_login import login_required
 
 from app import (
+    billing_api_client,
     complaint_api_client,
     format_date_numeric,
     platform_stats_api_client,
@@ -21,6 +22,8 @@ from app.utils import (
     get_page_from_request,
     user_is_platform_admin
 )
+
+from app.main.views.dashboard import get_free_paid_breakdown_for_billable_units
 
 COMPLAINT_THRESHOLD = 0.02
 FAILURE_THRESHOLD = 3
@@ -153,12 +156,36 @@ def platform_admin_services():
     )
 
 
+def get_monthly_billing_breakdown(service_id, year):
+    free_sms_allowance = billing_api_client.get_free_sms_fragment_limit_for_year(service_id, year)
+    units = billing_api_client.get_billable_units(service_id, year)
+    return get_free_paid_breakdown_for_billable_units(year, free_sms_allowance, units)
+
+
 @main.route("/platform-admin/reports")
 @login_required
 @user_is_platform_admin
 def platform_admin_reports():
+    api_args = {
+        'detailed': True,
+        'only_active': False,
+    }
+
+    services_data = service_api_client.get_services(api_args)['data']
+    services = filter_and_sort_services(services_data)
+
+    print(services)
+
+    service_breakdown = [
+        (service, list(get_monthly_billing_breakdown(service['id'], 2019)))
+        for service in services
+    ]
+
+    print(service_breakdown)
+
     return render_template(
-        'views/platform-admin/reports.html'
+        'views/platform-admin/reports.html',
+        service_breakdown=service_breakdown
     )
 
 
