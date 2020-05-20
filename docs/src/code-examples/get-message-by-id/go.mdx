@@ -5,7 +5,6 @@ lang: go
 resp, err := client.GetNotificationById(id)
 ```
 
-
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
     <Parameter required name="id" kind="String">
@@ -16,7 +15,7 @@ resp, err := client.GetNotificationById(id)
 
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
-If the request is successful a `Notification` is returned, for example for an SMS notification:
+If the request is successful, the client returns a `Notification`. For example:
 
 ```go
 resp := Notification {
@@ -36,4 +35,3 @@ resp := Notification {
 }
 ```
 </Panel>
-

@@ -1,0 +1,80 @@
+---
+lang: python
+---
+
+```python
+response = python_client.get_all_notifications(
+  template_type='sms',
+  status='delivered',
+  reference='xxxxxxxxxxxx',
+  older_than_id='xxxxxxxxxxxx'
+)
+```
+
+For each of the below arguments; if a falsy value is provided, the respective filter is not applied.
+
+<Panel label={<H3 appearAs={H5}>Arguments</H3>}>
+  <Parameters>
+    <Parameter name="template_type">
+      Filter messages by the type of template used. Options include:
+      <ul>
+        <li>email</li>
+        <li>sms</li>
+      </ul>
+    </Parameter>
+    <Parameter name="status">
+      Filter messages by message status. Options include:
+      <ul>
+        <li><strong>sending</strong> - the message is queued to be sent by the provider.</li>
+        <li><strong>delivered</strong> - the message was successfully delivered.</li>
+        <li><strong>failed</strong> - this will return all failure statuses permanent-failure, temporary-failure and technical-failure.</li>
+        <li><strong>permanent-failure</strong> - the provider was unable to deliver message, email does not exist; remove this recipient from your list.</li>
+        <li><strong>temporary-failure</strong> - the provider was unable to deliver message, email box was full; you can try to send the message again.</li>
+        <li><strong>technical-failure</strong> - Notify had a technical failure; you can try to send the message again.</li>
+      </ul>
+    </Parameter>
+    <Parameter name="reference">
+      Filter messages by reference supplied at time of sending.
+    </Parameter>
+    <Parameter name="older_than_id">
+      Specify a message ID to only retrieve messages older than that message.
+    </Parameter>
+  </Parameters>
+</Panel>
+
+<Panel label={<H3 appearAs={H5}>Response</H3>}>
+
+If the request is successful, the client returns a `dict`. For example:
+
+```python
+{"notifications":
+  [
+    {
+      "id": "740e5834-3a29-46b4-9a6f-16142fde533a", # required string - notification ID
+      "reference": "STRING", # optional string
+      "email_address": "sender@something.com",  # required string for emails
+      "phone_number": "+447900900123",  # required string for text messages
+      "type": "sms / email", # required string
+      "status": "sending / delivered / permanent-failure / temporary-failure / technical-failure", # required string
+      "template": {
+        "Version": INTEGER
+        "id": 'f33517ff-2a88-4f6e-b855-c550268ce08a' # required string - template ID
+        "uri": "/v2/template/{id}/{version}", # required
+      },
+      "body": "STRING", # required string - body of notification
+      "subject": "STRING" # required string for email - subject of email
+      "created_at": "STRING", # required string - date and time notification created
+      "created_by_name": "STRING", # optional string - name of the person who sent the notification if sent manually
+      "sent_at": "STRING", # optional string - date and time notification sent to provider
+      "completed_at:" "STRING" # optional string - date and time notification delivered or failed
+    },
+    …
+  ],
+  "links": {
+    "current": "/notifications?template_type=sms&status=delivered",
+    "next": "/notifications?other_than=last_id_in_list&template_type=sms&status=delivered"
+  }
+}
+```
+
+</Panel>

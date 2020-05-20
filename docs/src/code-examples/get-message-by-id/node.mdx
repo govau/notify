@@ -12,16 +12,16 @@ client
 The method returns a <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">promise</a>.
 
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
-<Parameters>
-  <Parameter required name="id">
-    The ID of the notification. This can be found in the response after sending an email or SMS.
-  </Parameter>
-</Parameters>
+  <Parameters>
+    <Parameter required name="id">
+      The ID of the notification. This can be found in the response after sending an email or SMS.
+    </Parameter>
+  </Parameters>
 </Panel>
 
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
-If the request is successful the promise resolves with an `object`, for example:
+If the request is successful, the promise resolves with an `object`, for example:
 
 ```json
 {
