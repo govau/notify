@@ -33,7 +33,8 @@ Before start, you'll need to create a new MySQL database:
 
 ```text
 mysql$ CREATE DATABASE `staytus` CHARSET utf8 COLLATE utf8_unicode_ci;
-mysql$ GRANT ALL ON staytus.* TO `staytus`@`localhost` IDENTIFIED BY "a_secure_password";
+mysql$ CREATE USER 'staytus'@'localhost' IDENTIFIED BY 'a_secure_password';
+mysql$ GRANT ALL ON staytus.* TO `staytus`@`localhost`;
 ```
 
 ```text
@@ -55,6 +56,13 @@ You may also want to change the SMTP configuration via environment variables,
 which are described in [`config/environment.example.yml`](config/environment.example.yml).
 
 To run staytus in the background, simply run `procodile start` without the `--foreground` option.
+
+If bundler is having trouble installing the mysql2 gem (on a mac), try:
+
+```
+brew install openssl
+export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/opt/openssl/lib/
+```
 
 ### Upgrading
 
