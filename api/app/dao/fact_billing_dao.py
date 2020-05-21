@@ -142,7 +142,7 @@ def fetch_usage_for_all_services(start_date, end_date):
         FactBilling.rate_multiplier,
         FactBilling.rate,
     ).order_by(
-        Service.name
+        Service.id
     )
 
     return query.all()

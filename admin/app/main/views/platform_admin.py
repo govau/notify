@@ -207,7 +207,7 @@ def platform_admin_quarterly_billing_csv():
                 billing_data.get('sms_rate'),
             ]
 
-    data = platform_stats_api_client.get_usage_for_all_services({
+    data = platform_stats_api_client.get_billing_for_all_services({
         'start_date': start_date,
         'end_date': end_date
     })
@@ -237,11 +237,12 @@ def platform_admin_quarterly_breakdown_csv():
                 billing_data.get('service_name'),
                 start_date,
                 end_date,
-                billing_data.get('sms_cost'),
-                billing_data.get('sms_total_notifications'),
-                billing_data.get('sms_total_units'),
-                billing_data.get('sms_billable_units'),
-                billing_data.get('sms_rate'),
+                billing_data.get('notification_type'),
+                billing_data.get('rate'),
+                billing_data.get('rate_multiplier'),
+                billing_data.get('notifications_sent'),
+                billing_data.get('billable_units_sent'),
+                billing_data.get('total_billable_units'),
             ]
 
     data = platform_stats_api_client.get_usage_for_all_services({
@@ -251,13 +252,14 @@ def platform_admin_quarterly_breakdown_csv():
 
     columns = [
         "Service ID", "Service name", "Start date", "End date",
-        "Cost", "SMS Notifications sent", "Total units", "Billable units",
-        "SMS rate",
+        "Notification type", "Rate", "Rate multiplier",
+        "Notifications sent", "Billable units sent", "Total billable units"
     ]
 
     csv_data = [columns, *(present_row(d) for d in data)]
     return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
-        'Content-Type': 'text/plain; charset=utf-8'
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': f'inline; filename="quarterly-usage-{year_quarter}.csv"'
     }
 
 

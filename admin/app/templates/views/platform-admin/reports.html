@@ -23,11 +23,11 @@
             <option value="{{year_quarter}}">{{year_quarter}}</option>
         {% endfor %}
     </select>
-    <input type="submit" value="generate quarterly billing report" />
+    <input type="submit" value="generate quarterly sms billing report" />
     <button
         type="submit"
         formaction="{{ url_for('main.platform_admin_quarterly_breakdown_csv') }}">
-        generate quarterly breakdown report
+        generate quarterly usage report
     </button>
 </form>
 

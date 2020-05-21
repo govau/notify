@@ -73,8 +73,8 @@ def get_platform_stats():
     return jsonify(stats)
 
 
-@platform_stats_blueprint.route('/usage-for-all-services')
-def get_usage_for_all_services():
+@platform_stats_blueprint.route('/billing-for-all-services')
+def get_billing_for_all_services():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
@@ -103,8 +103,8 @@ def get_usage_for_all_services():
     return jsonify(sorted(service_costs, key=lambda x: x['service_name']))
 
 
-@platform_stats_blueprint.route('/usages-for-all-services')
-def get_usages_for_all_services():
+@platform_stats_blueprint.route('/usage-for-all-services')
+def get_usage_for_all_services():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
