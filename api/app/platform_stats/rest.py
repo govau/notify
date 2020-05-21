@@ -92,6 +92,8 @@ def get_usage_for_all_services():
             "sms_total_units": int(s.sms_billable_units),
             # number of units sent out after free allowance removed
             "sms_billable_units": int(s.chargeable_billable_sms),
+            # notifications sent without being broken down to units
+            'sms_total_notifications': int(s.sms_notifications_sent),
             # total cost of billable units at sms rate
             "sms_cost": float(s.sms_cost),
         }

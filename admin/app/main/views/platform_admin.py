@@ -1,4 +1,5 @@
 import itertools
+import collections
 from datetime import datetime
 
 from flask import render_template, request, url_for
@@ -162,31 +163,66 @@ def get_monthly_billing_breakdown(service_id, year):
     return get_free_paid_breakdown_for_billable_units(year, free_sms_allowance, units)
 
 
+def generate_year_quarters(year):
+    yield (f'{year}/Q1', (f'{year}-07-01', f'{year}-09-30'))
+    yield (f'{year}/Q2', (f'{year}-10-01', f'{year}-12-31'))
+    yield (f'{year}/Q3', (f'{year+1}-01-01', f'{year+1}-03-31'))
+    yield (f'{year}/Q4', (f'{year+1}-04-01', f'{year+1}-06-30'))
+
+
+SUPPORTED_YEARS = [2018, 2019, 2020, 2021, 2022]
+SUPPORTED_YEAR_QUARTERS = collections.OrderedDict(
+    itertools.chain.from_iterable(
+        generate_year_quarters(year) for year in SUPPORTED_YEARS
+    )
+)
+
 @main.route("/platform-admin/reports")
 @login_required
 @user_is_platform_admin
 def platform_admin_reports():
-    api_args = {
-        'detailed': True,
-        'only_active': False,
-    }
-
-    services_data = service_api_client.get_services(api_args)['data']
-    services = filter_and_sort_services(services_data)
-
-    print(services)
-
-    service_breakdown = [
-        (service, list(get_monthly_billing_breakdown(service['id'], 2019)))
-        for service in services
-    ]
-
-    print(service_breakdown)
-
     return render_template(
         'views/platform-admin/reports.html',
-        service_breakdown=service_breakdown
+        supported_year_quarters=SUPPORTED_YEAR_QUARTERS,
     )
+
+
+@main.route("/platform-admin/reports/quarterly-billing.csv")
+@login_required
+@user_is_platform_admin
+def quarterly_billing_csv():
+    year_quarter = request.args.get('year_quarter')
+    start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
+
+    def present_row(billing_data):
+        return [
+                billing_data.get('service_id'),
+                billing_data.get('service_name'),
+                start_date,
+                end_date,
+                billing_data.get('sms_cost'),
+                billing_data.get('sms_total_notifications'),
+                billing_data.get('sms_total_units'),
+                billing_data.get('sms_billable_units'),
+                billing_data.get('sms_rate'),
+            ]
+
+    data = platform_stats_api_client.get_usage_for_all_services({
+        'start_date': start_date,
+        'end_date': end_date
+    })
+
+    columns = [
+        "Service ID", "Service name", "Start date", "End date",
+        "Cost", "SMS Notifications sent", "Total units", "Billable units",
+        "SMS rate",
+    ]
+
+    csv_data = [columns, *(present_row(d) for d in data)]
+    return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+    }
+
 
 
 @main.route("/platform-admin/reports/trial-services.csv")

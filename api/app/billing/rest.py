@@ -64,7 +64,6 @@ def get_yearly_billing_usage_summary_from_ft_billing(service_id):
     return jsonify(data)
 
 
-
 @billing_blueprint.route('/monthly-usage')
 def get_yearly_usage_by_month(service_id):
     try:
