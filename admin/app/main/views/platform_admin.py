@@ -190,7 +190,7 @@ def platform_admin_reports():
 @main.route("/platform-admin/reports/quarterly-billing.csv")
 @login_required
 @user_is_platform_admin
-def quarterly_billing_csv():
+def platform_admin_quarterly_billing_csv():
     year_quarter = request.args.get('year_quarter')
     start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
 
@@ -220,7 +220,44 @@ def quarterly_billing_csv():
 
     csv_data = [columns, *(present_row(d) for d in data)]
     return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
-        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': f'inline; filename="quarterly-billing-{year_quarter}.csv"'
+    }
+
+@main.route("/platform-admin/reports/quarterly-breakdown.csv")
+@login_required
+@user_is_platform_admin
+def platform_admin_quarterly_breakdown_csv():
+    year_quarter = request.args.get('year_quarter')
+    start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
+
+    def present_row(billing_data):
+        return [
+                billing_data.get('service_id'),
+                billing_data.get('service_name'),
+                start_date,
+                end_date,
+                billing_data.get('sms_cost'),
+                billing_data.get('sms_total_notifications'),
+                billing_data.get('sms_total_units'),
+                billing_data.get('sms_billable_units'),
+                billing_data.get('sms_rate'),
+            ]
+
+    data = platform_stats_api_client.get_usage_for_all_services({
+        'start_date': start_date,
+        'end_date': end_date
+    })
+
+    columns = [
+        "Service ID", "Service name", "Start date", "End date",
+        "Cost", "SMS Notifications sent", "Total units", "Billable units",
+        "SMS rate",
+    ]
+
+    csv_data = [columns, *(present_row(d) for d in data)]
+    return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
+        'Content-Type': 'text/plain; charset=utf-8'
     }
 
 

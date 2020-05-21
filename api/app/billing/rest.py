@@ -15,20 +15,9 @@ from app.dao.annual_billing_dao import (dao_get_free_sms_fragment_limit_for_year
                                         dao_get_all_free_sms_fragment_limit,
                                         dao_create_or_update_annual_billing_for_year,
                                         dao_update_annual_billing_for_future_years)
-from app.billing.billing_schemas import create_or_update_free_sms_fragment_limit_schema
 from app.errors import InvalidRequest
 from app.schema_validation import validate
 from app.dao.date_util import get_current_financial_year_start_year
-
-billing_blueprint = Blueprint(
-    'billing',
-    __name__,
-    url_prefix='/service/<uuid:service_id>/billing'
-)
-
-
-register_errors(billing_blueprint)
-
 from app.dao.fact_billing_dao import (
     fetch_monthly_billing_for_year,
     fetch_billing_totals_for_year,
@@ -39,6 +28,15 @@ from app.billing.billing_schemas import (
     serialize_ft_billing_remove_emails,
     serialize_ft_billing_yearly_totals,
 )
+
+billing_blueprint = Blueprint(
+    'billing',
+    __name__,
+    url_prefix='/service/<uuid:service_id>/billing'
+)
+
+
+register_errors(billing_blueprint)
 
 
 @billing_blueprint.route('/ft-monthly-usage')

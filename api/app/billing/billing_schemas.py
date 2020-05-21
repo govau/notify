@@ -34,7 +34,6 @@ def serialize_ft_billing_yearly_totals(data):
             "notification_type": total.notification_type,
             "billing_units": int(total.billable_units),
             "rate": float(total.rate),
-            "letter_total": float(total.billable_units * total.rate) if total.notification_type == 'letter' else 0
         }
         yearly_totals.append(json_result)
 
