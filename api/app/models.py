@@ -108,6 +108,7 @@ class User(db.Model):
     password_changed_at = db.Column(db.DateTime, index=False, unique=False, nullable=False,
                                     default=datetime.datetime.utcnow)
     logged_in_at = db.Column(db.DateTime, nullable=True)
+    email_last_verified_at = db.Column(db.DateTime, nullable=True)
     failed_login_count = db.Column(db.Integer, nullable=False, default=0)
     failed_verify_count = db.Column(db.Integer, nullable=False, default=0)
     state = db.Column(db.String, nullable=False, default='pending')
@@ -164,6 +165,7 @@ class User(db.Model):
             'failed_login_count': self.failed_login_count,
             'failed_verify_count': self.failed_verify_count,
             'logged_in_at': self.logged_in_at.strftime(DATETIME_FORMAT) if self.logged_in_at else None,
+            'email_last_verified_at': self.email_last_verified_at.strftime(DATETIME_FORMAT) if self.email_last_verified_at else None,
             'mobile_number': self.mobile_number,
             'organisations': [x.id for x in self.organisations if x.active],
             'password_changed_at': (
