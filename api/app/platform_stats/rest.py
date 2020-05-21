@@ -14,6 +14,7 @@ from app.dao.fact_billing_dao import (
     fetch_monthly_billing_for_year,
     fetch_billing_totals_for_year,
     fetch_sms_billing_for_all_services,
+    fetch_usage_for_all_services,
 )
 from app.billing.billing_schemas import (
     create_or_update_free_sms_fragment_limit_schema,
@@ -100,4 +101,28 @@ def get_usage_for_all_services():
 
     service_costs = [present_cost(c) for c in sms_costs]
     return jsonify(sorted(service_costs, key=lambda x: x['service_name']))
+
+
+@platform_stats_blueprint.route('/usages-for-all-services')
+def get_usages_for_all_services():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_date, end_date = validate_date_range_is_within_a_financial_year(start_date, end_date)
+    service_usage = fetch_usage_for_all_services(start_date, end_date)
+
+    def present_usage(s):
+        return {
+            "service_id": str(s.service_id),
+            "service_name": s.service_name,
+            "notification_type": s.notification_type,
+            "rate": float(s.rate),
+            "rate_multiplier": int(s.rate_multiplier),
+            "notifications_sent": int(s.notifications_sent),
+            "billable_units_sent": int(s.billable_units_sent),
+            "total_billable_units": int(s.total_billable_units),
+        }
+
+    usage = [present_usage(u) for u in service_usage]
+    return jsonify(usage)
 

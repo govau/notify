@@ -116,6 +116,38 @@ def fetch_sms_billing_for_all_services(start_date, end_date):
     return query.all()
 
 
+def fetch_usage_for_all_services(start_date, end_date):
+    billable_units = func.sum(FactBilling.billable_units * FactBilling.rate_multiplier)
+
+    query = db.session.query(
+        Service.name.label('service_name'),
+        Service.id.label('service_id'),
+        FactBilling.notification_type.label('notification_type'),
+        FactBilling.rate.label('rate'),
+        FactBilling.rate_multiplier.label('rate_multiplier'),
+        func.sum(FactBilling.notifications_sent).label('notifications_sent'),
+        func.sum(FactBilling.billable_units).label('billable_units_sent'),
+        billable_units.label('total_billable_units'),
+    ).select_from(
+        Service
+    ).join(
+        FactBilling, FactBilling.service_id == Service.id,
+    ).filter(
+        FactBilling.aet_date >= start_date,
+        FactBilling.aet_date <= end_date,
+    ).group_by(
+        Service.id,
+        Service.name,
+        FactBilling.notification_type,
+        FactBilling.rate_multiplier,
+        FactBilling.rate,
+    ).order_by(
+        Service.name
+    )
+
+    return query.all()
+
+
 def fetch_letter_costs_for_all_services(start_date, end_date):
     query = db.session.query(
         Organisation.name.label("organisation_name"),
