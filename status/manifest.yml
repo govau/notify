@@ -12,4 +12,5 @@ applications:
   - name: notify-status
     <<: *defaults
     routes:
-      - route: notify-status.apps.y.cld.gov.au
+      - route: status.notify.gov.au
+      - route: notify-status.apps.b.cld.gov.au

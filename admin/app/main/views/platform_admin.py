@@ -24,8 +24,6 @@ from app.utils import (
     user_is_platform_admin
 )
 
-from app.main.views.dashboard import get_free_paid_breakdown_for_billable_units
-
 COMPLAINT_THRESHOLD = 0.02
 FAILURE_THRESHOLD = 3
 ZERO_FAILURE_THRESHOLD = 0
@@ -157,12 +155,6 @@ def platform_admin_services():
     )
 
 
-def get_monthly_billing_breakdown(service_id, year):
-    free_sms_allowance = billing_api_client.get_free_sms_fragment_limit_for_year(service_id, year)
-    units = billing_api_client.get_billable_units(service_id, year)
-    return get_free_paid_breakdown_for_billable_units(year, free_sms_allowance, units)
-
-
 def generate_year_quarters(year):
     yield (f'{year}/Q1', (f'{year}-07-01', f'{year}-09-30'))
     yield (f'{year}/Q2', (f'{year}-10-01', f'{year}-12-31'))
@@ -224,6 +216,7 @@ def platform_admin_quarterly_billing_csv():
         'Content-Disposition': f'inline; filename="quarterly-billing-{year_quarter}.csv"'
     }
 
+
 @main.route("/platform-admin/reports/quarterly-breakdown.csv")
 @login_required
 @user_is_platform_admin
@@ -261,7 +254,6 @@ def platform_admin_quarterly_breakdown_csv():
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': f'inline; filename="quarterly-usage-{year_quarter}.csv"'
     }
-
 
 
 @main.route("/platform-admin/reports/trial-services.csv")
