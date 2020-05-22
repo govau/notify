@@ -1,11 +1,7 @@
-from datetime import datetime
-
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import func, desc, Integer, and_
 from app.utils import get_sydney_midnight_in_utc
 from app import db
 from app.dao.date_util import (
-    get_financial_year,
     get_financial_year_start,
     get_financial_year_for_datetime
 )
@@ -20,7 +16,6 @@ from app.models import (
     NotificationHistory,
     EMAIL_TYPE,
     AnnualBilling,
-    Organisation,
 )
 
 
