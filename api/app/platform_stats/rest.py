@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 
-from app.errors import register_errors
+from app.errors import register_errors, InvalidRequest
 from app.platform_stats.platform_stats_schema import platform_stats_request
 from app.dao.services_dao import (
     fetch_aggregate_stats_by_date_range_for_all_services
@@ -114,4 +114,3 @@ def get_usage_for_all_services():
 
     usage = [present_usage(u) for u in service_usage]
     return jsonify(usage)
-
