@@ -21,7 +21,6 @@ from app.dao.date_util import get_current_financial_year_start_year
 from app.dao.fact_billing_dao import (
     fetch_monthly_billing_for_year,
     fetch_billing_totals_for_year,
-    fetch_sms_billing_for_all_services,
 )
 from app.billing.billing_schemas import (
     create_or_update_free_sms_fragment_limit_schema,

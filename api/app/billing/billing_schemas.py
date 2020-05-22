@@ -16,7 +16,7 @@ create_or_update_free_sms_fragment_limit_schema = {
 def serialize_ft_billing_remove_emails(data):
     results = []
     billed_notifications = [x for x in data if x.notification_type != 'email']
-    for notification in data:
+    for notification in billed_notifications:
         json_result = {
             "month": (datetime.strftime(notification.month, "%B")),
             "notification_type": notification.notification_type,
@@ -38,4 +38,3 @@ def serialize_ft_billing_yearly_totals(data):
         yearly_totals.append(json_result)
 
     return yearly_totals
-

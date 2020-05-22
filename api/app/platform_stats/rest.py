@@ -11,21 +11,10 @@ from app.service.statistics import format_admin_stats
 from app.schema_validation import validate
 from app.utils import convert_utc_to_aet
 from app.dao.fact_billing_dao import (
-    fetch_monthly_billing_for_year,
-    fetch_billing_totals_for_year,
     fetch_sms_billing_for_all_services,
     fetch_usage_for_all_services,
 )
-from app.billing.billing_schemas import (
-    create_or_update_free_sms_fragment_limit_schema,
-    serialize_ft_billing_remove_emails,
-    serialize_ft_billing_yearly_totals,
-)
-from app.dao.date_util import (
-    get_financial_year,
-    get_financial_year_start,
-    get_financial_year_for_datetime
-)
+from app.dao.date_util import get_financial_year_for_datetime
 
 platform_stats_blueprint = Blueprint('platform_stats', __name__)
 
