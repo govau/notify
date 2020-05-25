@@ -1,3 +1,4 @@
+from datetime import datetime
 from notify.errors import HTTPError
 
 from app.notify_client import NotifyAdminAPIClient
@@ -12,6 +13,7 @@ ALLOWED_ATTRIBUTES = {
     'email_address',
     'mobile_number',
     'auth_type',
+    'email_last_verified_at',
 }
 
 
@@ -118,6 +120,11 @@ class UserApiClient(NotifyAdminAPIClient):
         endpoint = '/user/{0}/email-verification'.format(user_id)
         self.post(endpoint, data=data)
 
+    def send_reverify_email(self, user_id, to):
+        data = {'to': to}
+        endpoint = '/user/{0}/email-reverification'.format(user_id)
+        self.post(endpoint, data=data)
+
     def send_research_consent_email(self, user_id):
         endpoint = '/user/{0}/email-research-consent'.format(user_id)
         self.put(endpoint, data=None)
@@ -210,6 +217,10 @@ class UserApiClient(NotifyAdminAPIClient):
     def get_organisations_and_services_for_user(self, user_id):
         endpoint = '/user/{}/organisations-and-services'.format(user_id)
         return self.get(endpoint)
+
+    def set_email_last_verified_at(self, user_id):
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        return self.update_user_attribute(user_id, email_last_verified_at=now)
 
 
 user_api_client = UserApiClient()

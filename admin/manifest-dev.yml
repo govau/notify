@@ -24,3 +24,4 @@ applications:
       API_HOST_NAME: https://notify-api-((stg)).apps.y.cld.gov.au
       CF_APP_NAME: notify-((stg))
       FEATURE_PASSWORD_ROTATION: on
+      FEATURE_EMAIL_REVERIFICATION: on

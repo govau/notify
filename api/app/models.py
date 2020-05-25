@@ -165,7 +165,8 @@ class User(db.Model):
             'failed_login_count': self.failed_login_count,
             'failed_verify_count': self.failed_verify_count,
             'logged_in_at': self.logged_in_at.strftime(DATETIME_FORMAT) if self.logged_in_at else None,
-            'email_last_verified_at': self.email_last_verified_at.strftime(DATETIME_FORMAT) if self.email_last_verified_at else None,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S.%f') if self.created_at else None,
+            'email_last_verified_at': self.email_last_verified_at.strftime('%Y-%m-%d %H:%M:%S.%f') if self.email_last_verified_at else None,
             'mobile_number': self.mobile_number,
             'organisations': [x.id for x in self.organisations if x.active],
             'password_changed_at': (
