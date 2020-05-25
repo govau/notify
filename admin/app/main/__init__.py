@@ -36,4 +36,5 @@ from app.main.views import (  # noqa
     inbound_number,
     agreement,
     rotate_password,
+    reverify_email,
 )

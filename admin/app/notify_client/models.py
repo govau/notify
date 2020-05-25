@@ -61,6 +61,8 @@ class User(UserMixin):
         self.email_address = fields.get('email_address')
         self.mobile_number = fields.get('mobile_number')
         self.password_changed_at = fields.get('password_changed_at')
+        self.created_at = fields.get('created_at')
+        self.email_last_verified_at = fields.get('email_last_verified_at')
         self._set_permissions(fields.get('permissions', {}))
         self.auth_type = fields.get('auth_type')
         self.failed_login_count = fields.get('failed_login_count')

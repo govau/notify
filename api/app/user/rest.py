@@ -312,6 +312,32 @@ def send_new_user_email_verification(user_id):
     return jsonify({}), 204
 
 
+@user_blueprint.route('/<uuid:user_id>/email-reverification', methods=['POST'])
+def send_email_reverification(user_id):
+    user_to_send_to = get_user_by_id(user_id=user_id)
+    template = dao_get_template_by_id(current_app.config['REVERIFY_EMAIL_TEMPLATE_ID'])
+    service = Service.query.get(current_app.config['NOTIFY_SERVICE_ID'])
+
+    saved_notification = persist_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=user_to_send_to.email_address,
+        service=service,
+        personalisation={
+            'name': user_to_send_to.name,
+            'url': _create_reverification_url(user_to_send_to)
+        },
+        notification_type=template.template_type,
+        api_key_id=None,
+        key_type=KEY_TYPE_NORMAL,
+        reply_to_text=service.get_default_reply_to_email_address()
+    )
+
+    send_notification_to_queue(saved_notification, False, queue=QueueNames.NOTIFY)
+
+    return jsonify({}), 204
+
+
 @user_blueprint.route('/<uuid:user_id>/email-research-consent', methods=['PUT'])
 def send_support_user_research_consent(user_id):
     user = get_user_by_id(user_id=user_id)
@@ -463,6 +489,12 @@ def _create_reset_password_url(email):
 def _create_verification_url(user):
     data = json.dumps({'user_id': str(user.id), 'email': user.email_address})
     url = '/verify-email/'
+    return url_with_token(data, url, current_app.config)
+
+
+def _create_reverification_url(user):
+    data = json.dumps({'user_id': str(user.id), 'email': user.email_address})
+    url = '/reverify-email-token/'
     return url_with_token(data, url, current_app.config)
 
 

@@ -23,3 +23,4 @@ applications:
       API_HOST_NAME: https://rest-api.notify.gov.au
       CF_APP_NAME: notify
       FEATURE_PASSWORD_ROTATION: off
+      FEATURE_EMAIL_REVERIFICATION: off

@@ -24,6 +24,10 @@ class Config(object):
     # Hosted graphite statsd prefix
     STATSD_PREFIX = os.getenv('STATSD_PREFIX')
 
+    # Email reverification
+    DAYS_BETWEEN_EMAIL_REVERIFICATIONS = 30
+    FEATURE_EMAIL_REVERIFICATION_ENABLED = os.getenv('FEATURE_EMAIL_REVERIFICATION') == 'on'
+
     # Logging
     DEBUG = False
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')

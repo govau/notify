@@ -61,7 +61,6 @@ def old_service_dashboard(service_id):
 @login_required
 @user_has_permissions('view_activity')
 def service_dashboard(service_id):
-
     if session.get('invited_user'):
         session.pop('invited_user', None)
         session['service_id'] = service_id
