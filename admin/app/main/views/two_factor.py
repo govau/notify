@@ -12,6 +12,9 @@ from flask import (
 from flask_login import current_user, login_user
 from itsdangerous import SignatureExpired
 from notifications_utils.url_safe_token import check_token
+from datetime import date
+from datetime import datetime
+import dateutil.parser
 
 from app import user_api_client
 from app.main import main
@@ -61,6 +64,7 @@ def two_factor_email(token):
         flash("This link has already been used")
         session['user_details'] = {'id': user_id}
         return redirect(url_for('.resend_email_link'))
+
     return log_in_user(user_id)
 
 
@@ -89,20 +93,38 @@ def _is_safe_redirect_url(target):
         host_url.netloc == redirect_url.netloc
 
 
+def should_rotate_password(password_changed_at):
+    if not current_app.config['FEATURE_PASSWORD_ROTATION_ENABLED']:
+        return False
+
+    if 'password' in session.get('user_details', {}):
+        return False
+
+    delta = datetime.now() - dateutil.parser.parse(password_changed_at)
+    return delta.days >= current_app.config['DAYS_BETWEEN_PASSWORD_ROTATIONS']
+
+
 def log_in_user(user_id):
+    user = user_api_client.get_user(user_id)
+
+    if should_rotate_password(user.password_changed_at):
+        session['user_details'] = {'id': user_id}
+        return redirect(url_for('main.rotate_password'))
+
     try:
-        user = user_api_client.get_user(user_id)
-        # the user will have a new current_session_id set by the API - store it in the cookie for future requests
+        # the user will have a new current_session_id set by the API
+        # store it in the cookie for future requests
         session['current_session_id'] = user.current_session_id
-        # Check if coming from new password page
+        # check if password needs to be updated
         if 'password' in session.get('user_details', {}):
             user = user_api_client.update_password(user.id, password=session['user_details']['password'])
+            flash('Your password has been updated', 'default_with_tick')
         activated_user = user_api_client.activate_user(user)
         login_user(activated_user)
     finally:
         # get rid of anything in the session that we don't expect to have been set during register/sign in flow
-        session.pop("user_details", None)
-        session.pop("file_uploads", None)
+        session.pop('user_details', None)
+        session.pop('file_uploads', None)
 
     return redirect_when_logged_in(user_id)
 

@@ -437,6 +437,20 @@ class NewPasswordForm(StripWhitespaceForm):
     new_password = password()
 
 
+class RotatePasswordForm(StripWhitespaceForm):
+    def __init__(self, check_if_new_password_is_same_as_current_password, *args, **kwargs):
+        self.check_if_new_password_is_same_as_current_password = check_if_new_password_is_same_as_current_password
+        super(RotatePasswordForm, self).__init__(*args, **kwargs)
+
+    new_password = password()
+
+    def validate_new_password(self, new_password_field):
+        new_password_is_same_as_current_password = self.check_if_new_password_is_same_as_current_password(new_password_field.data)
+
+        if new_password_is_same_as_current_password:
+            raise ValidationError('Must be different to current password')
+
+
 class ChangePasswordForm(StripWhitespaceForm):
     def __init__(self, validate_password_func, *args, **kwargs):
         self.validate_password_func = validate_password_func

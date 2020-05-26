@@ -7,6 +7,7 @@ from flask import (
     request,
     session,
     url_for,
+    current_app,
 )
 from flask_login import current_user
 
@@ -23,29 +24,36 @@ def sign_in():
     form = LoginForm()
 
     if form.validate_on_submit():
-
         user = user_api_client.get_user_by_email_or_none(form.email_address.data)
         user = _get_and_verify_user(user, form.password.data)
-        if user and user.state == 'pending':
-            return redirect(url_for('main.resend_email_verification'))
 
-        if user and session.get('invited_user'):
-            invited_user = session.get('invited_user')
-            if user.email_address.lower() != invited_user['email_address'].lower():
-                flash("You can't accept an invite for another person.")
-                session.pop('invited_user', None)
-                abort(403)
-            else:
-                invite_api_client.accept_invite(invited_user['service'], invited_user['id'])
         if user:
-            session['user_details'] = {"email": user.email_address, "id": user.id}
-            if user.is_active:
-                if user.auth_type == "email_auth":
-                    return sign_in_email(user.id, user.email_address)
+            if user.state == 'pending':
+                return redirect(url_for('main.resend_email_verification'))
+
+            if session.get('invited_user'):
+                invited_user = session.get('invited_user')
+
+                if user.email_address.lower() != invited_user['email_address'].lower():
+                    flash("You can't accept an invite for another person.")
+                    session.pop('invited_user', None)
+                    abort(403)
                 else:
+                    invite_api_client.accept_invite(invited_user['service'], invited_user['id'])
+
+            session['user_details'] = {
+                'id': user.id,
+                'email': user.email_address,
+            }
+
+            if user.is_active:
+                if user.auth_type == 'email_auth':
+                    return sign_in_email(user.id, user.email_address)
+                elif user.auth_type == 'sms_auth':
                     return sign_in_sms(user.id, user.mobile_number)
 
-        # Vague error message for login in case of user not known, locked, inactive or password not verified
+        # Vague error message for login in case of user not known,
+        # locked, inactive or password not verified
         flash(Markup(
             (
                 "The email address or password you entered is incorrect."
@@ -54,6 +62,7 @@ def sign_in():
         ))
 
     other_device = current_user.logged_in_elsewhere()
+
     return render_template(
         'views/signin.html',
         form=form,

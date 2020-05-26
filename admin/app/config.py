@@ -28,6 +28,10 @@ class Config(object):
     DEBUG = False
     NOTIFY_LOG_PATH = os.getenv('NOTIFY_LOG_PATH')
 
+    # Password rotation
+    DAYS_BETWEEN_PASSWORD_ROTATIONS = 365
+    FEATURE_PASSWORD_ROTATION_ENABLED = os.getenv('FEATURE_PASSWORD_ROTATION') == 'on'
+
     CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME', 'dta-notify-csv-upload-20180712070203208700000001')
     LOGO_UPLOAD_BUCKET_NAME = os.getenv('LOGO_UPLOAD_BUCKET_NAME', 'public_logos-local')
 
