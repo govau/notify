@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+ruby "~> 2.6.0"
+
 gem 'rails', '~> 5.1'
 gem 'mysql2'
 gem 'sass-rails'
@@ -27,7 +29,6 @@ gem 'redcarpet'
 gem 'premailer'
 gem 'rack-custom-proxies'
 gem 'log_logins'
-gem "rake", "~> 12.3.3"
 
 group :development, :test do
   gem 'annotate', '~> 2.6.5'
