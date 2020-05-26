@@ -115,15 +115,15 @@ def test_update_sms_provider_to_inactive_sets_inactive(restore_provider_details)
 
 
 def test_get_current_sms_provider_returns_correct_provider(restore_provider_details):
-    set_primary_sms_provider('twilio')
+    set_primary_sms_provider('telstra')
 
     provider = get_current_provider('sms')
 
-    assert provider.identifier == 'twilio'
+    assert provider.identifier == 'telstra'
 
 
 @pytest.mark.parametrize('sap_enabled, identifier, expected', [
-    ('', 'telstra', 'twilio'),
+    ('', 'telstra', 'sap'),
     ('', 'twilio', 'telstra'),
     ('true', 'sap', 'telstra'),
     ('true', 'telstra', 'sap'),
@@ -400,7 +400,7 @@ def test_toggle_sms_provider_switches_provider_stores_notify_user_id_in_history_
 
 
 def test_can_get_all_provider_history(current_sms_provider):
-    assert len(dao_get_provider_versions(current_sms_provider.id)) == 2
+    assert len(dao_get_provider_versions(current_sms_provider.id)) == 3
 
 
 def test_get_sms_provider_with_equal_priority_returns_provider(
