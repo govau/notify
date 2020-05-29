@@ -27,19 +27,10 @@ def get_provider_details_by_identifier(identifier):
 
 def get_alternative_sms_provider(identifier):
     alternate_provider = None
-    if identifier == 'telstra':
+    if identifier != 'sap':
         alternate_provider = 'sap'
     else:
-        if os.getenv('FEATURE_SAP_ENABLED'):
-            if identifier == 'sap':
-                alternate_provider = 'telstra'
-            # We need to have a third check here because our tests expect that
-            # Twilio is enabled.
-            elif identifier == 'twilio':
-                alternate_provider = 'sap'
-        else:
-            if identifier == 'twilio':
-                alternate_provider = 'telstra'
+        alternate_provider = 'telstra'
 
     return ProviderDetails.query.filter_by(identifier=alternate_provider).one()
 
