@@ -124,7 +124,7 @@ def test_get_current_sms_provider_returns_correct_provider(restore_provider_deta
 
 @pytest.mark.parametrize('sap_enabled, identifier, expected', [
     ('', 'telstra', 'sap'),
-    ('', 'twilio', 'telstra'),
+    ('', 'twilio', 'sap'),
     ('true', 'sap', 'telstra'),
     ('true', 'telstra', 'sap'),
 ])
