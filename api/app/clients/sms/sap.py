@@ -135,7 +135,6 @@ class SAPSMSClient(PollableSMSClient):
     @timed("SAP auth request")
     def with_auth_config(self):
         access_token = auth_cache.get(_AUTH_CACHE_KEY)
-        print('access_oktne', access_token)
 
         if access_token is None:
             auth_api = AuthorizationApi(ApiClient(Configuration(
