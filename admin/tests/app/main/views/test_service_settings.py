@@ -1248,6 +1248,90 @@ def test_edit_sms_sender(
         is_default=api_default_args
     )
 
+@pytest.mark.parametrize('sms_sender, expected_link_text, partial_href', [
+    (
+        create_sms_sender(is_default=False),
+        'Delete',
+        partial(url_for, 'main.service_confirm_delete_sms_sender', sms_sender_id=sample_uuid()),
+    ),
+    (
+        create_sms_sender(is_default=True),
+        None,
+        None,
+    ),
+])
+def test_shows_delete_link_for_sms_sender(
+    mocker,
+    sms_sender,
+    expected_link_text,
+    partial_href,
+    fake_uuid,
+    client_request,
+):
+
+    mocker.patch('app.service_api_client.get_sms_sender', return_value=sms_sender)
+
+    page = client_request.get(
+        'main.service_edit_sms_sender',
+        service_id=SERVICE_ONE_ID,
+        sms_sender_id=sample_uuid(),
+    )
+
+    link = page.select_one('.page-footer a')
+    back_link = page.select_one('.govuk-back-link')
+
+    assert back_link.text.strip() == 'Back'
+    assert back_link['href'] == url_for(
+        '.service_sms_senders',
+        service_id=SERVICE_ONE_ID,
+    )
+
+    if expected_link_text:
+        assert normalize_spaces(link.text) == expected_link_text
+        assert link['href'] == partial_href(service_id=SERVICE_ONE_ID)
+    else:
+        assert not link
+
+
+def test_confirm_delete_sms_sender(
+    fake_uuid,
+    client_request,
+    get_non_default_sms_sender,
+):
+
+    page = client_request.get(
+        'main.service_confirm_delete_sms_sender',
+        service_id=SERVICE_ONE_ID,
+        sms_sender_id=fake_uuid,
+        _test_page_title=False,
+    )
+
+    assert normalize_spaces(page.select_one('.banner-dangerous').text) == (
+        'Are you sure you want to delete this text message sender? '
+        'Yes, delete'
+    )
+    assert 'action' not in page.select_one('.banner-dangerous form')
+    assert page.select_one('.banner-dangerous form')['method'] == 'post'
+
+def test_delete_sms_sender(
+    client_request,
+    service_one,
+    fake_uuid,
+    get_non_default_sms_sender,
+    mocker,
+):
+    mock_delete = mocker.patch('app.service_api_client.delete_sms_sender')
+    client_request.post(
+        '.service_delete_sms_sender',
+        service_id=SERVICE_ONE_ID,
+        sms_sender_id=fake_uuid,
+        _expected_redirect=url_for(
+            'main.service_sms_senders',
+            service_id=SERVICE_ONE_ID,
+            _external=True,
+        )
+    )
+    mock_delete.assert_called_once_with(service_id=SERVICE_ONE_ID, sms_sender_id=fake_uuid)
 
 @pytest.mark.parametrize('sender_page, fixture, default_message, params, checkbox_present', [
     (
