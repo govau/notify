@@ -192,11 +192,15 @@ def platform_admin_quarterly_billing_csv():
                 billing_data.get('service_name'),
                 start_date,
                 end_date,
-                billing_data.get('sms_cost'),
-                billing_data.get('sms_total_notifications'),
-                billing_data.get('sms_total_units'),
-                billing_data.get('sms_billable_units'),
                 billing_data.get('sms_rate'),
+                billing_data.get('total_cost'),
+                billing_data.get("notifications_sent"),
+                billing_data.get("billable_units"),
+                billing_data.get("billable_units_adjusted"),
+                billing_data.get("sms_free_rollover"),
+                billing_data.get("chargeable_units"),
+                billing_data.get("domestic_units"),
+                billing_data.get("international_units"),
             ]
 
     data = platform_stats_api_client.get_billing_for_all_services({
@@ -206,8 +210,10 @@ def platform_admin_quarterly_billing_csv():
 
     columns = [
         "Service ID", "Service name", "Start date", "End date",
-        "Cost", "SMS Notifications sent", "Total units", "Billable units",
-        "SMS rate",
+        "SMS rate", "Total cost",
+        "SMS Notifications sent", "Billable units", "Billable units adjusted(international)",
+        "SMS free rollover from last quarter", "Chargeable units",
+        "Domestic units", "International units",
     ]
 
     csv_data = [columns, *(present_row(d) for d in data)]

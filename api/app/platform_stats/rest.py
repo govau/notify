@@ -75,17 +75,29 @@ def get_billing_for_all_services():
             "service_id": str(s.service_id),
             "service_name": s.service_name,
             "sms_rate": float(s.sms_rate),
+
             # number of free sms available from start of this period FY
             "sms_free_rollover": s.sms_remainder,
-            # the total number of units we sent out.
+
+            # the total number of units(fragments) we sent out.
+            "billable_units": int(s.billable_units),
+
+            # the total number of adjusted units we sent out.
             # fragments * international modifier
-            "sms_total_units": int(s.sms_billable_units),
-            # number of units sent out after free allowance removed
-            "sms_billable_units": int(s.chargeable_billable_sms),
+            "billable_units_adjusted": float(s.billable_units_adjusted),
+
+            # number of adjusted units sent out after free allowance removed
+            "chargeable_units": float(s.chargeable_units),
+
+            # total cost of adjusted, non-free units at sms rate
+            "total_cost": float(s.total_cost),
+
+            # international/domestic unit count split
+            "domestic_units": int(s.domestic_units),
+            "international_units": int(s.international_units),
+
             # notifications sent without being broken down to units
-            'sms_total_notifications': int(s.sms_notifications_sent),
-            # total cost of billable units at sms rate
-            "sms_cost": float(s.sms_cost),
+            "notifications_sent": int(s.notifications_sent),
         }
 
     service_costs = [present_cost(c) for c in sms_costs]
