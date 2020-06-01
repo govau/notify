@@ -122,14 +122,11 @@ def test_get_current_sms_provider_returns_correct_provider(restore_provider_deta
     assert provider.identifier == 'telstra'
 
 
-@pytest.mark.parametrize('sap_enabled, identifier, expected', [
-    ('', 'telstra', 'sap'),
-    ('', 'twilio', 'sap'),
-    ('true', 'sap', 'telstra'),
-    ('true', 'telstra', 'sap'),
+@pytest.mark.parametrize('identifier, expected', [
+    ('telstra', 'sap'),
+    ('sap', 'telstra'),
 ])
-def test_get_alternative_sms_provider_returns_expected_provider(monkeypatch, notify_db, sap_enabled, identifier, expected):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', sap_enabled)
+def test_get_alternative_sms_provider_returns_expected_provider(monkeypatch, notify_db, identifier, expected):
 
     assert get_alternative_sms_provider(identifier).identifier == expected
 
@@ -177,56 +174,12 @@ def test_toggle_sms_provider_switches_provider(
     assert new_provider.priority < old_starting_provider.priority
 
 
-def test_toggle_sms_provider_switches_provider_FEATURE_SAP_ENABLED(
-    monkeypatch,
-    mocker,
-    restore_provider_details,
-    current_sms_provider,
-    with_active_sap_provider,
-    sample_user
-):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', 'true')
-
-    mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
-    dao_toggle_sms_provider(current_sms_provider.identifier)
-    new_provider = get_current_provider('sms')
-
-    old_starting_provider = get_provider_details_by_identifier(current_sms_provider.identifier)
-
-    assert new_provider.identifier != old_starting_provider.identifier
-    assert new_provider.priority < old_starting_provider.priority
-
-
 def test_toggle_sms_provider_switches_when_provider_priorities_are_equal(
     mocker,
     restore_provider_details,
     with_active_telstra_provider,
     sample_user
 ):
-    mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
-    current_provider = get_current_provider('sms')
-    new_provider = get_alternative_sms_provider(current_provider.identifier)
-
-    current_provider.priority = new_provider.priority
-    dao_update_provider_details(current_provider)
-
-    dao_toggle_sms_provider(current_provider.identifier)
-
-    old_starting_provider = get_provider_details_by_identifier(current_provider.identifier)
-
-    assert new_provider.identifier != old_starting_provider.identifier
-    assert new_provider.priority < old_starting_provider.priority
-
-
-def test_toggle_sms_provider_switches_when_provider_priorities_are_equal_FEATURE_SAP_ENABLED(
-    monkeypatch,
-    mocker,
-    restore_provider_details,
-    with_active_sap_provider,
-    sample_user
-):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', 'true')
-
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
     current_provider = get_current_provider('sms')
     new_provider = get_alternative_sms_provider(current_provider.identifier)
@@ -268,61 +221,12 @@ def test_toggle_sms_provider_updates_provider_history(
     assert updated_provider_history_rows[0].version - provider_history_rows[0].version == 1
 
 
-def test_toggle_sms_provider_updates_provider_history_FEATURE_SAP_ENABLED(
-    monkeypatch,
-    mocker,
-    restore_provider_details,
-    current_sms_provider,
-    with_active_sap_provider,
-    sample_user
-):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', 'true')
-
-    mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
-    provider_history_rows = ProviderDetailsHistory.query.filter(
-        ProviderDetailsHistory.id == current_sms_provider.id
-    ).order_by(
-        desc(ProviderDetailsHistory.version)
-    ).all()
-
-    dao_toggle_sms_provider(current_sms_provider.identifier)
-
-    updated_provider_history_rows = ProviderDetailsHistory.query.filter(
-        ProviderDetailsHistory.id == current_sms_provider.id
-    ).order_by(
-        desc(ProviderDetailsHistory.version)
-    ).all()
-
-    assert len(updated_provider_history_rows) - len(provider_history_rows) == 1
-    assert updated_provider_history_rows[0].version - provider_history_rows[0].version == 1
-
-
 def test_toggle_sms_provider_switches_provider_stores_notify_user_id(
     restore_provider_details,
     sample_user,
     with_active_telstra_provider,
     mocker
 ):
-    mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
-
-    current_provider = get_current_provider('sms')
-    dao_toggle_sms_provider(current_provider.identifier)
-    new_provider = get_current_provider('sms')
-
-    assert current_provider.identifier != new_provider.identifier
-    assert new_provider.created_by.id == sample_user.id
-    assert new_provider.created_by_id == sample_user.id
-
-
-def test_toggle_sms_provider_switches_provider_stores_notify_user_id_FEATURE_SAP_ENABLED(
-    monkeypatch,
-    restore_provider_details,
-    sample_user,
-    with_active_sap_provider,
-    mocker
-):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', 'true')
-
     mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
 
     current_provider = get_current_provider('sms')
@@ -365,40 +269,6 @@ def test_toggle_sms_provider_switches_provider_stores_notify_user_id_in_history(
     assert old_provider_from_history.created_by_id == sample_user.id
 
 
-def test_toggle_sms_provider_switches_provider_stores_notify_user_id_in_history_FEATURE_SAP_ENABLED(
-    monkeypatch,
-    restore_provider_details,
-    sample_user,
-    with_active_sap_provider,
-    mocker
-):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', 'true')
-
-    mocker.patch('app.provider_details.switch_providers.get_user_by_id', return_value=sample_user)
-
-    old_provider = get_current_provider('sms')
-    dao_toggle_sms_provider(old_provider.identifier)
-    new_provider = get_current_provider('sms')
-
-    old_provider_from_history = ProviderDetailsHistory.query.filter_by(
-        identifier=old_provider.identifier,
-        version=old_provider.version
-    ).order_by(
-        asc(ProviderDetailsHistory.priority)
-    ).first()
-    new_provider_from_history = ProviderDetailsHistory.query.filter_by(
-        identifier=new_provider.identifier,
-        version=new_provider.version
-    ).order_by(
-        asc(ProviderDetailsHistory.priority)
-    ).first()
-
-    assert old_provider.version == old_provider_from_history.version
-    assert new_provider.version == new_provider_from_history.version
-    assert new_provider_from_history.created_by_id == sample_user.id
-    assert old_provider_from_history.created_by_id == sample_user.id
-
-
 def test_can_get_all_provider_history(current_sms_provider):
     assert len(dao_get_provider_versions(current_sms_provider.id)) == 3
 
@@ -407,25 +277,6 @@ def test_get_sms_provider_with_equal_priority_returns_provider(
     restore_provider_details,
     with_active_telstra_provider
 ):
-    current_provider = get_current_provider('sms')
-    new_provider = get_alternative_sms_provider(current_provider.identifier)
-
-    current_provider.priority = new_provider.priority
-    dao_update_provider_details(current_provider)
-
-    conflicting_provider = \
-        dao_get_sms_provider_with_equal_priority(current_provider.identifier, current_provider.priority)
-
-    assert conflicting_provider
-
-
-def test_get_sms_provider_with_equal_priority_returns_provider_FEATURE_SAP_ENABLED(
-    monkeypatch,
-    restore_provider_details,
-    with_active_sap_provider
-):
-    monkeypatch.setenv('FEATURE_SAP_ENABLED', 'true')
-
     current_provider = get_current_provider('sms')
     new_provider = get_alternative_sms_provider(current_provider.identifier)
 
