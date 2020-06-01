@@ -105,7 +105,7 @@ def create_app(application):
     redis_store.init_app(application)
     performance_platform_client.init_app(application)
     clients.init_app(
-        sms_clients=[sap_sms_client, telstra_sms_client, twilio_sms_client],
+        sms_clients=[sap_sms_client, telstra_sms_client],
         email_clients=[aws_ses_client, smtp_client]
     )
 
