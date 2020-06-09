@@ -369,7 +369,7 @@ class ApiKeySchema(BaseSchema):
 class JobSchema(BaseSchema):
     created_by_user = fields.Nested(UserSchema, attribute="created_by",
                                     dump_to="created_by", only=["id", "name"], dump_only=True)
-    created_by = field_for(models.Job, 'created_by', required=True, load_only=True)
+    created_by = field_for(models.Job, 'created_by', load_only=True)
 
     job_status = field_for(models.JobStatus, 'name', required=False)
 

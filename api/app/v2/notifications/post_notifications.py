@@ -12,6 +12,10 @@ from app.config import QueueNames, TaskNames
 from app.dao.notifications_dao import dao_update_notification, update_notification_status_by_reference
 from app.dao.templates_dao import dao_create_template
 from app.dao.users_dao import get_user_by_id
+from app.dao.jobs_dao import (
+    dao_create_job,
+    dao_update_job,
+)
 from app.letters.utils import upload_letter_pdf
 from app.models import (
     Template,
@@ -44,6 +48,7 @@ from app.notifications.validators import (
     check_service_can_schedule_notification,
     check_service_has_permission,
     validate_template,
+    validate_template_without_content,
     check_service_email_reply_to_id,
     check_service_sms_sender_id
 )
@@ -56,6 +61,7 @@ from app.v2.notifications.notification_schemas import (
     post_letter_request,
     post_precompiled_letter_request
 )
+from app.schemas import job_schema
 from app.v2.notifications.create_response import (
     create_post_sms_response_from_notification,
     create_post_email_response_from_notification,
@@ -98,6 +104,70 @@ def post_precompiled_letter_notification():
     }
 
     return jsonify(resp), 201
+
+
+@v2_notification_blueprint.route('/bulk', methods=['POST'])
+def send_bulk_notifications():
+    form = request.json
+    notification_type = form.get('notification_type')
+    check_service_has_permission(notification_type, authenticated_service.permissions)
+    scheduled_for = form.get("scheduled_for", None)
+    check_service_can_schedule_notification(authenticated_service.permissions, scheduled_for)
+    check_rate_limiting(authenticated_service, api_user)
+    template = validate_template_without_content(
+        form['template_id'],
+        authenticated_service,
+        notification_type,
+    )
+
+    notification_requests = request.json.get('notifications', [])
+    job_params = {
+        'original_file_name': 'wow this is not a csv',
+        'service': authenticated_service.id,
+        'template': template.id,
+        'template_version': template.version,
+        'notification_count': len(notification_requests),
+    }
+    print('job_params', job_params)
+    job = job_schema.load(job_params).data
+    print(job)
+    dao_create_job(job)
+    print(job)
+
+    for job_row, notification_request in enumerate(notification_requests, start=1):
+        reply_to = get_reply_to_text(notification_type, notification_request, template)
+
+        fallback_params = {
+            param: notification_request.get(param, form.get(param))
+            for param
+            in ['reference', 'status_callback_url', 'status_callback_bearer_token']
+        }
+
+        params = {
+            'phone_number': notification_request.get('phone_number'),
+            'email_address': notification_request.get('email_address'),
+            'personalisation': notification_request.get('personalisation'),
+            **fallback_params
+        }
+
+        job_info = {
+            'job_id': job.id,
+            'job_row': job_row,
+        }
+
+        notification = process_sms_or_email_notification(
+            form=params,
+            notification_type=notification_type,
+            api_key=api_user,
+            template=template,
+            service=authenticated_service,
+            job_info=job_info,
+            reply_to_text=reply_to
+        )
+
+    job_json = job_schema.dump(job).data
+    return jsonify(data=job_json), 201
+
 
 
 @v2_notification_blueprint.route('/<notification_type>', methods=['POST'])
@@ -171,7 +241,10 @@ def post_notification(notification_type):
     return jsonify(resp), 201
 
 
-def process_sms_or_email_notification(*, form, notification_type, api_key, template, service, reply_to_text=None):
+def process_sms_or_email_notification(
+        *, form, notification_type, api_key,
+        template, service, job_info=None, reply_to_text=None):
+    job_info = job_info or {}
     form_send_to = form['email_address'] if notification_type == EMAIL_TYPE else form['phone_number']
 
     send_to = validate_and_format_recipient(send_to=form_send_to,
@@ -196,6 +269,8 @@ def process_sms_or_email_notification(*, form, notification_type, api_key, templ
         reply_to_text=reply_to_text,
         status_callback_url=form.get('status_callback_url', None),
         status_callback_bearer_token=form.get('status_callback_bearer_token', None),
+        job_id=job_info.get('job_id', None),
+        job_row_number=job_info.get('row_number', None),
     )
 
     scheduled_for = form.get("scheduled_for", None)
