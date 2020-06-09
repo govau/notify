@@ -392,6 +392,17 @@ class JobSchema(BaseSchema):
         strict = True
 
 
+class BatchSchema(BaseSchema):
+    class Meta:
+        model = models.Batch
+        exclude = (
+            "created_at",
+            "api_key_id",
+            "key_type"
+        )
+        strict = True
+
+
 class NotificationSchema(ma.Schema):
 
     class Meta:
@@ -682,6 +693,7 @@ detailed_service_schema = DetailedServiceSchema()
 template_schema = TemplateSchema()
 api_key_schema = ApiKeySchema()
 job_schema = JobSchema()
+batch_schema = BatchSchema()
 sms_admin_notification_schema = SmsAdminNotificationSchema()
 sms_template_notification_schema = SmsTemplateNotificationSchema()
 job_sms_template_notification_schema = JobSmsTemplateNotificationSchema()

@@ -108,19 +108,42 @@ def dao_get_last_template_usage(template_id, template_type):
     ).first()
 
 
-@statsd(namespace="dao")
-@transactional
-def dao_create_notification(notification):
+def dao_create_notification_records(notification, scheduled_for=None):
     if not notification.id:
         # need to populate defaulted fields before we create the notification history object
         notification.id = create_uuid()
     if not notification.status:
         notification.status = NOTIFICATION_CREATED
 
-    db.session.add(notification)
-    if _should_record_notification_in_history_table(notification):
-        db.session.add(NotificationHistory.from_original(notification))
+    yield notification
 
+    if _should_record_notification_in_history_table(notification):
+        yield NotificationHistory.from_original(notification)
+
+    if scheduled_for:
+        yield ScheduledNotification.for_notification(notification.id, scheduled_for)
+
+
+@statsd(namespace="dao")
+@transactional
+def dao_create_notification(notification):
+    for record in dao_create_notification_records(notification):
+        db.session.add(record)
+
+
+@statsd(namespace="dao")
+@transactional
+def dao_create_notifications(notifications):
+    notification_records = []
+    notification_history_records = []
+
+    for notification in notifications:
+        record, *history_records = dao_create_notification_records(notification)
+        notification_records.append(record)
+        notification_history_records.extend(history_records)
+    
+    db.session.bulk_save_objects(notification_records + notification_history_records)
+    return notification_records
 
 def _should_record_notification_in_history_table(notification):
     if notification.api_key_id and notification.key_type == KEY_TYPE_TEST:

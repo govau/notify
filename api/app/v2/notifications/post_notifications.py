@@ -3,6 +3,7 @@ import functools
 import io
 import math
 
+from datetime import datetime
 from flask import request, jsonify, current_app, abort
 from notifications_utils.pdf import pdf_page_count, PdfReadError
 from notifications_utils.recipients import try_validate_and_format_phone_number
@@ -12,10 +13,7 @@ from app.config import QueueNames, TaskNames
 from app.dao.notifications_dao import dao_update_notification, update_notification_status_by_reference
 from app.dao.templates_dao import dao_create_template
 from app.dao.users_dao import get_user_by_id
-from app.dao.jobs_dao import (
-    dao_create_job,
-    dao_update_job,
-)
+from app.dao.batches_dao import dao_create_batch
 from app.letters.utils import upload_letter_pdf
 from app.models import (
     Template,
@@ -30,6 +28,8 @@ from app.models import (
     NOTIFICATION_SENDING,
     NOTIFICATION_DELIVERED,
     NOTIFICATION_PENDING_VIRUS_CHECK,
+    JOB_STATUS_FINISHED,
+    JOB_STATUS_IN_PROGRESS,
 )
 from app.celery.letters_pdf_tasks import create_letters_pdf
 from app.celery.research_mode_tasks import create_fake_letter_response_file
@@ -61,7 +61,7 @@ from app.v2.notifications.notification_schemas import (
     post_letter_request,
     post_precompiled_letter_request
 )
-from app.schemas import job_schema
+from app.schemas import batch_schema
 from app.v2.notifications.create_response import (
     create_post_sms_response_from_notification,
     create_post_email_response_from_notification,
@@ -106,13 +106,13 @@ def post_precompiled_letter_notification():
     return jsonify(resp), 201
 
 
-@v2_notification_blueprint.route('/bulk', methods=['POST'])
-def send_bulk_notifications():
+@v2_notification_blueprint.route('/batch', methods=['POST'])
+def send_batch_notifications():
     form = request.json
     notification_type = form.get('notification_type')
     check_service_has_permission(notification_type, authenticated_service.permissions)
-    scheduled_for = form.get("scheduled_for", None)
-    check_service_can_schedule_notification(authenticated_service.permissions, scheduled_for)
+    # scheduled_for = form.get("scheduled_for", None)
+    # check_service_can_schedule_notification(authenticated_service.permissions, scheduled_for)
     check_rate_limiting(authenticated_service, api_user)
     template = validate_template_without_content(
         form['template_id'],
@@ -121,52 +121,46 @@ def send_bulk_notifications():
     )
 
     notification_requests = request.json.get('notifications', [])
-    job_params = {
-        'original_file_name': 'wow this is not a csv',
+    batch_params = {
         'service': authenticated_service.id,
         'template': template.id,
         'template_version': template.version,
-        'notification_count': len(notification_requests),
     }
-    print('job_params', job_params)
-    job = job_schema.load(job_params).data
-    print(job)
-    dao_create_job(job)
-    print(job)
+    batch = batch_schema.load(batch_params).data
+    dao_create_batch(batch)
 
-    for job_row, notification_request in enumerate(notification_requests, start=1):
-        reply_to = get_reply_to_text(notification_type, notification_request, template)
+    def process_notifications(requests)
+        for notification_request in notification_requests:
+            reply_to = get_reply_to_text(notification_type, notification_request, template)
 
-        fallback_params = {
-            param: notification_request.get(param, form.get(param))
-            for param
-            in ['reference', 'status_callback_url', 'status_callback_bearer_token']
-        }
+            fallback_params = {
+                param: notification_request.get(param, form.get(param))
+                for param
+                in ['reference', 'status_callback_url', 'status_callback_bearer_token']
+            }
 
-        params = {
-            'phone_number': notification_request.get('phone_number'),
-            'email_address': notification_request.get('email_address'),
-            'personalisation': notification_request.get('personalisation'),
-            **fallback_params
-        }
+            params = {
+                'phone_number': notification_request.get('phone_number'),
+                'email_address': notification_request.get('email_address'),
+                'personalisation': notification_request.get('personalisation'),
+                **fallback_params
+            }
 
-        job_info = {
-            'job_id': job.id,
-            'job_row': job_row,
-        }
+            notification = process_sms_or_email_notification(
+                form=params,
+                notification_type=notification_type,
+                api_key=api_user,
+                template=template,
+                service=authenticated_service,
+                reply_to_text=reply_to,
+                batch=batch
+            )
 
-        notification = process_sms_or_email_notification(
-            form=params,
-            notification_type=notification_type,
-            api_key=api_user,
-            template=template,
-            service=authenticated_service,
-            job_info=job_info,
-            reply_to_text=reply_to
-        )
+            print(notification)
+            notifications.append(notification)
 
-    job_json = job_schema.dump(job).data
-    return jsonify(data=job_json), 201
+    batch_json = batch_schema.dump(batch).data
+    return jsonify(data=batch_json), 201
 
 
 
@@ -243,17 +237,16 @@ def post_notification(notification_type):
 
 def process_sms_or_email_notification(
         *, form, notification_type, api_key,
-        template, service, job_info=None, reply_to_text=None):
-    job_info = job_info or {}
+        template, service, batch=None, reply_to_text=None):
     form_send_to = form['email_address'] if notification_type == EMAIL_TYPE else form['phone_number']
 
-    send_to = validate_and_format_recipient(send_to=form_send_to,
-                                            key_type=api_key.key_type,
-                                            service=service,
-                                            notification_type=notification_type)
-
     # Do not persist or send notification to the queue if it is a simulated recipient
-    simulated = simulated_recipient(send_to, notification_type)
+    simulated = is_simulated_recipient(
+        send_to=form_send_to,
+        key_type=api_key.key_type,
+        service=service,
+        notification_type=notification_type
+    )
 
     notification = persist_notification(
         template_id=template.id,
@@ -269,8 +262,7 @@ def process_sms_or_email_notification(
         reply_to_text=reply_to_text,
         status_callback_url=form.get('status_callback_url', None),
         status_callback_bearer_token=form.get('status_callback_bearer_token', None),
-        job_id=job_info.get('job_id', None),
-        job_row_number=job_info.get('row_number', None),
+        bulk_batch_id=batch.id if batch else None
     )
 
     scheduled_for = form.get("scheduled_for", None)
@@ -288,6 +280,8 @@ def process_sms_or_email_notification(
             current_app.logger.debug("POST simulated notification for id: {}".format(notification.id))
 
     return notification
+
+def process_sms_or_email_notification()
 
 
 def process_letter_notification(*, letter_data, api_key, template, reply_to_text, precompiled=False):
@@ -411,3 +405,13 @@ def get_precompiled_letter_template(service_id):
     dao_create_template(template)
 
     return template
+
+def is_simulated_recipient(*, send_to, key_type, service, notification_type):
+    target = validate_and_format_recipient(
+        send_to=form_send_to,
+        key_type=key_type,
+        service=service,
+        notification_type=notification_type
+    )
+
+    return simulated_recipient(target, notification_type)

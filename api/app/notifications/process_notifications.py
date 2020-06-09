@@ -52,7 +52,7 @@ def check_placeholders(template_object):
         raise BadRequestError(fields=[{'template': message}], message=message)
 
 
-def persist_notification(
+def prepare_notification(
     *,
     template_id,
     template_version,
@@ -121,26 +121,59 @@ def persist_notification(
     elif notification_type == EMAIL_TYPE:
         notification.normalised_to = format_email_address(notification.to)
 
-    # if simulated create a Notification model to return but do not persist the Notification to the dB
+    return notification
+
+def store_notification(notification):
+    dao_create_notification(notification)
+    notification_id = notification.id
+    notification_type = notification.notification_type
+    created_at = notification.created_at
+    current_app.logger.info(f"{notification_type} {notification_id} created at {created_at}")
+
+    if notification.key_type == KEY_TYPE_TEST:
+        return notification
+
+    service_id = notification.service_id
+    template_id = notification.template_id
+    if redis_store.get(redis.daily_limit_cache_key(service_id)):
+        redis_store.incr(redis.daily_limit_cache_key(service_id))
+    if redis_store.get_all_from_hash(cache_key_for_service_template_counter(service_id)):
+        redis_store.increment_hash_value(cache_key_for_service_template_counter(service_id), template_id)
+        increment_template_usage_cache(service_id, template_id, notification.created_at)
+
+    return notification
+
+def store_notifications(notifications, template):
+    def not_test_notification(notification):
+        return notification.key_type != KEY_TYPE_TEST
+
+    dao_create_notifications(notifications)
+
+    non_test_notifications = filter(not_test_notification, notifications)
+    num_real_notifications = len(non_test_notifications)
+
+    service = template.service
+    if redis_store.get(redis.daily_limit_cache_key(service.id)):
+        redis_store.incr(redis.daily_limit_cache_key(service.id), incr_by=num_real_notifications)
+    if redis_store.get_all_from_hash(cache_key_for_service_template_counter(service.id)):
+        redis_store.increment_hash_value(cache_key_for_service_template_counter(service.id), template_id, incr_by=num_real_notifications)
+        increment_template_usage_cache(service.id, template_id, notification.created_at, incr_by=num_real_notifications)
+
+    return notifications
+
+
+
+def persist_notification(*, simulated=False, **kwargs):
+    notification = prepare_notification(**kwargs)
     if not simulated:
-        dao_create_notification(notification)
-        if key_type != KEY_TYPE_TEST:
-            if redis_store.get(redis.daily_limit_cache_key(service.id)):
-                redis_store.incr(redis.daily_limit_cache_key(service.id))
-            if redis_store.get_all_from_hash(cache_key_for_service_template_counter(service.id)):
-                redis_store.increment_hash_value(cache_key_for_service_template_counter(service.id), template_id)
+        store_notification(notification)
 
-            increment_template_usage_cache(service.id, template_id, notification_created_at)
-
-        current_app.logger.info(
-            "{} {} created at {}".format(notification_type, notification_id, notification_created_at)
-        )
     return notification
 
 
-def increment_template_usage_cache(service_id, template_id, created_at):
+def increment_template_usage_cache(service_id, template_id, created_at, incr_by=1):
     key = cache_key_for_service_template_usage_per_day(service_id, convert_utc_to_aet(created_at))
-    redis_store.increment_hash_value(key, template_id)
+    redis_store.increment_hash_value(key, template_id, incr_by=incr_by)
     # set key to expire in eight days - we don't know if we've just created the key or not, so must assume that we
     # have and reset the expiry. Eight days is longer than any notification is in the notifications table, so we'll
     # always capture the full week's numbers
@@ -184,6 +217,5 @@ def simulated_recipient(to_address, notification_type):
 
 def persist_scheduled_notification(notification_id, scheduled_for):
     scheduled_datetime = convert_aet_to_utc(datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M"))
-    scheduled_notification = ScheduledNotification(notification_id=notification_id,
-                                                   scheduled_for=scheduled_datetime)
+    scheduled_notification = ScheduledNotification.for_notification(notification_id, scheduled_datetime)
     dao_created_scheduled_notification(scheduled_notification)
