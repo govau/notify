@@ -267,7 +267,7 @@ def get_human_day(time):
     now = convert_utc_to_aet(datetime.utcnow())
 
     #  Add 1 minute to transform 00:00 into ‘midnight today’ instead of ‘midnight tomorrow’
-    date = (convert_utc_to_aet(time) - timedelta(minutes=1)).date()
+    date = (gmt_timezones(time) - timedelta(minutes=1)).date()
     if date == (now + timedelta(days=1)).date():
         return 'tomorrow'
     if date == now.date():
