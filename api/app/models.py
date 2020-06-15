@@ -379,6 +379,7 @@ class Service(db.Model, Versioned):
     go_live_user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=True)
     go_live_user = db.relationship('User', foreign_keys=[go_live_user_id])
     go_live_at = db.Column(db.DateTime, nullable=True)
+    preferred_sms_provider = db.Column(db.String(), nullable=True)
 
     organisation = db.relationship(
         'Organisation',

@@ -12,7 +12,6 @@ sap_response_map = {
     'ERROR': 'permanent-failure',
 }
 
-_AUTH_CACHE_KEY = 'auth'
 auth_cache = SimpleCache()
 
 
@@ -29,6 +28,10 @@ class SAPSMSClient(PollableSMSClient):
     def init_app(self, logger, notify_host, *args, **kwargs):
         self.logger = logger
         self.notify_host = notify_host
+
+    @property
+    def _auth_cache_key(self):
+        return 'sap_auth'
 
     @property
     def name(self):
@@ -65,7 +68,7 @@ class SAPSMSClient(PollableSMSClient):
             for message in response.sap_notification:
                 yield message.order_id, message.status
 
-        self.logger.info(f"SAP query for SMS status scanned {page_count} pages")
+        self.logger.info(f"{self.name} query for SMS status scanned {page_count} pages")
 
     @timed("SAP get message status request")
     def check_message_status(self, reference, sent_at=None, **options):
@@ -88,7 +91,7 @@ class SAPSMSClient(PollableSMSClient):
 
         callback = [
             {
-                "url": f"{self.notify_host}/notifications/sms/sap/{reference}",
+                "url": f"{self.notify_host}/notifications/sms/{self.name}/{reference}",
                 "authType": "OAUTH2",
                 "oAuth2": {
                     "oAuthClient": oauth2_client.client_id,
@@ -113,7 +116,7 @@ class SAPSMSClient(PollableSMSClient):
         try:
             resp = sms_api.send_sms_using_post(body=body)
             order = resp.livelink_order_ids[0]
-            self.logger.info(f"SAP send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
+            self.logger.info(f"{self.name} send SMS request for {reference} succeeded: {order.livelink_order_id[0]}")
 
             # Avoid circular imports by importing this file later.
             from app.models import (
@@ -122,19 +125,19 @@ class SAPSMSClient(PollableSMSClient):
             return order.livelink_order_id[0], NOTIFICATION_SENDING
         except Exception as e:
             if e.status == 401 and in_retry:
-                self.logger.error(f"SAP send SMS request for {reference} failed")
+                self.logger.error(f"${self.name} send SMS request for {reference} failed")
                 raise e
 
         self.clear_cache()
         return self.send_sms(to, content, reference, sender=sender, in_retry=True)
 
     def clear_cache(self):
-        auth_cache.delete(_AUTH_CACHE_KEY)
+        auth_cache.delete(self._auth_cache_key)
 
     @property
     @timed("SAP auth request")
     def with_auth_config(self):
-        access_token = auth_cache.get(_AUTH_CACHE_KEY)
+        access_token = auth_cache.get(self._auth_cache_key)
 
         if access_token is None:
             auth_api = AuthorizationApi(ApiClient(Configuration(
@@ -146,9 +149,19 @@ class SAPSMSClient(PollableSMSClient):
             access_token = resp.access_token
 
             # cache for 15 minutes (token is valid for 45 minutes)
-            auth_cache.set(_AUTH_CACHE_KEY, access_token, timeout=15 * 60)
+            auth_cache.set(self._auth_cache_key, access_token, timeout=15 * 60)
 
         conf = Configuration()
         conf.access_token = access_token
 
         return conf
+
+
+class SAPCovidSMSClient(SAPSMSClient):
+    @property
+    def name(self):
+        return 'sap_covid'
+
+    @property
+    def _auth_cache_key(self):
+        return 'sap_covid_auth'
