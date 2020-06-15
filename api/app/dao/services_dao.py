@@ -656,6 +656,13 @@ def dao_resume_service(service_id):
     service.active = True
 
 
+@transactional
+@version_class(Service)
+def dao_set_service_preferred_sms_provider(service_id, provider):
+    service = Service.query.get(service_id)
+    service.preferred_sms_provider = provider
+
+
 def dao_fetch_active_users_for_service(service_id):
     query = User.query.filter(
         User.services.any(id=service_id),

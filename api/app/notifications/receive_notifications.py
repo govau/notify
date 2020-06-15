@@ -20,36 +20,48 @@ receive_notifications_blueprint = Blueprint('receive_notifications', __name__)
 register_errors(receive_notifications_blueprint)
 
 
-@receive_notifications_blueprint.route('/notifications/sms/receive/sap', methods=['POST'])
-@require_oauth(scope=None)
-def receive_sap_sms():
+def _receive_sap_sms(provider_name, data):
     response = MessagingResponse()
-
-    data = request.json
-
-    service = fetch_potential_service(data['originatingAddress'], 'sap')
+    service = fetch_potential_service(data['originatingAddress'], provider_name)
 
     if not service:
         # Since this is an issue with our service <-> number mapping, or no
         # inbound_sms service permission we should still tell SAP that we
         # received it successfully.
-        return str(response), 200
+        return response
 
-    statsd_client.incr('inbound.sap.successful')
+    statsd_client.incr(f'inbound.{provider_name}.successful')
 
-    inbound = create_inbound_sms_object(service,
-                                        content=data["message"],
-                                        from_number=data['msisdn'],
-                                        provider_ref=data["messageId"],
-                                        provider_name="sap")
+    inbound = create_inbound_sms_object(
+        service,
+        content=data["message"],
+        from_number=data['msisdn'],
+        provider_ref=data["messageId"],
+        provider_name=provider_name
+    )
 
     tasks.send_inbound_sms_to_service.apply_async([str(inbound.id), str(service.id)], queue=QueueNames.NOTIFY)
 
-    current_app.logger.debug('{} received inbound SMS with reference {} from SAP'.format(
+    current_app.logger.debug('{} received inbound SMS with reference {} from SAP:{}'.format(
         service.id,
         inbound.provider_reference,
+        provider_name,
     ))
 
+    return response
+
+
+@receive_notifications_blueprint.route('/notifications/sms/receive/sap', methods=['POST'])
+@require_oauth(scope=None)
+def receive_sap_sms():
+    response = _receive_sap_sms('sap', request.json)
+    return str(response), 200
+
+
+@receive_notifications_blueprint.route('/notifications/sms/receive/sap_covid', methods=['POST'])
+@require_oauth(scope=None)
+def receive_sap_covid_sms():
+    response = _receive_sap_sms('sap_covid', request.json)
     return str(response), 200
 
 

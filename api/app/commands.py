@@ -44,7 +44,8 @@ from app.dao.rates_dao import (
 from app.dao.services_dao import (
     delete_service_and_all_associated_db_objects,
     dao_fetch_all_services_by_user,
-    dao_fetch_all_services
+    dao_fetch_all_services,
+    dao_set_service_preferred_sms_provider
 )
 import app.dao.service_sms_sender_dao as sms_sender_dao
 from app.dao.users_dao import (
@@ -377,6 +378,13 @@ def grant_platform_admin(username):
     grant_platform_admin_by_email(f"{username}@dta.gov.au")
 
 
+@notify_command()
+@click.option('-s', '--service_id', required=True, help="service to alter")
+@click.option('-p', '--provider', help="sms provider to set as preferred")
+def set_preferred_sms_provider(service_id, provider):
+    dao_set_service_preferred_sms_provider(service_id, provider)
+
+
 @notify_command(name='provision-telstra')
 def provision_telstra_subscription():
     telstra_sms_client.provision_subscription()
@@ -416,7 +424,8 @@ def create_sap_oauth2_client(client_id, client_secret):
     if len(client_id) != 48:
         current_app.logger.error('Client ID should be 48 characters long')
         sys.exit(1)
-    if len(client_id) < 48:
+
+    if len(client_secret) < 48:
         current_app.logger.error('Client secret should be at least 48 characters long')
         sys.exit(1)
 

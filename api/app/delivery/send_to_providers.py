@@ -52,8 +52,9 @@ def send_sms_to_provider(notification):
         # the sender when sending a message. So we need to check if the sender
         # ID that was chosen is also an inbound number.
         provider = None
-        if service.inbound_number and service.inbound_number.active:
-            provider = inbound_number_provider_to_use(service.inbound_number, notification.id)
+        preferred_provider = get_preferred_sms_provider(service)
+        if preferred_provider:
+            provider = get_sms_provider_client(preferred_provider, notification.id)
         else:
             provider = provider_to_use(SMS_TYPE, notification.id, notification.international)
         current_app.logger.debug(
@@ -181,13 +182,19 @@ def update_notification(notification, provider, status=None):
     dao_update_notification(notification)
 
 
-def inbound_number_provider_to_use(inbound_number, notification_id):
+def get_sms_provider_client(provider, notification_id):
     try:
-        get_provider_details_by_identifier(inbound_number.provider)
+        get_provider_details_by_identifier(provider)
     except NoResultFound:
-        raise Exception("Could not find {} provider when trying to send notification {}".format(inbound_number.provider, notification_id))
+        raise Exception(f"Could not find {provider} provider when trying to send notification {notification_id}")
 
-    return clients.get_client_by_name_and_type(inbound_number.provider, SMS_TYPE)
+    return clients.get_client_by_name_and_type(provider, SMS_TYPE)
+
+
+def get_preferred_sms_provider(service):
+    if service.inbound_number and service.inbound_number.active:
+        return service.inbound_number.provider
+    return service.preferred_sms_provider
 
 
 def provider_to_use(notification_type, notification_id, international=False):

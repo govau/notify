@@ -13,7 +13,7 @@ def test_get_provider_details_in_type_and_identifier_order(client, notify_db):
     )
     assert response.status_code == 200
     json_resp = json.loads(response.get_data(as_text=True))['provider_details']
-    assert len(json_resp) == 6
+    assert len(json_resp) == 7
 
     assert json_resp[0]['identifier'] == 'ses'
     assert json_resp[1]['identifier'] == 'smtp'

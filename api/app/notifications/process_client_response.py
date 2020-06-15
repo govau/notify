@@ -15,6 +15,7 @@ from app.notifications.callbacks import check_for_callback_and_send_delivery_sta
 
 sms_response_mapper = {
     'sap': get_sap_responses,
+    'sap_covid': get_sap_responses,
     'telstra': get_telstra_responses,
     'twilio': get_twilio_responses,
 }

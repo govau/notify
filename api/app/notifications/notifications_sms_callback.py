@@ -15,20 +15,21 @@ sms_callback_blueprint = Blueprint("sms_callback", __name__, url_prefix="/notifi
 register_errors(sms_callback_blueprint)
 
 
-@sms_callback_blueprint.route('/sap/<notification_id>', methods=['POST'])
-@require_oauth(scope=None)
-def process_sap_response(notification_id):
-    client_name = 'sap'
-    data = request.json
-    errors = validate_callback_data(data=data,
-                                    fields=['messageId', 'status'],
-                                    client_name=client_name)
+def _process_sap_response(client_name, notification_id, data):
+    errors = validate_callback_data(
+        data=data,
+        fields=['messageId', 'status'],
+        client_name=client_name
+    )
+
     if errors:
         raise InvalidRequest(errors, status_code=400)
 
-    success, errors = process_sms_client_response(status=str(data.get('status')),
-                                                  provider_reference=notification_id,
-                                                  client_name=client_name)
+    success, errors = process_sms_client_response(
+        status=str(data.get('status')),
+        provider_reference=notification_id,
+        client_name=client_name
+    )
 
     redacted_data = data.copy()
     redacted_data.pop("recipient")
@@ -37,8 +38,22 @@ def process_sap_response(notification_id):
         "Full delivery response from {} for notification: {}\n{}".format(client_name, notification_id, redacted_data))
     if errors:
         raise InvalidRequest(errors, status_code=400)
-    else:
-        return jsonify(result='success', message=success), 200
+
+    return success
+
+
+@sms_callback_blueprint.route('/sap/<notification_id>', methods=['POST'])
+@require_oauth(scope=None)
+def process_sap_response(notification_id):
+    response = _process_sap_response('sap', notification_id, request.json)
+    return jsonify(result='success', message=response), 200
+
+
+@sms_callback_blueprint.route('/sap_covid/<notification_id>', methods=['POST'])
+@require_oauth(scope=None)
+def process_sap_covid_response(notification_id):
+    response = _process_sap_response('sap_covid', notification_id, request.json)
+    return jsonify(result='success', message=response), 200
 
 
 @sms_callback_blueprint.route('/telstra/<notification_id>', methods=['POST'])

@@ -272,6 +272,13 @@
           {% endcall %}
           {{ edit_field('Change', url_for('.data_retention', service_id=current_service.id)) }}
         {% endcall %}
+        {% call row() %}
+          {{ text_field('Preferred SMS provider')}}
+          {% call field() %}
+              {{ current_service.preferred_sms_provider }}
+          {% endcall %}
+          {{ text_field('')}}
+        {% endcall %}
       {% endcall %}
       <br />
       <ul>
