@@ -632,7 +632,11 @@ def dao_notifications_hung_at_sent(notification_type, in_last_seconds=360):
     notifications = Notification.query.filter(
         Notification.notification_type == notification_type,
         Notification.created_at >= since_date,
-        Notification.status == NOTIFICATION_SENDING
+        or_(
+            Notification.status == NOTIFICATION_SENDING,
+            Notification.status == NOTIFICATION_PENDING,
+            Notification.status == NOTIFICATION_SENT
+        )
     ).all()
     return notifications
 

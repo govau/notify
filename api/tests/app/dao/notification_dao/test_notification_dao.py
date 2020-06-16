@@ -2242,7 +2242,7 @@ def test_notifications_hung_at_sent_excludes_other_statuses(sample_template):
         create_notification(sample_template, status=status)
 
     results = dao_notifications_hung_at_sent('sms')
-    assert len(results) == 1
+    assert len(results) == 3
 
 
 @freeze_time('2016-10-18T10:00')
