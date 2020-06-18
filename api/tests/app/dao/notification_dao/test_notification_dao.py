@@ -476,6 +476,7 @@ def test_should_not_update_status_by_reference_if_from_country_with_no_delivery_
     assert notification.status == NOTIFICATION_SENT
 
 
+@pytest.mark.skip(reason="take any updates we can from provider")
 def test_should_not_update_status_by_id_if_sent_to_country_with_unknown_delivery_receipts(sample_template):
     notification = create_notification(
         sample_template,
@@ -490,6 +491,7 @@ def test_should_not_update_status_by_id_if_sent_to_country_with_unknown_delivery
     assert notification.status == NOTIFICATION_SENT
 
 
+@pytest.mark.skip(reason="take any updates we can from provider")
 def test_should_not_update_status_by_id_if_sent_to_country_with_carrier_delivery_receipts(sample_template):
     notification = create_notification(
         sample_template,

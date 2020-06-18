@@ -292,7 +292,7 @@ def test_sap_callback_should_update_notification_status_failed(notify_db, notify
     assert json_resp['message'] == 'sap callback succeeded. reference {} updated'.format(
         notification.id
     )
-    assert get_notification_by_id(notification.id).status == 'permanent-failure'
+    assert get_notification_by_id(notification.id).status == 'failed'
 
 
 def test_sap_callback_should_record_statsd(client, sample_sap_oauth2_client, notify_db, notify_db_session, mocker):
