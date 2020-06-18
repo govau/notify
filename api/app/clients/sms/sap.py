@@ -9,7 +9,7 @@ sap_response_map = {
     'SENT': 'sending',
     'DELIVERED': 'delivered',
     'RECEIVED': 'delivered',
-    'ERROR': 'permanent-failure',
+    'ERROR': 'failed',
 }
 
 auth_cache = SimpleCache()

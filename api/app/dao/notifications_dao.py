@@ -19,7 +19,7 @@ from sqlalchemy import (desc, func, or_, asc)
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import case
 from sqlalchemy.sql import functions
-from notifications_utils.international_billing_rates import INTERNATIONAL_BILLING_RATES
+# from notifications_utils.international_billing_rates import INTERNATIONAL_BILLING_RATES
 
 from app import db, create_uuid
 from app.dao import days_ago
@@ -141,8 +141,9 @@ def _decide_permanent_temporary_failure(current_status, status):
 
 
 def country_records_delivery(phone_prefix):
-    dlr = INTERNATIONAL_BILLING_RATES[phone_prefix]['attributes']['dlr']
-    return dlr and dlr.lower() == 'yes'
+    return True
+    # dlr = INTERNATIONAL_BILLING_RATES[phone_prefix]['attributes']['dlr']
+    # return dlr and dlr.lower() == 'yes'
 
 
 def _update_notification_status(notification, status):
