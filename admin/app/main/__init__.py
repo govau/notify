@@ -35,4 +35,5 @@ from app.main.views import (  # noqa
     notifications,
     inbound_number,
     agreement,
+    rotate_password,
 )

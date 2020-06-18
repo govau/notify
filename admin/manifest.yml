@@ -22,3 +22,4 @@ applications:
       ADMIN_BASE_URL: https://notify.gov.au
       API_HOST_NAME: https://rest-api.notify.gov.au
       CF_APP_NAME: notify
+      FEATURE_PASSWORD_ROTATION: off
