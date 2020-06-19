@@ -712,16 +712,16 @@ def service_edit_sms_sender(service_id, sms_sender_id):
         sms_sender_id=sms_sender_id
     )
 
-@main.route(
-    "/services/<uuid:service_id>/service-settings/sms-sender/<uuid:sms_sender_id>/delete",
-    methods=['POST'],
-)
+
+@main.route("/services/<service_id>/service-settings/sms-sender/<sms_sender_id>/delete", methods=['POST'])
+@login_required
 @user_has_permissions('manage_service')
 def service_delete_sms_sender(service_id, sms_sender_id):
     service_api_client.delete_sms_sender(
         service_id=current_service['id'],
         sms_sender_id=sms_sender_id,
     )
+    flash(f'Text message sender {sms_sender_id} deleted', 'default_with_tick')
     return redirect(url_for('.service_sms_senders', service_id=service_id))
 
 
