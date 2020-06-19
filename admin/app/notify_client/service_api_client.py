@@ -442,6 +442,12 @@ class ServiceAPIClient(NotifyAdminAPIClient):
             }
         )
 
+    def delete_sms_sender(self, service_id, sms_sender_id):
+        return self.post(
+            "/service/{}/sms-sender/{}/archive".format(service_id, sms_sender_id),
+            data=None
+        )
+
     def get_service_callback_api(self, service_id, callback_api_id):
         return self.get(
             "/service/{}/delivery-receipt-api/{}".format(

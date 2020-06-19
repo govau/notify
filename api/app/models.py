@@ -509,6 +509,7 @@ class ServiceSmsSender(db.Model):
     service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=False, unique=False)
     service = db.relationship(Service, backref=db.backref("service_sms_senders", uselist=True))
     is_default = db.Column(db.Boolean, nullable=False, default=True)
+    archived = db.Column(db.Boolean, nullable=False, default=False)
     inbound_number_id = db.Column(UUID(as_uuid=True), db.ForeignKey('inbound_numbers.id'),
                                   unique=True, index=True, nullable=True)
     inbound_number = db.relationship(InboundNumber, backref=db.backref("inbound_number", uselist=False))
@@ -524,6 +525,7 @@ class ServiceSmsSender(db.Model):
             "sms_sender": self.sms_sender,
             "service_id": str(self.service_id),
             "is_default": self.is_default,
+            "archived": self.archived,
             "inbound_number_id": str(self.inbound_number_id) if self.inbound_number_id else None,
             "created_at": self.created_at.strftime(DATETIME_FORMAT),
             "updated_at": self.updated_at.strftime(DATETIME_FORMAT) if self.updated_at else None,
