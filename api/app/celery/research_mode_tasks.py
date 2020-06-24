@@ -21,6 +21,8 @@ temp_fail_email = "temp-fail@simulator.notify"
 
 
 def send_sms_response(provider, notification_id, to):
+    return None
+
     if provider == "sap":
         headers = {"Content-type": "application/json"}
         body = sap_callback(notification_id, to)
