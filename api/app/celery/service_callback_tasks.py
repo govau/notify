@@ -15,7 +15,7 @@ from app import (
 from app.config import QueueNames
 
 
-@notify_celery.task(bind=True, name="send-delivery-status", max_retries=5, default_retry_delay=300)
+@notify_celery.task(bind=True, name="send-delivery-status", max_retries=2, default_retry_delay=60)
 @statsd(namespace="tasks")
 def send_delivery_status_to_service(self, notification_id,
                                     encrypted_status_update
@@ -42,7 +42,7 @@ def send_delivery_status_to_service(self, notification_id,
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer {}'.format(status_update['service_callback_api_bearer_token'])
             },
-            timeout=15
+            timeout=10
         )
         current_app.logger.info('send_delivery_status_to_service sending {} to {}, response {}'.format(
             notification_id,
