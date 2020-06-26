@@ -24,3 +24,5 @@ applications:
       CF_APP_NAME: notify
       FEATURE_PASSWORD_ROTATION: off
       FEATURE_EMAIL_REVERIFICATION: off
+      ADMIN_SENTRY_ENV: prod
+      ADMIN_SENTRY_DSN: https://0e0670d6de954529b936a0ce4daa9dea@sentry.cloud.gov.au/9
