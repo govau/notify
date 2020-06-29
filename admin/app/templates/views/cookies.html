@@ -7,72 +7,124 @@
 {% block maincolumn_content %}
 
 <div class="grid-row">
-  <div class="column-two-thirds">
-    <h1 class="heading-large">Cookies</h1>
-    <p class="summary">
-        Notify puts small files (known as ‘cookies’)
-        onto your computer.
-    </p>
-    <p>These cookies are used to remember you once you’ve logged in.</p>
-
-    <h2 class="heading-medium">Session cookies</h2>
-    <p>
-        We store session cookies on your computer to help keep your information
-        secure while you use the service.
-    </p>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Purpose</th>
-                <th>Expires</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                  notify_admin_session
-                </td>
-                <td width="50%">
-                  Used to keep you logged in
-                </td>
-                <td>
-                  20 hours
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h2 class="heading-medium">Introductory message cookie</h2>
-    <p>
-        When you first use the service, you may see a pop-up ‘welcome’ message.
-        Once you’ve seen the message, we store a cookie on your computer so it
-        knows not to show it again.
-    </p>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Purpose</th>
-                <th>Expires</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                  seen_cookie_message
-                </td>
-                <td width="50%">
-                    Saves a message to let us know that you have seen our cookie
-                    message
-                </td>
-                <td>
-                  1 month
-                </td>
-            </tr>
-        </tbody>
-    </table>
-  </div>
+    <div class="column-two-thirds">
+        <h1 class="heading-large">Cookies</h1>
+        <p class="summary">
+            Notify puts small files (known as ‘cookies’)
+            onto your computer.
+        </p>
+        <p>
+            These cookies are used to remember you once you’ve logged in.
+        </p>
+        <h2 class="heading-medium">Session cookies</h2>
+        <p>
+            We store session cookies on your computer to help keep your information
+            secure while you use the service.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Purpose</th>
+                    <th>Expires</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        notify_admin_session
+                    </td>
+                    <td width="50%">
+                        Used to keep you logged in
+                    </td>
+                    <td>
+                        8 hours
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h2 class="heading-medium">Introductory message cookie</h2>
+        <p>
+            When you first use the service, you may see a pop-up ‘welcome’ message.
+            Once you’ve seen the message, we store a cookie on your computer so it
+            knows not to show it again.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Purpose</th>
+                    <th>Expires</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        seen_cookie_message
+                    </td>
+                    <td width="50%">
+                        Saves a message to let us know that you have seen our cookie
+                        message
+                    </td>
+                    <td>
+                        1 month
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h2 class="heading-medium">Analytics cookies</h2>
+        <p>
+            We use Google Analytics to collect data about how you use Notify. This information helps us to improve our service.  
+        </p>
+        <p>
+            Google is not allowed to use or share our analytics data with anyone.  
+        </p>
+        <p>
+            Google Analytics stores anonymised information about:  
+        </p>
+        <ul class="list-bullet">
+            <li>how you got to Notify</li>
+            <li>the pages you visit on Notify and how long you spend on them</li>
+            <li>any errors you see while using Notify</li>
+        </ul>
+        <h3 class="heading-small">Google Analytics Cookies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Purpose</th>
+                    <th>Expires</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        _ga
+                    </td>
+                    <td width="50%">
+                        Checks if you’ve visited Notify before. This helps us count how many people visit our site.
+                    </td>
+                    <td>
+                        2 years
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        _gid
+                    </td>
+                    <td width="50%">
+                        Checks if you’ve visited Notify before. This helps us count how many people visit our site.
+                    </td>
+                    <td>
+                        24 hours
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            You can opt out of Google Analytics if you disable or refuse the cookie, disable JavaScript, or use the <a href="https://tools.google.com/dlpage/gaoptout">opt-out service</a> provided by Google.
+        </p>
+    </div>
 </div>
 
 {% endblock %}
