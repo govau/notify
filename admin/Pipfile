@@ -24,6 +24,7 @@ notify-client-python = {git = "https://github.com/govau/notify-client-python",re
 notifications-utils = {path = "./../utils",editable = true}
 sentry-sdk = {extras = ["flask"]}
 itsdangerous = "==1.1.0"
+email-validator = "*"
 
 [dev-packages]
 bandit = "==1.5.1"

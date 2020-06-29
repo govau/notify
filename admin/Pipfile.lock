@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "84d8a47bde854415cab8fc8fea3863316b6f1f664993b7faf4cc2856481205da"
+            "sha256": "c8a1aebe9626c477f3668311addbe3849e4862456d785f2d6129bd528e635293"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -71,6 +71,13 @@
             ],
             "version": "==7.1.1"
         },
+        "dnspython": {
+            "hashes": [
+                "sha256:25007cc5fd287575970d729fe354f7ec4d79aeb13289d8198b36c46f9506a921",
+                "sha256:593cf321a2bf099e760285136fc5cd7ddd85aaea7141dfe19e824897ebb90a02"
+            ],
+            "version": "==2.0.0rc1"
+        },
         "docutils": {
             "hashes": [
                 "sha256:6c4f696463b79f1fb8ba0c594b63840ebd41f059e92b31957c46b74a4599b6d0",
@@ -78,6 +85,14 @@
                 "sha256:a2aeea129088da402665e92e0b25b04b073c04b2dce4ab65caaa38b7ce2e1a99"
             ],
             "version": "==0.15.2"
+        },
+        "email-validator": {
+            "hashes": [
+                "sha256:5f246ae8d81ce3000eade06595b7bb55a4cf350d559e890182a1466a21f25067",
+                "sha256:63094045c3e802c3d3d575b18b004a531c36243ca8d1cec785ff6bfcb04185bb"
+            ],
+            "index": "pypi",
+            "version": "==1.1.1"
         },
         "et-xmlfile": {
             "hashes": [
