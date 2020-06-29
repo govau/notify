@@ -5,7 +5,7 @@ PORT   ?= 6012
 WORKERS?= 4
 CF     ?= cf
 APP    ?= notify
-STG    ?= dev
+STG    ?= development
 
 SHELL := /bin/bash
 DATE = $(shell date +%Y-%m-%d:%H:%M:%S)

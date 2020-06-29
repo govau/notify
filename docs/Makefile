@@ -3,7 +3,7 @@ RUNNER ?= $(NPM) run
 PORT   ?= 6015
 CF     ?= cf
 APP    ?= notify-docs
-STG    ?= dev
+STG    ?= development
 
 SRC     = $(shell find src -type f)
 
@@ -38,7 +38,7 @@ run:
 
 build: public/index.html
 
-public/index.html: export GATSBY_NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au	
+public/index.html: export GATSBY_NOTIFY_BASE_URL ?= https://notify-$(STG).apps.y.cld.gov.au
 public/index.html: $(SRC)
 	$(RUNNER) build
 
