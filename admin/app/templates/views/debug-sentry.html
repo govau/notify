@@ -12,11 +12,16 @@
         <h1 class="heading-large">
             Test Sentry client
         </h1>
+
+        <p>Server event ID: {{ serverSentryId }}</p>
+        <p>adminSentryDsn: {{ adminSentryDsn }}</p>
+        <p>adminSentryEnv: {{ adminSentryEnv }}</p>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        Sentry.captureMessage('Something went wrong');
         const sentryId = Sentry.captureException(new Error('Test client error ({{ notify_env }})'));
         console.log({ sentryId });
     });

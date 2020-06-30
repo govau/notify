@@ -1,3 +1,4 @@
+import os
 from flask import abort, current_app, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from sentry_sdk import capture_exception
@@ -119,7 +120,10 @@ def debug_sentry():
     serverSentryId = capture_exception(Exception('Test server error (' + current_app.config['NOTIFY_ENVIRONMENT'] + ')'))
     return render_template(
         'views/debug-sentry.html',
-        notify_env=current_app.config['NOTIFY_ENVIRONMENT']
+        notify_env=current_app.config['NOTIFY_ENVIRONMENT'],
+        serverSentryId=serverSentryId,
+        adminSentryDsn=os.getenv('ADMIN_SENTRY_DSN'),
+        adminSentryEnv=os.getenv('ADMIN_SENTRY_ENV')
     )
 
 @main.route('/callbacks')
