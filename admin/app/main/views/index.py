@@ -1,5 +1,6 @@
 from flask import abort, current_app, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sentry_sdk import capture_exception
 from notifications_utils.international_billing_rates import (
     INTERNATIONAL_BILLING_RATES,
 )
@@ -111,6 +112,15 @@ def email_template():
     )}, govau_banner=convert_to_boolean(request.args.get('govau_banner', True))
     ))
 
+
+@main.route('/debug-sentry')
+@login_required
+def debug_sentry():
+    serverSentryId = capture_exception(Exception('Test server error (' + current_app.config['NOTIFY_ENVIRONMENT'] + ')'))
+    return render_template(
+        'views/debug-sentry.html',
+        notify_env=current_app.config['NOTIFY_ENVIRONMENT']
+    )
 
 @main.route('/callbacks')
 def callbacks():

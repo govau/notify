@@ -1,0 +1,25 @@
+{% from "components/banner.html" import banner_wrapper %}
+{% extends "withoutnav_template.html" %}
+
+{% block per_page_title %}
+    Test Sentry client
+{% endblock %}
+
+{% block maincolumn_content %}
+
+<div class="grid-row">
+    <div class="column-two-thirds">
+        <h1 class="heading-large">
+            Test Sentry client
+        </h1>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sentryId = Sentry.captureException(new Error('Test client error ({{ notify_env }})'));
+        console.log({ sentryId });
+    });
+</script>
+
+{% endblock %}
