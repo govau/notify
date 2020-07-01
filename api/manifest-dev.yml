@@ -16,6 +16,7 @@ defaults: &defaults
     - telstra
     - twilio
     - smtp
+    - papertrailappsyslog
   env: &defaults_env
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-api --root notify-celery --root aws --root sap --root sap-covid --root telstra --root twilio --root smtp"
     FLASK_APP: application.py

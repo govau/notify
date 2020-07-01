@@ -8,6 +8,7 @@ defaults: &defaults
     - notify-shared
     - notify-admin
     - aws
+    - papertrailappsyslog
   env: &defaults_env
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-admin --root aws"
     NOTIFY_ENVIRONMENT: production
