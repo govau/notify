@@ -19,6 +19,10 @@ defaults: &defaults
     NOTIFY_ENVIRONMENT: production
     ADMIN_BASE_URL: https://notify.gov.au
     API_HOST_NAME: https://rest-api.notify.gov.au
+    API_SENTRY_ENV: prod
+    CELERY_SENTRY_ENV: prod
+    API_SENTRY_DSN: https://8791e04fef084ffca03a0f29b9b82e15@sentry.cloud.gov.au/10
+    CELERY_SENTRY_DSN: https://86b9c242aae249e696957da651107f01@sentry.cloud.gov.au/11
 
 applications:
   - name: notify-api

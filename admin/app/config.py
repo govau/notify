@@ -12,6 +12,9 @@ class Config(object):
     DESKPRO_API_HOST = os.environ.get('DESKPRO_API_HOST')
     DESKPRO_API_KEY = os.environ.get('DESKPRO_API_KEY')
 
+    ADMIN_SENTRY_ENV = os.environ.get('ADMIN_SENTRY_ENV')
+    ADMIN_SENTRY_DSN = os.environ.get('ADMIN_SENTRY_DSN')
+
     # if we're not on cloudfoundry, we can get to this app from localhost. but on cloudfoundry its different
     ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://localhost:6012')
 
