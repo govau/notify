@@ -11,7 +11,7 @@ CLD_Y         ?= y.cld.gov.au
 CLD_HOST      ?= $(CLD_Y)
 STG           ?= dev
 
-SERVICES       = notify-shared notify-api notify-admin notify-celery aws smtp sap sap-covid telstra twilio
+SERVICES       = notify-shared notify-api notify-admin notify-celery aws smtp sap sap-covid telstra twilio syslog
 SVC_APPLIED    = $(SERVICES:%=apply-service-%)
 SVC_CREATED    = $(SERVICES:%=create-service-%)
 SVC_DIFFED     = $(SERVICES:%=diff-service-%)
