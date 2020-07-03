@@ -8,8 +8,9 @@ defaults: &defaults
     - notify-shared
     - notify-admin
     - aws
+    - syslog
   env: &defaults_env
-    RUNNER: "./vcapenvwrapper --root notify-shared --root notify-admin --root aws"
+    RUNNER: "./vcapenvwrapper --root notify-shared --root notify-admin --root aws --root syslog"
     NOTIFY_ENVIRONMENT: production
     ADMIN_SENTRY_ENV: dev
   command: make run-gunicorn
