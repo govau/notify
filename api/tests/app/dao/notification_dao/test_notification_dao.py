@@ -2241,9 +2241,9 @@ def test_notifications_not_yet_sent_return_no_rows(sample_service, notification_
 
 def test_notifications_hung_at_sent_excludes_other_statuses(sample_template):
     for status in NOTIFICATION_STATUS_TYPES:
-        create_notification(sample_template, status=status)
+        create_notification(sample_template, status=status, reference=str(uuid.uuid4()))
 
-    results = dao_notifications_hung_at_sent('sms')
+    results = dao_notifications_hung_at_sent('sms').all()
     assert len(results) == 3
 
 
@@ -2253,11 +2253,26 @@ def test_notifications_hung_at_sent_only_checks_recent_messages(sample_template)
     yesterday = right_now - timedelta(hours=24)
     tomorrow = right_now + timedelta(hours=24)
 
-    create_notification(sample_template, status='sending')
-    create_notification(sample_template, status='sending', created_at=yesterday)
+    create_notification(sample_template, status='sending', reference=str(uuid.uuid4()))
+    create_notification(sample_template, status='sending', reference=str(uuid.uuid4()), created_at=yesterday)
 
     # TODO: this could be wrong. do we care if this happens?
-    create_notification(sample_template, status='sending', created_at=tomorrow)
+    create_notification(sample_template, status='sending', reference=str(uuid.uuid4()), created_at=tomorrow)
 
-    results = dao_notifications_hung_at_sent('sms')
+    results = dao_notifications_hung_at_sent('sms').all()
     assert len(results) == 2
+
+
+def test_notifications_hung_at_sent_excludes_without_reference(sample_template):
+    create_notification(sample_template, status='sending', reference=str(uuid.uuid4()))
+    create_notification(sample_template, status='sending')
+    results = dao_notifications_hung_at_sent('sms').all()
+    assert len(results) == 1
+
+
+def test_notifications_hung_at_sent_excludes_test_messages(sample_template):
+    create_notification(sample_template, status='sending', reference=str(uuid.uuid4()))
+    create_notification(sample_template, status='sending', reference=str(uuid.uuid4()), key_type=KEY_TYPE_TEST)
+    create_notification(sample_template, status='sending', key_type=KEY_TYPE_TEST)
+    results = dao_notifications_hung_at_sent('sms').all()
+    assert len(results) == 1

@@ -163,13 +163,13 @@ def check_notification_status(
 @statsd(namespace="tasks")
 def check_notifications_status():
     # check notifications stuck at sending for the last 4 hours
-
     four_hours = 60 * 60 * 4
-    sms_to_check = dao_notifications_hung_at_sent(SMS_TYPE, in_last_seconds=four_hours)
-    email_to_check = dao_notifications_hung_at_sent(EMAIL_TYPE, in_last_seconds=four_hours)
-    notifications_to_check = sms_to_check + email_to_check
 
-    for notification in notifications_to_check:
+    def notifications_to_check(notification_types):
+        for notification_type in notification_types:
+            yield from dao_notifications_hung_at_sent(notification_type, in_last_seconds=four_hours)
+
+    for notification in notifications_to_check([SMS_TYPE, EMAIL_TYPE]):
         check_notification_status.apply_async([
             notification.notification_type, notification.sent_by,
             notification.reference,
