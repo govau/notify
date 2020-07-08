@@ -630,16 +630,17 @@ def dao_get_count_of_letters_to_process_for_date(date_to_process=None):
 def dao_notifications_hung_at_sent(notification_type, in_last_seconds=360):
     since_date = datetime.utcnow() - timedelta(seconds=in_last_seconds)
 
-    notifications = Notification.query.filter(
+    return Notification.query.filter(
         Notification.notification_type == notification_type,
         Notification.created_at >= since_date,
+        Notification.reference != None, # noqa
+        Notification.key_type != KEY_TYPE_TEST,
         or_(
             Notification.status == NOTIFICATION_SENDING,
             Notification.status == NOTIFICATION_PENDING,
             Notification.status == NOTIFICATION_SENT
         )
-    ).all()
-    return notifications
+    )
 
 
 def notifications_not_yet_sent(should_be_sending_after_seconds, notification_type):
