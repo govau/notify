@@ -1,6 +1,7 @@
 import json
 
 from flask import current_app
+from datetime import datetime
 from notifications_utils.statsd_decorators import statsd
 from requests import (
     HTTPError,
@@ -12,17 +13,21 @@ from app import (
     notify_celery,
     encryption
 )
+from app.dao.callback_failures_dao import dao_create_callback_failure
+from app.dao.notifications_dao import dao_get_notification_history_by_id
+from app.models import CallbackFailure
 from app.config import QueueNames
 
 
-@notify_celery.task(bind=True, name="send-delivery-status", max_retries=2, default_retry_delay=60)
+@notify_celery.task(bind=True, name="send-delivery-status", max_retries=5, default_retry_delay=60)
 @statsd(namespace="tasks")
 def send_delivery_status_to_service(self, notification_id,
                                     encrypted_status_update
                                     ):
-    try:
-        status_update = encryption.decrypt(encrypted_status_update)
+    start_time = datetime.utcnow()
+    status_update = encryption.decrypt(encrypted_status_update)
 
+    try:
         data = {
             "id": str(notification_id),
             "reference": status_update['notification_client_reference'],
@@ -51,6 +56,7 @@ def send_delivery_status_to_service(self, notification_id,
         ))
         response.raise_for_status()
     except RequestException as e:
+        end_time = datetime.utcnow()
         current_app.logger.warning(
             "send_delivery_status_to_service request failed for notification_id: {} and url: {}. exc: {}".format(
                 notification_id,
@@ -58,13 +64,26 @@ def send_delivery_status_to_service(self, notification_id,
                 e
             )
         )
+        record_failed_status_callback.apply_async([], dict(
+            notification_id=notification_id,
+            service_id=status_update['service_id'],
+            service_callback_url=status_update['service_callback_api_url'],
+            notification_api_key_id=status_update['notification_api_key_id'],
+            notification_api_key_type=status_update['notification_api_key_type'],
+            callback_attempt_number=self.request.retries,
+            callback_attempt_started=start_time,
+            callback_attempt_ended=end_time,
+            callback_failure_type=type(e).__name__,
+            service_callback_type='send_delivery_status_to_service',
+        ), queue=QueueNames.NOTIFY)
+
         if not isinstance(e, HTTPError) or e.response.status_code >= 500:
             try:
                 self.retry(queue=QueueNames.RETRY)
             except self.MaxRetriesExceededError:
                 current_app.logger.exception(
                     """Retry: send_delivery_status_to_service has retried the max num of times
-                     for notification: {}""".format(notification_id)
+                        for notification: {}""".format(notification_id)
                 )
 
 
@@ -144,6 +163,9 @@ def create_delivery_status_callback_data(notification, service_callback_api):
             notification.updated_at.strftime(DATETIME_FORMAT) if notification.updated_at else None,
         "notification_sent_at": notification.sent_at.strftime(DATETIME_FORMAT) if notification.sent_at else None,
         "notification_type": notification.notification_type,
+        "notification_api_key_id": str(notification.api_key_id),
+        "notification_api_key_type": notification.key_type,
+        "service_id": str(notification.service_id),
         "service_callback_api_url": notification.status_callback_url if notification.status_callback_url else service_callback_api.url,
         "service_callback_api_bearer_token": notification.status_callback_bearer_token if notification.status_callback_bearer_token else service_callback_api.bearer_token,
     }
@@ -162,3 +184,29 @@ def create_complaint_callback_data(complaint, notification, service_callback_api
         "service_callback_api_bearer_token": service_callback_api.bearer_token,
     }
     return encryption.encrypt(data)
+
+
+@notify_celery.task(name="record-failed-status-callback")
+def record_failed_status_callback(
+        *, notification_id, service_id, service_callback_url,
+        notification_api_key_id, notification_api_key_type,
+        callback_attempt_number, callback_attempt_started,
+        callback_attempt_ended, callback_failure_type, service_callback_type):
+
+    # A notification history entry will not exist if this notification was created with a test key.
+    # To avoid a broken foreign key entry failure, we check to see if the history exists before
+    # we attempt to create the failure record.
+    notification = dao_get_notification_history_by_id(notification_id, _raise=False)
+    callback_failure = CallbackFailure(
+        notification_id=notification_id if notification else None,
+        service_id=service_id,
+        service_callback_url=service_callback_url,
+        notification_api_key_id=notification_api_key_id,
+        notification_api_key_type=notification_api_key_type,
+        callback_attempt_number=callback_attempt_number,
+        callback_attempt_started=callback_attempt_started,
+        callback_attempt_ended=callback_attempt_ended,
+        callback_failure_type=callback_failure_type,
+        service_callback_type=service_callback_type,
+    )
+    dao_create_callback_failure(callback_failure)

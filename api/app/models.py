@@ -2003,3 +2003,21 @@ class ServiceDataRetention(db.Model):
             "created_at": self.created_at.strftime(DATETIME_FORMAT),
             "updated_at": self.updated_at.strftime(DATETIME_FORMAT) if self.updated_at else None,
         }
+
+
+class CallbackFailure(db.Model):
+    __tablename__ = 'callback_failures'
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    notification_id = db.Column(UUID(as_uuid=True), db.ForeignKey('notification_history.id'), index=True, nullable=True)
+    notification = db.relationship('NotificationHistory')
+    service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, nullable=True)
+    service = db.relationship('Service')
+
+    service_callback_url = db.Column(db.Text(), nullable=False)
+    notification_api_key_id = db.Column(UUID(as_uuid=True), nullable=True)
+    notification_api_key_type = db.Column(db.String(255), nullable=True)
+    callback_attempt_number = db.Column(db.Integer, default=0, nullable=False)
+    callback_attempt_started = db.Column(db.DateTime, nullable=False)
+    callback_attempt_ended = db.Column(db.DateTime, nullable=False)
+    callback_failure_type = db.Column(db.DateTime, nullable=True)
+    service_callback_type = db.Column(db.DateTime, nullable=False)

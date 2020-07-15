@@ -504,10 +504,13 @@ def dao_get_notification_by_reference(reference):
 
 
 @statsd(namespace="dao")
-def dao_get_notification_history_by_id(id):
-    return NotificationHistory.query.filter(
-        NotificationHistory.id == id
-    ).one()
+def dao_get_notification_history_by_id(id, _raise=True):
+    query = NotificationHistory.query.filter(NotificationHistory.id == id)
+
+    if _raise:
+        return query.one()
+    else:
+        return query.first()
 
 
 @statsd(namespace="dao")
