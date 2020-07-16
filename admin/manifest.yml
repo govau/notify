@@ -10,7 +10,6 @@ defaults: &defaults
     RUNNER: "./vcapenvwrapper --root notify-shared --root notify-admin --root aws"
     NOTIFY_ENVIRONMENT: production
     ADMIN_SENTRY_ENV: prod
-    ADMIN_SENTRY_DSN: https://0e0670d6de954529b936a0ce4daa9dea@sentry.cloud.gov.au/9
   command: make run-gunicorn
 
 applications:
