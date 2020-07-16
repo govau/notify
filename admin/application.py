@@ -1,5 +1,4 @@
 import os
-import sys
 
 from flask import Flask
 from whitenoise import WhiteNoise
@@ -12,12 +11,6 @@ from app import create_app, version
 cf_app = os.environ.get('CF_APP_NAME')
 sentry_dsn = os.environ.get('ADMIN_SENTRY_DSN')
 sentry_env = os.environ.get('ADMIN_SENTRY_ENV')
-
-if cf_app:
-    print('cf_app: ' + cf_app)
-
-print('sentry_dsn: ' + sentry_dsn)
-print('sentry_env: ' + sentry_env)
 
 if sentry_dsn:
     sentry_extras = dict(release=version.__commit_sha__)
