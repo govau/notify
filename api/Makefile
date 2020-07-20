@@ -5,7 +5,7 @@ PORT   ?= 6011
 WORKERS?= 4
 CF     ?= cf
 APP    ?= notify-api
-STG    ?= dev
+STG    ?= development
 
 .DEFAULT_GOAL := help
 SHELL := /bin/bash

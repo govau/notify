@@ -9,7 +9,7 @@ DIFF          ?= diff
 
 CLD_Y         ?= y.cld.gov.au
 CLD_HOST      ?= $(CLD_Y)
-STG           ?= dev
+STG           ?= development
 
 SERVICES       = notify-shared notify-api notify-admin notify-celery aws smtp sap sap-covid telstra twilio
 SVC_APPLIED    = $(SERVICES:%=apply-service-%)

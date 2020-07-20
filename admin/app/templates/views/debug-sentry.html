@@ -1,0 +1,54 @@
+{% from "components/banner.html" import banner_wrapper %}
+{% extends "withoutnav_template.html" %}
+
+{% block per_page_title %}
+    Test Sentry client
+{% endblock %}
+
+{% block maincolumn_content %}
+
+<div class="grid-row">
+    <div class="column-two-thirds">
+        <h1 class="heading-large">
+            Sentry
+        </h1>
+        <p>
+            <strong>Server issue logged</strong>
+            <br>
+            {{ serverSentryId }}
+        </p>
+        <p>
+            <strong>Client issue logged</strong>
+            <br>
+            <span id="client-id"></span>
+        </p>
+        <p>
+            <strong>Sentry DSN</strong>
+            <br>
+            {{ adminSentryDsn }}</p>
+        <p>
+            <strong>Sentry env</strong>
+            <br>
+            {{ adminSentryEnv }}</p>
+        </p>
+        <p>
+            <strong>Notify env</strong>
+            <br>
+            {{ notify_env }}</p>
+        </p>
+        <p>
+            <strong>Host</strong>
+            <br>
+            {{ host }}</p>
+        </p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sentryId = Sentry.captureException(new Error('TESTING client error (notifyEnv: {{ notify_env }}, sentryEnv: {{ adminSentryEnv }}, host: {{ host }})'));
+        document.getElementById('client-id').innerHTML = sentryId;
+    });
+</script>
+
+{% endblock %}
