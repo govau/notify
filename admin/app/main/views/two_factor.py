@@ -65,6 +65,9 @@ def two_factor_email(token):
         session['user_details'] = {'id': user_id}
         return redirect(url_for('.resend_email_link'))
 
+    if 'user_details' not in session:
+        session['user_details'] = {'id': user_id}
+
     user_api_client.set_email_last_verified_at(user_id)
     return log_in_user(user_id)
 
@@ -129,13 +132,12 @@ def should_reverify_email(email_last_verified_at, created_at, auth_type):
 def log_in_user(user_id):
     user = user_api_client.get_user(user_id)
 
-    if should_rotate_password(user.password_changed_at):
-        session['user_details'] = {'id': user_id}
-        return redirect(url_for('main.rotate_password'))
-
     if should_reverify_email(user.email_last_verified_at, user.created_at, user.auth_type):
         user_api_client.send_reverify_email(user.id, user.email_address)
         return redirect(url_for('main.reverify_email'))
+
+    if should_rotate_password(user.password_changed_at):
+        return redirect(url_for('main.rotate_password'))
 
     try:
         # the user will have a new current_session_id set by the API

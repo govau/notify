@@ -129,6 +129,28 @@ def revoke_platform_admin_by_email(email_address):
     db.session.commit()
 
 
+def set_email_updated_date_earlier_by_email(email_address):
+    oneMonthAgo = datetime.utcnow() - timedelta(days=31)
+
+    changes = {
+        'email_last_verified_at': oneMonthAgo,
+    }
+
+    db.session.query(User).filter(User.email_address == email_address).update(changes)
+    db.session.commit()
+
+
+def set_password_updated_date_earlier_by_email(email_address):
+    oneYearAgo = datetime.utcnow() - timedelta(days=366)
+
+    changes = {
+        'password_changed_at': oneYearAgo,
+    }
+
+    db.session.query(User).filter(User.email_address == email_address).update(changes)
+    db.session.commit()
+
+
 def increment_failed_login_count(user):
     user.failed_login_count += 1
     db.session.add(user)
