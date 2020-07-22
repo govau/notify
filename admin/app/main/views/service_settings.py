@@ -681,10 +681,17 @@ def service_add_sms_sender(service_id):
 
 
 @main.route("/services/<service_id>/service-settings/sms-sender/<sms_sender_id>/edit", methods=['GET', 'POST'])
-@main.route("/services/<service_id>/service-settings/sms-sender/<sms_sender_id>/delete", methods=['GET'], endpoint="service_confirm_delete_sms_sender")
 @login_required
 @user_has_permissions('manage_service')
 def service_edit_sms_sender(service_id, sms_sender_id):
+    if request.form and 'delete' in request.form:
+        service_api_client.delete_sms_sender(
+            service_id=service_id,
+            sms_sender_id=sms_sender_id,
+        )
+        flash(f'Text message sender {sms_sender_id} deleted', 'default_with_tick')
+        return redirect(url_for('.service_sms_senders', service_id=service_id))
+
     sms_sender = service_api_client.get_sms_sender(service_id, sms_sender_id)
     is_inbound_number = sms_sender['inbound_number_id']
     if is_inbound_number:
@@ -702,8 +709,10 @@ def service_edit_sms_sender(service_id, sms_sender_id):
         return redirect(url_for('.service_sms_senders', service_id=service_id))
 
     form.is_default.data = sms_sender['is_default']
-    if (request.endpoint == "main.service_confirm_delete_sms_sender"):
-        flash("Are you sure you want to delete this text message sender?", 'delete')
+
+    if 'delete' in request.args:
+        flash('Are you sure you want to delete this text message sender?', 'delete')
+
     return render_template(
         'views/service-settings/sms-sender/edit.html',
         form=form,
@@ -711,18 +720,6 @@ def service_edit_sms_sender(service_id, sms_sender_id):
         inbound_number=is_inbound_number,
         sms_sender_id=sms_sender_id
     )
-
-
-@main.route("/services/<service_id>/service-settings/sms-sender/<sms_sender_id>/delete", methods=['POST'])
-@login_required
-@user_has_permissions('manage_service')
-def service_delete_sms_sender(service_id, sms_sender_id):
-    service_api_client.delete_sms_sender(
-        service_id=current_service['id'],
-        sms_sender_id=sms_sender_id,
-    )
-    flash(f'Text message sender {sms_sender_id} deleted', 'default_with_tick')
-    return redirect(url_for('.service_sms_senders', service_id=service_id))
 
 
 @main.route("/services/<service_id>/service-settings/set-letter-contact-block", methods=['GET', 'POST'])
