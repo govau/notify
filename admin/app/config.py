@@ -29,7 +29,7 @@ class Config(object):
 
     # Email reverification
     DAYS_BETWEEN_EMAIL_REVERIFICATIONS = 30
-    FEATURE_EMAIL_REVERIFICATION_ENABLED = os.getenv('FEATURE_EMAIL_REVERIFICATION') == 'on'
+    FEATURE_EMAIL_REVERIFICATION_ENABLED = True
 
     # Logging
     DEBUG = False
@@ -37,7 +37,7 @@ class Config(object):
 
     # Password rotation
     DAYS_BETWEEN_PASSWORD_ROTATIONS = 365
-    FEATURE_PASSWORD_ROTATION_ENABLED = os.getenv('FEATURE_PASSWORD_ROTATION') == 'on'
+    FEATURE_PASSWORD_ROTATION_ENABLED = True
 
     CSV_UPLOAD_BUCKET_NAME = os.getenv('CSV_UPLOAD_BUCKET_NAME', 'dta-notify-csv-upload-20180712070203208700000001')
     LOGO_UPLOAD_BUCKET_NAME = os.getenv('LOGO_UPLOAD_BUCKET_NAME', 'public_logos-local')

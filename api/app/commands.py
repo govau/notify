@@ -45,7 +45,7 @@ from app.dao.services_dao import (
     delete_service_and_all_associated_db_objects,
     dao_fetch_all_services_by_user,
     dao_fetch_all_services,
-    dao_set_service_preferred_sms_provider
+    dao_set_service_preferred_sms_provider,
 )
 import app.dao.service_sms_sender_dao as sms_sender_dao
 from app.dao.users_dao import (
@@ -54,6 +54,8 @@ from app.dao.users_dao import (
     get_users_by_platform_admin,
     grant_platform_admin_by_email,
     revoke_platform_admin_by_email,
+    set_email_updated_date_earlier_by_email,
+    set_password_updated_date_earlier_by_email,
 )
 from app.models import PROVIDERS, SMS_PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Notification
 from app.notifications.callbacks import check_for_callback_and_send_delivery_status_to_service
@@ -376,6 +378,20 @@ def revoke_platform_admin(email_address):
               help="""Name of org member to promote as platform admin""")
 def grant_platform_admin(username):
     grant_platform_admin_by_email(f"{username}@dta.gov.au")
+
+
+@notify_command()
+@click.option('-e', '--email_address', required=True,
+              help="""Full email address of user""")
+def set_email_updated_date_earlier(email_address):
+    set_email_updated_date_earlier_by_email(email_address)
+
+
+@notify_command()
+@click.option('-e', '--email_address', required=True,
+              help="""Full email address of user""")
+def set_password_updated_date_earlier(email_address):
+    set_password_updated_date_earlier_by_email(email_address)
 
 
 @notify_command()
