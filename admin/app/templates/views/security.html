@@ -7,13 +7,12 @@
 {% endblock %}
 
 {% block maincolumn_content %}
-
 <div class="grid-row">
   <div class="column-one-third">
     {{ sub_navigation(navigation_links) }}
   </div>
-  <div class="column-two-thirds">
 
+  <div class="column-two-thirds">
     <h1 class="heading-large">Security</h1>
     <p>Notify is built for the needs of government services. It has processes in place to:</p>
     <ul class="list list-bullet">
@@ -23,17 +22,14 @@
     </ul>
 
     <h2 class="heading-medium">Data</h2>
-    <p>On Notify, data is encrypted:</p>
+    <p>On Notify, data is encrypted when it passes through the service. All data stored in Notify databases is encrypted at rest to prevent unauthorised access.</p>
+    <p>Any Notify data you upload to our service is only held for 7 days.</p>
+
+    <h2 class="heading-medium">Data Protection</h2>
+    <p>Notify complies with the data protection guidelines outlined in the <a href="https://www.oaic.gov.au/privacy/the-privacy-act/">Privacy Act 1988 (Cth)</a>. To make sure it stays compliant, there are regular legal reviews of the service’s:</p>
     <ul class="list list-bullet">
-      <li>when it passes through the service</li>
-      <li>when it’s stored on the service</li>
-    </ul>
-    <p>Any user data you upload is only held for 7 days.</p>
-    <h3 class="heading-small">Data Protection Act</h3>
-    <p>Notify complies with the Data Protection Act. To make sure it stays compliant, there are regular legal reviews of the service’s:</p>
-    <ul class="list list-bullet">
-      <li>privacy policy</li>
-      <li>terms of use</li>
+      <li><a href="/privacy">Privacy Policy</a></li>
+      <li><a href="/terms">Terms of Use</a></li>
       <li>approach to data sharing</li>
     </ul>
 
@@ -43,15 +39,12 @@
       <li>protective monitoring to record activity, and raise alerts about any suspicious activity</li>
       <li>using JSON Web Tokens, to avoid sending API keys when your service talks to Notify</li>
     </ul>
-    
-    <h3 class="heading-small">Protect sensitive information</h3>
-    <p>Some messages include sensitive information like security codes or password reset links.</p>
-    <p>If you’re sending a message with sensitive information, you can choose to hide those details on the Notify dashboard once the message has been sent. This means that only the message recipient will be able to see that information.</p>
-    
+
     <h2 class="heading-medium">User permissions and signing in</h2>
     <p>You can set different user permissions in Notify. This lets you control who in your team has access to certain parts of the service.</p>
-    <h3 class="heading-small">Two-factor authentication</h3>
-    <p>To sign in to Notify, you’ll need to enter:</p>
+
+    <h2 class="heading-medium">Two-factor authentication</h2>
+    <p>To sign in to Notify, you will need to enter:</p>
     <ul class="list list-bullet">
       <li>your email address and password</li>
       <li>a text message code that Notify sends to your phone</li>
@@ -64,6 +57,51 @@
       <li>regular updates to the Privacy Impact Assessment</li>
       <li>security impact assessments</li>
     </ul>
+
+    <h2 class="heading-medium">Your security obligations</h2>
+    <p>As a user of Notify, you understand and accept the following:</p>
+    <ul class="list list-bullet">
+      <li>you must ensure the Account Administrator and all members keep secure, and not share, any login details for your User Account.</li>
+      <li>you are responsible for ensuring the regular maintenance of any data uploaded to Notify. This includes, but is not limited to, activities such as removing inactive or unresponsive numbers from your uploads and keeping your information up-to-date and accurate.</li>
+    </ul>
+    <p>For further information on your security obligations, please see our <a href="/terms">Terms of Use</a>.</p>
+
+    <h2 class="heading-medium">Security audits</h2>
+    <p>Notify is regularly audited for vulnerabilities at source code level by the internal DTA Security Team. A full audit will be completed prior to the Live release. Any security bugs that are raised during audits are fixed and deployed in a timely manner.</p>
+
+    <h2 class="heading-medium">Status and incident updates</h2>
+    <p>The current status of the Notify site can be viewed at <a href="https://status.notify.gov.au/">https://status.notify.gov.au/</a>. We publish our service availability in real time. If there is downtime for any reason, an incident will be raised on this site with regular updates until the service is restored.</p>
+
+    <h2 class="heading-medium">Monitoring</h2>
+    <p>Notify is continually monitored by a range of tools that immediately notify the team of any errors or changes to performance that could affect the Notify service.</p>
+
+    <h2 class="heading-medium">Open source</h2>
+    <p>In line with the Digital Service Standard, all code behind Notify is open source and available on <a href="https://github.com/govau/notify">our GitHub repository</a>.</p>
+
+    <h2 class="heading-medium">Protecting sensitive information</h2>
+    <p>Some messages include sensitive information like security codes or password reset links.
+      If you are sending a message with sensitive information, you can choose to hide those details on the Notify dashboard once the message has been sent. This means that only the message recipient will be able to see that information.</p>
+
+    <h2 class="heading-medium">Classifications and security vetting</h2>
+    <p>You can use Notify to send messages classified as ‘OFFICIAL’ or ‘OFFICIAL: Sensitive’ as outlined in the <a href="https://www.protectivesecurity.gov.au/information/sensitive-classified-information/Pages/default.aspx#c">Protective Security Policy Framework</a>.</p>
+    <p>You must not use Notify to send sensitive information, as defined in the <a href="https://www.oaic.gov.au/privacy/the-privacy-act/">Privacy Act 1988 (Cth)</a>.</p>
+    <p>The Notify team has Baseline vetting as the minimum <a href="https://www.protectivesecurity.gov.au/personnel/eligibility-and-suitability-of-personnel/Pages/default.aspx">personnel security vetting standard</a>.</p>
+
+    <h2 class="heading-medium">Raising issues or providing feedback</h2>
+    <p>Anyone can raise an issue or provide feedback for Notify. You can contact us at <a href="mailto:notify-support@dta.gov.au">notify-support@dta.gov.au</a> to:</p>
+    <ul class="list list-bullet">
+      <li>report a bug</li>
+      <li>request a feature</li>
+      <li>raise a security concern</li>
+      <li>provide feedback</li>
+    </ul>
+    <p>Our service standard to responding to raised issues is 48 hours. We will endeavour to address critical issues as soon possible, dependent on resourcing restraints.</p>
+    <p>We appreciate all feedback and/or suggestions. Notify is an agile development, which means it evolves in response to the needs of its users. If you have any feedback or questions relating to this document (or any other Notify matters) please email <a href="mailto:notify-support@dta.gov.au">notify-support@dta.gov.au</a>.</p>
+
+    <br>
+    <br>
+
+    <p><i>Updated: 11/06/2020</i></p>
   </div>
 </div>
 {% endblock %}
