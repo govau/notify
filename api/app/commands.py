@@ -11,10 +11,9 @@ from click_datetime import Datetime as click_dt
 from flask import current_app
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
 from notifications_utils.statsd_decorators import statsd
 
-from app import db, redis_store
+from app import db
 from app.celery.tasks import check_celery_health
 from app.celery.scheduled_tasks import send_total_sent_notifications_to_performance_platform
 from app.celery.letters_pdf_tasks import create_letters_pdf
@@ -61,7 +60,6 @@ from app.models import PROVIDERS, SMS_PROVIDERS, User, SMS_TYPE, EMAIL_TYPE, Not
 from app.notifications.callbacks import check_for_callback_and_send_delivery_status_to_service
 from app.performance_platform.processing_time import (send_processing_time_for_start_and_end)
 from app.utils import (
-    cache_key_for_service_template_usage_per_day,
     get_sydney_midnight_in_utc,
     get_midnight_for_day_before,
     convert_aet_to_utc,

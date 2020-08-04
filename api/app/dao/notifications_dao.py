@@ -31,6 +31,7 @@ from app.models import (
     Service,
     Template,
     TemplateHistory,
+    Batch,
     KEY_TYPE_NORMAL,
     KEY_TYPE_TEST,
     LETTER_TYPE,
@@ -141,9 +142,10 @@ def dao_create_notifications(notifications, scheduled_for=None):
         record, *extra_records = dao_create_notification_records(notification, scheduled_for=scheduled_for)
         notification_records.append(record)
         notification_extra_records.extend(extra_records)
-    
+
     db.session.bulk_save_objects(notification_records + notification_extra_records)
     return notification_records
+
 
 def _should_record_notification_in_history_table(notification):
     if notification.api_key_id and notification.key_type == KEY_TYPE_TEST:
@@ -289,7 +291,9 @@ def get_notifications_for_service(
     include_jobs=False,
     include_from_test_key=False,
     older_than=None,
-    client_reference=None
+    client_reference=None,
+    batch_id=None,
+    batch_reference=None,
 ):
     if page_size is None:
         page_size = current_app.config['PAGE_SIZE']
@@ -317,7 +321,13 @@ def get_notifications_for_service(
     if client_reference is not None:
         filters.append(Notification.client_reference == client_reference)
 
-    query = Notification.query.filter(*filters)
+    if batch_id is not None:
+        filters.append(Batch.id == batch_id)
+
+    if batch_reference is not None:
+        filters.append(Batch.client_reference == batch_reference)
+
+    query = Notification.query.outerjoin(Batch).filter(*filters)
     query = _filter_query(query, filter_dict)
     if personalisation:
         query = query.options(
@@ -369,6 +379,9 @@ def delete_notifications_created_more_than_a_week_ago_by_type(notification_type)
 @statsd(namespace="dao")
 @transactional
 def dao_delete_notifications_and_history_by_id(notification_id):
+    db.session.query(ScheduledNotification).filter(
+        ScheduledNotification.notification_id == notification_id
+    ).delete(synchronize_session='fetch')
     db.session.query(Notification).filter(
         Notification.id == notification_id
     ).delete(synchronize_session='fetch')

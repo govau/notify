@@ -397,8 +397,10 @@ class BatchSchema(BaseSchema):
         model = models.Batch
         exclude = (
             "created_at",
-            "api_key_id",
-            "key_type"
+        )
+        load_only = (
+            "api_key",
+            "api_key_type"
         )
         strict = True
 

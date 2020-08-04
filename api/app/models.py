@@ -61,6 +61,8 @@ DELIVERY_STATUS_CALLBACK_TYPE = 'delivery_status'
 COMPLAINT_CALLBACK_TYPE = 'complaint'
 SERVICE_CALLBACK_TYPES = [DELIVERY_STATUS_CALLBACK_TYPE, COMPLAINT_CALLBACK_TYPE]
 
+BATCH_MAX_NOTIFICATIONS = 250
+
 
 def filter_null_value_fields(obj):
     return dict(
@@ -1006,7 +1008,7 @@ JOB_STATUS_TYPES = [
 class Batch(db.Model):
     __tablename__ = 'batches'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    reference = db.Column(db.String, index=True, nullable=True)
+    client_reference = db.Column(db.String, index=True, nullable=True)
     service_id = db.Column(UUID(as_uuid=True), db.ForeignKey('services.id'), index=True, unique=False, nullable=False)
     service = db.relationship('Service', backref=db.backref('batches', lazy='dynamic'))
     template_id = db.Column(UUID(as_uuid=True), db.ForeignKey('templates.id'), index=True, unique=False)
@@ -1015,6 +1017,7 @@ class Batch(db.Model):
     api_key_id = db.Column(UUID(as_uuid=True), db.ForeignKey('api_keys.id'), index=True, unique=False)
     api_key = db.relationship('ApiKey')
     key_type = db.Column(db.String, db.ForeignKey('key_types.name'), index=True, unique=False, nullable=False)
+    api_key_type = db.relationship('KeyTypes')
     created_at = db.Column(db.DateTime, index=False, unique=False, nullable=False, default=datetime.datetime.utcnow)
 
 
@@ -1247,6 +1250,8 @@ class Notification(db.Model):
     api_key_id = db.Column(UUID(as_uuid=True), db.ForeignKey('api_keys.id'), index=True, unique=False)
     api_key = db.relationship('ApiKey')
     key_type = db.Column(db.String, db.ForeignKey('key_types.name'), index=True, unique=False, nullable=False)
+    batch_id = db.Column(UUID(as_uuid=True), db.ForeignKey('batches.id'), index=True, unique=False)
+    batch = db.relationship('Batch', backref=db.backref('notifications', lazy='dynamic'))
     billable_units = db.Column(db.Integer, nullable=False, default=0)
     notification_type = db.Column(notification_types, index=True, nullable=False)
     created_at = db.Column(
@@ -1278,11 +1283,7 @@ class Notification(db.Model):
     reference = db.Column(db.String, nullable=True, index=True)
     client_reference = db.Column(db.String, index=True, nullable=True)
     _personalisation = db.Column(db.String, nullable=True)
-
     scheduled_notification = db.relationship('ScheduledNotification', uselist=False)
-
-    client_reference = db.Column(db.String, index=True, nullable=True)
-
     international = db.Column(db.Boolean, nullable=False, default=False)
     phone_prefix = db.Column(db.String, nullable=True)
     rate_multiplier = db.Column(db.Float(asdecimal=False), nullable=True)
@@ -1536,6 +1537,8 @@ class NotificationHistory(db.Model, HistoryModel):
     api_key_id = db.Column(UUID(as_uuid=True), db.ForeignKey('api_keys.id'), index=True, unique=False)
     api_key = db.relationship('ApiKey')
     key_type = db.Column(db.String, db.ForeignKey('key_types.name'), index=True, unique=False, nullable=False)
+    batch_id = db.Column(UUID(as_uuid=True), db.ForeignKey('batches.id'), index=True, unique=False)
+    batch = db.relationship('Batch')
     billable_units = db.Column(db.Integer, nullable=False, default=0)
     notification_type = db.Column(notification_types, index=True, nullable=False)
     created_at = db.Column(db.DateTime, index=True, unique=False, nullable=False)

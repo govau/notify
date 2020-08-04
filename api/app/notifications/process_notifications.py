@@ -26,6 +26,7 @@ from app.models import (
 )
 from app.dao.notifications_dao import (
     dao_create_notification,
+    dao_create_notifications,
     dao_delete_notifications_and_history_by_id,
     dao_created_scheduled_notification
 )
@@ -34,7 +35,6 @@ from app.v2.errors import BadRequestError
 from app.utils import (
     cache_key_for_service_template_counter,
     convert_aet_to_utc,
-    convert_utc_to_aet,
     get_template_instance,
 )
 
@@ -73,6 +73,7 @@ def prepare_notification(
     reply_to_text=None,
     status_callback_url=None,
     status_callback_bearer_token=None,
+    batch_id=None,
 ):
     notification_created_at = created_at or datetime.utcnow()
     if not notification_id:
@@ -91,6 +92,7 @@ def prepare_notification(
         created_at=notification_created_at,
         job_id=job_id,
         job_row_number=job_row_number,
+        batch_id=batch_id,
         client_reference=client_reference,
         reference=reference,
         created_by_id=created_by_id,
@@ -122,6 +124,7 @@ def prepare_notification(
 
     return notification
 
+
 def increment_cache(*, service_id, template_id, amount=1):
     if redis_store.get(redis.daily_limit_cache_key(service_id)):
         redis_store.incr(redis.daily_limit_cache_key(service_id), incr_by=amount)
@@ -130,8 +133,8 @@ def increment_cache(*, service_id, template_id, amount=1):
         redis_store.increment_hash_value(cache_key_for_service_template_counter(service_id), template_id, incr_by=amount)
 
 
-def store_notification(notification):
-    dao_create_notification(notification)
+def store_notification(notification, scheduled_for=None):
+    dao_create_notification(notification, scheduled_for)
     notification_id = notification.id
     notification_type = notification.notification_type
     created_at = notification.created_at
@@ -143,21 +146,23 @@ def store_notification(notification):
     increment_cache(service_id=notification.service_id, template_id=notification.template_id)
     return notification
 
+
 def store_notifications(notifications):
     def not_test_notification(notification):
         return notification.key_type != KEY_TYPE_TEST
 
     service_template_counts = collections.Counter()
-    dao_create_notifications(notifications)
+    created_notifications = dao_create_notifications(notifications)
 
-    for notification in notifications:
+    for notification in created_notifications:
         if not_test_notification(notification):
             service_template_counts[(notification.service_id, notification.template_id)] += 1
 
     for (service_id, template_id), count in service_template_counts.items():
+        current_app.logger.info(f"{count} notifications created for template:{template_id}")
         increment_cache(service_id=service_id, template_id=template_id, amount=count)
 
-    return notifications
+    return created_notifications
 
 
 def persist_notification(*, simulated=False, **kwargs):
@@ -168,7 +173,7 @@ def persist_notification(*, simulated=False, **kwargs):
     return notification
 
 
-def send_notification_to_queue(notification, research_mode, queue=None):
+def send_notification_to_queue(notification, research_mode, queue=None, remove_on_failure=True):
     if research_mode or notification.key_type == KEY_TYPE_TEST:
         queue = QueueNames.RESEARCH_MODE
 
@@ -184,13 +189,19 @@ def send_notification_to_queue(notification, research_mode, queue=None):
     try:
         deliver_task.apply_async([str(notification.id)], queue=queue)
     except Exception:
-        dao_delete_notifications_and_history_by_id(notification.id)
-        raise
+        if remove_on_failure:
+            dao_delete_notifications_and_history_by_id(notification.id)
+            raise
 
     current_app.logger.debug(
         "{} {} sent to the {} queue for delivery".format(notification.notification_type,
                                                          notification.id,
                                                          queue))
+
+
+def send_notifications_to_queue(notifications, research_mode, queue=None):
+    for notification in notifications:
+        send_notification_to_queue(notification, research_mode, queue, remove_on_failure=False)
 
 
 def simulated_recipient(to_address, notification_type):
@@ -208,6 +219,6 @@ def get_scheduled_datetime(scheduled_for):
 
 
 def persist_scheduled_notification(notification_id, scheduled_for):
-    scheduled_datetime = convert_aet_to_utc(datetime.strptime(scheduled_for, "%Y-%m-%d %H:%M"))
+    scheduled_datetime = get_scheduled_datetime(scheduled_for)
     scheduled_notification = ScheduledNotification.for_notification(notification_id, scheduled_datetime)
     dao_created_scheduled_notification(scheduled_notification)
