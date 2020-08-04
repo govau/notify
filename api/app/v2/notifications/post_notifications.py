@@ -146,7 +146,7 @@ def send_batch_notifications():
                 **fallback_params
             }
 
-            notification = process_sms_or_email_notification(
+            yield process_sms_or_email_notification(
                 form=params,
                 notification_type=notification_type,
                 api_key=api_user,
@@ -156,8 +156,8 @@ def send_batch_notifications():
                 batch=batch
             )
 
-            print(notification)
-            notifications.append(notification)
+    notifications = store_notifications(process_notifications(notification_requests), template)
+    send_notifications_to_queue(notifications)
 
     batch_json = batch_schema.dump(batch).data
     return jsonify(data=batch_json), 201
@@ -281,8 +281,35 @@ def process_sms_or_email_notification(
 
     return notification
 
-def process_sms_or_email_notification()
+def _process_sms_or_email_notification(
+        *, form, notification_type, api_key,
+        template, service, batch=None, reply_to_text=None):
+    form_send_to = form['email_address'] if notification_type == EMAIL_TYPE else form['phone_number']
 
+    # Do not persist or send notification to the queue if it is a simulated recipient
+    simulated = is_simulated_recipient(
+        send_to=form_send_to,
+        key_type=api_key.key_type,
+        service=service,
+        notification_type=notification_type
+    )
+
+    notification = prepare_notification(
+        template_id=template.id,
+        template_version=template.version,
+        recipient=form_send_to,
+        service=service,
+        personalisation=form.get('personalisation', None),
+        notification_type=notification_type,
+        api_key_id=api_key.id,
+        key_type=api_key.key_type,
+        client_reference=form.get('reference', None),
+        reply_to_text=reply_to_text,
+        status_callback_url=form.get('status_callback_url', None),
+        status_callback_bearer_token=form.get('status_callback_bearer_token', None),
+        bulk_batch_id=batch.id if batch else None
+    )
+    return notification
 
 def process_letter_notification(*, letter_data, api_key, template, reply_to_text, precompiled=False):
     if api_key.key_type == KEY_TYPE_TEAM:

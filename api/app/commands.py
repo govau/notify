@@ -715,50 +715,6 @@ def migrate_data_to_ft_billing(start_date, end_date):
 
 
 @notify_command()
-@click.option('-s', '--service_id', required=True, type=click.UUID)
-@click.option('-d', '--day', required=True, type=click_dt(format='%Y-%m-%d'))
-def populate_redis_template_usage(service_id, day):
-    """
-    Recalculate and replace the stats in redis for a day.
-    To be used if redis data is lost for some reason.
-    """
-    if not current_app.config['REDIS_ENABLED']:
-        current_app.logger.error('Cannot populate redis template usage - redis not enabled')
-        sys.exit(1)
-
-    # the day variable is set by click to be midnight of that day
-    start_time = get_sydney_midnight_in_utc(day)
-    end_time = get_sydney_midnight_in_utc(day + timedelta(days=1))
-
-    usage = {
-        str(row.template_id): row.count
-        for row in db.session.query(
-            Notification.template_id,
-            func.count().label('count')
-        ).filter(
-            Notification.service_id == service_id,
-            Notification.created_at >= start_time,
-            Notification.created_at < end_time
-        ).group_by(
-            Notification.template_id
-        )
-    }
-    current_app.logger.info('Populating usage dict for service {} day {}: {}'.format(
-        service_id,
-        day,
-        usage.items())
-    )
-    if usage:
-        key = cache_key_for_service_template_usage_per_day(service_id, day)
-        redis_store.set_hash_and_expire(
-            key,
-            usage,
-            current_app.config['EXPIRE_CACHE_EIGHT_DAYS'],
-            raise_exception=True
-        )
-
-
-@notify_command()
 def list_jobs():
     print_jobs(dao_get_jobs())
 

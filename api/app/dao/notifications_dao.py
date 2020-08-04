@@ -126,23 +126,23 @@ def dao_create_notification_records(notification, scheduled_for=None):
 
 @statsd(namespace="dao")
 @transactional
-def dao_create_notification(notification):
-    for record in dao_create_notification_records(notification):
+def dao_create_notification(notification, scheduled_for=None):
+    for record in dao_create_notification_records(notification, scheduled_for=scheduled_for):
         db.session.add(record)
 
 
 @statsd(namespace="dao")
 @transactional
-def dao_create_notifications(notifications):
+def dao_create_notifications(notifications, scheduled_for=None):
     notification_records = []
-    notification_history_records = []
+    notification_extra_records = []
 
     for notification in notifications:
-        record, *history_records = dao_create_notification_records(notification)
+        record, *extra_records = dao_create_notification_records(notification, scheduled_for=scheduled_for)
         notification_records.append(record)
-        notification_history_records.extend(history_records)
+        notification_extra_records.extend(extra_records)
     
-    db.session.bulk_save_objects(notification_records + notification_history_records)
+    db.session.bulk_save_objects(notification_records + notification_extra_records)
     return notification_records
 
 def _should_record_notification_in_history_table(notification):
