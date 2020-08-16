@@ -787,7 +787,7 @@ def test_post_email_notification_with_status_callback_returns_201(client, sample
     assert mocked.called
 
 
-def test_post_bulk_notification_returns_201(client, sample_template_with_placeholders, mocker):
+def test_post_batch_notification_returns_201(client, sample_template_with_placeholders, mocker):
     mocked = mocker.patch('app.celery.provider_tasks.deliver_sms.apply_async')
     data = {
         'template_id': str(sample_template_with_placeholders.id),
