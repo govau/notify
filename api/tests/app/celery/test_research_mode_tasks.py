@@ -18,7 +18,6 @@ from app.celery.research_mode_tasks import (
 from tests.conftest import set_config_values
 
 
-@pytest.mark.skip('disabled')
 def test_make_telstra_callback(notify_api, rmock):
     endpoint = "http://localhost:6011/notifications/sms/telstra/1234"
     rmock.request(
@@ -33,7 +32,6 @@ def test_make_telstra_callback(notify_api, rmock):
     assert json.loads(rmock.request_history[0].text)['to'] == '0409000001'
 
 
-@pytest.mark.skip('disabled')
 @pytest.mark.parametrize("phone_number",
                          ["0409000001", "0409000002", "0409000003",
                           "0412345678"])

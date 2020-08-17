@@ -1,8 +1,9 @@
 from datetime import datetime
 import json
 
+import requests
 from flask import current_app
-from requests import request, RequestException, HTTPError
+from authlib.integrations.requests_client import OAuth2Session
 
 from notifications_utils.s3 import s3upload
 
@@ -21,11 +22,20 @@ temp_fail_email = "temp-fail@simulator.notify"
 
 
 def send_sms_response(provider, notification_id, to):
-    return None
-
     if provider == "sap":
-        headers = {"Content-type": "application/json"}
-        body = sap_callback(notification_id, to)
+        api_host_name = current_app.config["API_HOST_NAME"]
+
+        from app.sap.oauth2 import OAuth2Client
+        oauth2_client = OAuth2Client.query.first()
+        session = OAuth2Session(oauth2_client.client_id, oauth2_client.client_secret)
+        session.fetch_token(f'{api_host_name}/sap/oauth2/token')
+
+        with session as client:
+            headers = {"Content-type": "application/json"}
+            body = sap_callback(notification_id, to)
+            make_request(SMS_TYPE, provider, notification_id, body, headers, client=client)
+        return
+
     elif provider == "telstra":
         headers = {"Content-type": "application/json"}
         body = telstra_callback(notification_id, to)
@@ -49,27 +59,16 @@ def send_email_response(reference, to):
     process_ses_results_task.apply_async([body], queue=QueueNames.RESEARCH_MODE)
 
 
-def make_request(notification_type, provider, notification_id, data, headers):
-    api_call = "{}/notifications/{}/{}/{}".format(current_app.config["API_HOST_NAME"], notification_type, provider, notification_id)
+def make_request(notification_type, provider, notification_id, data, headers, client=requests):
+    api_host_name = current_app.config["API_HOST_NAME"]
+    api_call = f"{api_host_name}/notifications/{notification_type}/{provider}/{notification_id}"
 
     try:
-        response = request(
-            "POST",
-            api_call,
-            headers=headers,
-            data=data,
-            timeout=60
-        )
+        response = client.post(api_call, headers=headers, data=data, timeout=60)
         response.raise_for_status()
-    except RequestException as e:
-        api_error = HTTPError(e)
-        current_app.logger.error(
-            "API {} request on {} failed with {}".format(
-                "POST",
-                api_call,
-                api_error.response
-            )
-        )
+    except requests.RequestException as e:
+        api_error = requests.HTTPError(e)
+        current_app.logger.error(f"API POST request on {api_call} failed with {api_error.response}")
         raise api_error
     finally:
         current_app.logger.info("Mocked provider callback request finished")
@@ -86,6 +85,7 @@ def sap_callback(notification_id, to):
 
     return json.dumps({
         "messageId": "XXXX",
+        "message": "message content",
         "recipient": to,
         "status": status,
     })
