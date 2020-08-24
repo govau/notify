@@ -148,7 +148,7 @@ def features():
     )
 
 
-@main.route('/features/roadmap', endpoint='roadmap')
+@main.route('/roadmap', endpoint='roadmap')
 def roadmap():
     return render_template(
         'views/roadmap.html',
@@ -156,7 +156,7 @@ def roadmap():
     )
 
 
-@main.route('/features/security', endpoint='security')
+@main.route('/security', endpoint='security')
 def security():
     return render_template(
         'views/security.html',
@@ -164,7 +164,7 @@ def security():
     )
 
 
-@main.route('/features/terms', endpoint='terms')
+@main.route('/terms', endpoint='terms')
 def terms():
     return render_template(
         'views/terms-of-use.html',
@@ -173,7 +173,7 @@ def terms():
     )
 
 
-@main.route('/features/using-notify')
+@main.route('/using-notify')
 def using_notify():
     return render_template(
         'views/using-notify.html',
@@ -183,13 +183,15 @@ def using_notify():
 
 # --- Redirects --- #
 
-@main.route('/roadmap', endpoint='old_roadmap')
-@main.route('/terms', endpoint='old_terms')
+@main.route('/features/security', endpoint='old_security')
+@main.route('/features/roadmap', endpoint='old_roadmap')
+@main.route('/features/terms', endpoint='old_terms')
 @main.route('/information-security', endpoint='information_security')
 @main.route('/using_notify', endpoint='old_using_notify')
 @main.route('/information-risk-management', endpoint='information_risk_management')
 def old_page_redirects():
     redirects = {
+        'main.old_security': 'main.security',
         'main.old_roadmap': 'main.roadmap',
         'main.old_terms': 'main.terms',
         'main.information_security': 'main.using_notify',
