@@ -24,7 +24,11 @@
         class="file-list-filename"
         href="{{ url_for('.conversation', service_id=current_service.id, notification_id=item.id) }}#n{{ item.id }}"
       >
-        {{ item.user_number | e164_to_phone_number | format_phone_number_human_readable }}
+        {% if re.search('[a-zA-Z]', item.user_number) %}
+          {{ item.user_number }}
+        {% else %}
+          {{ item.user_number | e164_to_phone_number | format_phone_number_human_readable }}
+        {% endif %}
       </a>
       <span class="file-list-hint">{{ item.content }}</span>
     {% endcall %}
@@ -37,4 +41,3 @@
 
   {{ previous_next_navigation(prev_page, next_page) }}
 </div>
-
