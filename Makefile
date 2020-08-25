@@ -11,14 +11,16 @@ BRANCH        ?= $(CIRCLE_BRANCH)
 FEATURE        = $(BRANCH:$(STG_PREFIX)%=%)
 
 # set prod stage if we're on prod branch
-ifeq ($(BRANCH), $(PRD_BRANCH))
-	export STG ?= $(PRD_STAGE)
-endif
+# ifeq ($(BRANCH), $(PRD_BRANCH))
+# 	export STG ?= $(PRD_STAGE)
+# endif
 
 # export stg variable only if we are on a feature branch
-ifneq ($(BRANCH), $(FEATURE))
-	export STG ?= f-$(FEATURE)
-endif
+# ifneq ($(BRANCH), $(FEATURE))
+# 	export STG ?= f-$(FEATURE)
+# endif
+
+export STG ?= $(PRD_STAGE)
 
 all: install
 
