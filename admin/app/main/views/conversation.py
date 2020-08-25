@@ -4,7 +4,7 @@ from notify.errors import HTTPError
 from notifications_utils.recipients import (
     e164_to_phone_number,
     format_phone_number_human_readable,
-    validate_and_format_phone_number_and_allow_international,
+    try_validate_and_format_phone_number,
 )
 from notifications_utils.template import SMSPreviewTemplate
 
@@ -18,7 +18,6 @@ from app.utils import user_has_permissions
 @login_required
 @user_has_permissions('view_activity')
 def conversation(service_id, notification_id):
-
     user_number = get_user_number(service_id, notification_id)
 
     return render_template(
@@ -97,24 +96,19 @@ def get_conversation_partials(service_id, user_number):
 
 def get_user_number(service_id, notification_id):
     try:
-        number_e164 = service_api_client.get_inbound_sms_by_id(service_id, notification_id)['user_number']
+        number = service_api_client.get_inbound_sms_by_id(service_id, notification_id)['user_number']
     except HTTPError:
         notification = notification_api_client.get_notification(service_id, notification_id)
 
-        number_e164 = notification['normalised_to']
+        number = notification['normalised_to']
 
         # For old records normalised_to may be empty or it may be stored in the
         # old format (without storing the leading plus sign). If this is the
         # case, use the to field instead and create the E.164 format on the fly.
-        if not number_e164 or not number_e164.startswith('+'):
-            try:
-                number_e164 = validate_and_format_phone_number_and_allow_international(notification['to'])
-            except Exception:
-                return notification['to']
+        if not number or not number.startswith('+'):
+            number = notification['to']
 
-    number = e164_to_phone_number(number_e164)
-
-    return format_phone_number_human_readable(number)
+    return try_validate_and_format_phone_number(number)
 
 
 def get_sms_thread(service_id, user_number):
