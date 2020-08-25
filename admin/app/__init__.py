@@ -32,6 +32,7 @@ from notifications_utils.clients.statsd.statsd_client import StatsdClient
 from notifications_utils.recipients import (
     format_phone_number_human_readable,
     e164_to_phone_number,
+    try_validate_and_format_phone_number,
 )
 from notifications_utils.formatters import formatted_list
 from werkzeug.exceptions import abort
@@ -621,5 +622,6 @@ def add_template_filters(application):
         nl2br,
         format_phone_number_human_readable,
         e164_to_phone_number,
+        try_validate_and_format_phone_number,
     ]:
         application.add_template_filter(fn)

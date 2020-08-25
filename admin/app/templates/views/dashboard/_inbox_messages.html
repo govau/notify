@@ -24,7 +24,7 @@
         class="file-list-filename"
         href="{{ url_for('.conversation', service_id=current_service.id, notification_id=item.id) }}#n{{ item.id }}"
       >
-        {{ item.user_number | e164_to_phone_number | format_phone_number_human_readable }}
+        {{ item.user_number | try_validate_and_format_phone_number }}
       </a>
       <span class="file-list-hint">{{ item.content }}</span>
     {% endcall %}
