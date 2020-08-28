@@ -185,5 +185,5 @@ class JSONFormatter(BaseJSONFormatter):
         try:
             log_record['message'] = log_record['message'].format(**log_record)
         except KeyError as e:
-            logger.exception("JSONFormatter: failed to format log message: {} not found".format(e))
+            logger.warning("JSONFormatter: failed to format log message: {} not found".format(e))
         return log_record
