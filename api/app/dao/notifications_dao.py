@@ -633,10 +633,12 @@ def dao_get_count_of_letters_to_process_for_date(date_to_process=None):
 def dao_notifications_hung_at_sent(notification_type, in_last_seconds=360):
     since_date = datetime.utcnow() - timedelta(seconds=in_last_seconds)
 
+    # TODO: remove SMS_TYPE filter once we're able to check up on other message types
     return Notification.query.filter(
         Notification.notification_type == notification_type,
         Notification.created_at >= since_date,
         Notification.reference != None, # noqa
+        Notification.notification_type == SMS_TYPE,
         Notification.key_type != KEY_TYPE_TEST,
         or_(
             Notification.status == NOTIFICATION_SENDING,
