@@ -4,7 +4,6 @@ from app.dao.date_util import (
     get_financial_year_start,
     get_financial_year_for_datetime
 )
-
 from app.models import (
     FactBilling,
     Service,
@@ -13,18 +12,23 @@ from app.models import (
 )
 
 
+def get_internationalised_billable_units():
+    return func.coalesce(
+        FactBilling.billable_units *
+        case([
+            (FactBilling.international == 't', 2.167),
+            (FactBilling.international == 'f', 1),
+        ]),
+        0
+    )
+
+
 def fetch_sms_free_allowance_remainder(start_date):
     # ASSUMPTION: AnnualBilling has been populated for year.
     billing_year = get_financial_year_for_datetime(start_date)
     start_of_year = get_financial_year_start(billing_year)
 
-    billable_units = func.sum(
-        FactBilling.billable_units *
-        case([
-            (FactBilling.international == 't', 2.167),
-            (FactBilling.international == 'f', 1),
-        ])
-    )
+    billable_units = func.sum(get_internationalised_billable_units())
 
     query = db.session.query(
         AnnualBilling.service_id.label("service_id"),
@@ -54,13 +58,7 @@ def fetch_sms_billing_for_all_services(start_date, end_date):
     free_allowance_remainder = fetch_sms_free_allowance_remainder(start_date).subquery()
     notifications_sent = func.sum(FactBilling.notifications_sent)
     billable_units = func.sum(FactBilling.billable_units)
-    billable_units_adjusted = func.sum(
-        FactBilling.billable_units *
-        case([
-            (FactBilling.international == 't', 2.167),
-            (FactBilling.international == 'f', 1),
-        ])
-    )
+    billable_units_adjusted = func.sum(get_internationalised_billable_units())
 
     international_units = func.sum(
         case([
@@ -76,19 +74,15 @@ def fetch_sms_billing_for_all_services(start_date, end_date):
         ])
     )
 
-    sms_remainder = func.coalesce(
-        free_allowance_remainder.c.sms_remainder,
-        free_allowance_remainder.c.free_sms_fragment_limit
-    )
-    chargeable_units = func.greatest(billable_units_adjusted - sms_remainder, 0)
+    chargeable_units = func.greatest(billable_units_adjusted - free_allowance_remainder.c.sms_remainder, 0)
     total_cost = chargeable_units * FactBilling.rate
 
     query = db.session.query(
         Service.name.label('service_name'),
         Service.id.label('service_id'),
+        free_allowance_remainder.c.sms_remainder,
         free_allowance_remainder.c.free_sms_fragment_limit,
         FactBilling.rate.label('sms_rate'),
-        sms_remainder.label('sms_remainder'),
         notifications_sent.label('notifications_sent'),
         billable_units.label('billable_units'),
         billable_units_adjusted.label('billable_units_adjusted'),
@@ -115,7 +109,6 @@ def fetch_sms_billing_for_all_services(start_date, end_date):
     ).order_by(
         Service.name
     )
-
     return query.all()
 
 
