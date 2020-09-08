@@ -81,7 +81,6 @@ jobs:
             - utils
             - api
             - admin
-            - status
             - docs
             - ci
 
@@ -382,15 +381,6 @@ jobs:
       - *cf_login_prod
       - run: make api.deploy-celery-beat
 
-  deploy-statuspage:
-    docker:
-      - image: circleci/ruby:2.3-node
-    steps:
-      - *cf_install
-      - *attach_workspace
-      - *cf_login_prod
-      - run: make status.deploy
-
   deploy-docs:
     <<: *node_image
     steps:
@@ -554,11 +544,6 @@ workflows:
             - unlock-prod-deploy
 
       - deploy-prod-celery-beat:
-          <<: *master_branch
-          requires:
-            - unlock-prod-deploy
-
-      - deploy-statuspage:
           <<: *master_branch
           requires:
             - unlock-prod-deploy

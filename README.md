@@ -23,14 +23,14 @@ The targets that every sub-project should implement are:
 - `check-vulnerabilities`
 
 Issuing any of these commands at the root level will forward it on to all
-sub-projects. For example, you can set up and build every project by running
+sub-projects. For example, you can set up and build every project by running:
 
 ```
 make install
 make build
 ```
 
-You can run all the tests of all projects by running
+You can run all the tests of all projects by running:
 
 ```
 make install-dev
@@ -40,7 +40,7 @@ make test
 You can also work with a specific project from the root level by prefixing the
 command with the project name, and a full stop separator.
 
-For instance, running the API in dev mode is done with
+For instance, to run the API in dev mode:
 
 ```
 make api.run
@@ -70,10 +70,7 @@ Different projects have different needs. Consult them individually to be sure.
 
 Generally though, you'll need Python and pipenv for the frontend and backend.
 
-You'll need Node.js for the frontend and docs,
-
-And we've got a simple open source status page that's written in Ruby, but
-we don't usually run it locally.
+You'll need Node.js for the frontend and docs.
 
 ## Credits
 
