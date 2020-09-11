@@ -9,10 +9,10 @@ from app import (
     user_api_client,
 )
 
-from app import format_date
+from app.utils import gmt_timezones
 from app.main import main
 from app.main.forms import InviteUserForm, PermissionsForm, SearchUsersForm
-from app.notify_client.models import roles
+from app.notify_client.models import roles, all_permissions
 from app.utils import user_has_permissions, Spreadsheet
 
 
@@ -41,19 +41,25 @@ def manage_users(service_id):
 @login_required
 @user_has_permissions('manage_service')
 def service_users_report(service_id):
+    # permissions are structured differently on invited vs accepted-invite users
+    def user_permissions(user):
+        return {
+            permission for permission in all_permissions if
+            user.has_permission_for_service(service_id, permission)
+        }
+
     def present_row(user):
-        permissions = sorted(user.permissions.get(service_id, []))
-        logged_in_at = 'no login information'
-        if user.logged_in_at:
-            logged_in_at = format_date(user.logged_in_at)
+        logged_in_at = getattr(user, 'logged_in_at', None)
+        if logged_in_at:
+            logged_in_at = gmt_timezones(logged_in_at)
 
         return [
-            user.name,
             user.email_address,
-            user.mobile_number,
+            getattr(user, 'name', None),  # does not exist on invited user
+            getattr(user, 'mobile_number', None),  # does not exist on invited user
             logged_in_at,
             user.auth_type,
-            ';'.join(permissions)
+            ';'.join(user_permissions(user))
         ]
 
     users = sorted(
@@ -64,7 +70,7 @@ def service_users_report(service_id):
         key=lambda user: user.email_address,
     )
 
-    columns = ["name", "email_address", "mobile_number", "last_login", "auth_type", "permissions"]
+    columns = ["email_address", "name", "mobile_number", "last_login", "auth_type", "permissions"]
     csv_data = [columns, *(present_row(user) for user in users)]
     return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
         'Content-Type': 'text/csv; charset=utf-8',
