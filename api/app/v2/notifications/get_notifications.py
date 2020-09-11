@@ -45,7 +45,7 @@ def get_notifications():
         older_than=data.get('older_than'),
         client_reference=data.get('reference'),
         page_size=current_app.config.get('API_PAGE_SIZE'),
-        include_jobs=data.get('include_jobs')
+        include_jobs=data.get('include_jobs', 'true').lower() == 'true',
     )
 
     def _build_links(notifications):

@@ -275,13 +275,14 @@ def test_get_all_notifications_except_job_notifications_returns_200(client, samp
     auth_header = create_authorization_header(service_id=notification.service_id)
     response = client.get(
         path='/v2/notifications',
+        query_string={'include_jobs': 'false'},
         headers=[('Content-Type', 'application/json'), auth_header])
 
     json_response = json.loads(response.get_data(as_text=True))
 
     assert response.status_code == 200
     assert response.headers['Content-type'] == "application/json"
-    assert json_response['links']['current'].endswith("/v2/notifications")
+    assert "/v2/notifications" in json_response['links']['current']
     assert 'next' in json_response['links'].keys()
     assert len(json_response['notifications']) == 2
 
