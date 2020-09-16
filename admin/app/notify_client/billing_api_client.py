@@ -19,6 +19,12 @@ class BillingAPIClient(NotifyAdminAPIClient):
             params=dict(year=year)
         )
 
+    def get_service_usage_v2(self, service_id, year=None):
+        return self.get(
+            '/service/{0}/billing/yearly-usage-summary-v2'.format(service_id),
+            params=dict(year=year)
+        )
+
     def get_free_sms_fragment_limit_for_year(self, service_id, year=None):
         result = self.get(
             '/service/{0}/billing/free-sms-fragment-limit'.format(service_id),

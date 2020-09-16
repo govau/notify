@@ -79,6 +79,56 @@
         #}
       </div>
 
+
+      {% if yearly_usage %}
+        <div class="dashboard-table body-copy-table">
+          {% call(entry, row_index) list_table(
+            yearly_usage,
+            caption="Total spend",
+            caption_visible=False,
+            empty_message='',
+            field_headings=[
+              'FT LETTER Usage By month',
+              hidden_field_heading('Cost'),
+            ],
+            field_headings_visible=True
+          ) %}
+            {% call row_heading() %}
+              {{ entry.month_name }}
+            {% endcall %}
+            {% call field(align='left') %}
+            {{ big_number(
+                entry.chargeable_cost,
+                currency="$",
+                smallest=True
+              ) }}
+          <ul>
+              {% if entry.billable_units > 0 %}
+                  {% if entry.units_available > 0 %}
+                    <li class="tabular-numbers">{{ "{:,}".format(entry.units_available) }} free text messages</li>
+                  {% endif %}
+
+                  {% if entry.domestic_units > 0 %}
+                    <li class="tabular-numbers">{{
+                        "{:,}".format(entry.domestic_units) }} text messages at {{ entry.domestic_unit_rate }}c</li>
+                  {% endif %}
+
+                  {% if entry.international_units > 0 %}
+                    <li class="tabular-numbers">{{
+                        "{:,}".format(entry.international_units) }} text messages at {{ entry.international_unit_rate }}c</li>
+                  {% endif %}
+              {% else %}
+                  <li aria-hidden="true">–</li>
+              {% endif %}
+              </ul>
+            {% endcall %}
+          {% endcall %}
+        </div>
+
+        <h2 class='heading-large'>Previous billing</h2>
+    {% endif %}
+
+
       {% if months %}
         <div class="dashboard-table body-copy-table">
           {% call(month, row_index) list_table(
