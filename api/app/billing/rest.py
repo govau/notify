@@ -7,6 +7,7 @@ from app.dao.monthly_billing_dao import (
     get_billing_data_for_financial_year,
     get_monthly_billing_by_notification_type
 )
+from app.dao.fact_billing_dao import fetch_annual_billing
 from app.dao.date_util import get_months_for_financial_year
 from app.errors import register_errors
 from app.models import SMS_TYPE, EMAIL_TYPE, LETTER_TYPE
@@ -62,6 +63,52 @@ def get_yearly_billing_usage_summary(service_id):
 
     except TypeError:
         return jsonify(result='error', message='No valid year provided'), 400
+
+
+def isoformat(date):
+    """Return the date formatted according to ISO.
+    This is 'YYYY-MM-DD'.
+    References:
+    - http://www.w3.org/TR/NOTE-datetime
+    - http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+    """
+    return datetime.strftime(date, "%Y-%m-%d")
+
+
+@billing_blueprint.route('/yearly-usage-summary-v2')
+def get_yearly_billing_usage_summary_v2(service_id):
+    year = int(request.args.get('year'))
+    billing_data = fetch_annual_billing(service_id, year).all()
+
+    def present_billing(s):
+        return {
+            "month": isoformat(s.month),
+            "month_name": s.month.strftime("%B"),
+
+            # unit and credit breakdown
+            # _available fields refer to start of month
+            "domestic_units": int(s.domestic_units),
+            "international_units": int(s.international_units),
+            "billable_units": int(s.billable_units),
+            "credits_available": float(s.credits_available),
+            "units_available": int(s.units_available),
+
+            # constant rates we charge at for display purposes
+            "domestic_unit_rate": int(s.domestic_unit_rate),
+            "international_unit_rate": int(s.international_unit_rate),
+
+            # total cost of this month without factoring in free usage
+            "total_cost": float(s.total_cost),
+
+            # total cost of this month after free usage removed
+            "chargeable_cost": float(s.chargeable_cost),
+
+            # notifications sent without being broken down to units
+            "notifications_sent": int(s.notifications_sent),
+        }
+
+    billing_info = [present_billing(x) for x in billing_data]
+    return jsonify(billing_info)
 
 
 def _get_total_billable_units_and_rate_for_notification_type(billing_data, noti_type):
