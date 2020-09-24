@@ -78,7 +78,7 @@ def test_perm_failure_telstra_callback(phone_number):
 def test_temp_failure_telstra_callback(phone_number):
     data = json.loads(telstra_callback("1234", phone_number))
     assert data['to'] == phone_number
-    assert data['deliveryStatus'] == "REJECTED"
+    assert data['deliveryStatus'] == "REJECTD"
 
 
 @pytest.mark.parametrize("phone_number", ["0409000001", "+61409000001", "409000001", "+61 409000001",
