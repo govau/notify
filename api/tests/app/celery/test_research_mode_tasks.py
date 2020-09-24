@@ -33,7 +33,7 @@ def test_make_telstra_callback(notify_api, rmock):
 
 
 @pytest.mark.parametrize("phone_number",
-                         ["0409000001", "0409000002", "0409000003",
+                         ["0409000001", "0426305771", "0426305770",
                           "0412345678"])
 def test_make_twilio_callback(notify_api, rmock, phone_number):
     endpoint = "http://localhost:6011/notifications/sms/twilio/1234"
@@ -67,14 +67,14 @@ def test_delivered_telstra_callback(phone_number):
     assert data['deliveryStatus'] == "DELIVRD"
 
 
-@pytest.mark.parametrize("phone_number", ["0409000002", "+61409000002", "409000002", "+61 409000002"])
+@pytest.mark.parametrize("phone_number", ["0426305771", "+61426305771", "426305771", "+61 426305771"])
 def test_perm_failure_telstra_callback(phone_number):
     data = json.loads(telstra_callback("1234", phone_number))
     assert data['to'] == phone_number
     assert data['deliveryStatus'] == "UNDVBL"
 
 
-@pytest.mark.parametrize("phone_number", ["0409000003", "+61409000003", "409000003", "+61 409000003"])
+@pytest.mark.parametrize("phone_number", ["0426305770", "+61426305770", "426305770", "+61 426305770"])
 def test_temp_failure_telstra_callback(phone_number):
     data = json.loads(telstra_callback("1234", phone_number))
     assert data['to'] == phone_number
@@ -96,7 +96,7 @@ def test_delivered_twilio_callback(phone_number):
     }
 
 
-@pytest.mark.parametrize("phone_number", ["0409000002", "+61409000002", "409000002", "+61 409000002"])
+@pytest.mark.parametrize("phone_number", ["0426305771", "+61426305771", "426305771", "+61 426305771"])
 def test_failure_twilio_callback(phone_number):
     assert twilio_callback('1234', phone_number) == {
         "AccountSid": "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",

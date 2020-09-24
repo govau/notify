@@ -334,7 +334,10 @@ def test_post_email_notification_returns_201(client, sample_email_template_with_
     ('simulate-delivered-3@notify.gov.au', EMAIL_TYPE),
     ('0400 900000', 'sms'),
     ('0400 900111', 'sms'),
-    ('0400 900222', 'sms')
+    ('0400 900222', 'sms'),
+    ('0426 305772', 'sms'),
+    ('0426 305773', 'sms'),
+    ('0426 305774', 'sms')
 ])
 def test_should_not_persist_or_send_notification_if_simulated_recipient(
         client,

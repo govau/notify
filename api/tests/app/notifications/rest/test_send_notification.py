@@ -821,7 +821,10 @@ def test_should_not_persist_notification_or_send_email_if_simulated_email(
 @pytest.mark.parametrize('to_sms', [
     '+61400900000',
     '+61400900111',
-    '+61400900222'
+    '+61400900222',
+    '+61426305772',
+    '+61426305773',
+    '+61426305774'
 ])
 def test_should_not_persist_notification_or_send_sms_if_simulated_number(
         client,
