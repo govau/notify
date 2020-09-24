@@ -638,7 +638,6 @@ def dao_notifications_hung_at_sent(notification_type, in_last_seconds=360):
         Notification.notification_type == notification_type,
         Notification.created_at >= since_date,
         Notification.reference != None, # noqa
-        Notification.notification_type == SMS_TYPE,
         Notification.key_type != KEY_TYPE_TEST,
         or_(
             Notification.status == NOTIFICATION_SENDING,

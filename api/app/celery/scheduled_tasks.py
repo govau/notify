@@ -169,12 +169,12 @@ def check_notifications_status():
         for notification_type in notification_types:
             yield from dao_notifications_hung_at_sent(notification_type, in_last_seconds=four_hours)
 
-    for notification in notifications_to_check([SMS_TYPE, EMAIL_TYPE]):
+    for notification in notifications_to_check([SMS_TYPE]):
         check_notification_status.apply_async([
             notification.notification_type, notification.sent_by,
             notification.reference,
             notification.sent_at.replace(tzinfo=timezone.utc).timestamp()
-        ], queue=QueueNames.NOTIFY)
+        ], queue=QueueNames.PERIODIC)
 
 
 @notify_celery.task(name="delete-verify-codes")
