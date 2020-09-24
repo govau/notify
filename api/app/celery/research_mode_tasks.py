@@ -94,7 +94,7 @@ def sap_callback(notification_id, to):
 
 def telstra_callback(notification_id, to):
     if to.strip().endswith(temp_fail_old) or to.strip().endswith(temp_fail):
-        status = "REJECTED"
+        status = "REJECTD"
     elif to.strip().endswith(perm_fail_old) or to.strip().endswith(perm_fail):
         status = "UNDVBL"
     else:

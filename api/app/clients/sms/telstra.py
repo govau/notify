@@ -12,6 +12,7 @@ telstra_response_map = {
     'DELETED': 'permanent-failure',  # TODO: assuming this is permanent
     'UNDVBL': 'permanent-failure',  # TODO: assuming this is permanent
     'REJECTED': 'temporary-failure',  # TODO: assuming this is temporary
+    'REJECTD': 'temporary-failure',
     'READ': 'delivered'  # TODO: can we add a new status 'read'?
 }
 
