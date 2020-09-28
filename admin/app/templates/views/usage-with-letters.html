@@ -30,13 +30,13 @@
             {{ big_number(sms_sent, 'sent', smaller=True) }}
             {{ big_number(sms_free_allowance, 'free allowance', smaller=True) }}
             {{ big_number(sms_allowance_remaining, 'free allowance remaining', smaller=True) }}
-              {% if sms_chargeable %}
+            {% if sms_chargeable %}
                 {{ big_number(
-                  sms_chargeable,
-                  'at {:.3g}c per message (excl. GST)'.format(sms_rate * 100),
-                  smaller=True
+                sms_chargeable,
+                'at {:.3g}c per message (excl. GST)'.format(sms_rate * 100),
+                smaller=True
                 ) }}
-              {% endif %}
+            {% endif %}
           </div>
         </div>
         {#
@@ -57,12 +57,16 @@
         </div>
         <div class='column-one-half'>
           <div class="keyline-block">
-            {{ big_number(
-              (sms_chargeable * sms_rate),
-              'spent',
-              currency="$",
-              smaller=True
-            ) }}
+              {% if sms_cost %}
+                  {{ big_number(sms_cost, 'spent', currency="$", smaller=True) }}
+              {% else %}
+                  {{ big_number(
+                  (sms_chargeable * sms_rate),
+                  'spent',
+                  currency="$",
+                  smaller=True
+                  ) }}
+              {% endif %}
           </div>
         </div>
         {#
@@ -88,7 +92,7 @@
             caption_visible=False,
             empty_message='',
             field_headings=[
-              'FT LETTER Usage By month',
+              'By month',
               hidden_field_heading('Cost'),
             ],
             field_headings_visible=True
@@ -98,24 +102,25 @@
             {% endcall %}
             {% call field(align='left') %}
             {{ big_number(
-                entry.chargeable_cost,
+                entry.cost_chargeable,
                 currency="$",
                 smallest=True
               ) }}
           <ul>
-              {% if entry.billable_units > 0 %}
-                  {% if entry.units_available > 0 %}
-                    <li class="tabular-numbers">{{ "{:,}".format(entry.units_available) }} free text messages</li>
+              {% if entry.units > 0 %}
+                  {% if entry.units_free_available > 0 %}
+                      {% if entry.units_free_remaining > 0 %}
+                          <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} of {{ "{:,}".format(entry.units_free_available) }} free text messages</li>
+                      {% else %}
+                          <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} free text messages</li> {% endif %}
                   {% endif %}
 
-                  {% if entry.domestic_units > 0 %}
-                    <li class="tabular-numbers">{{
-                        "{:,}".format(entry.domestic_units) }} text messages at {{ entry.domestic_unit_rate }}c</li>
+                  {% if entry.fragments_domestic > 0 %}
+                    <li class="tabular-numbers">{{ "{:,}".format(entry.fragments_domestic) }} domestic texts at {{ entry.unit_rate_domestic }}c</li>
                   {% endif %}
 
-                  {% if entry.international_units > 0 %}
-                    <li class="tabular-numbers">{{
-                        "{:,}".format(entry.international_units) }} text messages at {{ entry.international_unit_rate }}c</li>
+                  {% if entry.fragments_international > 0 %}
+                    <li class="tabular-numbers">{{ "{:,}".format(entry.fragments_international) }} international texts at {{ entry.unit_rate_international }}c</li>
                   {% endif %}
               {% else %}
                   <li aria-hidden="true">–</li>
@@ -125,11 +130,8 @@
           {% endcall %}
         </div>
 
-        <h2 class='heading-large'>Previous billing</h2>
-    {% endif %}
+      {% elif months %}
 
-
-      {% if months %}
         <div class="dashboard-table body-copy-table">
           {% call(month, row_index) list_table(
             months,

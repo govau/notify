@@ -146,10 +146,20 @@ def usage(service_id):
     free_sms_allowance = billing_api_client.get_free_sms_fragment_limit_for_year(service_id, year)
     units = billing_api_client.get_billable_units(service_id, year)
     yearly_usage = billing_api_client.get_service_usage(service_id, year)
+    calculated_usage = calculate_usage(yearly_usage, free_sms_allowance)
 
     ft_yearly_usage = None
     if 'ft_usage' in request.args:
         ft_yearly_usage = billing_api_client.get_service_usage_v2(service_id, year)
+        latest_month = ft_yearly_usage[-1]
+        totals = lambda param: sum(month[param] for month in ft_yearly_usage)
+
+        calculated_usage['sms_sent'] = totals('notifications_sms')
+        calculated_usage['emails_sent'] = totals('notifications_email')
+        calculated_usage['sms_chargeable'] = latest_month['units_chargeable_cumulative']
+        calculated_usage['sms_free_allowance'] = latest_month['fragments_free_limit']
+        calculated_usage['sms_allowance_remaining'] = latest_month['units_free_remaining']
+        calculated_usage['sms_cost'] = latest_month['cost_chargeable_cumulative']
 
     usage_template = 'views/usage.html'
     if 'letter' in current_service['permissions']:
@@ -168,8 +178,7 @@ def usage(service_id):
             start=current_financial_year - 1,
             end=current_financial_year + 1,
         ),
-        **calculate_usage(yearly_usage,
-                          free_sms_allowance)
+        **calculated_usage,
     )
 
 

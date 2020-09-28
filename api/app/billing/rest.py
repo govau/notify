@@ -12,9 +12,8 @@ from app.dao.date_util import get_months_for_financial_year
 from app.errors import register_errors
 from app.models import SMS_TYPE, EMAIL_TYPE, LETTER_TYPE
 from app.utils import convert_utc_to_aet
-from app.dao.annual_billing_dao import (dao_get_free_sms_fragment_limit_for_year,
-                                        dao_get_all_free_sms_fragment_limit,
-                                        dao_create_or_update_annual_billing_for_year,
+from app.dao.annual_billing_dao import (dao_create_or_update_annual_billing_for_year,
+                                        dao_get_free_sms_fragment_limit,
                                         dao_update_annual_billing_for_future_years)
 from app.errors import InvalidRequest
 from app.schema_validation import validate
@@ -85,26 +84,33 @@ def get_yearly_billing_usage_summary_v2(service_id):
             "month": isoformat(s.month),
             "month_name": s.month.strftime("%B"),
 
-            # unit and credit breakdown
-            # _available fields refer to start of month
-            "domestic_units": int(s.domestic_units),
-            "international_units": int(s.international_units),
-            "billable_units": int(s.billable_units),
-            "credits_available": float(s.credits_available),
-            "units_available": int(s.units_available),
+            # SMS fragment counts
+            "fragments_free_limit": int(s.fragments_free_limit),  # constant
+            "fragments_domestic": int(s.fragments_domestic),
+            "fragments_international": int(s.fragments_international),
 
-            # constant rates we charge at for display purposes
-            "domestic_unit_rate": int(s.domestic_unit_rate),
-            "international_unit_rate": int(s.international_unit_rate),
+            # number of notifications before being broken down into fragments or units
+            "notifications": int(s.notifications),
+            "notifications_sms": int(s.notifications_sms),
+            "notifications_email": int(s.notifications_email),
 
-            # total cost of this month without factoring in free usage
-            "total_cost": float(s.total_cost),
+            # costs in AUD by month and cumulative
+            "cost": float(s.cost),
+            "cost_chargeable": float(s.cost_chargeable),  # with free credits removed
+            "cost_cumulative": float(s.cost_cumulative),
+            "cost_chargeable_cumulative": float(s.cost_chargeable_cumulative),
 
-            # total cost of this month after free usage removed
-            "chargeable_cost": float(s.chargeable_cost),
+            # units are international-scaled fragments ( fragments * TYPE_unit_rate / BASE_unit_rate )
+            "units": int(s.units),
+            "units_chargeable": int(s.units_chargeable),
+            "units_chargeable_cumulative": int(s.units_chargeable_cumulative),
+            "units_free_available": int(s.units_free_available),
+            "units_free_remaining": int(s.units_free_remaining),
+            "units_free_used": int(s.units_free_used),
 
-            # notifications sent without being broken down to units
-            "notifications_sent": int(s.notifications_sent),
+            # constant rates
+            "unit_rate_domestic": int(s.unit_rate_domestic),
+            "unit_rate_international": int(s.unit_rate_international),
         }
 
     billing_info = [present_billing(x) for x in billing_data]
@@ -176,33 +182,15 @@ def _transform_billing_for_month_letters(billing_for_month):
 
 @billing_blueprint.route('/free-sms-fragment-limit', methods=["GET"])
 def get_free_sms_fragment_limit(service_id):
-
     financial_year_start = request.args.get('financial_year_start')
+    annual_billing = dao_get_free_sms_fragment_limit(
+        service_id,
+        int(financial_year_start) if financial_year_start else None,
+        get_current_financial_year_start_year()
+    )
 
-    annual_billing = dao_get_free_sms_fragment_limit_for_year(service_id, financial_year_start)
-
-    if annual_billing is None:
-        # An entry does not exist in annual_billing table for that service and year. If it is a past year,
-        # we return the oldest entry.
-        # If it is the current or future years, we create an entry in the db table using the newest record,
-        # and return that number.  If all fails, we return InvalidRequest.
-        sms_list = dao_get_all_free_sms_fragment_limit(service_id)
-
-        if not sms_list:
-            raise InvalidRequest('no free-sms-fragment-limit entry for service {} in DB'.format(service_id), 404)
-        else:
-            if financial_year_start is None:
-                financial_year_start = get_current_financial_year_start_year()
-
-            if int(financial_year_start) < get_current_financial_year_start_year():
-                # return the earliest historical entry
-                annual_billing = sms_list[0]   # The oldest entry
-            else:
-                annual_billing = sms_list[-1]  # The newest entry
-
-                annual_billing = dao_create_or_update_annual_billing_for_year(service_id,
-                                                                              annual_billing.free_sms_fragment_limit,
-                                                                              financial_year_start)
+    if not annual_billing:
+        raise InvalidRequest('no free-sms-fragment-limit entry for service {} in DB'.format(service_id), 404)
 
     return jsonify(annual_billing.serialize_free_sms_items()), 200
 
