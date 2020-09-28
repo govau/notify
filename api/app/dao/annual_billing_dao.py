@@ -64,3 +64,33 @@ def dao_insert_annual_billing_for_this_year(service, free_sms_fragment_limit):
     )
 
     db.session.add(annual_billing)
+
+
+def dao_get_free_sms_fragment_limit(service_id, financial_year_start, current_year):
+    annual_billing = dao_get_free_sms_fragment_limit_for_year(service_id, financial_year_start)
+
+    if annual_billing is not None:
+        return annual_billing
+
+    # An entry does not exist in annual_billing table for that service and year. If it is a past year,
+    # we return the oldest entry.
+    # If it is the current or future years, we create an entry in the db table using the newest record,
+    # and return that number.  If all fails, we return InvalidRequest.
+    sms_list = dao_get_all_free_sms_fragment_limit(service_id)
+
+    if not sms_list:
+        return None
+
+    if financial_year_start is None:
+        financial_year_start = current_year
+
+    if financial_year_start < current_year:
+        # return the earliest historical entry
+        annual_billing = sms_list[0]   # The oldest entry
+    else:
+        annual_billing = sms_list[-1]  # The newest entry
+        annual_billing = dao_create_or_update_annual_billing_for_year(
+            service_id, annual_billing.free_sms_fragment_limit, financial_year_start
+        )
+
+    return annual_billing

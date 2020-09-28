@@ -49,12 +49,16 @@
         </div>
         <div class='column-half'>
           <div class="keyline-block">
-            {{ big_number(
-              (sms_chargeable * sms_rate),
-              'spent',
-              currency="$",
-              smaller=True
-            ) }}
+              {% if sms_cost %}
+                  {{ big_number(sms_cost, 'spent', currency="$", smaller=True) }}
+              {% else %}
+                  {{ big_number(
+                  (sms_chargeable * sms_rate),
+                  'spent',
+                  currency="$",
+                  smaller=True
+                  ) }}
+              {% endif %}
           </div>
         </div>
       </div>
@@ -77,24 +81,26 @@
             {% endcall %}
             {% call field(align='left') %}
             {{ big_number(
-                entry.chargeable_cost,
+                entry.cost_chargeable,
                 currency="$",
                 smallest=True
               ) }}
           <ul>
-              {% if entry.billable_units > 0 %}
-                  {% if entry.units_available > 0 %}
-                    <li class="tabular-numbers">{{ "{:,}".format(entry.units_available) }} free text messages</li>
+              {% if entry.units > 0 %}
+                  {% if entry.units_free_available > 0 %}
+                      {% if entry.units_free_remaining > 0 %}
+                          <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} of {{ "{:,}".format(entry.units_free_available) }} free text messages</li>
+                      {% else %}
+                          <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} free text messages</li>
+                      {% endif %}
                   {% endif %}
 
-                  {% if entry.domestic_units > 0 %}
-                    <li class="tabular-numbers">{{
-                        "{:,}".format(entry.domestic_units) }} text messages at {{ entry.domestic_unit_rate }}c</li>
+                  {% if entry.fragments_domestic > 0 %}
+                    <li class="tabular-numbers">{{ "{:,}".format(entry.fragments_domestic) }} domestic texts at {{ entry.unit_rate_domestic }}c</li>
                   {% endif %}
 
-                  {% if entry.international_units > 0 %}
-                    <li class="tabular-numbers">{{
-                        "{:,}".format(entry.international_units) }} text messages at {{ entry.international_unit_rate }}c</li>
+                  {% if entry.fragments_international > 0 %}
+                    <li class="tabular-numbers">{{ "{:,}".format(entry.fragments_international) }} international texts at {{ entry.unit_rate_international }}c</li>
                   {% endif %}
               {% else %}
                   <li aria-hidden="true">–</li>
