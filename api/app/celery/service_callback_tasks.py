@@ -13,7 +13,7 @@ from app import (
     notify_celery,
     encryption
 )
-from app.dao.callback_failures_dao import dao_create_callback_failure
+from app.dao.callback_failures_dao import dao_create_callback_failure, dao_service_callbacks_are_failing
 from app.dao.notifications_dao import dao_get_notification_history_by_id
 from app.models import CallbackFailure
 from app.config import QueueNames
@@ -21,9 +21,7 @@ from app.config import QueueNames
 
 @notify_celery.task(bind=True, name="send-delivery-status", max_retries=5, default_retry_delay=60)
 @statsd(namespace="tasks")
-def send_delivery_status_to_service(self, notification_id,
-                                    encrypted_status_update
-                                    ):
+def send_delivery_status_to_service(self, notification_id, encrypted_status_update):
     start_time = datetime.utcnow()
     status_update = encryption.decrypt(encrypted_status_update)
 
@@ -78,6 +76,13 @@ def send_delivery_status_to_service(self, notification_id,
         ), queue=QueueNames.NOTIFY)
 
         if not isinstance(e, HTTPError) or e.response.status_code >= 500:
+            service_id = status_update['service_id']
+            if dao_service_callbacks_are_failing(service_id):
+                current_app.logger.warning(
+                    f"send_delivery_status_to_service retry cancelled for notification_id: {notification_id} due to failing service_id: {service_id}"
+                )
+                return
+
             try:
                 self.retry(queue=QueueNames.RETRY)
             except self.MaxRetriesExceededError:

@@ -8,10 +8,12 @@ from app import (
     service_api_client,
     user_api_client,
 )
+
+from app.utils import gmt_timezones
 from app.main import main
 from app.main.forms import InviteUserForm, PermissionsForm, SearchUsersForm
-from app.notify_client.models import roles
-from app.utils import user_has_permissions
+from app.notify_client.models import roles, all_permissions
+from app.utils import user_has_permissions, Spreadsheet
 
 
 @main.route("/services/<service_id>/users")
@@ -33,6 +35,47 @@ def manage_users(service_id):
         show_search_box=(len(users) > 7),
         form=SearchUsersForm(),
     )
+
+
+@main.route("/services/<service_id>/users.csv")
+@login_required
+@user_has_permissions('manage_service')
+def service_users_report(service_id):
+    # permissions are structured differently on invited vs accepted-invite users
+    def user_permissions(user):
+        return {
+            permission for permission in all_permissions if
+            user.has_permission_for_service(service_id, permission)
+        }
+
+    def present_row(user):
+        logged_in_at = getattr(user, 'logged_in_at', None)
+        if logged_in_at:
+            logged_in_at = gmt_timezones(logged_in_at)
+
+        return [
+            user.email_address,
+            getattr(user, 'name', None),  # does not exist on invited user
+            getattr(user, 'mobile_number', None),  # does not exist on invited user
+            logged_in_at,
+            user.auth_type,
+            ';'.join(user_permissions(user))
+        ]
+
+    users = sorted(
+        user_api_client.get_users_for_service(service_id=service_id) + [
+            invite for invite in invite_api_client.get_invites_for_service(service_id=service_id)
+            if invite.status != 'accepted'
+        ],
+        key=lambda user: user.email_address,
+    )
+
+    columns = ["email_address", "name", "mobile_number", "last_login", "auth_type", "permissions"]
+    csv_data = [columns, *(present_row(user) for user in users)]
+    return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': f'inline; filename="service-{service_id}-users.csv"'
+    }
 
 
 @main.route("/services/<service_id>/users/invite", methods=['GET', 'POST'])

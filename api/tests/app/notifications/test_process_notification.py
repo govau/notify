@@ -305,6 +305,11 @@ def test_send_notification_to_queue_throws_exception_deletes_notification(sample
     ("+61400900222", "sms", True),
     ("0400900000", "sms", True),
     ("0400900111", "sms", True),
+    ("+61426305772", "sms", True),
+    ("+61426305773", "sms", True),
+    ("+61426305774", "sms", True),
+    ("0426305772", "sms", True),
+    ("0426305773", "sms", True),
     ("simulate-delivered@notify.gov.au", "email", True),
     ("simulate-delivered-2@notify.gov.au", "email", True),
     ("simulate-delivered-3@notify.gov.au", "email", True),
@@ -320,7 +325,7 @@ def test_simulated_recipient(notify_api, to_address, notification_type, expected
         'simulate-delivered-2@notify.gov.au',
         'simulate-delivered-2@notify.gov.au'
     )
-    SIMULATED_SMS_NUMBERS = ('+61400900000', '+61400900111', '+61400900222')
+    SIMULATED_SMS_NUMBERS = ('+61400900000', '+61400900111', '+61400900222', '+61426305772', '+61426305773', '+61426305774')
     """
     formatted_address = None
 
@@ -338,6 +343,7 @@ def test_simulated_recipient(notify_api, to_address, notification_type, expected
     ('0412900123', False, '61', 1),  # AU
     ('+61490090012', False, '61', 1),  # AU
     ('0400900222', False, '61', 1),  # AU
+    ('0426305774', False, '61', 1),  # AU
     ('+447900900123', True, '44', 2),  # UK
     ('+7495 123 4567', True, '7', 1),  # Russia
     ('+360623400400', True, '36', 3)]  # Hungary

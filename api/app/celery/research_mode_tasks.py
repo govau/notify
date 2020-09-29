@@ -12,9 +12,10 @@ from app.models import SMS_TYPE
 from app.config import QueueNames
 from app.celery.process_ses_receipts_tasks import process_ses_results_task
 
-temp_fail = "409000003"
-perm_fail = "409000002"
-delivered = "409000001"
+temp_fail_old = "409000003"
+perm_fail_old = "409000002"
+temp_fail = "426305770"
+perm_fail = "426305771"
 
 delivered_email = "delivered@simulator.notify"
 perm_fail_email = "perm-fail@simulator.notify"
@@ -76,9 +77,9 @@ def make_request(notification_type, provider, notification_id, data, headers, cl
 
 
 def sap_callback(notification_id, to):
-    if to.strip().endswith(temp_fail):
+    if to.strip().endswith(temp_fail_old) or to.strip().endswith(temp_fail):
         status = "ERROR"  # We don't seem to have a SAP state for temp fail
-    elif to.strip().endswith(perm_fail):
+    elif to.strip().endswith(perm_fail_old) or to.strip().endswith(perm_fail):
         status = "ERROR"
     else:
         status = "DELIVERED"
@@ -92,9 +93,9 @@ def sap_callback(notification_id, to):
 
 
 def telstra_callback(notification_id, to):
-    if to.strip().endswith(temp_fail):
-        status = "REJECTED"
-    elif to.strip().endswith(perm_fail):
+    if to.strip().endswith(temp_fail_old) or to.strip().endswith(temp_fail):
+        status = "REJECTD"
+    elif to.strip().endswith(perm_fail_old) or to.strip().endswith(perm_fail):
         status = "UNDVBL"
     else:
         status = "DELIVRD"
@@ -107,9 +108,9 @@ def telstra_callback(notification_id, to):
 
 
 def twilio_callback(notification_id, to):
-    if to.strip().endswith(temp_fail):
+    if to.strip().endswith(temp_fail_old) or to.strip().endswith(temp_fail):
         status = "failed"
-    elif to.strip().endswith(perm_fail):
+    elif to.strip().endswith(perm_fail_old) or to.strip().endswith(perm_fail):
         status = "undelivered"
     else:
         status = "delivered"

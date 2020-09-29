@@ -46,24 +46,29 @@ Messages sent using a test key don’t show up on your dashboard or count agains
 
 By default, all messages sent with a test key will result in a delivered status.
 
-If you want to test failure responses with a test key, use the following addresses:
+If you want to test failure responses with a test key, use the following numbers and addresses:
 
 |                                   |                   |
 | --------------------------------- | ----------------- |
+| 0426305770                        | temporary failure |
+| 0426305771                        | permanent failure |
 | temp-fail@simulator.notify        | temporary failure |
 | perm-fail@simulator.notify        | permanent failure |
 | any other valid number or address | delivered         |
 
 ## Smoke testing your integration
 
-If you need to smoke test your integration with Notify on a regular basis, you should use the smoke test addresses below.
+If you need to smoke test your integration with Notify on a regular basis, you should use the smoke test numbers and addresses below.
 
 |                                    |
 | ---------------------------------- |
+| 0426305772                         |
+| 0426305773                         |
+| 0426305774                         |
 | simulate-delivered@notify.gov.au   |
 | simulate-delivered-2@notify.gov.au |
 | simulate-delivered-3@notify.gov.au |
 
-The smoke test addresses will immediately return a successful response, but won’t send a real message and won’t produce a delivery receipt. The notification ID is not a real ID, you will not be able to fetch the notification by ID.
+The smoke test numbers and addresses will immediately return a successful response, but won’t send a real message and won’t produce a delivery receipt. The notification ID is not a real ID, you will not be able to fetch the notification by ID.
 
-You can use the smoke test addresses with any type of key. If your smoke tests need to get the status of a message, then use a test key and don’t use these addresses.
+You can use the smoke test numbers and addresses with any type of key. If your smoke tests need to get the status of a message, then use a test key and don’t use these numbers and addresses.
