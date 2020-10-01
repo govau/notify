@@ -102,6 +102,7 @@ def get_yearly_billing_usage_summary_v2(service_id):
 
             # units are international-scaled fragments ( fragments * TYPE_unit_rate / BASE_unit_rate )
             "units": int(s.units),
+            "units_cumulative": int(s.units_cumulative),
             "units_chargeable": int(s.units_chargeable),
             "units_chargeable_cumulative": int(s.units_chargeable_cumulative),
             "units_free_available": int(s.units_free_available),

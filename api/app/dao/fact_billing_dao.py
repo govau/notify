@@ -185,6 +185,7 @@ def fetch_annual_billing(service_id, year):
 
     credits_used = func.least(cost, credits_available)
     units = cost / FRAGMENT_UNIT_RATE
+    units_cumulative = cost_cumulative / FRAGMENT_UNIT_RATE
     units_chargeable = cost_chargeable / FRAGMENT_UNIT_RATE
     units_free_used = credits_used / FRAGMENT_UNIT_RATE
     units_free_available = credits_available / FRAGMENT_UNIT_RATE
@@ -207,6 +208,7 @@ def fetch_annual_billing(service_id, year):
         cost_chargeable_cumulative.label('cost_chargeable_cumulative'),
 
         units.label('units'),
+        units_cumulative.label('units_cumulative'),
         units_chargeable.label('units_chargeable'),
         units_chargeable_cumulative.label('units_chargeable_cumulative'),
         units_free_available.label('units_free_available'),
