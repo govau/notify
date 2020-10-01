@@ -110,11 +110,7 @@
           {% endcall %}
         </div>
 
-        <h2 class='heading-large'>Previous billing</h2>
-    {% endif %}
-
-
-      {% if months %}
+      {% elif months %}
         <div class="dashboard-table body-copy-table">
           {% call(month, row_index) list_table(
             months,

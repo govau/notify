@@ -154,8 +154,8 @@ def usage(service_id):
         latest_month = ft_yearly_usage[-1]
         totals = lambda param: sum(month[param] for month in ft_yearly_usage)
 
-        calculated_usage['sms_sent'] = totals('notifications_sms')
         calculated_usage['emails_sent'] = totals('notifications_email')
+        calculated_usage['sms_sent'] = latest_month['units_cumulative']
         calculated_usage['sms_chargeable'] = latest_month['units_chargeable_cumulative']
         calculated_usage['sms_free_allowance'] = latest_month['fragments_free_limit']
         calculated_usage['sms_allowance_remaining'] = latest_month['units_free_remaining']
