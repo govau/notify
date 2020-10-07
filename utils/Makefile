@@ -27,12 +27,6 @@ build:
 tests:
 	$(RUNNER) python setup.py test
 
-ROOT_TEST_FILES = $(shell find tests/test_*.py -type f)
-ROOT_TESTS = $(ROOT_TEST_FILES:tests/test_%.py=test-%)
-
-$(ROOT_TESTS): test-%:
-	$(RUNNER) pytest tests/test_$*.py
-
 check-vulnerabilities:
 	$(RUNNER) bandit -c bandit.yml -r . -x tests -l
 

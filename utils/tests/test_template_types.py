@@ -272,14 +272,15 @@ def test_markdown_in_templates(
             "http://service.gov.au/blah.ext?q=a%20b%20c&order=desc#fragment",
             "http://service.gov.au/blah.ext?q=a%20b%20c&amp;order=desc#fragment",
         ),
-        pytest.mark.xfail(("example.com", "example.com")),
-        pytest.mark.xfail(("www.example.com", "www.example.com")),
-        pytest.mark.xfail((
+        pytest.param("example.com", "example.com", marks=pytest.mark.xfail),
+        pytest.param("www.example.com", "www.example.com", marks=pytest.mark.xfail),
+        pytest.param(
             "http://service.gov.uk/blah.ext?q=one two three",
             "http://service.gov.uk/blah.ext?q=one two three",
-        )),
-        pytest.mark.xfail(("ftp://example.com", "ftp://example.com")),
-        pytest.mark.xfail(("mailto:test@example.com", "mailto:test@example.com")),
+            marks=pytest.mark.xfail,
+        ),
+        pytest.param("ftp://example.com", "ftp://example.com", marks=pytest.mark.xfail),
+        pytest.param("mailto:test@example.com", "mailto:test@example.com", marks=pytest.mark.xfail),
     ]
 )
 def test_makes_links_out_of_URLs(template_class, url, url_with_entities_replaced):
@@ -373,7 +374,7 @@ def test_sms_message_adds_prefix_only_if_asked_to(
 ])
 @pytest.mark.parametrize("show_sender", [
     True,
-    pytest.mark.xfail(False),
+    pytest.param(False, marks=pytest.mark.xfail),
 ])
 def test_sms_message_preview_shows_sender(
     show_sender,
@@ -640,11 +641,11 @@ def test_letter_image_renderer(jinja_template):
 
 
 @pytest.mark.parametrize('page_image_url', [
-    pytest.mark.xfail('http://example.com/endpoint.png?page=0'),
+    pytest.param('http://example.com/endpoint.png?page=0', marks=pytest.mark.xfail),
     'http://example.com/endpoint.png?page=1',
     'http://example.com/endpoint.png?page=2',
     'http://example.com/endpoint.png?page=3',
-    pytest.mark.xfail('http://example.com/endpoint.png?page=4'),
+    pytest.param('http://example.com/endpoint.png?page=4', marks=pytest.mark.xfail),
 ])
 def test_letter_image_renderer_pagination(page_image_url):
     assert page_image_url in str(LetterImageTemplate(
@@ -730,8 +731,8 @@ def test_subject_line_gets_replaced():
         mock.call('((phone number))', {}, with_brackets=False, html='escape'),
         mock.call('content', {}, html='escape', redact_missing_personalisation=False),
     ]),
-    pytest.mark.skip(
-        (LetterPreviewTemplate, {'contact_block': 'www.gov.au'}, [
+    pytest.param(
+        LetterPreviewTemplate, {'contact_block': 'www.gov.au'}, [
             mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
             mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
             mock.call((
@@ -744,8 +745,11 @@ def test_subject_line_gets_replaced():
                 '((postcode))'
             ), {}, with_brackets=False, html='escape'),
             mock.call('www.gov.au', {}, html='escape', redact_missing_personalisation=False),
-        ]),
-        (LetterImageTemplate, {
+        ],
+        marks=pytest.mark.skip
+    ),
+    pytest.param(
+        LetterImageTemplate, {
             'image_url': 'http://example.com', 'page_count': 1, 'contact_block': 'www.gov.au'
         }, [
             mock.call((
@@ -760,7 +764,8 @@ def test_subject_line_gets_replaced():
             mock.call('www.gov.au', {}, html='escape', redact_missing_personalisation=False),
             mock.call('subject', {}, html='escape', redact_missing_personalisation=False),
             mock.call('content', {}, html='escape', markdown_lists=True, redact_missing_personalisation=False),
-        ])
+        ],
+        marks=pytest.mark.skip
     ),
     (Template, {'redact_missing_personalisation': True}, [
         mock.call('content', {}, html='escape', redact_missing_personalisation=True),
@@ -837,8 +842,8 @@ def test_templates_handle_html_and_redacting(
     (SMSPreviewTemplate, {}, [
         mock.call('content'),
     ]),
-    pytest.mark.skip(
-        (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+    pytest.param(
+        LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
             mock.call(Markup('subject')),
             mock.call(Markup('<p>content</p>')),
             mock.call((
@@ -853,7 +858,8 @@ def test_templates_handle_html_and_redacting(
             mock.call(Markup('www.gov.uk')),
             mock.call(Markup('subject')),
             mock.call(Markup('subject')),
-        ])
+        ],
+        marks=pytest.mark.skip
     ),
 ])
 @mock.patch('notifications_utils.template.remove_whitespace_before_punctuation', side_effect=lambda x: x)
@@ -895,11 +901,13 @@ def test_templates_remove_whitespace_before_punctuation(
         ),
         mock.call(Markup('subject')),
     ]),
-    pytest.mark.skip(
-        (LetterPreviewTemplate, {'contact_block': 'www.gov.uk'}, [
+    pytest.param(
+        LetterPreviewTemplate, {'contact_block': 'www.gov.uk'},
+        [
             mock.call(Markup('subject')),
             mock.call(Markup('<p>content</p>')),
-        ])
+        ],
+        marks=pytest.mark.skip,
     ),
     (SMSMessageTemplate, {}, [
     ]),
@@ -1030,8 +1038,7 @@ def test_templates_extract_placeholders(
         'from_name': 'Example service',
         'from_address': 'test@example.com',
     },
-    pytest.mark.xfail({
-    }),
+    pytest.param({}, marks=pytest.mark.xfail),
 ])
 def test_email_preview_shows_from_name(extra_args):
     template = EmailPreviewTemplate(
@@ -1057,8 +1064,7 @@ def test_email_preview_escapes_html_in_from_name():
     {
         'reply_to': 'test@example.com'
     },
-    pytest.mark.xfail({
-    }),
+    pytest.param({}, marks=pytest.mark.xfail),
 ])
 def test_email_preview_shows_reply_to_address(extra_args):
     template = EmailPreviewTemplate(

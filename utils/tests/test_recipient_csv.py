@@ -456,14 +456,15 @@ def test_column_headers(file_contents, template_type, expected, expected_missing
 @pytest.mark.parametrize(
     'file_contents,template_type',
     [
-        pytest.mark.xfail(('', 'sms')),
-        pytest.mark.xfail(('name', 'sms')),
-        pytest.mark.xfail(('email address', 'sms')),
-        pytest.mark.xfail((
+        pytest.param('', 'sms', marks=pytest.mark.xfail),
+        pytest.param('name', 'sms', marks=pytest.mark.xfail),
+        pytest.param('email address', 'sms', marks=pytest.mark.xfail),
+        pytest.param(
             # missing postcode
             'address_line_1, address_line_2, address_line_3, address_line_4, address_line_5',
-            'letter'
-        )),
+            'letter',
+            marks=pytest.mark.xfail,
+        ),
         ('phone number', 'sms'),
         ('phone number,name', 'sms'),
         ('email address', 'email'),
@@ -781,10 +782,11 @@ def test_dont_error_if_too_many_recipients_not_specified():
             '   colour   ': 'blue'
         },
     ),
-    pytest.mark.xfail((
+    pytest.param(
         3,
         {'phone number': 'foo'},
-    ), raises=IndexError),
+        marks=pytest.mark.xfail(raises=IndexError),
+    ),
     (
         -1,
         {
