@@ -15,4 +15,4 @@ bandit = "~=1.5.1"
 allow_prereleases = true
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
