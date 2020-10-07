@@ -163,33 +163,7 @@ jobs:
     steps:
       - *attach_workspace
       - run: make utils.install-dev
-      - run: make -C utils test-base_template
-      - run: make -C utils test-columns
-      - run: make -C utils test-deskpro_client
-      - run: make -C utils test-field
-      - run: make -C utils test-field_html_handling
-      - run: make -C utils test-formatters
-      - run: make -C utils test-gsm
-      - run: make -C utils test-international_billing_rates
-      # - run: make -C utils test-letter_timings
-      # - run: make -C utils test-logging
-      - run: make -C utils test-pdf
-      - run: make -C utils test-placeholders
-      # - run: make -C utils test-recipient_csv
-      # - run: make -C utils test-recipient_validation
-      - run: make -C utils test-redis_client
-      - run: make -C utils test-request_header_authentication
-      - run: make -C utils test-request_id
-      - run: make -C utils test-s3
-      - run: make -C utils test-statsd_client
-      - run: make -C utils test-statsd_decorators
-      - run: make -C utils test-take
-      - run: make -C utils test-template_change
-      # - run: make -C utils test-template_types
-      # - run: make -C utils test-timezones
-      - run: make -C utils test-url_safe_tokens
-      - run: echo 're-enable tests here'
-      - run: echo 'make utils.test'
+      - run: make utils.test
 
   check-vulnerabilities:
     <<: *python_node_postgres_images
