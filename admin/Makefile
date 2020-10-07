@@ -81,38 +81,22 @@ run: version-file ## Run a development server (reloading)
 run-gunicorn: version-file ## Run a production server
 	$(RUNNER) gunicorn -w $(WORKERS) -b 0.0.0.0:$(PORT) -k eventlet application
 
-pipenv-requirements.txt: Pipfile.lock
+requirements.txt: Pipfile.lock
 	$(PIPENV) lock -r > $@
 
-build: vendor
-
-vendor: pipenv-requirements.txt
-	$(RUNNER) pip download -d $@ -r $<
-
-requirements.txt: pipenv-requirements.txt
-	cat $< | $(RUNNER) python scripts/fixup-requirements.py > $@
-
-native-vendor:
-	mkdir -p $@
-
-build-linux-wheels: pipenv-requirements.txt native-vendor
-	cat $< | $(RUNNER) python scripts/fixup-requirements.py --ignore | docker run\
-		-i --rm\
-		-v $(shell pwd)/build-linux-wheels.sh:/build-linux-wheels.sh\
-		quay.io/pypa/manylinux1_x86_64 bash /build-linux-wheels.sh | tar -C native-vendor -x
-
+build: requirements.txt
 
 manifest-vars-%.yml:
 	echo "stg: $*" > $@
 
-deploy: vendor requirements.txt ## Deploy admin to cloudfoundry
+deploy: requirements.txt
 	$(CF) zero-downtime-push $(APP) -f manifest.yml
 
-deploy-dev: manifest-vars-$(STG).yml vendor requirements.txt ## Deploy admin to cloudfoundry
+deploy-dev: manifest-vars-$(STG).yml requirements.txt
 	$(CF) push $(APP)-$(STG) -f manifest-dev.yml --vars-file $<
 
 clean:
-	-rm -r vendor
+	# nothing to do
 
 .PHONY:
 	help clean \

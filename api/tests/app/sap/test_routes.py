@@ -41,7 +41,7 @@ def test_issue_token_returns_error_with_invalid_grant_type(client, grant_type):
         headers=headers,
     )
     assert response.status_code == 400
-    assert json.loads(response.get_data(as_text=True))['error'] == 'invalid_grant'
+    assert json.loads(response.get_data(as_text=True))['error'] == 'unsupported_grant_type'
 
 
 def test_issue_token_returns_error_with_bad_credentials(client, sample_sap_oauth2_client):
