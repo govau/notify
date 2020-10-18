@@ -11,6 +11,7 @@ from app import (
     format_date_numeric,
     platform_stats_api_client,
     service_api_client,
+    callback_failures_client,
 )
 from app.main import main
 from app.main.forms import DateFilterForm
@@ -21,7 +22,9 @@ from app.statistics_utils import (
 from app.utils import (
     Spreadsheet,
     get_page_from_request,
-    user_is_platform_admin
+    user_is_platform_admin,
+    generate_next_dict,
+    generate_previous_dict,
 )
 
 COMPLAINT_THRESHOLD = 0.02
@@ -46,11 +49,13 @@ def platform_admin():
     platform_stats = platform_stats_api_client.get_aggregate_platform_stats(api_args)
     number_of_complaints = complaint_api_client.get_complaint_count(api_args)
 
+    callback_stats = callback_failures_client.get_failing_callback_stats()
+
     return render_template(
         'views/platform-admin/index.html',
         include_from_test_key=form.include_from_test_key.data,
         form=form,
-        global_stats=make_columns(platform_stats, number_of_complaints)
+        global_stats=make_columns(platform_stats, number_of_complaints, callback_stats)
     )
 
 
@@ -78,7 +83,7 @@ def get_tech_failure_status_box_data(stats):
     return stats
 
 
-def make_columns(global_stats, complaints_number):
+def make_columns(global_stats, complaints_number, callback_stats):
     return [
         # email
         {
@@ -113,7 +118,12 @@ def make_columns(global_stats, complaints_number):
             'other_data': [
                 get_tech_failure_status_box_data(global_stats['sms']),
                 get_status_box_data(global_stats['sms'], 'permanent-failure', 'permanent failures'),
-                get_status_box_data(global_stats['sms'], 'temporary-failure', 'temporary failures')
+                get_status_box_data(global_stats['sms'], 'temporary-failure', 'temporary failures'),
+                {
+                    'number': callback_stats.get('total_failure_count'),
+                    'label': 'callback failures',
+                    'url': url_for('main.platform_admin_callback_failure_summary')
+                },
             ],
             'test_data': {
                 'number': global_stats['sms']['test-key'],
@@ -362,6 +372,46 @@ def platform_admin_list_complaints():
         page=page,
         prev_page=prev_page,
         next_page=next_page,
+    )
+
+
+@main.route("/platform-admin/callback-failures")
+@login_required
+@user_is_platform_admin
+def platform_admin_callback_failures():
+    page = get_page_from_request()
+    if page is None:
+        abort(404, "Invalid page argument ({}).".format(request.args.get('page')))
+
+    response = callback_failures_client.get_failing_callbacks(page=page)
+
+    prev_page = None
+    if response['links'].get('prev'):
+        prev_page = generate_previous_dict('main.platform_admin_callback_failures', None, page)
+    next_page = None
+    if response['links'].get('next'):
+        next_page = generate_next_dict('main.platform_admin_callback_failures', None, page)
+
+    return render_template(
+        'views/platform-admin/callback_failures.html',
+        callback_failures=response['callbacks'],
+        page_title='Callback failures',
+        page=page,
+        prev_page=prev_page,
+        next_page=next_page,
+    )
+
+
+@main.route("/platform-admin/callback-failure-summary")
+@login_required
+@user_is_platform_admin
+def platform_admin_callback_failure_summary():
+    summary_rows = callback_failures_client.get_failing_callback_summary()
+
+    return render_template(
+        'views/platform-admin/callback_failure_summary.html',
+        summary_rows=summary_rows,
+        page_title='Callback failures over the last 3 days',
     )
 
 

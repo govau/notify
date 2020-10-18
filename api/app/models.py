@@ -2007,6 +2007,7 @@ class ServiceDataRetention(db.Model):
 
 class CallbackFailure(db.Model):
     __tablename__ = 'callback_failures'
+
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     notification_id = db.Column(UUID(as_uuid=True), db.ForeignKey('notification_history.id'), index=True, nullable=True)
     notification = db.relationship('NotificationHistory')
@@ -2021,3 +2022,16 @@ class CallbackFailure(db.Model):
     callback_attempt_ended = db.Column(db.DateTime, nullable=False)
     callback_failure_type = db.Column(db.DateTime, nullable=True)
     service_callback_type = db.Column(db.DateTime, nullable=False)
+
+    def serialize(self):
+        return {
+            "id": str(self.id),
+            "notification_id": str(self.notification_id),
+            "service_id": str(self.service_id),
+            "service_name": self.service.name,
+            "service_callback_url": self.service_callback_url,
+            "callback_attempt_number": self.callback_attempt_number,
+            "callback_attempt_started": self.callback_attempt_started.strftime(DATETIME_FORMAT) if self.callback_attempt_started else None,
+            "callback_attempt_ended": self.callback_attempt_ended.strftime(DATETIME_FORMAT) if self.callback_attempt_ended else None,
+            "callback_failure_type": self.callback_failure_type,
+        }

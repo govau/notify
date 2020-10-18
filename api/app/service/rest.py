@@ -77,6 +77,11 @@ from app.dao.service_letter_contact_dao import (
 )
 from app.dao.provider_statistics_dao import get_fragment_count
 from app.dao.users_dao import get_user_by_id
+from app.dao.callback_failures_dao import (
+    dao_get_callback_failing_stats_for_all_services,
+    dao_get_callback_failures_for_all_services,
+    dao_get_failing_callback_summary,
+)
 from app.errors import (
     InvalidRequest,
     register_errors
@@ -739,6 +744,47 @@ def get_service_sms_senders_for_service(service_id):
 def get_organisation_for_service(service_id):
     organisation = dao_get_organisation_by_service_id(service_id=service_id)
     return jsonify(organisation.serialize() if organisation else {}), 200
+
+
+@service_blueprint.route('/failing-callback-stats', methods=['GET'])
+def get_callback_failing_stats_for_all_services():
+    stats = dao_get_callback_failing_stats_for_all_services()
+    data = {
+        'total_failure_count': stats.total_failure_count,
+        'failed_notification_count': stats.failed_notification_count,
+    }
+    return jsonify(data), 200
+
+
+@service_blueprint.route('/failing-callbacks', methods=['GET'])
+def get_callbacks_failing_for_all_services():
+    page = int(request.args.get('page', 1))
+    paginated_callbacks = dao_get_callback_failures_for_all_services(page=page)
+    return jsonify(
+        callbacks=[callback.serialize() for callback in paginated_callbacks.items],
+        links=pagination_links(
+            paginated_callbacks,
+            '.get_callbacks_failing_for_all_services',
+            **request.args.to_dict()
+        )
+    ), 200
+
+
+@service_blueprint.route('/failing-callback-summary', methods=['GET'])
+def get_failing_callback_summary():
+    data = dao_get_failing_callback_summary()
+    summary = list()
+
+    for i in data:
+        summary.append(
+            {
+                'failure_count': i.failure_count,
+                'service_id': i.service_id,
+                'service_name': i.service_name,
+            }
+        )
+
+    return jsonify(summary), 200
 
 
 @service_blueprint.route('/unique', methods=["GET"])
