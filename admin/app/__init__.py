@@ -63,6 +63,7 @@ from app.notify_client.status_api_client import status_api_client
 from app.notify_client.support_api_client import support_api_client
 from app.notify_client.template_statistics_api_client import template_statistics_client
 from app.notify_client.user_api_client import user_api_client
+from app.notify_client.callback_failures_client import callback_failures_client
 from app.commands import setup_commands
 from app.utils import requires_auth
 from app.utils import get_cdn_domain
@@ -118,6 +119,7 @@ def create_app(application):
         support_api_client,
         template_statistics_client,
         user_api_client,
+        callback_failures_client,
 
         # External API clients
         statsd_client,
