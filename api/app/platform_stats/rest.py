@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 
-from app.errors import register_errors, InvalidRequest
+from app.errors import register_errors
 from app.platform_stats.platform_stats_schema import platform_stats_request
 from app.dao.services_dao import (
     fetch_aggregate_stats_by_date_range_for_all_services
@@ -10,33 +10,11 @@ from app.dao.services_dao import (
 from app.service.statistics import format_admin_stats
 from app.schema_validation import validate
 from app.utils import convert_utc_to_aet
-from app.dao.fact_billing_dao import (
-    fetch_sms_billing_for_all_services,
-    fetch_usage_for_all_services,
-)
-from app.dao.date_util import get_financial_year_for_datetime
+from app.dao.fact_billing_dao import fetch_billing_for_all_services
 
 platform_stats_blueprint = Blueprint('platform_stats', __name__)
 
 register_errors(platform_stats_blueprint)
-
-
-def validate_date_range_is_within_a_financial_year(start_date, end_date):
-    try:
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-    except ValueError:
-        raise InvalidRequest(message="Input must be a date in the format: YYYY-MM-DD", status_code=400)
-    if end_date < start_date:
-        raise InvalidRequest(message="Start date must be before end date", status_code=400)
-
-    start_fy = get_financial_year_for_datetime(start_date)
-    end_fy = get_financial_year_for_datetime(end_date)
-
-    if start_fy != end_fy:
-        raise InvalidRequest(message="Date must be in a single financial year.", status_code=400)
-
-    return start_date, end_date
 
 
 @platform_stats_blueprint.route('')
@@ -62,67 +40,43 @@ def get_platform_stats():
     return jsonify(stats)
 
 
-@platform_stats_blueprint.route('/billing-for-all-services')
-def get_billing_for_all_services():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
+@platform_stats_blueprint.route('/services-billing')
+def get_all_services_billing():
+    billing_data = fetch_billing_for_all_services()
 
-    start_date, end_date = validate_date_range_is_within_a_financial_year(start_date, end_date)
-    sms_costs = fetch_sms_billing_for_all_services(start_date, end_date)
-
-    def present_cost(s):
+    def present_data(s):
         return {
             "service_id": str(s.service_id),
             "service_name": s.service_name,
-            "sms_rate": float(s.sms_rate),
 
-            # number of free sms available from start of this period FY
-            "sms_free_rollover": s.sms_remainder,
+            "breakdown_aet": str(s.breakdown_aet),
+            "breakdown_fy": str(s.breakdown_fy),
+            "breakdown_fy_year": int(s.breakdown_fy_year),
+            "breakdown_fy_quarter": int(s.breakdown_fy_quarter),
 
-            # the total number of units(fragments) we sent out.
-            "billable_units": int(s.billable_units),
+            "notifications": int(s.notifications),
+            "notifications_sms": int(s.notifications_sms or 0),
+            "notifications_email": int(s.notifications_email or 0),
 
-            # the total number of adjusted units we sent out.
-            # fragments * international modifier
-            "billable_units_adjusted": float(s.billable_units_adjusted),
+            "fragments_free_limit": int(s.fragments_free_limit),
+            "fragments_domestic": int(s.fragments_domestic),
+            "fragments_international": int(s.fragments_international),
 
-            # number of adjusted units sent out after free allowance removed
-            "chargeable_units": float(s.chargeable_units),
+            "cost": float(s.cost),
+            "cost_chargeable": float(s.cost_chargeable),
+            "cost_cumulative": float(s.cost_cumulative),
+            "cost_chargeable_cumulative": float(s.cost_chargeable_cumulative),
 
-            # total cost of adjusted, non-free units at sms rate
-            "total_cost": float(s.total_cost),
+            "units": float(s.units),
+            "units_cumulative": float(s.units_cumulative),
+            "units_chargeable": float(s.units_chargeable),
+            "units_chargeable_cumulative": float(s.units_chargeable_cumulative),
+            "units_free_available": float(s.units_free_available),
+            "units_free_remaining": float(s.units_free_remaining),
+            "units_free_used": float(s.units_free_used),
 
-            # international/domestic unit count split
-            "domestic_units": int(s.domestic_units),
-            "international_units": int(s.international_units),
-
-            # notifications sent without being broken down to units
-            "notifications_sent": int(s.notifications_sent),
+            "unit_rate_domestic": float(s.unit_rate_domestic),
+            "unit_rate_international": float(s.unit_rate_international),
         }
 
-    service_costs = [present_cost(c) for c in sms_costs]
-    return jsonify(sorted(service_costs, key=lambda x: x['service_name']))
-
-
-@platform_stats_blueprint.route('/usage-for-all-services')
-def get_usage_for_all_services():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-
-    start_date, end_date = validate_date_range_is_within_a_financial_year(start_date, end_date)
-    service_usage = fetch_usage_for_all_services(start_date, end_date)
-
-    def present_usage(s):
-        return {
-            "service_id": str(s.service_id),
-            "service_name": s.service_name,
-            "notification_type": s.notification_type,
-            "rate": float(s.rate),
-            "rate_multiplier": int(s.rate_multiplier),
-            "notifications_sent": int(s.notifications_sent),
-            "billable_units_sent": int(s.billable_units_sent),
-            "total_billable_units": int(s.total_billable_units),
-        }
-
-    usage = [present_usage(u) for u in service_usage]
-    return jsonify(usage)
+    return jsonify([present_data(x) for x in billing_data])
