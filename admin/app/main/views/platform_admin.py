@@ -165,110 +165,69 @@ def platform_admin_services():
     )
 
 
-def generate_year_quarters(year):
-    yield (f'{year}/Q1', (f'{year}-07-01', f'{year}-09-30'))
-    yield (f'{year}/Q2', (f'{year}-10-01', f'{year}-12-31'))
-    yield (f'{year}/Q3', (f'{year+1}-01-01', f'{year+1}-03-31'))
-    yield (f'{year}/Q4', (f'{year+1}-04-01', f'{year+1}-06-30'))
-
-
-SUPPORTED_YEARS = [2018, 2019, 2020, 2021, 2022]
-SUPPORTED_YEAR_QUARTERS = collections.OrderedDict(
-    itertools.chain.from_iterable(
-        generate_year_quarters(year) for year in SUPPORTED_YEARS
-    )
-)
-
 @main.route("/platform-admin/reports")
 @login_required
 @user_is_platform_admin
 def platform_admin_reports():
-    return render_template(
-        'views/platform-admin/reports.html',
-        supported_year_quarters=SUPPORTED_YEAR_QUARTERS,
-    )
+    return render_template('views/platform-admin/reports.html')
 
 
-@main.route("/platform-admin/reports/quarterly-billing.csv")
+@main.route("/platform-admin/reports/services-billing.csv")
 @login_required
 @user_is_platform_admin
-def platform_admin_quarterly_billing_csv():
-    year_quarter = request.args.get('year_quarter')
-    start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
-
+def services_billing_csv():
     def present_row(billing_data):
         return [
-                billing_data.get('service_id'),
-                billing_data.get('service_name'),
-                start_date,
-                end_date,
-                billing_data.get('sms_rate'),
-                billing_data.get('total_cost'),
-                billing_data.get("notifications_sent"),
-                billing_data.get("billable_units"),
-                billing_data.get("billable_units_adjusted"),
-                billing_data.get("sms_free_rollover"),
-                billing_data.get("chargeable_units"),
-                billing_data.get("domestic_units"),
-                billing_data.get("international_units"),
-            ]
+            billing_data.get("service_id"),
+            billing_data.get("service_name"),
 
-    data = platform_stats_api_client.get_billing_for_all_services({
-        'start_date': start_date,
-        'end_date': end_date
-    })
+            billing_data.get("breakdown_aet"),
+            billing_data.get("breakdown_fy"),
+            billing_data.get("breakdown_fy_year"),
+            billing_data.get("breakdown_fy_quarter"),
+
+            billing_data.get("notifications"),
+            billing_data.get("notifications_sms"),
+            billing_data.get("notifications_email"),
+
+            billing_data.get("fragments_free_limit"),
+            billing_data.get("fragments_domestic"),
+            billing_data.get("fragments_international"),
+
+            billing_data.get("cost"),
+            billing_data.get("cost_chargeable"),
+            billing_data.get("cost_cumulative"),
+            billing_data.get("cost_chargeable_cumulative"),
+
+            billing_data.get("units"),
+            billing_data.get("units_cumulative"),
+            billing_data.get("units_chargeable"),
+            billing_data.get("units_chargeable_cumulative"),
+            billing_data.get("units_free_available"),
+            billing_data.get("units_free_remaining"),
+            billing_data.get("units_free_used"),
+
+            billing_data.get("unit_rate_domestic"),
+            billing_data.get("unit_rate_international"),
+        ]
+
+    data = platform_stats_api_client.get_services_billing()
 
     columns = [
-        "Service ID", "Service name", "Start date", "End date",
-        "SMS rate", "Total cost",
-        "SMS Notifications sent", "Billable units", "Billable units adjusted(international)",
-        "SMS free rollover from last quarter", "Chargeable units",
-        "Domestic units", "International units",
+        "Service ID", "Service name",
+        "AET period start", "FY period start", "FY year", "FY quarter",
+        "Notifications sent", "SMS Notifications sent", "Email Notifications sent",
+        "Service annual SMS fragment limit", "Domestic SMS fragments", "International SMS fragments",
+        "Cost", "Chargeable cost", "Cost cumulative(year)", "Chargeable cost cumulative(year)",
+        "Units", "Units cumulative(year)", "Chargeable units", "Chargeable units cumulative(year)",
+        "Free units available", "Free units remaining", "Free units used",
+        "Domestic unit rate", "International unit rate",
     ]
 
     csv_data = [columns, *(present_row(d) for d in data)]
     return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': f'inline; filename="quarterly-billing-{year_quarter}.csv"'
-    }
-
-
-@main.route("/platform-admin/reports/quarterly-breakdown.csv")
-@login_required
-@user_is_platform_admin
-def platform_admin_quarterly_breakdown_csv():
-    year_quarter = request.args.get('year_quarter')
-    start_date, end_date = SUPPORTED_YEAR_QUARTERS[year_quarter]
-
-    def present_row(billing_data):
-        return [
-                billing_data.get('service_id'),
-                billing_data.get('service_name'),
-                start_date,
-                end_date,
-                billing_data.get('notification_type'),
-                billing_data.get('rate'),
-                billing_data.get('rate_multiplier'),
-                billing_data.get('notifications_sent'),
-                billing_data.get('billable_units_sent'),
-                billing_data.get('total_billable_units'),
-            ]
-
-    data = platform_stats_api_client.get_usage_for_all_services({
-        'start_date': start_date,
-        'end_date': end_date
-    })
-
-    columns = [
-        "Service ID", "Service name", "Start date", "End date",
-        "Notification type", "Rate", "Rate multiplier",
-        "Notifications sent", "Billable units sent", "Total billable units"
-    ]
-
-    csv_data = [columns, *(present_row(d) for d in data)]
-    return Spreadsheet.from_rows(csv_data).as_csv_data, 200, {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': f'inline; filename="quarterly-usage-{year_quarter}.csv"'
+        'Content-Disposition': f'inline; filename="{datetime.now().date()}-services-billing.csv"'
     }
 
 

@@ -11,11 +11,8 @@ class PlatformStatsAPIClient(NotifyAdminAPIClient):
     def get_aggregate_platform_stats(self, params_dict=None):
         return self.get("/platform-stats", params=params_dict)
 
-    def get_billing_for_all_services(self, params_dict=None):
-        return self.get("/platform-stats/billing-for-all-services", params=params_dict)
-
-    def get_usage_for_all_services(self, params_dict=None):
-        return self.get("/platform-stats/usage-for-all-services", params=params_dict)
+    def get_services_billing(self, params_dict=None):
+        return self.get("/platform-stats/services-billing", params=params_dict)
 
 
 platform_stats_api_client = PlatformStatsAPIClient()
