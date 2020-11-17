@@ -9,11 +9,11 @@ Notification notification = client.GetNotificationById(id);
 <Panel label={<H3 appearAs={H5}>Arguments</H3>}>
   <Parameters>
     <Parameter required name="id" kind="String">
-      The ID of the notification. This can be found in the response after sending an email or SMS.
+      The ID of the notification. This can be found in the response after
+      sending an email or SMS.
     </Parameter>
   </Parameters>
 </Panel>
-
 
 <Panel label={<H3 appearAs={H5}>Response</H3>}>
 
@@ -34,6 +34,7 @@ string status;
 Template template;
 string type;
 string createdByName;
+string createdByEmailAddress;
 ```
 
 </Panel>
