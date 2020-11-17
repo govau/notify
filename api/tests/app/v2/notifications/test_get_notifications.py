@@ -74,7 +74,9 @@ def test_get_notification_by_id_returns_200(
         "subject": None,
         'sent_at': sample_notification.sent_at,
         'completed_at': sample_notification.completed_at(),
-        'scheduled_for': '2017-05-12T05:15:00.000000Z'
+        'scheduled_for': '2017-05-12T05:15:00.000000Z',
+        "created_by_name": None,
+        "created_by_email_address": None,
     }
 
     assert json_response == expected_response
@@ -124,7 +126,9 @@ def test_get_notification_by_id_with_placeholders_returns_200(
         "subject": "Bob",
         'sent_at': sample_notification.sent_at,
         'completed_at': sample_notification.completed_at(),
-        'scheduled_for': None
+        'scheduled_for': None,
+        "created_by_name": None,
+        "created_by_email_address": None,
     }
 
     assert json_response == expected_response
@@ -147,6 +151,40 @@ def test_get_notification_by_reference_returns_200(client, sample_template):
 
     assert json_response['notifications'][0]['id'] == str(sample_notification_with_reference.id)
     assert json_response['notifications'][0]['reference'] == "some-client-reference"
+
+
+def test_get_notification_by_id_returns_created_by_name_if_notification_created_by_id(
+    client,
+    sample_user,
+    sample_template,
+):
+    sms_notification = create_notification(template=sample_template, created_by_id=sample_user.id)
+
+    auth_header = create_authorization_header(service_id=sms_notification.service_id)
+    response = client.get(
+        path=url_for('v2_notifications.get_notification_by_id', notification_id=sms_notification.id),
+        headers=[('Content-Type', 'application/json'), auth_header]
+    )
+
+    json_response = response.get_json()
+    assert json_response['created_by_name'] == 'Test User'
+
+
+def test_get_notification_by_id_returns_created_by_email_address_if_notification_created_by_id(
+    client,
+    sample_user,
+    sample_template,
+):
+    sms_notification = create_notification(template=sample_template, created_by_id=sample_user.id)
+
+    auth_header = create_authorization_header(service_id=sms_notification.service_id)
+    response = client.get(
+        path=url_for('v2_notifications.get_notification_by_id', notification_id=sms_notification.id),
+        headers=[('Content-Type', 'application/json'), auth_header]
+    )
+
+    json_response = response.get_json()
+    assert json_response['created_by_email_address'] == 'notify@digital.cabinet-office.gov.uk'
 
 
 def test_get_notifications_returns_scheduled_for(client, sample_template):

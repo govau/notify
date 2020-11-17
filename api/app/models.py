@@ -1426,6 +1426,18 @@ class Notification(db.Model):
             # Currently can only be technical-failure
             return self.status
 
+    def get_created_by_name(self):
+        if self.created_by:
+            return self.created_by.name
+
+        return None
+
+    def get_created_by_email_address(self):
+        if self.created_by:
+            return self.created_by.email_address
+
+        return None
+
     def serialize_for_csv(self):
         created_at_in_aet = convert_utc_to_aet(self.created_at)
         serialized = {
@@ -1464,6 +1476,8 @@ class Notification(db.Model):
             "template": template_dict,
             "body": self.content,
             "subject": self.subject,
+            "created_by_name": self.get_created_by_name(),
+            "created_by_email_address": self.get_created_by_email_address(),
             "created_at": self.created_at.strftime(DATETIME_FORMAT),
             "sent_at": self.sent_at.strftime(DATETIME_FORMAT) if self.sent_at else None,
             "completed_at": self.completed_at(),

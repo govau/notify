@@ -205,6 +205,7 @@ def create_notification(
     normalised_to=None,
     one_off=False,
     sms_sender_id=None,
+    created_by_id=None,
     reply_to_text=None
 ):
     if created_at is None:
@@ -253,6 +254,7 @@ def create_notification(
         'international': international,
         'phone_prefix': phone_prefix,
         'normalised_to': normalised_to,
+        'created_by_id': created_by_id,
         'reply_to_text': reply_to_text
     }
     notification = Notification(**data)
