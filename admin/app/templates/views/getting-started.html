@@ -1,0 +1,40 @@
+{% extends "withoutnav_template.html" %}
+{% from "components/table.html" import mapping_table, row, text_field, edit_field, field with context %}
+{% from "components/sub-navigation.html" import sub_navigation %}
+
+{% block per_page_title %}
+  Getting started
+{% endblock %}
+
+{% block maincolumn_content %}
+  <div class="grid-row">
+    <div class="column-one-third">
+      {{ sub_navigation(navigation_links) }}
+    </div>
+
+    <div class="column-two-thirds">
+      <h1 class="heading-large">Getting started</h1>
+
+      <h2 class="heading-medium">1. Check if Notify is right for you</h2>
+      <p>Read about our <a href="{{ url_for("main.features") }}">features</a>, <a href="{{ url_for("main.pricing") }}">pricing</a> and <a href="{{ url_for("main.roadmap") }}">roadmap</a>.</p>
+      <p>Notify is available to any Government agency with a ‘.gov.au’ email address. If you are unsure about your agency’s eligibility or experience any unexpected barriers during account creation, please <a href="{{ url_for("main.support") }}">contact support</a>.</p>
+
+      <h2 class="heading-medium">2. Create an account</h2>
+      <p><a href="{{ url_for("main.register") }}">Create an account</a> for free and add your first Notify service. When you add a new service it will start in <a href="{{ url_for("main.getting_started_trial_mode") }}">trial mode</a>.</p>
+
+      <h2 class="heading-medium">3. Add some message templates</h2>
+      <p>Add message templates with examples of the content you plan to send.</p>
+
+      <h2 class="heading-medium">4. Set up your service</h2>
+      <p>Review your settings to manage features such as reply-to addresses and sender information.</p>
+      <p>Add team members and review their permissions.</p>
+
+      <h2 class="heading-medium">5. Set up an API integration (optional)</h2>
+      <p>You can use the Notify API to send messages automatically.</p>
+      <p>Our <a href="{{ docs_base_url }}">documentation</a> explains how to integrate the API with a web application or back office system.
+
+      <h2 class="heading-medium">6. Start sending messages</h2>
+      <p>When you’re ready to send messages to people outside your team, go to the <strong>Settings</strong> page and select <strong>Request to go live</strong>. We endeavour to respond to live requests within 48 business hours.</p>
+    </div>
+  </div>
+{% endblock %}

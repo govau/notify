@@ -57,14 +57,12 @@ const firstColumn = [
 ]
 
 const secondColumn = [
+  { text: 'Getting started', href: notifyUrl('/getting-started') },
   { text: 'Features', href: notifyUrl('/features') },
   { text: 'Roadmap', href: notifyUrl('/features/roadmap') },
   { text: 'Security', href: notifyUrl('/features/security') },
   { text: 'Terms of use', href: notifyUrl('/features/terms') },
-  {
-    text: 'Using Notify',
-    href: notifyUrl('/features/using-notify'),
-  },
+  { text: 'Using Notify', href: notifyUrl('/features/using-notify') },
 ]
 
 const thirdColumn = [

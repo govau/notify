@@ -1,0 +1,53 @@
+{% extends "withoutnav_template.html" %}
+{% from "components/table.html" import mapping_table, row, text_field, edit_field, field with context %}
+{% from "components/sub-navigation.html" import sub_navigation %}
+
+{% block per_page_title %}
+  Trial mode
+{% endblock %}
+
+{% block maincolumn_content %}
+  <div class="grid-row">
+    <div class="column-one-third">
+      {{ sub_navigation(navigation_links) }}
+    </div>
+
+    <div class="column-two-thirds">
+      <h1 class="heading-large">Trial mode</h1>
+
+      <p>
+        When you add a new service, it will start in trial mode. This lets you try out Notify, with a few restrictions.
+      </p>
+
+      <p>
+        While your service is in trial mode you can only:
+      </p>
+
+      <ul class="list list-bullet">
+        <li>create message templates</li>
+        <li>send 50 text messages and emails per day</li>
+        <li>send messages to yourself and other people in your team</li>
+      </ul>
+
+      <p>
+        To remove these restrictions:
+      </p>
+
+      <ol class="list list-number">
+        <li><a href="{{ url_for("main.sign_in") }}">Sign in to Notify</a></li>
+        <li>Go to the <strong>Settings</strong> page</li>
+        <li>Select Request to go live at the bottom of the <strong>Settings</strong> page.</li>
+      </ol>
+
+      <h2 class="heading-medium">Before you request to go live</h2>
+
+      <p>You must:</p>
+
+      <ul class="list list-bullet">
+        <li>have more than one team member with the ‘Manage service’ permission</li>
+        <li>add examples of the messages you wish to send</li>
+        <li>accept our <a href="{{ url_for("main.terms") }}">Terms of use</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
