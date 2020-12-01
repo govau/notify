@@ -10,7 +10,7 @@ from notifications_utils.template import HTMLEmailTemplate
 from app import convert_to_boolean
 from app.main import main
 from app.main.forms import SearchTemplatesForm
-from app.main.views.sub_navigation_dictionaries import features_nav
+from app.main.views.sub_navigation_dictionaries import features_nav, getting_started_nav
 from app.utils import AgreementInfo
 
 
@@ -178,6 +178,40 @@ def using_notify():
     return render_template(
         'views/using-notify.html',
         navigation_links=features_nav()
+    )
+
+
+# --- Getting started --- #
+
+@main.route('/getting-started')
+def getting_started():
+    return render_template(
+        'views/getting-started.html',
+        navigation_links=getting_started_nav()
+    )
+
+
+@main.route('/getting-started/trial-mode')
+def getting_started_trial_mode():
+    return render_template(
+        'views/getting-started-trial-mode.html',
+        navigation_links=getting_started_nav()
+    )
+
+
+@main.route('/getting-started/guidance')
+def getting_started_guidance():
+    return render_template(
+        'views/getting-started-guidance.html',
+        navigation_links=getting_started_nav()
+    )
+
+
+@main.route('/getting-started/sending-messages')
+def getting_started_sending_messages():
+    return render_template(
+        'views/getting-started-sending-messages.html',
+        navigation_links=getting_started_nav()
     )
 
 

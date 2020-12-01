@@ -39,6 +39,18 @@
 {% block maincolumn_content %}
   <div class="product-page-section">
     <div class="grid-row">
+      <div class="column">
+        <h2>
+          Introducing Notify
+        </h2>
+        <div class="videoWrapper">
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/JLl-ptqyyCQ?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="product-page-section">
+    <div class="grid-row with-keyline">
       <div class="column-half">
         <h2>
           Control your content
@@ -185,17 +197,24 @@
 
   <div class="product-page-section">
     <div class="with-keyline bottom-gutter-2">
-      <h2>The team</h2>
-        <div class="grid-row">
-          <div class="column-half">
-            <p>
-            Notify is maintained by the Digital Transformation Agency
-            and is supported during business hours.
-            </p>
-            <p>
-            <a href="{{ url_for('main.support') }}">Contact the team</a> if you have a question or want
-            to give feedback.
-            </p>
+      <div class="grid-row">
+        <div class="column-half">
+          <h2>Start using Notify today</h2>
+          <p>
+            <a href="{{ url_for("main.getting_started") }}">Getting started</a> with Notify couldn't be simpler.
+          </p>
+          <p>
+            <a href="{{ url_for("main.register") }}">Create a free account</a> to get started designing templates and sending messages immediately.
+          </p>
+        </div>
+        <div class="column-half">
+          <h2>The team</h2>
+          <p>
+            Notify is maintained by the Digital Transformation Agency and is supported during business hours.
+          </p>
+          <p>
+            <a href="{{ url_for('main.support') }}">Contact the team</a> if you have a question or want to give feedback.
+          </p>
         </div>
       </div>
     </div>
