@@ -58,7 +58,7 @@ def total(e):
 
 
 def dao_get_priced_billing_data():
-    aet_month = cast(func.date_trunc('month', FactBilling.aet_date), Date())
+    aet_month = cast(func.date_trunc('quarter', FactBilling.aet_date), Date())
     fy_date = cast(FactBilling.aet_date - cast('6 months', Interval()), Date())
 
     international_units = case([
@@ -110,7 +110,7 @@ def fetch_annual_billing(service_id, year):
     )
 
     # break down usage by month with empty gaps by generating a series
-    months_series = func.generate_series(start_date, end_date, '1 month').alias('month')
+    months_series = func.generate_series(start_date, end_date, '1 months').alias('month')
     months_series_c = column('month').cast(Date()).label('month')
     query_cte = query.cte()
 

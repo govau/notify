@@ -143,35 +143,26 @@ def template_usage(service_id):
 def usage(service_id):
     year, current_financial_year = requested_and_current_financial_year(request)
 
-    free_sms_allowance = billing_api_client.get_free_sms_fragment_limit_for_year(service_id, year)
-    units = billing_api_client.get_billable_units(service_id, year)
-    yearly_usage = billing_api_client.get_service_usage(service_id, year)
-    calculated_usage = calculate_usage(yearly_usage, free_sms_allowance)
+    calculated_usage = calculate_usage()
+    ft_yearly_usage = billing_api_client.get_service_usage_v2(service_id, year)
+    latest_month = ft_yearly_usage[-1]
+    totals = lambda param: sum(month[param] for month in ft_yearly_usage)
 
-    ft_yearly_usage = None
-    if 'ft_usage' in request.args:
-        ft_yearly_usage = billing_api_client.get_service_usage_v2(service_id, year)
-        latest_month = ft_yearly_usage[-1]
-        totals = lambda param: sum(month[param] for month in ft_yearly_usage)
-
-        calculated_usage['emails_sent'] = totals('notifications_email')
-        calculated_usage['sms_sent'] = latest_month['units_cumulative']
-        calculated_usage['sms_chargeable'] = latest_month['units_chargeable_cumulative']
-        calculated_usage['sms_free_allowance'] = latest_month['fragments_free_limit']
-        calculated_usage['sms_allowance_remaining'] = latest_month['units_free_remaining']
-        calculated_usage['sms_cost'] = latest_month['cost_chargeable_cumulative']
+    calculated_usage['emails_sent'] = totals('notifications_email')
+    calculated_usage['sms_sent'] = latest_month['units_cumulative']
+    calculated_usage['sms_chargeable'] = latest_month['units_chargeable_cumulative']
+    calculated_usage['sms_free_allowance'] = latest_month['fragments_free_limit']
+    calculated_usage['sms_allowance_remaining'] = latest_month['units_free_remaining']
+    calculated_usage['sms_cost'] = latest_month['cost_chargeable_cumulative']
+    calculated_usage['sms_rate'] = latest_month['unit_rate_domestic'] / 100
 
     usage_template = 'views/usage.html'
     if 'letter' in current_service['permissions']:
         usage_template = 'views/usage-with-letters.html'
+
     return render_template(
         usage_template,
         yearly_usage=ft_yearly_usage,
-        months=list(get_free_paid_breakdown_for_billable_units(
-            year,
-            free_sms_allowance,
-            units
-        )),
         selected_year=year,
         years=get_tuples_of_financial_years(
             partial(url_for, '.usage', service_id=service_id),
@@ -358,29 +349,10 @@ def get_dashboard_totals(statistics):
     return statistics
 
 
-def calculate_usage(usage, free_sms_fragment_limit):
-    sms_free_allowance = free_sms_fragment_limit
-
-    # this relies on the assumption: only one SMS rate per financial year.
-    sms_rate = 0 if len(usage) == 0 else usage[0].get("rate", 0)
-    sms_sent = get_sum_billing_units(breakdown for breakdown in usage if breakdown['notification_type'] == 'sms')
-    emails = [breakdown["billing_units"] for breakdown in usage if breakdown['notification_type'] == 'email']
-    emails_sent = 0 if len(emails) == 0 else emails[0]
-
-    letters = [(breakdown["billing_units"], breakdown['letter_total']) for breakdown in usage if
-               breakdown['notification_type'] == 'letter']
-    letter_sent = 0 if len(letters) == 0 else letters[0][0]
-    letter_cost = 0 if len(letters) == 0 else letters[0][1]
-
+def calculate_usage():
     return {
-        'emails_sent': emails_sent,
-        'sms_free_allowance': sms_free_allowance,
-        'sms_sent': sms_sent,
-        'sms_allowance_remaining': max(0, (sms_free_allowance - sms_sent)),
-        'sms_chargeable': max(0, sms_sent - sms_free_allowance),
-        'sms_rate': sms_rate,
-        'letter_sent': letter_sent,
-        'letter_cost': letter_cost
+        'letter_sent': 0,
+        'letter_cost': 0
     }
 
 
