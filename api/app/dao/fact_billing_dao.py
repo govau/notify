@@ -110,7 +110,7 @@ def fetch_annual_billing(service_id, year):
     )
 
     # break down usage by month with empty gaps by generating a series
-    months_series = func.generate_series(start_date, end_date, '1 month').alias('month')
+    months_series = func.generate_series(start_date, end_date, '1 months').alias('month')
     months_series_c = column('month').cast(Date()).label('month')
     query_cte = query.cte()
 
