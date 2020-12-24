@@ -30,23 +30,13 @@
             {{ big_number(sms_sent, 'sent', smaller=True) }}
             {{ big_number(sms_free_allowance, 'free allowance', smaller=True) }}
             {{ big_number(sms_allowance_remaining, 'free allowance remaining', smaller=True) }}
-            {% if sms_chargeable %}
-                {{ big_number(
+            {{ big_number(
                 sms_chargeable,
                 'at {:.3g}c per message (excl. GST)'.format(sms_rate * 100),
                 smaller=True
-                ) }}
-            {% endif %}
+            ) }}
           </div>
         </div>
-        {#
-        <div class='column-one-third'>
-          <h2 class='heading-small'>Letters</h2>
-          <div class="keyline-block">
-            {{ big_number(letter_sent, 'sent', smaller=True) }}
-          </div>
-        </div>
-        #}
       </div>
 
       <div class='grid-row'>
@@ -69,22 +59,8 @@
               {% endif %}
           </div>
         </div>
-        {#
-        <div class='column-one-third'>
-          <div class="keyline-block">
-            {{ big_number(
-                letter_cost,
-                'spent',
-                currency="$",
-                smaller=True
-              ) }}
-          </div>
-        </div>
-        #}
       </div>
 
-
-      {% if yearly_usage %}
         <div class="dashboard-table body-copy-table">
           {% call(entry, row_index) list_table(
             yearly_usage,
@@ -108,11 +84,8 @@
               ) }}
           <ul>
               {% if entry.units > 0 %}
-                  {% if entry.units_free_available > 0 %}
-                      {% if entry.units_free_remaining > 0 %}
-                          <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} of {{ "{:,}".format(entry.units_free_available) }} free text messages</li>
-                      {% else %}
-                          <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} free text messages</li> {% endif %}
+                  {% if entry.units_free_used > 0 %}
+                     <li class="tabular-numbers">{{ "{:,}".format(entry.units_free_used) }} of {{ "{:,}".format(entry.units_free_available) }} free text messages used</li>
                   {% endif %}
 
                   {% if entry.fragments_domestic > 0 %}
@@ -129,54 +102,6 @@
             {% endcall %}
           {% endcall %}
         </div>
-
-      {% elif months %}
-
-        <div class="dashboard-table body-copy-table">
-          {% call(month, row_index) list_table(
-            months,
-            caption="Total spend",
-            caption_visible=False,
-            empty_message='',
-            field_headings=[
-              'By month',
-              hidden_field_heading('Cost'),
-            ],
-            field_headings_visible=True
-          ) %}
-            {% call row_heading() %}
-              {{ month.name }}
-            {% endcall %}
-            {% call field(align='left') %}
-              {{ big_number(
-                (sms_rate * month.paid) + month.letter_total,
-                currency="$",
-                smallest=True
-              ) }}
-          <ul>
-              {% if month.free %}
-                <li class="tabular-numbers">{{ "{:,}".format(month.free) }} free text messages</li>
-              {% endif %}
-              {% if month.paid %}
-                <li class="tabular-numbers">{{ "{:,}".format(month.paid) }} text messages at
-                {{- ' {:.3g}c'.format(sms_rate * 100) }}</li>
-              {% endif %}
-              {% if not (month.free or month.paid) %}
-                <li aria-hidden="true">–</li>
-              {% endif %}
-              </ul>
-             <ul>
-              {% for letter in month.letters%}
-                {% if letter[0] %}
-                <li class="tabular-numbers">{{ "{:,}".format(letter[0])}} letters at {{ '{:.0f}c'.format(letter[1] * 100) }}
-                </li>
-                {% endif %}
-              {% endfor %}
-            </ul>
-            {% endcall %}
-          {% endcall %}
-        </div>
-      {% endif %}
     </div>
 
     <div class="grid-row">
