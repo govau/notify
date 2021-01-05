@@ -20,12 +20,13 @@ pyexcel-xls = "~=0.5.8"
 pyexcel-xlsx = "~=0.5.6"
 pytz = "~=2019.3"
 whitenoise = "~=3.3.1"
-notify-client-python = {git = "https://github.com/govau/notify-client-python",ref = "v5.3.0"}
+notify-client-python = {git = "https://github.com/govau/notify-client-python",ref = "v5.3.1"}
 notifications-utils = {git = "https://github.com/govau/notify.git",ref = "master",subdirectory = "utils"}
 sentry-sdk = {extras = ["flask"]}
 itsdangerous = "~=1.1.0"
 email-validator = "~=1.1.2"
 pyyaml = "~=5.3"
+wtforms = "~=2.3.3"
 
 [dev-packages]
 bandit = "~=1.5.1"
