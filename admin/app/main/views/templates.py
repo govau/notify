@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from string import ascii_uppercase
 
 from dateutil.parser import parse
-from flask import abort, flash, redirect, render_template, request, url_for
+from flask import abort, flash, redirect, render_template, request, url_for, jsonify
 from flask_login import current_user, login_required
 from markupsafe import Markup
 from notify.errors import HTTPError
@@ -68,6 +68,41 @@ def view_template(service_id, template_id):
         ),
         default_letter_contact_block_id=default_letter_contact_block_id,
     )
+
+
+@main.route("/services/<service_id>/templates.json")
+@login_required
+@user_has_permissions('manage_service')
+def templates_report_json(service_id):
+    get_template_version = lambda template: template['version']
+    common_template_fields = [
+        "name",
+        "content",
+        "subject",
+        "template_type",
+        "reply_to",
+        "reply_to_text",
+        "version",
+    ]
+
+    def present_template_version(template_version):
+        response = {field: template_version.get(field) for field in common_template_fields}
+        response['created_by'] = template_version.get('created_by', {}).get('email_address')
+        return response
+
+    def present_template(template):
+        template_id = template['id']
+        template_version_data = service_api_client.get_service_template_versions(service_id, template_id)['data']
+        template_version_data = sorted(template_version_data, key=get_template_version)
+        template_versions = [present_template_version(version) for version in template_version_data]
+
+        response = {field: template.get(field) for field in common_template_fields}
+        response['versions'] = template_versions
+        return response
+
+    templates = service_api_client.get_service_templates(service_id)['data']
+    response = [present_template(template) for template in templates]
+    return jsonify(response)
 
 
 @main.route("/services/<service_id>/start-tour/<uuid:template_id>")
