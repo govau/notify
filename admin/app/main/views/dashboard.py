@@ -137,6 +137,40 @@ def template_usage(service_id):
     )
 
 
+@main.route("/services/<service_id>/usage.json")
+@login_required
+@user_has_permissions('manage_service')
+def usage_report_json(service_id):
+    exported_fields = {
+        'service_name': 'service_name',
+        'breakdown_aet': 'month',
+        'breakdown_fy_year': 'financial_year',
+        'breakdown_fy_quarter': 'financial_year_quarter',
+
+        'notifications': 'notifications',
+        'notifications_sms': 'notifications_sms',
+        'notifications_email': 'notifications_email',
+
+        'fragments_domestic': 'fragments_domestic',
+        'fragments_international': 'fragments_international',
+        'units_free_available': 'fragments_free_available',
+
+        'cost': 'cost',
+        'cost_chargeable': 'cost_charged',
+    }
+
+    usage = billing_api_client.get_overall_service_usage_v2(service_id)
+    response = [
+        {
+            exported_fields[field]: entry[field]
+            for field in exported_fields
+            if field in entry
+        }
+        for entry in usage
+    ]
+    return jsonify(response)
+
+
 @main.route("/services/<service_id>/usage")
 @login_required
 @user_has_permissions('manage_service')
