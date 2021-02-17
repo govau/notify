@@ -32,6 +32,8 @@ from notifications_utils.template import (
 )
 
 
+font_family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif"
+
 @pytest.mark.parametrize(
     "url", [
         "http://example.com",
@@ -371,7 +373,7 @@ def test_hrule(markdown_function, expected):
         (
             '<table role="presentation" style="padding: 0 0 20px 0;">'
             '<tr>'
-            '<td style="font-family: Helvetica, Arial, sans-serif;">'
+            f'<td style="font-family: {font_family};">'
             '<ol style="Margin: 0 0 0 20px; padding: 0; list-style-type: decimal;">'
             '<li style="Margin: 5px 0 5px; padding: 0 0 0 5px; font-size: 19px;'
             'line-height: 25px; color: #0B0C0C;">one</li>'
@@ -419,7 +421,7 @@ def test_ordered_list(markdown_function, expected):
         (
             '<table role="presentation" style="padding: 0 0 20px 0;">'
             '<tr>'
-            '<td style="font-family: Helvetica, Arial, sans-serif;">'
+            f'<td style="font-family: {font_family};">'
             '<ul style="Margin: 0 0 0 20px; padding: 0; list-style-type: disc;">'
             '<li style="Margin: 5px 0 5px; padding: 0 0 0 5px; font-size: 19px;'
             'line-height: 25px; color: #0B0C0C;">one</li>'
