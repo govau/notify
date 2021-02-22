@@ -231,7 +231,7 @@ def submit_request_to_go_live(service_id):
 def service_switch_live(service_id):
     form = ServiceOnOffSettingForm(
         name="Make service live",
-        enabled=not current_service['restricted']
+        enabled=ServiceOnOffSettingForm.enabled_from_boolean(not current_service['restricted'])
     )
 
     if form.validate_on_submit():
@@ -251,9 +251,7 @@ def service_switch_live(service_id):
 def service_switch_count_as_live(service_id):
     form = ServiceOnOffSettingForm(
         name="Count in list of live services",
-        enabled=current_service['count_as_live'],
-        truthy='Yes',
-        falsey='No',
+        enabled=ServiceOnOffSettingForm.enabled_from_boolean(current_service['count_as_live']),
     )
 
     if form.validate_on_submit():
