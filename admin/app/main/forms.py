@@ -643,30 +643,12 @@ class ServiceLetterContactBlockForm(StripWhitespaceForm):
             )
 
 
-class OnOffField(RadioField):
-    def __init__(self, label, *args, **kwargs):
-        super().__init__(label, choices=[
-            (True, 'On'),
-            (False, 'Off'),
-        ], *args, **kwargs)
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            value = valuelist[0]
-            self.data = (value == 'True') if value in ['True', 'False'] else value
-
-
 class ServiceOnOffSettingForm(StripWhitespaceForm):
+    enabled = RadioField('Choices', coerce=lambda x: x == 'on', choices=[('on', 'On'), ('off', 'Off')])
 
-    def __init__(self, name, *args, truthy='On', falsey='Off', **kwargs):
-        super().__init__(*args, **kwargs)
-        self.enabled.label.text = name
-        self.enabled.choices = [
-            (True, truthy),
-            (False, falsey),
-        ]
-
-    enabled = OnOffField('Choices')
+    @staticmethod
+    def enabled_from_boolean(enabled):
+        return 'on' if enabled else 'off'
 
 
 class ServiceSwitchLettersForm(StripWhitespaceForm):
