@@ -433,7 +433,7 @@
         },
         "notifications-utils": {
             "git": "https://github.com/govau/notify.git",
-            "ref": "db4503821bbe21db18789594270088afe3ceca06",
+            "ref": "75f20d7fee1c3dddbe10e52a804052d08164bc69",
             "subdirectory": "utils"
         },
         "oscrypto": {
