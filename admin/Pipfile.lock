@@ -292,7 +292,7 @@
         },
         "notifications-utils": {
             "git": "https://github.com/govau/notify.git",
-            "ref": "39bcf6a88f6fe39b085d2a783d4785d96cb93576",
+            "ref": "75f20d7fee1c3dddbe10e52a804052d08164bc69",
             "subdirectory": "utils"
         },
         "notify-client-python": {
