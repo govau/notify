@@ -172,6 +172,9 @@ deploy-celery-worker-retrys:
 deploy-celery-worker-internal:
 	APP=notify-celery-worker-internal $(MAKE) deploy
 
+deploy-dev-celery-worker:
+	APP=notify-celery-worker $(MAKE) deploy-dev
+
 deploy-dev-celery-worker-default:
 	APP=notify-celery-worker-default $(MAKE) deploy-dev
 
@@ -217,7 +220,7 @@ clean:
 	run run-celery-worker run-celery-beat \
 	run-celery-worker-default run-celery-worker-priority run-celery-worker-sender run-celery-worker-callbacks run-celery-worker-retrys run-celery-worker-internal \
 	deploy deploy-api \
-	deploy-dev-celery-worker-default deploy-dev-celery-worker-priority deploy-dev-celery-worker-sender deploy-dev-celery-worker-callbacks deploy-dev-celery-worker-retrys deploy-dev-celery-worker-internal \
+	deploy-dev-celery-worker deploy-dev-celery-worker-default deploy-dev-celery-worker-priority deploy-dev-celery-worker-sender deploy-dev-celery-worker-callbacks deploy-dev-celery-worker-retrys deploy-dev-celery-worker-internal \
 	deploy-celery-beat deploy-dev-celery-beat \
 	run-production \
 	create-migration help clean check-vulnerabilities \
