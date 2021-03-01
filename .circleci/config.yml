@@ -204,6 +204,16 @@ jobs:
       # Need the API to be running so that the callback can auto-subscribe.
       - run: make ci.setup-ses-callback
 
+  deploy-dev-celery-worker:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login
+      - run: make ci.create-service-psql
+      - run: make ci.create-service-redis
+      - run: make api.deploy-dev-celery-worker
+
   deploy-dev-celery-worker-default:
     <<: *deploy_image
     steps:
@@ -298,6 +308,14 @@ jobs:
       - *attach_workspace
       - *cf_login_prod
       - run: make api.deploy
+
+  deploy-prod-celery-worker:
+    <<: *deploy_image
+    steps:
+      - *cf_install
+      - *attach_workspace
+      - *cf_login_prod
+      - run: make api.deploy-celery-worker
 
   deploy-prod-celery-worker-default:
     <<: *deploy_image
@@ -420,29 +438,39 @@ workflows:
           requires:
             - build-api
 
+      - deploy-dev-celery-worker:
+          requires:
+            - build-api
+
       - deploy-dev-celery-worker-default:
           requires:
             - build-api
+            - unlock-extra-dev-workers
 
       - deploy-dev-celery-worker-priority:
           requires:
             - build-api
+            - unlock-extra-dev-workers
 
       - deploy-dev-celery-worker-sender:
           requires:
             - build-api
+            - unlock-extra-dev-workers
 
       - deploy-dev-celery-worker-callbacks:
           requires:
             - build-api
+            - unlock-extra-dev-workers
 
       - deploy-dev-celery-worker-retrys:
           requires:
             - build-api
+            - unlock-extra-dev-workers
 
       - deploy-dev-celery-worker-internal:
           requires:
             - build-api
+            - unlock-extra-dev-workers
 
       - deploy-dev-celery-beat:
           requires:
@@ -456,6 +484,12 @@ workflows:
           requires:
             - setup
 
+      - unlock-extra-dev-workers:
+          type: approval
+          requires:
+            - build-api
+            - deploy-dev-celery-worker
+
       - unlock-prod-deploy:
           <<: *master_branch
           type: approval
@@ -468,12 +502,7 @@ workflows:
             - check-vulnerabilities
             - deploy-dev-api
             - deploy-dev-admin
-            - deploy-dev-celery-worker-default
-            - deploy-dev-celery-worker-priority
-            - deploy-dev-celery-worker-sender
-            - deploy-dev-celery-worker-callbacks
-            - deploy-dev-celery-worker-retrys
-            - deploy-dev-celery-worker-internal
+            - deploy-dev-celery-worker
             - deploy-dev-celery-beat
             - deploy-dev-docs
 
