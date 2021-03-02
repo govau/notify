@@ -140,7 +140,7 @@ def template_usage(service_id):
 @main.route("/services/<service_id>/usage.json")
 @login_required
 @user_has_permissions('manage_service')
-def usage_report_json(service_id):
+def service_usage_report_json(service_id):
     exported_fields = {
         'service_name': 'service_name',
         'breakdown_aet': 'month',

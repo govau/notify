@@ -73,7 +73,7 @@ def view_template(service_id, template_id):
 @main.route("/services/<service_id>/templates.json")
 @login_required
 @user_has_permissions('manage_service')
-def templates_report_json(service_id):
+def service_templates_report_json(service_id):
     get_template_version = lambda template: template['version']
     common_template_fields = [
         "name",

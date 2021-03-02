@@ -279,7 +279,8 @@ def query_ft_billing_by_breakdown_period(*, breakdown_period):
 def fetch_billing_for_all_services(breakdown_period='quarter'):
     return query_ft_billing_by_breakdown_period(breakdown_period=breakdown_period).all()
 
+
 def fetch_billing_breakdown_for_service(*, service_id, breakdown_period='month'):
     query = query_ft_billing_by_breakdown_period(breakdown_period=breakdown_period)
-    query = query.filter(FactBilling.service_id == service_id)
+    query = query.filter(Service.id == service_id)
     return query.all()
