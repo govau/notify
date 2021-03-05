@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from string import ascii_uppercase
 
 from dateutil.parser import parse
-from flask import abort, flash, redirect, render_template, request, url_for, jsonify
+from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from markupsafe import Markup
 from notify.errors import HTTPError
@@ -25,6 +25,8 @@ from app.utils import (
     email_or_sms_not_enabled,
     get_template,
     user_has_permissions,
+    user_is_platform_admin,
+    json_download,
 )
 
 form_objects = {
@@ -72,7 +74,7 @@ def view_template(service_id, template_id):
 
 @main.route("/services/<service_id>/templates.json")
 @login_required
-@user_has_permissions('manage_service')
+@user_is_platform_admin
 def service_templates_report_json(service_id):
     get_template_version = lambda template: template['version']
     common_template_fields = [
@@ -102,7 +104,7 @@ def service_templates_report_json(service_id):
 
     templates = service_api_client.get_service_templates(service_id)['data']
     response = [present_template(template) for template in templates]
-    return jsonify(response)
+    return json_download(response, f'service-{service_id}-templates')
 
 
 @main.route("/services/<service_id>/start-tour/<uuid:template_id>")

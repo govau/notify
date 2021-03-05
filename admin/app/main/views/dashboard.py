@@ -34,6 +34,8 @@ from app.utils import (
     generate_previous_dict,
     get_current_financial_year,
     user_has_permissions,
+    user_is_platform_admin,
+    json_download,
 )
 
 
@@ -139,7 +141,7 @@ def template_usage(service_id):
 
 @main.route("/services/<service_id>/usage.json")
 @login_required
-@user_has_permissions('manage_service')
+@user_is_platform_admin
 def service_usage_report_json(service_id):
     exported_fields = {
         'service_name': 'service_name',
@@ -168,7 +170,7 @@ def service_usage_report_json(service_id):
         }
         for entry in usage
     ]
-    return jsonify(response)
+    return json_download(response, f'service-{service_id}-usage')
 
 
 @main.route("/services/<service_id>/usage")

@@ -208,6 +208,7 @@
 
     {% endif %}
 
+    {% if current_user.platform_admin %}
     <h2 class="heading-medium">Data export</h2>
     <ul class='list list-bullet'>
 
@@ -216,6 +217,7 @@
       <li><a href="{{ url_for('main.service_users_report_json', service_id=current_service.id) }}">Team member JSON data</a></li>
       <li><a href="{{ url_for('main.service_users_report', service_id=current_service.id) }}">Team member CSV data</a></li>
     </ul>
+    {% endif %}
 
     {% if current_user.platform_admin %}
 

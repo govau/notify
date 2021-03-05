@@ -1,4 +1,6 @@
-from flask import abort, flash, redirect, render_template, request, url_for, jsonify
+import flask.json
+from datetime import datetime
+from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from notify.errors import HTTPError
 
@@ -13,7 +15,7 @@ from app.utils import gmt_timezones
 from app.main import main
 from app.main.forms import InviteUserForm, PermissionsForm, SearchUsersForm
 from app.notify_client.models import roles, all_permissions
-from app.utils import user_has_permissions, Spreadsheet
+from app.utils import user_has_permissions, Spreadsheet, user_is_platform_admin, json_download
 
 
 @main.route("/services/<service_id>/users")
@@ -39,7 +41,7 @@ def manage_users(service_id):
 
 @main.route("/services/<service_id>/users.json")
 @login_required
-@user_has_permissions('manage_service')
+@user_is_platform_admin
 def service_users_report_json(service_id):
     # permissions are structured differently on invited vs accepted-invite users
     def user_permissions(user):
@@ -70,7 +72,7 @@ def service_users_report_json(service_id):
         key=lambda user: user.email_address,
     )
 
-    return jsonify([present_row(user) for user in users])
+    return json_download([present_row(user) for user in users], f'service-{service_id}-users')
 
 
 @main.route("/services/<service_id>/users.csv")
