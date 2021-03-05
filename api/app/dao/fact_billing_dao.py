@@ -183,9 +183,7 @@ def fetch_annual_billing(service_id, year):
     return gapfilled_query
 
 
-def fetch_billing_for_all_services():
-    breakdown_period = 'quarter'
-
+def query_ft_billing_by_breakdown_period(*, breakdown_period):
     free_allowances = fetch_sms_free_allowances().subquery()
     query_cte = dao_get_priced_billing_data().cte()
 
@@ -275,4 +273,14 @@ def fetch_billing_for_all_services():
         Service.name,
         breakdown_fy,
     )
-    return qry.all()
+    return qry
+
+
+def fetch_billing_for_all_services(breakdown_period='quarter'):
+    return query_ft_billing_by_breakdown_period(breakdown_period=breakdown_period).all()
+
+
+def fetch_billing_breakdown_for_service(*, service_id, breakdown_period='month'):
+    query = query_ft_billing_by_breakdown_period(breakdown_period=breakdown_period)
+    query = query.filter(Service.id == service_id)
+    return query.all()

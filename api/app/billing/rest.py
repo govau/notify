@@ -7,7 +7,7 @@ from app.dao.monthly_billing_dao import (
     get_billing_data_for_financial_year,
     get_monthly_billing_by_notification_type
 )
-from app.dao.fact_billing_dao import fetch_annual_billing
+from app.dao.fact_billing_dao import fetch_annual_billing, fetch_billing_breakdown_for_service
 from app.dao.date_util import get_months_for_financial_year
 from app.errors import register_errors
 from app.models import SMS_TYPE, EMAIL_TYPE, LETTER_TYPE
@@ -116,6 +116,48 @@ def get_yearly_billing_usage_summary_v2(service_id):
 
     billing_info = [present_billing(x) for x in billing_data]
     return jsonify(billing_info)
+
+
+@billing_blueprint.route('/overall-usage-summary-v2')
+def get_overall_billing_usage_summary_v2(service_id):
+    billing_data = fetch_billing_breakdown_for_service(service_id=service_id)
+
+    def present_data(s):
+        return {
+            "service_id": str(s.service_id),
+            "service_name": s.service_name,
+
+            "breakdown_aet": str(s.breakdown_aet),
+            "breakdown_fy": str(s.breakdown_fy),
+            "breakdown_fy_year": int(s.breakdown_fy_year),
+            "breakdown_fy_quarter": int(s.breakdown_fy_quarter),
+
+            "notifications": int(s.notifications),
+            "notifications_sms": int(s.notifications_sms or 0),
+            "notifications_email": int(s.notifications_email or 0),
+
+            "fragments_free_limit": int(s.fragments_free_limit),
+            "fragments_domestic": int(s.fragments_domestic),
+            "fragments_international": int(s.fragments_international),
+
+            "cost": float(s.cost),
+            "cost_chargeable": float(s.cost_chargeable),
+            "cost_cumulative": float(s.cost_cumulative),
+            "cost_chargeable_cumulative": float(s.cost_chargeable_cumulative),
+
+            "units": float(s.units),
+            "units_cumulative": float(s.units_cumulative),
+            "units_chargeable": float(s.units_chargeable),
+            "units_chargeable_cumulative": float(s.units_chargeable_cumulative),
+            "units_free_available": float(s.units_free_available),
+            "units_free_remaining": float(s.units_free_remaining),
+            "units_free_used": float(s.units_free_used),
+
+            "unit_rate_domestic": float(s.unit_rate_domestic),
+            "unit_rate_international": float(s.unit_rate_international),
+        }
+
+    return jsonify([present_data(x) for x in billing_data])
 
 
 def _get_total_billable_units_and_rate_for_notification_type(billing_data, noti_type):

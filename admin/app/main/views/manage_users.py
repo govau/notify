@@ -1,3 +1,5 @@
+import flask.json
+from datetime import datetime
 from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from notify.errors import HTTPError
@@ -13,7 +15,7 @@ from app.utils import gmt_timezones
 from app.main import main
 from app.main.forms import InviteUserForm, PermissionsForm, SearchUsersForm
 from app.notify_client.models import roles, all_permissions
-from app.utils import user_has_permissions, Spreadsheet
+from app.utils import user_has_permissions, Spreadsheet, user_is_platform_admin, json_download
 
 
 @main.route("/services/<service_id>/users")
@@ -35,6 +37,42 @@ def manage_users(service_id):
         show_search_box=(len(users) > 7),
         form=SearchUsersForm(),
     )
+
+
+@main.route("/services/<service_id>/users.json")
+@login_required
+@user_is_platform_admin
+def service_users_report_json(service_id):
+    # permissions are structured differently on invited vs accepted-invite users
+    def user_permissions(user):
+        return {
+            permission for permission in all_permissions if
+            user.has_permission_for_service(service_id, permission)
+        }
+
+    def present_row(user):
+        logged_in_at = getattr(user, 'logged_in_at', None)
+        if logged_in_at:
+            logged_in_at = gmt_timezones(logged_in_at)
+
+        return {
+            "email_address": user.email_address,
+            "name": getattr(user, 'name', None),  # does not exist on invited user
+            "mobile_number": getattr(user, 'mobile_number', None),  # does not exist on invited user
+            "last_login": logged_in_at,
+            "auth_type": user.auth_type,
+            "permissions": list(user_permissions(user)),
+        }
+
+    users = sorted(
+        user_api_client.get_users_for_service(service_id=service_id) + [
+            invite for invite in invite_api_client.get_invites_for_service(service_id=service_id)
+            if invite.status != 'accepted'
+        ],
+        key=lambda user: user.email_address,
+    )
+
+    return json_download([present_row(user) for user in users], f'service-{service_id}-users')
 
 
 @main.route("/services/<service_id>/users.csv")

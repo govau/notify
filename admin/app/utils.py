@@ -15,6 +15,7 @@ import dateutil
 import pyexcel
 import pytz
 import yaml
+import flask.json
 from flask import (
     Markup,
     Response,
@@ -602,3 +603,13 @@ class GovernmentEmailDomain(AgreementInfo):
             ))
         except StopIteration:
             raise NotGovernmentEmailDomain()
+
+
+def json_download(data, filename):
+    indent = 2
+    separators = (", ", ": ")
+    response_body = flask.json.dumps(data, indent=indent, separators=separators)
+    return response_body, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Disposition': f'attachment; filename="{datetime.now().date()}-{filename}.json"'
+    }
