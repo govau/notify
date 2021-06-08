@@ -18,12 +18,12 @@ def register():
     if current_user and current_user.is_authenticated:
         return redirect(url_for('main.choose_account'))
 
-    form = RegisterUserForm()
-    if form.validate_on_submit():
-        _do_registration(form, send_sms=False)
-        return redirect(url_for('main.registration_continue'))
+    # form = RegisterUserForm()
+    # if form.validate_on_submit():
+    #     _do_registration(form, send_sms=False)
+    #     return redirect(url_for('main.registration_continue'))
 
-    return render_template('views/register.html', form=form)
+    return render_template('views/register.html')
 
 
 @main.route('/register-from-invite', methods=['GET', 'POST'])
@@ -32,23 +32,23 @@ def register_from_invite():
     if not invited_user:
         abort(404)
 
-    is_sms_auth = invited_user['auth_type'] == 'sms_auth'
+    # is_sms_auth = invited_user['auth_type'] == 'sms_auth'
 
-    form = RegisterUserFromInviteForm(invited_user)
+    # form = RegisterUserFromInviteForm(invited_user)
 
-    if form.validate_on_submit():
-        if form.service.data != invited_user['service'] or form.email_address.data != invited_user['email_address']:
-            abort(400)
-        _do_registration(form, send_email=False, send_sms=is_sms_auth)
-        invite_api_client.accept_invite(invited_user['service'], invited_user['id'])
-        if is_sms_auth:
-            return redirect(url_for('main.verify'))
-        else:
-            # we've already proven this user has email because they clicked the invite link,
-            # so just activate them straight away
-            return activate_user(session['user_details']['id'])
+    # if form.validate_on_submit():
+    #     if form.service.data != invited_user['service'] or form.email_address.data != invited_user['email_address']:
+    #         abort(400)
+    #     _do_registration(form, send_email=False, send_sms=is_sms_auth)
+    #     invite_api_client.accept_invite(invited_user['service'], invited_user['id'])
+    #     if is_sms_auth:
+    #         return redirect(url_for('main.verify'))
+    #     else:
+    #         # we've already proven this user has email because they clicked the invite link,
+    #         # so just activate them straight away
+    #         return activate_user(session['user_details']['id'])
 
-    return render_template('views/register-from-invite.html', invited_user=invited_user, form=form)
+    return render_template('views/register-from-invite.html', invited_user=invited_user)
 
 
 @main.route('/register-from-org-invite', methods=['GET', 'POST'])
@@ -57,21 +57,21 @@ def register_from_org_invite():
     if not invited_org_user:
         abort(404)
 
-    form = RegisterUserFromOrgInviteForm(
-        invited_org_user,
-    )
-    form.auth_type.data = 'sms_auth'
+    # form = RegisterUserFromOrgInviteForm(
+    #     invited_org_user,
+    # )
+    # form.auth_type.data = 'sms_auth'
 
-    if form.validate_on_submit():
-        if (form.organisation.data != invited_org_user['organisation']
-                or form.email_address.data != invited_org_user['email_address']):
-            abort(400)
-        _do_registration(form, send_email=False, send_sms=True, organisation_id=invited_org_user['organisation'])
-        org_invite_api_client.accept_invite(invited_org_user['organisation'], invited_org_user['id'])
-        user_api_client.add_user_to_organisation(invited_org_user['organisation'], session['user_details']['id'])
+    # if form.validate_on_submit():
+    #     if (form.organisation.data != invited_org_user['organisation']
+    #             or form.email_address.data != invited_org_user['email_address']):
+    #         abort(400)
+    #     _do_registration(form, send_email=False, send_sms=True, organisation_id=invited_org_user['organisation'])
+    #     org_invite_api_client.accept_invite(invited_org_user['organisation'], invited_org_user['id'])
+    #     user_api_client.add_user_to_organisation(invited_org_user['organisation'], session['user_details']['id'])
 
-        return redirect(url_for('main.verify'))
-    return render_template('views/register-from-org-invite.html', invited_org_user=invited_org_user, form=form)
+    #     return redirect(url_for('main.verify'))
+    return render_template('views/register-from-org-invite.html', invited_org_user=invited_org_user)
 
 
 def _do_registration(form, send_sms=True, send_email=True, organisation_id=None):

@@ -36,7 +36,12 @@
     <script>document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');</script>
 
     {% block body_start %}{% endblock %}
-
+    <div style="background: #45c2f0;color: #fff; text-align: center;">
+      <div style="padding:5px 0px">
+        <span style="background:#000;padding:3px;text-transform:uppercase;font-weight:bolder;margin-right:5px">Important</span>
+        Notify is retiring with our last day of operation on 4 July 2021. Contact us via our <a href="/support">support</a> for any queries.
+      </div>
+    </div>
     <div id="skiplink-container">
       <div>
         <a href="#content" class="skiplink">{{ skip_link_message|default('Skip to main content') }}</a>
